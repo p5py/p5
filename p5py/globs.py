@@ -1,0 +1,6 @@
+"""
+GLOBALS
+"""
+
+WIDTH = 200
+HEIGHT = 200
