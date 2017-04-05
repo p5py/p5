@@ -54,12 +54,15 @@ def quad(x1, y1, x2, y2, x3, y3, x4, y4):
     p4 = (x4, y4)
     _shape_2d(p1, p2, p3, p4)
 
-def rect(x, y, width, height):
+def rect(x, y, width, height, mode=None):
     quad(x, y, x + width, y, x + width, y + height, x, y + height)
 
-def ellipse(x, y, width, height):
+def ellipse(x, y, width, height, mode=None):
     ellipse_vertices = [
         ((x + 0.5 * width * math.cos(t * (math.pi/180))),
          (y + 0.5 * height * math.sin(t * (math.pi/180))))
             for t in range(360)]
     _shape_2d(*ellipse_vertices)
+
+def circle(x, y, radius):
+    ellipse(x, y, radius*2, radius*2, mode='CENTER')
