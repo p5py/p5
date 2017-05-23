@@ -1,3 +1,0 @@
-pygame==1.9.3
-PyOpenGL==3.1.0
-PyOpenGL-accelerate==3.1.0
