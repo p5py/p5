@@ -1,6 +1,7 @@
 p5py
 ====
 
+
 Introduction
 ------------
 
@@ -57,6 +58,13 @@ Processing API, p5py will also:
          # code
 
 
+p5py is being developed as a `project
+<https://summerofcode.withgoogle.com/projects/#5809403503575040>`_
+under the `Processing Foundation <https://processingfoundation.org/>`_
+for the `Google Summer of Code 2017
+<https://summerofcode.withgoogle.com/>`_.
+
+         
 Setup
 -----
 
