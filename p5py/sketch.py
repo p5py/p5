@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .renderer import OpenGLRenderer
+from .backends import OpenGLRenderer
 
 # The Sketch is the main state machine for the p5py application. It
 # contains a `window` object and a `renderer` object that control,
