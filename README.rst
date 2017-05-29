@@ -25,7 +25,7 @@ often looks like:
    def setup():
        size(640, 360)
        no_stroke()
-       no_loop)_
+       no_loop()
 
    def draw():
        draw_circle(WIDTH/2, 280, 6)
