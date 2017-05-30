@@ -20,8 +20,8 @@ import pyglet
 
 from .backends import opengl as _renderer
 
-WIDTH = 100
-HEIGHT = 100
+WIDTH = 800
+HEIGHT = 800
 
 _attrs = {
     'title': "p5py"
@@ -36,6 +36,7 @@ _window = pyglet.window.Window(
 )
 
 _renderer.initialize()
+_renderer.set_defaults(WIDTH, HEIGHT, None)
 
 def _initialize(*args, **kwargs):
     _window.set_visible()
