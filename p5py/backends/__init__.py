@@ -16,8 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-class OpenGLRenderer:
-    def __init__(self):
-        pass
-    def render(self, *args):
-        print("Render {}".format(args))
+from .opengl import OpenGLRenderer
+
+__all__ = ['OpenGLRenderer']
