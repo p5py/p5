@@ -16,6 +16,3 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .opengl import OpenGLRenderer
-
-__all__ = ['OpenGLRenderer']

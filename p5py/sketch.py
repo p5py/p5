@@ -18,7 +18,7 @@
 
 import pyglet
 
-from .backends import OpenGLRenderer
+from .backends import opengl as _renderer
 
 WIDTH = 100
 HEIGHT = 100
@@ -35,7 +35,7 @@ _window = pyglet.window.Window(
     visible=False,
 )
 
-_renderer = OpenGLRenderer()
+_renderer.initialize()
 
 # This will store the shapes that need to be drawn on the screen on
 # each window flip. THIS IS A TEMPORARY HACK that will help us work on

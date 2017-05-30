@@ -18,12 +18,11 @@
 
 from pyglet.gl import *
 
-class OpenGLRenderer:
-    def __init__(self):
-        glClearColor(0.3, 0.3, 0.3, 0.0)
+def initialize():
+    glClearColor(0.3, 0.3, 0.3, 0.0)
 
-    def clear(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+def clear():
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         
-    def render(self, *args):
-        print("Rendering {}".format(args))
+def render(*args):
+    print("Rendering {}".format(args))
