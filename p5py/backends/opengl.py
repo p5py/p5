@@ -26,3 +26,7 @@ def clear():
         
 def render(*args):
     print("Rendering {}".format(args))
+
+def sample_draw():
+    """Render a test drawing"""
+    pass

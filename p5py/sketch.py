@@ -37,11 +37,6 @@ _window = pyglet.window.Window(
 
 _renderer.initialize()
 
-# This will store the shapes that need to be drawn on the screen on
-# each window flip. THIS IS A TEMPORARY HACK that will help us work on
-# (and test) the renderer.
-_tmp_on_screen_shapes = []
-
 def _initialize(*args, **kwargs):
     _window.set_visible()
 
@@ -81,11 +76,7 @@ def _p5_artist(f):
     #    def rect(*args, **kwargs):
     #        # code that creates a rectangular Shape object and
     #        # returns it.
-    def render_and_return(*args, **kwargs):
-        shape = f(*args, **kwargs)
-        _tmp_on_screen_shapes.append(shape)
-        return shape
-    return render_and_return
+    return f
 
 @_window.event
 def on_exit():
@@ -94,6 +85,5 @@ def on_exit():
 @_window.event
 def on_draw():
     _renderer.clear()
-    for shape in _tmp_on_screen_shapes:
-        _renderer.render(shape)
+    _renderer.sample_draw()
     _window.flip()
