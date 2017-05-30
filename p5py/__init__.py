@@ -16,6 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .sketch import Sketch
-
-_p5 = Sketch()
+from .backends import *
+from .primitives import *
+from .pmath import *

@@ -16,59 +16,84 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import pyglet
+
 from .backends import OpenGLRenderer
 
-# The Sketch is the main state machine for the p5py application. It
-# contains a `window` object and a `renderer` object that control,
-# respectively, the window events and the low-level rendering for the
-# sketch.
-# 
-class Sketch:
-    def __init__(self, *args):
-        raise NotImplementedError
+WIDTH = 100
+HEIGHT = 100
 
-    # render calls the sketch's renderer and asks it to draw the input
-    # shape.
-    def render(self, *args):
-        # check what surface we are rendering onto (i.e., are we
-        # drawing on the primary surface or on a secondary surface
-        # created using create_graphics()).
+_attrs = {
+    'title': "p5py"
+}
 
-        # check if we are using translate() and rotate() and then
-        # apply the required transformations to the shape.
+_window = pyglet.window.Window(
+    width=WIDTH,
+    height=HEIGHT,
+    caption=_attrs['title'],
+    resizable=False,
+    visible=False,
+)
 
-        # check if the shape has style attributes. if not, give it the
-        # correct style attributes and/or fill in the missing ones.
-        raise NotImplementedError
+_renderer = OpenGLRenderer()
 
-    def run(self, *args):
-        # set up required handlers depending on how the sketch is
-        # being run (i.e., are we running from a standalone script, or
-        # are we running inside the REPL?)
-        raise NotImplementedError
+# This will store the shapes that need to be drawn on the screen on
+# each window flip. THIS IS A TEMPORARY HACK that will help us work on
+# (and test) the renderer.
+_tmp_on_screen_shapes = []
 
+def _initialize(*args, **kwargs):
+    _window.set_visible()
+
+def _run(*args, **kwargs):
+    # set up required handlers depending on how the sketch is being
+    # run (i.e., are we running from a standalone script, or are we
+    # running inside the REPL?)
+    pyglet.app.run()
+
+def _p5_attribute(f):
     # a decorator that will wrap around the "attribute setters" for
     # the sketch like fill, background, etc and modify internal state
     # variables.
     #
-    #     @_p5.attribute
+    #     @_p5_attribute
     #     def fill(*args, **kwargs):
     #         # code that returns a new color (after converting it
     #         # to the appropriate internal color object)
-    def attribute(self, f):
-        # take the function's return value and use the function's name
-        # to change the required state variable.
-        raise NotImplementedError
+    return f
 
+def _p5_transformation(f):
+    # a decorator that will wrap around functions that control
+    # transformations on the sketch. Like translate(), rotate(), etc.
+    # 
+    #    @_p5_transformation
+    #    def translate(*args, **kwargs):
+    #        # code that returns a matrix with the appropriate
+    #        # translation applied to it.
+    return f
+
+def _p5_artist(f):
     # a decorator that will wrap around the the "artists" in the
     # sketch -- these are functions that draw stuff on the screen like
     # rect(), line(), etc.
     #
-    #    @_p5.artist
+    #    @_p5_artist
     #    def rect(*args, **kwargs):
     #        # code that creates a rectangular Shape object and
     #        # returns it.
-    def artist(self, f):
-        # modify the function such that we first render the Shape
-        # object before returning it.
-        raise NotImplementedError
+    def render_and_return(*args, **kwargs):
+        shape = f(*args, **kwargs)
+        _tmp_on_screen_shapes.append(shape)
+        return shape
+    return render_and_return
+
+@_window.event
+def on_exit():
+    _window.close()
+
+@_window.event
+def on_draw():
+    _renderer.clear()
+    for shape in _tmp_on_screen_shapes:
+        _renderer.render(shape)
+    _window.flip()
