@@ -36,7 +36,6 @@ _window = pyglet.window.Window(
 )
 
 _renderer.initialize()
-_renderer.set_defaults(WIDTH, HEIGHT, None)
 
 def _initialize(*args, **kwargs):
     _window.set_visible()
@@ -86,5 +85,5 @@ def on_exit():
 @_window.event
 def on_draw():
     _renderer.clear()
-    _renderer.sample_draw()
+    _renderer.test_render()
     _window.flip()

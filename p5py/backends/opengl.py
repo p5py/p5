@@ -142,7 +142,6 @@ class Shader:
     def pid(self, k):
         raise AttributeError("The program id is read-only.")
 
-
 # a simple triangle for to test things out
 # (all z-coords are zero as this is a 2D triangle)
 vertices = [
@@ -152,14 +151,35 @@ vertices = [
 ]
 
 def initialize():
+    """Run the renderer initialization routine.
+
+    For an OpenGL renderer this should setup the required buffers,
+    compile the shaders, etc.
+    """
+    renderer_pid = glCreateProgram()
+
+    _init_buffers(renderer_pid)
+    _init_shaders(renderer_pid)
+
+    glLinkProgram(renderer_pid)
+    glUseProgram(renderer_pid)
+
+    position_attr = glGetAttribLocation(renderer_pid, b"position")
+    glEnableVertexAttribArray(position_attr)
+    glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+    # Defaults
+    glClearColor(0.0, 0.0, 0., 0.0)
+
+def _init_buffers(renderer_pid):
+    vertices_ctype = (GLfloat * len(vertices))(*vertices)
+
     vao = GLuint()
     glGenVertexArrays(1, pointer(vao))
     glBindVertexArray(vao)
 
     vbo = GLuint()
     glGenBuffers(1, pointer(vbo))
-
-    vertices_ctype = (GLfloat * len(vertices))(*vertices)
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
 
@@ -170,59 +190,43 @@ def initialize():
         GL_STATIC_DRAW
     )
 
-    shader_program = _init_shaders()
-
-    position_attr = glGetAttribLocation(shader_program, b"position")
-    glEnableVertexAttribArray(position_attr)
-    glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+def _init_shaders(renderer_pid):
+    vertex_shader_source = """
+    #version 130
     
-def _init_shaders():
-    vertex_shader_source = b"""
-        #version 130
-        
-        in vec3 position;
-        
-        void main()
-        {
-            gl_Position = vec4(position, 1.0);
-        }
+    in vec3 position;
+    
+    void main()
+    {
+        gl_Position = vec4(position, 1.0);
+    }
     """
 
-    fragment_shader_source = b"""
-        #version 130
-        
-        out vec4 outColor;
-        
-        void main()
-        {
-            outColor = vec4(1.0, 1.0, 1.0, 1.0);
-        }
+    fragment_shader_source = """
+    #version 130
+    
+    out vec4 outColor;
+    
+    void main()
+    {
+        outColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
     """
-
-    shader_program = glCreateProgram()
-
     shaders = [
-        Shader(vertex_shader_source, GL_VERTEX_SHADER, shader_program),
-        Shader(fragment_shader_source, GL_FRAGMENT_SHADER, shader_program),
+        Shader(vertex_shader_source, GL_VERTEX_SHADER, renderer_pid),
+        Shader(fragment_shader_source, GL_FRAGMENT_SHADER, renderer_pid),
     ]
 
     for shader in shaders:
         shader.compile()
         shader.attach()
 
-    glBindFragDataLocation(shader_program, 0, b"outColor")
-    glLinkProgram(shader_program)
-    glUseProgram(shader_program)
-
-    return shader_program
-
-def set_defaults(*args):
-    width, height, _ = args
-    glClearColor(0.0, 0.0, 0., 0.0)
+    glBindFragDataLocation(renderer_pid, 0, b"outColor")
 
 def clear():
+    """Clear the screen."""
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-def sample_draw():
+def test_render():
     """Render a test drawing"""
     glDrawArrays(GL_TRIANGLES, 0, 3)
