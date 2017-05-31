@@ -21,6 +21,17 @@ from ctypes import *
 from pyglet.gl import *
 
 
+# TODO (abhikpal, 2017-06-01)
+# 
+#    - Setup some global data struct to store/retrive all buffers.
+# 
+#    - Get rid of the hardcoded `vertices` buffer thing inside
+#      _init_buffers(). Ideally, _init_buffers() and _create_buffers()
+#      should be combined somehow.
+
+
+renderer_pid = None
+
 class Shader:
     """Represents a shader in OpenGL.
 
@@ -156,6 +167,7 @@ def initialize():
     For an OpenGL renderer this should setup the required buffers,
     compile the shaders, etc.
     """
+    global renderer_pid
     renderer_pid = glCreateProgram()
 
     _init_buffers(renderer_pid)
@@ -210,8 +222,8 @@ def _init_shaders(renderer_pid):
     void main()
     {
         outColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-    """
+    } 
+   """
     shaders = [
         Shader(vertex_shader_source, GL_VERTEX_SHADER, renderer_pid),
         Shader(fragment_shader_source, GL_FRAGMENT_SHADER, renderer_pid),
@@ -222,6 +234,48 @@ def _init_shaders(renderer_pid):
         shader.attach()
 
     glBindFragDataLocation(renderer_pid, 0, b"outColor")
+
+
+# UNTESTED
+def _create_buffers(shape):
+    """Create the required buffers for the given shape.
+
+    :param shape: Create buffers for this shape.
+    :type shape: Shape
+
+    """
+    vertex_buffer = GLuint()
+    glGenBuffers(1, pointer(vertex_buffer))
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
+
+    vertices = [vi for vertex in shape.vertices for vi in vertex]
+    vertices_typed =  (GLfloat * len(vertices))(*vertices)
+    
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(vertices_typed),
+        vertices_typed,
+        GL_STATIC_DRAW
+    )
+    
+    position_attr = glGetAttribLocation(renderer_pid, b"position")
+    glEnableVertexAttribArray(position_attr)
+    glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+# UNTESTED
+def render(shape):
+    """Use the renderer to render a shape.
+    
+    :param shape: The shape to be rendered.
+    :type shape: Shape
+
+    """
+    # bind the correct buffers,
+    # select shape type GL_LINES, GL_TRIANGLES, etc
+    # set the attrib pointers.
+    raise NotImplementedError
+    
+    
 
 def clear():
     """Clear the screen."""
