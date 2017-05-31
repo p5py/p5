@@ -143,29 +143,6 @@ class Shader:
         raise AttributeError("The program id is read-only.")
 
 
-vertex_shader_source = b"""
-    #version 130
-    
-    in vec3 position;
-
-    void main()
-    {
-        gl_Position = vec4(position, 1.0);
-    }
-"""
-
-fragment_shader_source = b"""
-    #version 130
-    
-    out vec4 outColor;
-    
-    void main()
-    {
-        outColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-"""
-
-
 # a simple triangle for to test things out
 # (all z-coords are zero as this is a 2D triangle)
 vertices = [
@@ -200,31 +177,38 @@ def initialize():
     glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
     
 def _init_shaders():
-    shader_ids = []
+    vertex_shader_source = b"""
+        #version 130
+        
+        in vec3 position;
+        
+        void main()
+        {
+            gl_Position = vec4(position, 1.0);
+        }
+    """
 
-    shaders = [
-        (vertex_shader_source, GL_VERTEX_SHADER),
-        (fragment_shader_source, GL_FRAGMENT_SHADER)
-    ]
-
-    for shader_source, kind in shaders:
-        shader_id = glCreateShader(kind)
-        src = c_char_p(shader_source)
-        glShaderSource(
-            shader_id,
-            1,
-            cast(pointer(src), POINTER(POINTER(c_char))),
-            None
-        )
-
-        glCompileShader(shader_id)
-
-        shader_ids.append(shader_id)
+    fragment_shader_source = b"""
+        #version 130
+        
+        out vec4 outColor;
+        
+        void main()
+        {
+            outColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+    """
 
     shader_program = glCreateProgram()
 
-    for sid in shader_ids:
-        glAttachShader(shader_program, sid)
+    shaders = [
+        Shader(vertex_shader_source, GL_VERTEX_SHADER, shader_program),
+        Shader(fragment_shader_source, GL_FRAGMENT_SHADER, shader_program),
+    ]
+
+    for shader in shaders:
+        shader.compile()
+        shader.attach()
 
     glBindFragDataLocation(shader_program, 0, b"outColor")
     glLinkProgram(shader_program)
@@ -235,7 +219,6 @@ def _init_shaders():
 def set_defaults(*args):
     width, height, _ = args
     glClearColor(0.0, 0.0, 0., 0.0)
-
 
 def clear():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
