@@ -60,13 +60,13 @@ class Shader:
         else:
             self.source = source
 
-        self.__pid = program
-        self.__kind = kind
-        self.__sid = None
+        self._pid = program
+        self._kind = kind
+        self._sid = None
 
     def compile(self):
         """Generate a shader id and compile the shader"""
-        self.__sid = glCreateShader(self.__kind)
+        self._sid = glCreateShader(self._kind)
         src = c_char_p(self.source)
         glShaderSource(
             self.sid,
@@ -92,66 +92,50 @@ class Shader:
     def source(self):
         """Return the GLSL source code for the shader.
 
-        :rtype: str
+        :rtype: bytes
         """
-        return self.__source
+        return self._source
 
     @source.setter
     def source(self, src):
         if isinstance(src, bytes):
-            self.__source = src
+            self._source = src
         else:
-            self.__source = src.encode('utf-8')
+            self._source = src.encode('utf-8')
 
     @property
     def kind(self):
         """Return the type of the shader.
 
         :rtype: int
-        :raises AttributeError: On modification attempt.
 
         """
-        return self.__kind
-
-    @kind.setter
-    def kind(self, k):
-        raise AttributeError("Cannot modify the shader type"
-                             "after it has been instantiated")
+        return self._kind
 
     @property
     def sid(self):
         """Return the shader id of the shader.
 
         :rtype: int
-        :raises AttributeError: On modification attempt.
         :raises NameError: If the shader hasn't been created.
 
         """
-        if self.__sid:
-            return self.__sid
+        if self._sid:
+            return self._sid
         else:
             raise NameError("Shader hasn't been created yet.")
-
-    @sid.setter
-    def sid(self, k):
-        raise AttributeError("The shader id is read-only.")
 
     @property
     def pid(self):
         """Returns the id of the program to which the shader is attached.
 
         :rtype: int
-        :raises AttributeError: On modification attempt.
         :raises NameError: If the shader hasn't been attached to a program.
 
         """
-        if self.__pid:
-            return self.__pid
+        if self._pid:
+            return self._pid
         raise NameError("Shader hasn't been attached to a program yet.")
-
-    @pid.setter
-    def pid(self, k):
-        raise AttributeError("The program id is read-only.")
 
 # a simple triangle for to test things out
 # (all z-coords are zero as this is a 2D triangle)
