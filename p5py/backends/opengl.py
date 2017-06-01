@@ -20,7 +20,6 @@ from ctypes import *
 
 from pyglet.gl import *
 
-
 # TODO (abhikpal, 2017-06-01)
 # 
 #    - Setup some global data struct to store/retrive all buffers.
@@ -31,6 +30,12 @@ from pyglet.gl import *
 
 
 renderer_pid = None
+
+# Dummy shape class for testing.
+class Shape:
+    def __init__(self, *vertices):
+        self.vertices = list(vertices)
+
 
 class Shader:
     """Represents a shader in OpenGL.
@@ -137,13 +142,6 @@ class Shader:
             return self._pid
         raise NameError("Shader hasn't been attached to a program yet.")
 
-# a simple triangle for to test things out
-# (all z-coords are zero as this is a 2D triangle)
-vertices = [
-    0, 0.5, 0,
-    0.5, -0.5, 0,
-    -0.5, -0.5, 0,
-]
 
 def initialize():
     """Run the renderer initialization routine.
@@ -154,8 +152,14 @@ def initialize():
     global renderer_pid
     renderer_pid = glCreateProgram()
 
-    _init_buffers(renderer_pid)
-    _init_shaders(renderer_pid)
+    vao = GLuint()
+    glGenVertexArrays(1, pointer(vao))
+    glBindVertexArray(vao)
+
+
+    _test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
+    _create_buffers(_test_triangle)
+    _init_shaders()
 
     glLinkProgram(renderer_pid)
     glUseProgram(renderer_pid)
@@ -167,26 +171,7 @@ def initialize():
     # Defaults
     glClearColor(0.0, 0.0, 0., 0.0)
 
-def _init_buffers(renderer_pid):
-    vertices_ctype = (GLfloat * len(vertices))(*vertices)
-
-    vao = GLuint()
-    glGenVertexArrays(1, pointer(vao))
-    glBindVertexArray(vao)
-
-    vbo = GLuint()
-    glGenBuffers(1, pointer(vbo))
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo)
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(vertices_ctype),
-        vertices_ctype,
-        GL_STATIC_DRAW
-    )
-
-def _init_shaders(renderer_pid):
+def _init_shaders():
     vertex_shader_source = """
     #version 130
     
@@ -219,8 +204,6 @@ def _init_shaders(renderer_pid):
 
     glBindFragDataLocation(renderer_pid, 0, b"outColor")
 
-
-# UNTESTED
 def _create_buffers(shape):
     """Create the required buffers for the given shape.
 
@@ -241,12 +224,7 @@ def _create_buffers(shape):
         vertices_typed,
         GL_STATIC_DRAW
     )
-    
-    position_attr = glGetAttribLocation(renderer_pid, b"position")
-    glEnableVertexAttribArray(position_attr)
-    glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-# UNTESTED
 def render(shape):
     """Use the renderer to render a shape.
     
@@ -258,8 +236,6 @@ def render(shape):
     # select shape type GL_LINES, GL_TRIANGLES, etc
     # set the attrib pointers.
     raise NotImplementedError
-    
-    
 
 def clear():
     """Clear the screen."""
