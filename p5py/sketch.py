@@ -16,6 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from functools import wraps
+
 import pyglet
 
 from .backends import opengl as _renderer
@@ -76,12 +78,14 @@ def _p5_artist(f):
     #    def rect(*args, **kwargs):
     #        # code that creates a rectangular Shape object and
     #        # returns it.
-    def render_and_return(*args, **kwargs):
+
+    @wraps(f)
+    def _artist(*args, **kwargs):
         shape = f(*args, **kwargs)
         _renderer.render(shape)
         return shape
 
-    return render_and_return
+    return _artist
 
 @_window.event
 def on_exit():
