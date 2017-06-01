@@ -76,7 +76,12 @@ def _p5_artist(f):
     #    def rect(*args, **kwargs):
     #        # code that creates a rectangular Shape object and
     #        # returns it.
-    return f
+    def render_and_return(*args, **kwargs):
+        shape = f(*args, **kwargs)
+        _renderer.render(shape)
+        return shape
+
+    return render_and_return
 
 @_window.event
 def on_exit():
