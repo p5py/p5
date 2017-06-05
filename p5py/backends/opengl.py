@@ -43,9 +43,8 @@ class Shader:
     :param source: GLSL source code/filename for the shader.
     :type source: str or bytes
 
-    :param kind: the type of the shader (should ideally be a const
-        from pyglet.gl)
-    :type kind: int
+    :param kind: the type of shader {'vertex', 'fragment', etc}
+    :type kind: str
 
     :param pid: The ID of the program to which the shader belongs.
         (Optional; defaults to None)
@@ -55,7 +54,13 @@ class Shader:
         False otherwise.
     :type filename: bool
 
+    :raises TypeError: When the give shader type is not supported. 
+
     """
+    _supported_shader_types = {
+        'vertex': GL_VERTEX_SHADER,
+        'fragment': GL_FRAGMENT_SHADER
+    }
 
     def __init__(self, source, kind, program=None, from_file=False):
         if from_file:
@@ -66,12 +71,18 @@ class Shader:
             self.source = source
 
         self._pid = program
-        self._kind = kind
+
+        if kind in self._supported_shader_types:
+            self._kind = kind
+        else:
+            raise TypeError("Shader type not supported.")
+
         self._sid = None
 
     def compile(self):
         """Generate a shader id and compile the shader"""
-        self._sid = glCreateShader(self._kind)
+        shader_type = self._supported_shader_types.get(self.kind)
+        self._sid = glCreateShader(shader_type)
         src = c_char_p(self.source)
         glShaderSource(
             self.sid,
@@ -112,7 +123,7 @@ class Shader:
     def kind(self):
         """Return the type of the shader.
 
-        :rtype: int
+        :rtype: str
 
         """
         return self._kind
@@ -194,8 +205,8 @@ def _init_shaders():
     } 
    """
     shaders = [
-        Shader(vertex_shader_source, GL_VERTEX_SHADER, renderer_pid),
-        Shader(fragment_shader_source, GL_FRAGMENT_SHADER, renderer_pid),
+        Shader(vertex_shader_source, 'vertex', renderer_pid),
+        Shader(fragment_shader_source, 'fragment', renderer_pid),
     ]
 
     for shader in shaders:
@@ -222,7 +233,7 @@ def _create_buffers(shape):
         GL_ARRAY_BUFFER,
         sizeof(vertices_typed),
         vertices_typed,
-        GL_STATIC_DRAW
+        GL_DYNAMIC_DRAW
     )
 
 def render(shape):
@@ -235,7 +246,8 @@ def render(shape):
     # bind the correct buffers,
     # select shape type GL_LINES, GL_TRIANGLES, etc
     # set the attrib pointers.
-    raise NotImplementedError
+    _create_buffers(shape)
+    glDrawArrays(GL_TRIANGLES, 0, len(shape.vertices))
 
 def clear():
     """Clear the screen."""
@@ -243,4 +255,6 @@ def clear():
 
 def test_render():
     """Render a test drawing"""
-    glDrawArrays(GL_TRIANGLES, 0, 3)
+    _test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
+    _create_buffers(_test_triangle)
+    glDrawArrays(GL_TRIANGLES, 0, len(_test_triangle.vertices))
