@@ -122,12 +122,10 @@ class Shader:
         log_message = create_string_buffer(log_size.value)
         glGetShaderInfoLog(self._sid, log_size, None, log_message)
 
-        if verbose:
-            print("Shader compilation status code: {}.".format(status_code.value))
-            print("Log size is {} bytes".format(log_size.value))
-
         if log_message.value:
             if verbose:
+                print("Shader compilation status code: {}.".format(status_code.value))
+                print("Log size is {} bytes".format(log_size.value))
                 print("Shader source:")
                 print(self._source.decode('utf-8'))
             error_message = log_message.value.decode('utf-8')
@@ -179,7 +177,7 @@ class Shader:
 
         """
         return self._attached_programs
-
+    
 
 def initialize():
     """Run the renderer initialization routine.
