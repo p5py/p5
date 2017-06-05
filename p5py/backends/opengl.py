@@ -29,7 +29,7 @@ from pyglet.gl import *
 #      should be combined somehow.
 
 
-renderer_pid = None
+_shader_program_id = None
 
 # Dummy shape class for testing.
 class Shape:
@@ -106,7 +106,7 @@ class Shader:
             raise ValueError("Shader already attached to the program.")
         self._attached_programs.add(pid)
         glAttachShader(pid, self.sid)
-
+        
     @property
     def source(self):
         """Return the GLSL source code for the shader.
@@ -114,7 +114,7 @@ class Shader:
         :rtype: bytes
         """
         return self._source
-
+    
     @source.setter
     def source(self, src):
         if isinstance(src, bytes):
@@ -160,8 +160,8 @@ def initialize():
     For an OpenGL renderer this should setup the required buffers,
     compile the shaders, etc.
     """
-    global renderer_pid
-    renderer_pid = glCreateProgram()
+    global _shader_program_id
+    _shader_program_id = glCreateProgram()
 
     vao = GLuint()
     glGenVertexArrays(1, pointer(vao))
@@ -172,10 +172,10 @@ def initialize():
     _create_buffers(_test_triangle)
     _init_shaders()
 
-    glLinkProgram(renderer_pid)
-    glUseProgram(renderer_pid)
+    glLinkProgram(_shader_program_id)
+    glUseProgram(_shader_program_id)
 
-    position_attr = glGetAttribLocation(renderer_pid, b"position")
+    position_attr = glGetAttribLocation(_shader_program_id, b"position")
     glEnableVertexAttribArray(position_attr)
     glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
@@ -211,9 +211,9 @@ def _init_shaders():
 
     for shader in shaders:
         shader.compile()
-        shader.attach(renderer_pid)
+        shader.attach(_shader_program_id)
 
-    glBindFragDataLocation(renderer_pid, 0, b"outColor")
+    glBindFragDataLocation(_shader_program_id, 0, b"outColor")
 
 def _create_buffers(shape):
     """Create the required buffers for the given shape.
