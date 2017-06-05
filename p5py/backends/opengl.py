@@ -106,7 +106,39 @@ class Shader:
             raise ValueError("Shader already attached to the program.")
         self._attached_programs.add(pid)
         glAttachShader(pid, self.sid)
-        
+
+        self.log_info(verbose=True)
+
+    def log_info(self, verbose=False):
+        """Print the shader log and raise appropriate errors.
+
+        :param verbose: Verbose state (False by default)
+        :type verbose: bool
+
+        :raises RuntimeError: When the shader compiler reports an
+            error.
+        """
+        status_code = c_int(0)
+        glGetShaderiv(self._sid, GL_COMPILE_STATUS, pointer(status_code))
+
+        log_size = c_int(0)
+        glGetShaderiv(self._sid, GL_INFO_LOG_LENGTH, pointer(log_size))
+
+        log_message = create_string_buffer(log_size.value)
+        glGetShaderInfoLog(self._sid, log_size, None, log_message)
+
+        if verbose:
+            print("Shader compilation status code: {}.".format(status_code.value))
+            print("Log size is {} bytes".format(log_size.value))
+
+        if log_message.value:
+            if verbose:
+                print("Shader source:")
+                print(self._source.decode('utf-8'))
+            error_message = log_message.value.decode('utf-8')
+            raise RuntimeError("Error compiling {} shader.\n"
+                               "\t{}".format(self._kind, error_message))
+
     @property
     def source(self):
         """Return the GLSL source code for the shader.
