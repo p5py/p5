@@ -62,7 +62,7 @@ class Shader:
         'fragment': GL_FRAGMENT_SHADER
     }
 
-    def __init__(self, source, kind, program=None, from_file=False):
+    def __init__(self, source, kind, from_file=False):
         if from_file:
             with open(self.filename) as f:
                 src = f.read()
@@ -70,12 +70,12 @@ class Shader:
         else:
             self.source = source
 
-        self._pid = program
-
         if kind in self._supported_shader_types:
             self._kind = kind
         else:
             raise TypeError("Shader type not supported.")
+
+        self._attached_programs = set()
 
         self._sid = None
 
@@ -85,23 +85,26 @@ class Shader:
         self._sid = glCreateShader(shader_type)
         src = c_char_p(self.source)
         glShaderSource(
-            self.sid,
+            self._sid,
             1,
             cast(pointer(src), POINTER(POINTER(c_char))),
             None
         )
-        glCompileShader(self.sid)
+        glCompileShader(self._sid)
 
-    def attach(self, pid=None):
+    def attach(self, pid):
         """Attach the shader to the given program.
 
         :param pid: The program id.
         :type pid: int
+        
+        :raises ValueError: If the shader is already attached to the
+            program.
 
         """
-        if self.pid and (not pid):
-            pid = self.pid
-
+        if pid in self._attached_programs:
+            raise ValueError("Shader already attached to the program.")
+        self._attached_programs.add(pid)
         glAttachShader(pid, self.sid)
 
     @property
@@ -142,16 +145,13 @@ class Shader:
             raise NameError("Shader hasn't been created yet.")
 
     @property
-    def pid(self):
-        """Returns the id of the program to which the shader is attached.
+    def attached_programs(self):
+        """Returns the ids of the program to which the shader is attached.
 
-        :rtype: int
-        :raises NameError: If the shader hasn't been attached to a program.
+        :rtype: set
 
         """
-        if self._pid:
-            return self._pid
-        raise NameError("Shader hasn't been attached to a program yet.")
+        return self._attached_programs
 
 
 def initialize():
@@ -205,13 +205,13 @@ def _init_shaders():
     } 
    """
     shaders = [
-        Shader(vertex_shader_source, 'vertex', renderer_pid),
-        Shader(fragment_shader_source, 'fragment', renderer_pid),
+        Shader(vertex_shader_source, 'vertex'),
+        Shader(fragment_shader_source, 'fragment'),
     ]
 
     for shader in shaders:
         shader.compile()
-        shader.attach()
+        shader.attach(renderer_pid)
 
     glBindFragDataLocation(renderer_pid, 0, b"outColor")
 
