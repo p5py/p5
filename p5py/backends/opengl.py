@@ -20,11 +20,14 @@ from ctypes import *
 
 from pyglet.gl import *
 
+from ..backends import BaseRenderer
+
+# This should only have the renderer.
+__all__ = ['OpenGLRenderer']
+
+
 # TODO (abhikpal, 2017-06-01)
 #    - Setup some global data struct to store/retrive all buffers.
-
-
-_shader_program_id = None
 
 # Dummy shape class for testing.
 class Shape:
@@ -179,107 +182,123 @@ class Shader:
         return self._attached_programs
     
 
-def initialize():
-    """Run the renderer initialization routine.
+class OpenGLRenderer(BaseRenderer):
+    """The main OpenGL renderer."""
 
-    For an OpenGL renderer this should setup the required buffers,
-    compile the shaders, etc.
-    """
-    global _shader_program_id
-    _shader_program_id = glCreateProgram()
+    def __init__(self):
+        #
+        # TODO (abhikpal, 2017-06-06)
+        #
+        # - Do we want to initialize the renderer here or get the
+        #   sketch to do it explicitly when it has everything else
+        #   ready?
+        #
+        self._shader_program_id = None
+        self._test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
 
-    vao = GLuint()
-    glGenVertexArrays(1, pointer(vao))
-    glBindVertexArray(vao)
+    def initialize(self):
+        """Run the renderer initialization routine.
 
+        For an OpenGL renderer this should setup the required buffers,
+        compile the shaders, etc.
+        """
+        self._shader_program_id = glCreateProgram()
 
-    _test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
-    _create_buffers(_test_triangle)
-    _init_shaders()
+        vao = GLuint()
+        glGenVertexArrays(1, pointer(vao))
+        glBindVertexArray(vao)
 
-    glLinkProgram(_shader_program_id)
-    glUseProgram(_shader_program_id)
+        self._create_buffers(self._test_triangle)
+        self._init_shaders()
 
-    position_attr = glGetAttribLocation(_shader_program_id, b"position")
-    glEnableVertexAttribArray(position_attr)
-    glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+        glLinkProgram(self._shader_program_id)
+        glUseProgram(self._shader_program_id)
 
-    # Defaults
-    glClearColor(0.0, 0.0, 0., 0.0)
+        position_attr = glGetAttribLocation(self._shader_program_id, b"position")
+        glEnableVertexAttribArray(position_attr)
+        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-def _init_shaders():
-    vertex_shader_source = """
-    #version 130
-    
-    in vec3 position;
-    
-    void main()
-    {
-        gl_Position = vec4(position, 1.0);
-    }
-    """
+        # Defaults
+        glClearColor(0.0, 0.0, 0.0, 0.0)
 
-    fragment_shader_source = """
-    #version 130
-    
-    out vec4 outColor;
-    
-    void main()
-    {
-        outColor = vec4(1.0, 1.0, 1.0, 1.0);
-    } 
-   """
-    shaders = [
-        Shader(vertex_shader_source, 'vertex'),
-        Shader(fragment_shader_source, 'fragment'),
-    ]
+    def check_support(self):
+        # TODO (abhikpal, 2017-06-06)
+        #
+        # - decide on a base OpenGL class and use gl_info.have_version
+        #   to implement this.
+        pass
 
-    for shader in shaders:
-        shader.compile()
-        shader.attach(_shader_program_id)
+    def _init_shaders(self):
+        vertex_shader_source = """
+            #version 130
 
-    glBindFragDataLocation(_shader_program_id, 0, b"outColor")
+            in vec3 position;
 
-def _create_buffers(shape):
-    """Create the required buffers for the given shape.
+            void main()
+            {
+                gl_Position = vec4(position, 1.0);
+            }
+        """
 
-    :param shape: Create buffers for this shape.
-    :type shape: Shape
+        fragment_shader_source = """
+            #version 130
 
-    """
-    vertex_buffer = GLuint()
-    glGenBuffers(1, pointer(vertex_buffer))
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
+            out vec4 outColor;
 
-    vertices = [vi for vertex in shape.vertices for vi in vertex]
-    vertices_typed =  (GLfloat * len(vertices))(*vertices)
-    
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(vertices_typed),
-        vertices_typed,
-        GL_DYNAMIC_DRAW
-    )
+            void main()
+            {
+                outColor = vec4(1.0, 1.0, 1.0, 1.0);
+            }
+        """
+        shaders = [
+            Shader(vertex_shader_source, 'vertex'),
+            Shader(fragment_shader_source, 'fragment'),
+        ]
 
-def render(shape):
-    """Use the renderer to render a shape.
-    
-    :param shape: The shape to be rendered.
-    :type shape: Shape
+        for shader in shaders:
+            shader.compile()
+            shader.attach(self._shader_program_id)
 
-    """
-    # bind the correct buffers,
-    # select shape type GL_LINES, GL_TRIANGLES, etc
-    # set the attrib pointers.
-    _create_buffers(shape)
-    glDrawArrays(GL_TRIANGLES, 0, len(shape.vertices))
+        glBindFragDataLocation(self._shader_program_id, 0, b"outColor")
 
-def clear():
-    """Clear the screen."""
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    def _create_buffers(self, shape):
+        """Create the required buffers for the given shape.
 
-def test_render():
-    """Render a test drawing"""
-    _test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
-    _create_buffers(_test_triangle)
-    glDrawArrays(GL_TRIANGLES, 0, len(_test_triangle.vertices))
+        :param shape: Create buffers for this shape.
+        :type shape: Shape
+
+        """
+        vertex_buffer = GLuint()
+        glGenBuffers(1, pointer(vertex_buffer))
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
+
+        vertices = [vi for vertex in shape.vertices for vi in vertex]
+        vertices_typed =  (GLfloat * len(vertices))(*vertices)
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(vertices_typed),
+            vertices_typed,
+            GL_DYNAMIC_DRAW
+        )
+
+    def render(self, shape):
+        """Use the renderer # TODO: o render a shape.
+
+        :param shape: The shape to be rendered.
+        :type shape: Shape
+
+        """
+        # bind the correct buffers,
+        # select shape type GL_LINES, GL_TRIANGLES, etc
+        # set the attrib pointers.
+        self._create_buffers(shape)
+        glDrawArrays(GL_TRIANGLES, 0, len(shape.vertices))
+
+    def clear(self):
+        """Clear the screen."""
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    def test_render(self):
+        self._create_buffers(self._test_triangle)
+        glDrawArrays(GL_TRIANGLES, 0, len(self._test_triangle.vertices))

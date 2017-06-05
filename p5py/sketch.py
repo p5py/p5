@@ -20,7 +20,7 @@ from functools import wraps
 
 import pyglet
 
-from .backends import opengl as _renderer
+from .backends import OpenGLRenderer
 
 WIDTH = 800
 HEIGHT = 800
@@ -37,6 +37,7 @@ _window = pyglet.window.Window(
     visible=False,
 )
 
+_renderer = OpenGLRenderer()
 _renderer.initialize()
 
 def _initialize(*args, **kwargs):
@@ -89,8 +90,15 @@ def _p5_artist(f):
 
 @_window.event
 def on_exit():
+    _renderer.cleanup()
     _window.close()
 
+#
+# TODO (abhikpal, 2017-06-06)
+#
+# - We need to schedule a clock for this to work properly. Like,
+#   this?: pyglet.clock.schedule(update_func, frequency)
+#
 @_window.event
 def on_draw():
     _renderer.clear()
