@@ -21,12 +21,7 @@ from ctypes import *
 from pyglet.gl import *
 
 # TODO (abhikpal, 2017-06-01)
-# 
 #    - Setup some global data struct to store/retrive all buffers.
-# 
-#    - Get rid of the hardcoded `vertices` buffer thing inside
-#      _init_buffers(). Ideally, _init_buffers() and _create_buffers()
-#      should be combined somehow.
 
 
 _shader_program_id = None
