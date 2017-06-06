@@ -28,6 +28,10 @@ _attrs = {
     'min_width': 100,
     'height': 600,
     'min_height': 100,
+
+    'background_color': (0.9, 0.9, 0.9, 1.0),
+    'fill_color': (0.5, 0.5, 0.5, 1.0),
+    'stroke_color': (0.2, 0.2, 0.2, 1.0),
 }
 
 _window = pyglet.window.Window(
@@ -38,7 +42,7 @@ _window = pyglet.window.Window(
     visible=False,
 )
 
-_renderer = OpenGLRenderer()
+_renderer = OpenGLRenderer(sketch_attrs=_attrs)
 _renderer.initialize()
 
 def _initialize(*args, **kwargs):

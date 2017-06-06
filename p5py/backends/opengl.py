@@ -183,9 +183,14 @@ class Shader:
     
 
 class OpenGLRenderer(BaseRenderer):
-    """The main OpenGL renderer."""
+    """The main OpenGL renderer.
 
-    def __init__(self):
+    :param sketch_attrs: The main dictionary containing all attributes
+        for the sketch.
+    :type sketch_attrs: dict
+    """
+
+    def __init__(self, sketch_attrs):
         #
         # TODO (abhikpal, 2017-06-06)
         #
@@ -193,6 +198,7 @@ class OpenGLRenderer(BaseRenderer):
         #   sketch to do it explicitly when it has everything else
         #   ready?
         #
+        self.sketch_attrs = sketch_attrs
         self._shader_program_id = None
         self._test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
 
@@ -247,7 +253,7 @@ class OpenGLRenderer(BaseRenderer):
 
             void main()
             {
-                outColor = vec4(1.0, 1.0, 1.0, 1.0);
+                outColor = vec4(0.5, 0.5, 0.5, 1.0);
             }
         """
         shaders = [
@@ -297,6 +303,7 @@ class OpenGLRenderer(BaseRenderer):
 
     def clear(self):
         """Clear the screen."""
+        glClearColor(*self.sketch_attrs['background_color'])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     def test_render(self):
