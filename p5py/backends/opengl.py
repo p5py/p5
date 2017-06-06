@@ -90,20 +90,21 @@ class Shader:
         )
         glCompileShader(self._sid)
 
-    def attach(self, pid):
+    def attach(self, program):
         """Attach the shader to the given program.
 
-        :param pid: The program id.
-        :type pid: int
+        :param program: The shader program to which we need to attach
+            the shader.
+        :type pid: ShaderProgram
         
         :raises ValueError: If the shader is already attached to the
             program.
 
         """
-        if pid in self._attached_programs:
+        if program.pid in self._attached_programs:
             raise ValueError("Shader already attached to the program.")
-        self._attached_programs.add(pid)
-        glAttachShader(pid, self.sid)
+        self._attached_programs.add(program.pid)
+        glAttachShader(program.pid, self.sid)
 
         self.log_info(verbose=True)
 
@@ -180,6 +181,36 @@ class Shader:
 
         """
         return self._attached_programs
+
+class ShaderProgram:
+    """A thin abstraction layer that helps work with shader programs."""
+
+    def __init__(self):
+        #: The program ID for the current shader program.
+        self.pid = glCreateProgram()
+
+    def attach(self, *shaders):
+        """Attach a list of shaders to the current program.
+
+        :param shaders: The list of shaders to be attached.
+        :type shaders: list of Shader objects
+        """
+        for shader in shaders:
+            shader.attach(self)
+
+    def link(self):
+        """Link the current shader."""
+        glLinkProgram(self.pid)
+
+    def activate(self):
+        """Activate the current shader."""
+        glUseProgram(self.pid)
+
+    def __repr__(self):
+        return "{}( pid={})".format(self.__class__.__name__, self.pid)
+
+    __str__ = __repr__
+
     
 
 class OpenGLRenderer(BaseRenderer):
@@ -199,7 +230,8 @@ class OpenGLRenderer(BaseRenderer):
         #   ready?
         #
         self.sketch_attrs = sketch_attrs
-        self._shader_program_id = None
+        self.shader_program = ShaderProgram()
+        self._shader_program_id = self.shader_program.pid
         self._test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
 
     def initialize(self):
@@ -208,7 +240,11 @@ class OpenGLRenderer(BaseRenderer):
         For an OpenGL renderer this should setup the required buffers,
         compile the shaders, etc.
         """
-        self._shader_program_id = glCreateProgram()
+
+        glEnable(GL_DEPTH_TEST)
+        glDepthFunc(GL_LEQUAL)
+
+        glViewport(0, 0, self.sketch_attrs['width'], self.sketch_attrs['height'])
 
         vao = GLuint()
         glGenVertexArrays(1, pointer(vao))
@@ -217,15 +253,12 @@ class OpenGLRenderer(BaseRenderer):
         self._create_buffers(self._test_triangle)
         self._init_shaders()
 
-        glLinkProgram(self._shader_program_id)
-        glUseProgram(self._shader_program_id)
+        self.shader_program.link()
+        self.shader_program.activate()
 
         position_attr = glGetAttribLocation(self._shader_program_id, b"position")
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
-        # Defaults
-        glClearColor(0.0, 0.0, 0.0, 0.0)
 
     def check_support(self):
         # TODO (abhikpal, 2017-06-06)
@@ -263,7 +296,7 @@ class OpenGLRenderer(BaseRenderer):
 
         for shader in shaders:
             shader.compile()
-            shader.attach(self._shader_program_id)
+            self.shader_program.attach(shader)
 
         glBindFragDataLocation(self._shader_program_id, 0, b"outColor")
 
