@@ -22,16 +22,17 @@ import pyglet
 
 from .backends import OpenGLRenderer
 
-WIDTH = 800
-HEIGHT = 800
-
 _attrs = {
-    'title': "p5py"
+    'title': "p5py",
+    'width': 800,
+    'min_width': 100,
+    'height': 600,
+    'min_height': 100,
 }
 
 _window = pyglet.window.Window(
-    width=WIDTH,
-    height=HEIGHT,
+    width=_attrs['width'],
+    height=_attrs['height'],
     caption=_attrs['title'],
     resizable=False,
     visible=False,
