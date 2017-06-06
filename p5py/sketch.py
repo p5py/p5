@@ -52,6 +52,7 @@ def _run(*args, **kwargs):
     # set up required handlers depending on how the sketch is being
     # run (i.e., are we running from a standalone script, or are we
     # running inside the REPL?)
+    pyglet.clock.schedule(update)
     pyglet.app.run()
 
 def _p5_attribute(f):
@@ -98,14 +99,7 @@ def on_exit():
     _renderer.cleanup()
     _window.close()
 
-#
-# TODO (abhikpal, 2017-06-06)
-#
-# - We need to schedule a clock for this to work properly. Like,
-#   this?: pyglet.clock.schedule(update_func, frequency)
-#
-@_window.event
-def on_draw():
+def update(dt):
     _renderer.clear()
     _renderer.test_render()
     _window.flip()

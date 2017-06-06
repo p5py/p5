@@ -26,15 +26,6 @@ from ..backends import BaseRenderer
 __all__ = ['OpenGLRenderer']
 
 
-# TODO (abhikpal, 2017-06-01)
-#    - Setup some global data struct to store/retrive all buffers.
-
-# Dummy shape class for testing.
-class Shape:
-    def __init__(self, *vertices):
-        self.vertices = list(vertices)
-
-
 class Shader:
     """Represents a shader in OpenGL.
 
@@ -232,7 +223,6 @@ class OpenGLRenderer(BaseRenderer):
         self.sketch_attrs = sketch_attrs
         self.shader_program = ShaderProgram()
         self._shader_program_id = self.shader_program.pid
-        self._test_triangle = Shape((0, 0.5, 0), (0.5, -0.5, 0), (-0.5, -0.5, 0))
 
     def initialize(self):
         """Run the renderer initialization routine.
@@ -250,15 +240,10 @@ class OpenGLRenderer(BaseRenderer):
         glGenVertexArrays(1, pointer(vao))
         glBindVertexArray(vao)
 
-        self._create_buffers(self._test_triangle)
         self._init_shaders()
 
         self.shader_program.link()
         self.shader_program.activate()
-
-        position_attr = glGetAttribLocation(self._shader_program_id, b"position")
-        glEnableVertexAttribArray(position_attr)
-        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
     def check_support(self):
         # TODO (abhikpal, 2017-06-06)
@@ -307,9 +292,13 @@ class OpenGLRenderer(BaseRenderer):
         :type shape: Shape
 
         """
-        vertex_buffer = GLuint()
-        glGenBuffers(1, pointer(vertex_buffer))
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
+        self.vertex_buffer = GLuint()
+        glGenBuffers(1, pointer(self.vertex_buffer))
+
+        self.index_buffer = GLuint()
+        glGenBuffers(1, pointer(self.index_buffer))
+
+        glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer)
 
         vertices = [vi for vertex in shape.vertices for vi in vertex]
         vertices_typed =  (GLfloat * len(vertices))(*vertices)
@@ -318,21 +307,48 @@ class OpenGLRenderer(BaseRenderer):
             GL_ARRAY_BUFFER,
             sizeof(vertices_typed),
             vertices_typed,
-            GL_DYNAMIC_DRAW
+            GL_STATIC_DRAW
+        )
+
+        position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
+        glEnableVertexAttribArray(position_attr)
+        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+        elements = [idx for face in shape.faces for idx in face]
+        elements_typed = (GLuint * len(elements))(*elements)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            sizeof(elements_typed),
+            elements_typed,
+            GL_STATIC_DRAW
+        )
+        self.num_elements = len(elements)
+
+    def _draw_buffers(self):
+        glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer)
+
+        position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
+        glEnableVertexAttribArray(position_attr)
+        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
+        glDrawElements(
+            GL_TRIANGLES,
+            self.num_elements,
+            GL_UNSIGNED_INT,
+            0
         )
 
     def render(self, shape):
-        """Use the renderer # TODO: o render a shape.
+        """Use the renderer to render a shape.
 
         :param shape: The shape to be rendered.
         :type shape: Shape
 
         """
-        # bind the correct buffers,
-        # select shape type GL_LINES, GL_TRIANGLES, etc
-        # set the attrib pointers.
         self._create_buffers(shape)
-        glDrawArrays(GL_TRIANGLES, 0, len(shape.vertices))
+        self._draw_buffers()
 
     def clear(self):
         """Clear the screen."""
@@ -340,5 +356,26 @@ class OpenGLRenderer(BaseRenderer):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     def test_render(self):
-        self._create_buffers(self._test_triangle)
-        glDrawArrays(GL_TRIANGLES, 0, len(self._test_triangle.vertices))
+        class Shape:
+            def __init__(self):
+                self.vertices = []
+                self.faces = []
+
+        _test_triangle = Shape()
+        _test_triangle.vertices = [
+            (-0.50, 0.25, 0),
+            (-0.25, -0.25, 0),
+            (-0.75, -0.25, 0)
+        ]
+        _test_triangle.faces = [(0, 1, 2)]
+        self.render(_test_triangle)
+
+        _test_rect = Shape()
+        _test_rect.vertices = [
+            (0.25, 0.25, 0),
+            (0.75, 0.25, 0),
+            (0.75, -0.25, 0),
+            (0.25, -0.25, 0)
+        ]
+        _test_rect.faces = [(0, 1, 2), (2, 3, 0)]
+        self.render(_test_rect)
