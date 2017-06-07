@@ -155,7 +155,7 @@ class Shader:
     def sid(self):
         """Return the shader id of the shader.
 
-        :rtype: int
+        :rtype: into
         :raises NameError: If the shader hasn't been created.
 
         """
@@ -222,7 +222,8 @@ class OpenGLRenderer(BaseRenderer):
         #
         self.sketch_attrs = sketch_attrs
         self.shader_program = ShaderProgram()
-        self._shader_program_id = self.shader_program.pid
+
+        self.shader_uniforms = {}
 
     def initialize(self):
         """Run the renderer initialization routine.
@@ -244,6 +245,9 @@ class OpenGLRenderer(BaseRenderer):
 
         self.shader_program.link()
         self.shader_program.activate()
+
+        self.shader_uniforms['fill_color'] = glGetUniformLocation(
+            self.shader_program.pid, b"fill_color" )
 
     def check_support(self):
         # TODO (abhikpal, 2017-06-06)
@@ -268,10 +272,11 @@ class OpenGLRenderer(BaseRenderer):
             #version 130
 
             out vec4 outColor;
+            uniform vec4 fill_color;
 
             void main()
             {
-                outColor = vec4(0.5, 0.5, 0.5, 1.0);
+                outColor = fill_color;
             }
         """
         shaders = [
@@ -283,7 +288,7 @@ class OpenGLRenderer(BaseRenderer):
             shader.compile()
             self.shader_program.attach(shader)
 
-        glBindFragDataLocation(self._shader_program_id, 0, b"outColor")
+        glBindFragDataLocation(self.shader_program.pid, 0, b"outColor")
 
     def _create_buffers(self, shape):
         """Create the required buffers for the given shape.
@@ -310,10 +315,6 @@ class OpenGLRenderer(BaseRenderer):
             GL_STATIC_DRAW
         )
 
-        position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
-        glEnableVertexAttribArray(position_attr)
-        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
         elements = [idx for face in shape.faces for idx in face]
         elements_typed = (GLuint * len(elements))(*elements)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
@@ -325,12 +326,18 @@ class OpenGLRenderer(BaseRenderer):
         )
         self.num_elements = len(elements)
 
+        position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
+        glEnableVertexAttribArray(position_attr)
+        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
     def _draw_buffers(self):
         glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer)
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+        glUniform4f(self.shader_uniforms['fill_color'], 0.5, 0.5, 0.5, 1.0)
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
         glDrawElements(
