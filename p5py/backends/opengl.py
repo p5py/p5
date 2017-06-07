@@ -337,7 +337,7 @@ class OpenGLRenderer(BaseRenderer):
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-        glUniform4f(self.shader_uniforms['fill_color'], 0.5, 0.5, 0.5, 1.0)
+        glUniform4f(self.shader_uniforms['fill_color'], *self.sketch_attrs['fill_color'])
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
         glDrawElements(
@@ -368,21 +368,18 @@ class OpenGLRenderer(BaseRenderer):
                 self.vertices = []
                 self.faces = []
 
-        _test_triangle = Shape()
-        _test_triangle.vertices = [
-            (-0.50, 0.25, 0),
-            (-0.25, -0.25, 0),
-            (-0.75, -0.25, 0)
-        ]
-        _test_triangle.faces = [(0, 1, 2)]
-        self.render(_test_triangle)
+        class TestRect(Shape):
+            def __init__(self, x, y, w, h):
+                self.vertices = [
+                    (x, y, 0),
+                    (x + w, y, 0),
+                    (x + w, y - h, 0),
+                    (x, y - h, 0)
+                ]
+                self.faces = [(0, 1, 2), (2, 3, 0)]
 
-        _test_rect = Shape()
-        _test_rect.vertices = [
-            (0.25, 0.25, 0),
-            (0.75, 0.25, 0),
-            (0.75, -0.25, 0),
-            (0.25, -0.25, 0)
-        ]
-        _test_rect.faces = [(0, 1, 2), (2, 3, 0)]
-        self.render(_test_rect)
+        for i in range(-8, 8):
+            r = TestRect(i/8, 1, 0.2, 2)
+            norm_i = (i + 8)/16
+            self.sketch_attrs['fill_color'] = ((1 - norm_i), norm_i**3, norm_i, 1.0)
+            self.render(r)
