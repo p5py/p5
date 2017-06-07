@@ -31,7 +31,7 @@ _attrs = {
 
     'background_color': (0.9, 0.9, 0.9, 1.0),
     'fill_color': (0.5, 0.5, 0.5, 1.0),
-    'stroke_color': (0.2, 0.2, 0.2, 1.0),
+    'stroke_color': (0.1, 0.1, 0.1, 1.0),
 }
 
 _window = pyglet.window.Window(

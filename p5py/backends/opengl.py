@@ -346,6 +346,19 @@ class OpenGLRenderer(BaseRenderer):
             GL_UNSIGNED_INT,
             0
         )
+        #
+        # TODO (abhikpal, 2017-06-08)
+        #
+        # Figure out a way to get stroke_width
+        # 
+        glUniform4f(self.shader_uniforms['fill_color'], *self.sketch_attrs['stroke_color'])
+        glDrawElements(
+            GL_LINE_LOOP,
+            self.num_elements,
+            GL_UNSIGNED_INT,
+            0
+        )
+
 
     def render(self, shape):
         """Use the renderer to render a shape.
@@ -379,7 +392,17 @@ class OpenGLRenderer(BaseRenderer):
                 self.faces = [(0, 1, 2), (2, 3, 0)]
 
         for i in range(-8, 8):
-            r = TestRect(i/8, 1, 0.2, 2)
             norm_i = (i + 8)/16
-            self.sketch_attrs['fill_color'] = ((1 - norm_i), norm_i**3, norm_i, 1.0)
+
+            r = TestRect(i/8, 0.95, 0.2, 0.6)
+            self.sketch_attrs['fill_color'] = (1 - norm_i, 0.1, norm_i, 1.0)
             self.render(r)
+
+            r = TestRect(i/8, 0.3, 0.2, 0.6)
+            self.sketch_attrs['fill_color'] = (0.1, norm_i, 1 - norm_i, 1.0)
+            self.render(r)
+
+            r = TestRect(i/8, -0.35, 0.2, 0.6)
+            self.sketch_attrs['fill_color'] = (norm_i, 1 - norm_i, 0.1, 1.0)
+            self.render(r)
+
