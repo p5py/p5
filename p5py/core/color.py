@@ -19,7 +19,7 @@
 class Color:
     """Represents a color."""
 
-    def __init__(self, r, g, b, a, color_mode='RGBA'):
+    def __init__(self, r, g, b, a=1.0, color_mode='RGBA'):
         self._normalized_values = (r, g, b, a)
 
     @property
