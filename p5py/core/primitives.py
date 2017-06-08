@@ -16,9 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .sketch import _p5_artist
-from .sketch import _p5_attribute
-from .sketch import _p5_transformation
+from ..sketch import _p5_artist
+from ..sketch import _p5_attribute
+from ..sketch import _p5_transformation
 
 class Shape:
     """Represents a Shape in p5py.
