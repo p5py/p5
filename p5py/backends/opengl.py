@@ -224,6 +224,7 @@ class OpenGLRenderer(BaseRenderer):
         self.shader_program = ShaderProgram()
 
         self.shader_uniforms = {}
+        self.geoms = {}
 
     def initialize(self):
         """Run the renderer initialization routine.
@@ -297,13 +298,19 @@ class OpenGLRenderer(BaseRenderer):
         :type shape: Shape
 
         """
-        self.vertex_buffer = GLuint()
-        glGenBuffers(1, pointer(self.vertex_buffer))
+        shape_hash = str(shape.__dict__)
+        if shape_hash in self.geoms:
+            return shape_hash
 
-        self.index_buffer = GLuint()
-        glGenBuffers(1, pointer(self.index_buffer))
+        self.geoms[shape_hash] = {}
 
-        glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer)
+        self.geoms[shape_hash]['vertex_buffer'] = GLuint()
+        glGenBuffers(1, pointer(self.geoms[shape_hash]['vertex_buffer']))
+
+        self.geoms[shape_hash]['index_buffer'] = GLuint()
+        glGenBuffers(1, pointer(self.geoms[shape_hash]['index_buffer']))
+
+        glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
 
         vertices = [vi for vertex in shape.vertices for vi in vertex]
         vertices_typed =  (GLfloat * len(vertices))(*vertices)
@@ -317,21 +324,23 @@ class OpenGLRenderer(BaseRenderer):
 
         elements = [idx for face in shape.faces for idx in face]
         elements_typed = (GLuint * len(elements))(*elements)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
             sizeof(elements_typed),
             elements_typed,
             GL_STATIC_DRAW
         )
-        self.num_elements = len(elements)
+        self.geoms[shape_hash]['num_elements'] = len(elements)
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-    def _draw_buffers(self):
-        glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer)
+        return shape_hash
+
+    def _draw_buffers(self, shape_hash):
+        glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
         glEnableVertexAttribArray(position_attr)
@@ -339,10 +348,10 @@ class OpenGLRenderer(BaseRenderer):
 
         glUniform4f(self.shader_uniforms['fill_color'], *self.sketch_attrs['fill_color'])
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
         glDrawElements(
             GL_TRIANGLES,
-            self.num_elements,
+            self.geoms[shape_hash]['num_elements'],
             GL_UNSIGNED_INT,
             0
         )
@@ -354,11 +363,10 @@ class OpenGLRenderer(BaseRenderer):
         glUniform4f(self.shader_uniforms['fill_color'], *self.sketch_attrs['stroke_color'])
         glDrawElements(
             GL_LINE_LOOP,
-            self.num_elements,
+            self.geoms[shape_hash]['num_elements'],
             GL_UNSIGNED_INT,
             0
         )
-
 
     def render(self, shape):
         """Use the renderer to render a shape.
@@ -367,8 +375,8 @@ class OpenGLRenderer(BaseRenderer):
         :type shape: Shape
 
         """
-        self._create_buffers(shape)
-        self._draw_buffers()
+        shape_hash = self._create_buffers(shape)
+        self._draw_buffers(shape_hash)
 
     def clear(self):
         """Clear the screen."""
@@ -391,18 +399,22 @@ class OpenGLRenderer(BaseRenderer):
                 ]
                 self.faces = [(0, 1, 2), (2, 3, 0)]
 
-        for i in range(-8, 8):
-            norm_i = (i + 8)/16
+            def __eq__(self, other):
+                return self.__dict__ == other.__dict__
 
-            r = TestRect(i/8, 0.95, 0.2, 0.6)
+        lim = 16
+        for i in range(-1*lim, lim):
+            norm_i = (i + lim)/(lim * 2)
+
+            r = TestRect(i/lim, 0.95, 1/lim, 0.6)
             self.sketch_attrs['fill_color'] = (1 - norm_i, 0.1, norm_i, 1.0)
             self.render(r)
 
-            r = TestRect(i/8, 0.3, 0.2, 0.6)
+            r = TestRect(i/lim, 0.3, 1/lim, 0.6)
             self.sketch_attrs['fill_color'] = (0.1, norm_i, 1 - norm_i, 1.0)
             self.render(r)
 
-            r = TestRect(i/8, -0.35, 0.2, 0.6)
+            r = TestRect(i/lim, -0.35, 1/lim, 0.6)
             self.sketch_attrs['fill_color'] = (norm_i, 1 - norm_i, 0.1, 1.0)
             self.render(r)
 
