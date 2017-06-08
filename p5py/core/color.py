@@ -52,7 +52,7 @@ class Color:
         raise NotImplementedError()
     
     @staticmethod
-    def parse_color(*args, *kwargs):
+    def parse_color(*args, **kwargs):
         """Parses a color from a range of different input formats.
 
         :returns: A color based on the parsed arguments.
