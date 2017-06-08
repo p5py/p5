@@ -18,15 +18,6 @@
 
 import math
 
-TWO_PI = 2 * math.pi
-PI = math.pi
-HALF_PI = math.pi / 2.0
-QUARTER_PI = math.pi / 4.0
-
-TAU = 2 * math.pi
-HALF_TAU = math.pi
-
-
 class Vector:
     """Describes a vector in two or three dimensional space.
 
