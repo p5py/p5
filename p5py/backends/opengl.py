@@ -299,19 +299,25 @@ class OpenGLRenderer(BaseRenderer):
         :type shape: Shape
 
         """
+
+        #
+        # TODO (abhikpal, 2017-06-10)
+        #
+        # - Ideally, this should be implemented by the Shape's
+        #   __hash__ so that we can use the shape itself as the dict
+        #   key and get rid of this str(__dict__(...) business.
+        #
         shape_hash = str(shape.__dict__)
         if shape_hash in self.geoms:
             return shape_hash
 
-        self.geoms[shape_hash] = {}
+        vertex_buffer = GLuint()
+        glGenBuffers(1, pointer(vertex_buffer))
 
-        self.geoms[shape_hash]['vertex_buffer'] = GLuint()
-        glGenBuffers(1, pointer(self.geoms[shape_hash]['vertex_buffer']))
+        index_buffer = GLuint()
+        glGenBuffers(1, pointer(index_buffer))
 
-        self.geoms[shape_hash]['index_buffer'] = GLuint()
-        glGenBuffers(1, pointer(self.geoms[shape_hash]['index_buffer']))
-
-        glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
 
         vertices = [vi for vertex in shape.vertices for vi in vertex]
         vertices_typed =  (GLfloat * len(vertices))(*vertices)
@@ -325,19 +331,23 @@ class OpenGLRenderer(BaseRenderer):
 
         elements = [idx for face in shape.faces for idx in face]
         elements_typed = (GLuint * len(elements))(*elements)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
             sizeof(elements_typed),
             elements_typed,
             GL_STATIC_DRAW
         )
-        self.geoms[shape_hash]['num_elements'] = len(elements)
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
+        self.geoms[shape_hash] = {
+            'vertex_buffer': vertex_buffer,
+            'index_buffer': index_buffer,
+            'num_elements': len(elements)
+        }
         return shape_hash
 
     def _draw_buffers(self, shape_hash):
