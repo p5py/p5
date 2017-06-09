@@ -16,5 +16,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .primitives import *
 from .color import *
+
+#
+# TODO (abhikpal 2017-06-09)
+#
+# - This causes a nasty circular import error:
+#       p5py --> sketch --> renderer --> color
+#                  ^                       |
+#                  |                       |
+#                  +-- primitives <-- core +
+#
+# from .primitives import *

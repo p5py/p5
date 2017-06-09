@@ -16,6 +16,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from . import sketch
-from .backends import *
-from .pmath import *
+"""Temporary code for um-implemented parts of p5py.
+
+Most of these will:
+
+- Be removed when the replacement is written.
+- Be made into a permanent module somewhere else. 
+
+"""
+
+from .euclid import *
