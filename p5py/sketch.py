@@ -21,6 +21,7 @@ from functools import wraps
 import pyglet
 
 from .backends import OpenGLRenderer
+from .core import Color
 
 _attrs = {
     'title': "p5py",
@@ -29,9 +30,9 @@ _attrs = {
     'height': 600,
     'min_height': 100,
 
-    'background_color': (0.9, 0.9, 0.9, 1.0),
-    'fill_color': (0.5, 0.5, 0.5, 1.0),
-    'stroke_color': (0.1, 0.1, 0.1, 1.0),
+    'background_color': Color(0.9, 0.9, 0.9, 1.0),
+    'fill_color': Color(0.5, 0.5, 0.5, 1.0),
+    'stroke_color': Color(0.1, 0.1, 0.1, 1.0),
 }
 
 _window = pyglet.window.Window(

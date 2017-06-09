@@ -21,6 +21,7 @@ from ctypes import *
 from pyglet.gl import *
 
 from ..backends import BaseRenderer
+from ..core import Color
 
 # This should only have the renderer.
 __all__ = ['OpenGLRenderer']
@@ -337,7 +338,8 @@ class OpenGLRenderer(BaseRenderer):
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-        glUniform4f(self.shader_uniforms['fill_color'], *self.sketch_attrs['fill_color'])
+        glUniform4f(self.shader_uniforms['fill_color'],
+                    *self.sketch_attrs['fill_color'].normalized)
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
         glDrawElements(
@@ -351,7 +353,8 @@ class OpenGLRenderer(BaseRenderer):
         #
         # Figure out a way to get stroke_width
         # 
-        glUniform4f(self.shader_uniforms['fill_color'], *self.sketch_attrs['stroke_color'])
+        glUniform4f(self.shader_uniforms['fill_color'],
+                    *self.sketch_attrs['stroke_color'].normalized)
         glDrawElements(
             GL_LINE_LOOP,
             self.num_elements,
@@ -372,7 +375,7 @@ class OpenGLRenderer(BaseRenderer):
 
     def clear(self):
         """Clear the screen."""
-        glClearColor(*self.sketch_attrs['background_color'])
+        glClearColor(*self.sketch_attrs['background_color'].normalized)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     def test_render(self):
@@ -395,14 +398,14 @@ class OpenGLRenderer(BaseRenderer):
             norm_i = (i + 8)/16
 
             r = TestRect(i/8, 0.95, 0.2, 0.6)
-            self.sketch_attrs['fill_color'] = (1 - norm_i, 0.1, norm_i, 1.0)
+            self.sketch_attrs['fill_color'] = Color(1 - norm_i, 0.1, norm_i)
             self.render(r)
 
             r = TestRect(i/8, 0.3, 0.2, 0.6)
-            self.sketch_attrs['fill_color'] = (0.1, norm_i, 1 - norm_i, 1.0)
+            self.sketch_attrs['fill_color'] = Color(0.1, norm_i, 1 - norm_i, 1.0)
             self.render(r)
 
             r = TestRect(i/8, -0.35, 0.2, 0.6)
-            self.sketch_attrs['fill_color'] = (norm_i, 1 - norm_i, 0.1, 1.0)
+            self.sketch_attrs['fill_color'] = Color(norm_i, 1 - norm_i, 0.1, 1.0)
             self.render(r)
 
