@@ -19,6 +19,7 @@
 from functools import wraps
 
 import pyglet
+from pyglet.gl import Config
 
 from .backends import OpenGLRenderer
 from .core import Color
@@ -40,7 +41,12 @@ _window = pyglet.window.Window(
     height=_attrs['height'],
     caption=_attrs['title'],
     resizable=False,
-    visible=False,
+    vsync=True,
+    config=Config(
+        double_buffer=True,
+        major_version=3,
+        minor_version=0,
+    ),
 )
 
 _renderer = OpenGLRenderer(sketch_attrs=_attrs)
@@ -103,4 +109,4 @@ def on_exit():
 def update(dt):
     _renderer.clear()
     _renderer.test_render()
-    _window.flip()
+    # _window.flip()
