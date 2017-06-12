@@ -20,9 +20,6 @@ from functools import wraps
 
 import pyglet
 
-from .backends import OpenGLRenderer
-from .core import Color
-
 _attrs = {
     'title': "p5py",
     'width': 800,
@@ -30,10 +27,12 @@ _attrs = {
     'height': 600,
     'min_height': 100,
 
-    'background_color': Color(0.9, 0.9, 0.9, 1.0),
-    'fill_color': Color(0.5, 0.5, 0.5, 1.0),
-    'stroke_color': Color(0.1, 0.1, 0.1, 1.0),
+    'background_color': None,
+    'fill_color': None,
+    'stroke_color': None,
 }
+
+from .backends import OpenGLRenderer
 
 _window = pyglet.window.Window(
     width=_attrs['width'],
@@ -43,7 +42,7 @@ _window = pyglet.window.Window(
     vsync=True,
 )
 
-_renderer = OpenGLRenderer(sketch_attrs=_attrs)
+_renderer = OpenGLRenderer()
 _renderer.initialize()
 
 def _initialize(*args, **kwargs):

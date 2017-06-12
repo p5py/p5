@@ -16,6 +16,16 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from .. import sketch
+
+sketch_attrs = sketch._attrs
+
+__all__ = [
+    'Color', 'background', 'color_mode',
+    'fill', 'no_fill',
+    'stroke', 'no_stroke',
+]
+
 class Color:
     """Represents a color."""
 
@@ -59,3 +69,39 @@ class Color:
         :rtype: Color
         """
         raise NotImplementedError()
+
+def fill(*color_args):
+    """Set the fill color of the shapes."""
+    sketch_attrs['fill_enabled'] = True
+    sketch_attrs['fill_color'] = Color(*color_args)
+
+def no_fill():
+    """Disable filling geometry."""
+    sketch_attrs['fill_enabled'] = False
+
+def stroke(*color_args):
+    """Set the color used to draw lines around shapes"""
+    sketch_attrs['stroke_enabled'] = True
+    sketch_attrs['stroke_color'] = Color(*color_args)
+
+def no_stroke():
+    """Disable drawing the stroke around shapes."""
+    sketch_attrs['stroke_enabled'] = False
+    
+def background(*color_args):
+    """Set the background color for the sketch."""
+    sketch_attrs['background_color'] = Color(*color_args)
+
+def color_mode(mode):
+    """Set the color mode of the sketch.
+    
+    :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
+        or Hue/Saturation/Brightness
+    :type mode: str
+
+    """
+    sketch_attrs['color_mode'] = mode
+
+sketch_attrs['background_color'] = Color(0.9, 0.9, 0.9, 1.0)
+sketch_attrs['fill_color'] = Color(0.5, 0.5, 0.5, 1.0)
+sketch_attrs['stroke_color'] = Color(0.1, 0.1, 0.1, 1.0)

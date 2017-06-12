@@ -21,7 +21,11 @@ from ctypes import *
 from pyglet.gl import *
 
 from ..backends import BaseRenderer
-from ..core import Color
+from ..import core
+
+from .. import sketch
+
+sketch_attrs = sketch._attrs
 
 # This should only have the renderer.
 __all__ = ['OpenGLRenderer']
@@ -213,7 +217,7 @@ class OpenGLRenderer(BaseRenderer):
     :type sketch_attrs: dict
     """
 
-    def __init__(self, sketch_attrs):
+    def __init__(self):
         #
         # TODO (abhikpal, 2017-06-06)
         #
@@ -221,7 +225,6 @@ class OpenGLRenderer(BaseRenderer):
         #   sketch to do it explicitly when it has everything else
         #   ready?
         #
-        self.sketch_attrs = sketch_attrs
         self.shader_program = ShaderProgram()
 
         self.shader_uniforms = {}
@@ -237,7 +240,7 @@ class OpenGLRenderer(BaseRenderer):
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
 
-        glViewport(0, 0, self.sketch_attrs['width'], self.sketch_attrs['height'])
+        glViewport(0, 0, sketch_attrs['width'], sketch_attrs['height'])
 
         vao = GLuint()
         glGenVertexArrays(1, pointer(vao))
@@ -358,7 +361,7 @@ class OpenGLRenderer(BaseRenderer):
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
         glUniform4f(self.shader_uniforms['fill_color'],
-                    *self.sketch_attrs['fill_color'].normalized)
+                     *sketch_attrs['fill_color'].normalized)
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
         glDrawElements(
@@ -373,7 +376,7 @@ class OpenGLRenderer(BaseRenderer):
         # Figure out a way to get stroke_width
         # 
         glUniform4f(self.shader_uniforms['fill_color'],
-                    *self.sketch_attrs['stroke_color'].normalized)
+                     *sketch_attrs['stroke_color'].normalized)
         glDrawElements(
             GL_LINE_LOOP,
             self.geoms[shape_hash]['num_elements'],
@@ -393,7 +396,7 @@ class OpenGLRenderer(BaseRenderer):
 
     def clear(self):
         """Clear the screen."""
-        glClearColor(*self.sketch_attrs['background_color'].normalized)
+        glClearColor(*sketch_attrs['background_color'].normalized)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     def test_render(self):
@@ -420,15 +423,15 @@ class OpenGLRenderer(BaseRenderer):
             norm_i = (i + lim)/(lim * 2)
 
             r = TestRect(i/8, 0.95, 0.2, 0.6)
-            self.sketch_attrs['fill_color'] = Color(1 - norm_i, 0.1, norm_i)
+            core.fill(1 - norm_i, 0.1, norm_i)
             self.render(r)
 
             r = TestRect(i/8, 0.3, 0.2, 0.6)
-            self.sketch_attrs['fill_color'] = Color(0.1, norm_i, 1 - norm_i, 1.0)
+            core.fill(0.1, norm_i, 1 - norm_i, 1.0)
             self.render(r)
 
             r = TestRect(i/8, -0.35, 0.2, 0.6)
-            self.sketch_attrs['fill_color'] = Color(norm_i, 1 - norm_i, 0.1, 1.0)
+            core.fill(norm_i, 1 - norm_i, 0.1, 1.0)
 
             self.render(r)
 

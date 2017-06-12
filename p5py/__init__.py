@@ -17,5 +17,6 @@
 #
 
 from . import sketch
+from .core import *
 from .backends import *
 from .pmath import *
