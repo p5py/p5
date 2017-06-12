@@ -55,17 +55,6 @@ def _run(*args, **kwargs):
     pyglet.clock.schedule(update)
     pyglet.app.run()
 
-def _p5_attribute(f):
-    # a decorator that will wrap around the "attribute setters" for
-    # the sketch like fill, background, etc and modify internal state
-    # variables.
-    #
-    #     @_p5_attribute
-    #     def fill(*args, **kwargs):
-    #         # code that returns a new color (after converting it
-    #         # to the appropriate internal color object)
-    return f
-
 def _p5_transformation(f):
     # a decorator that will wrap around functions that control
     # transformations on the sketch. Like translate(), rotate(), etc.
