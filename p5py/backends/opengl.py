@@ -20,10 +20,9 @@ from ctypes import *
 
 from pyglet.gl import *
 
-from ..backends import BaseRenderer
-from ..import core
-
+from .. import core
 from .. import sketch
+from ..backends import BaseRenderer
 
 sketch_attrs = sketch._attrs
 

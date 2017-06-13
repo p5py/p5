@@ -16,9 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from ..sketch import _p5_artist
-from ..sketch import _p5_attribute
-from ..sketch import _p5_transformation
+from .. import sketch
+
+artist = sketch._p5_artist
 
 class Shape:
     """Represents a Shape in p5py.
@@ -46,7 +46,7 @@ class Shape:
 
     __str__ = __repr__
 
-@_p5_artist
+@artist
 def point(x, y, z=0):
     """Returns a point Shape.
 
@@ -65,7 +65,7 @@ def point(x, y, z=0):
     """
     return Shape('POLY', [(x, y, z)])
 
-@_p5_artist
+@artist
 def line(start_point, end_point):
     """Returns a line Shape.
 
@@ -85,16 +85,9 @@ def line(start_point, end_point):
         end_point = *end_point, 0
     return Shape('POLY', [start_point, end_point], [(0, 1)])
 
-@_p5_artist
+@artist
 def rect(*args):
     """Returns a rect object."""
-    raise NotImplementedError
-
-# etc...
-
-@_p5_attribute
-def fill(*args):
-    """Returns a new fill color for the sketch."""
     raise NotImplementedError
 
 # etc...

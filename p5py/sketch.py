@@ -32,18 +32,9 @@ _attrs = {
     'stroke_color': None,
 }
 
-from .backends import OpenGLRenderer
+_window = None
+_renderer = None
 
-_window = pyglet.window.Window(
-    width=_attrs['width'],
-    height=_attrs['height'],
-    caption=_attrs['title'],
-    resizable=False,
-    vsync=True,
-)
-
-_renderer = OpenGLRenderer()
-_renderer.initialize()
 
 def _initialize(*args, **kwargs):
     _window.set_visible()
@@ -83,12 +74,25 @@ def _p5_artist(f):
 
     return _artist
 
-@_window.event
-def on_exit():
-    _renderer.cleanup()
-    _window.close()
-
 def update(dt):
     _renderer.clear()
     _renderer.test_render()
     # _window.flip()
+
+from .backends import OpenGLRenderer
+
+_window = pyglet.window.Window(
+    width=_attrs['width'],
+    height=_attrs['height'],
+    caption=_attrs['title'],
+    resizable=False,
+    vsync=True,
+)
+
+_renderer = OpenGLRenderer()
+_renderer.initialize()
+
+@_window.event
+def on_exit():
+    _renderer.cleanup()
+    _window.close()
