@@ -18,8 +18,6 @@
 
 from .. import sketch
 
-artist = sketch._p5_artist
-
 class Shape:
     """Represents a Shape in p5py.
 
@@ -46,7 +44,7 @@ class Shape:
 
     __str__ = __repr__
 
-@artist
+@sketch._artist
 def point(x, y, z=0):
     """Returns a point Shape.
 
@@ -65,7 +63,7 @@ def point(x, y, z=0):
     """
     return Shape('POLY', [(x, y, z)])
 
-@artist
+@sketch._artist
 def line(start_point, end_point):
     """Returns a line Shape.
 
@@ -85,9 +83,7 @@ def line(start_point, end_point):
         end_point = *end_point, 0
     return Shape('POLY', [start_point, end_point], [(0, 1)])
 
-@artist
+@sketch._artist
 def rect(*args):
     """Returns a rect object."""
     raise NotImplementedError
-
-# etc...

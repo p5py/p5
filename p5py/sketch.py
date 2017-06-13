@@ -43,10 +43,10 @@ def _run(*args, **kwargs):
     # set up required handlers depending on how the sketch is being
     # run (i.e., are we running from a standalone script, or are we
     # running inside the REPL?)
-    pyglet.clock.schedule(update)
+    pyglet.clock.schedule(_update)
     pyglet.app.run()
 
-def _p5_artist(f):
+def _artist(f):
     # a decorator that will wrap around the the "artists" in the
     # sketch -- these are functions that draw stuff on the screen like
     # rect(), line(), etc.
@@ -64,7 +64,7 @@ def _p5_artist(f):
 
     return _artist
 
-def update(dt):
+def _update(dt):
     _renderer.clear()
     _renderer.test_render()
     # _window.flip()
