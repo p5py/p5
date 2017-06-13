@@ -46,16 +46,6 @@ def _run(*args, **kwargs):
     pyglet.clock.schedule(update)
     pyglet.app.run()
 
-def _p5_transformation(f):
-    # a decorator that will wrap around functions that control
-    # transformations on the sketch. Like translate(), rotate(), etc.
-    # 
-    #    @_p5_transformation
-    #    def translate(*args, **kwargs):
-    #        # code that returns a matrix with the appropriate
-    #        # translation applied to it.
-    return f
-
 def _p5_artist(f):
     # a decorator that will wrap around the the "artists" in the
     # sketch -- these are functions that draw stuff on the screen like
