@@ -60,19 +60,16 @@ def _artist(f):
     #    def rect(*args, **kwargs):
     #        # code that creates a rectangular Shape object and
     #        # returns it.
-
     @wraps(f)
     def _artist(*args, **kwargs):
         shape = f(*args, **kwargs)
         _renderer.render(shape)
         return shape
-
     return _artist
 
 def _update(dt):
     _renderer.clear()
     _renderer.test_render()
-    # _window.flip()
 
 from .backends import OpenGLRenderer
 
@@ -83,7 +80,6 @@ _window = pyglet.window.Window(
     resizable=False,
     vsync=True,
 )
-
 
 _renderer = OpenGLRenderer()
 _renderer.initialize()
