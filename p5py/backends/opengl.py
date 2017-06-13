@@ -205,7 +205,6 @@ class ShaderProgram:
         return "{}( pid={})".format(self.__class__.__name__, self.pid)
 
     __str__ = __repr__
-
     
 
 class OpenGLRenderer(BaseRenderer):
@@ -240,10 +239,6 @@ class OpenGLRenderer(BaseRenderer):
         glDepthFunc(GL_LEQUAL)
 
         glViewport(0, 0, sketch_attrs['width'], sketch_attrs['height'])
-
-        vao = GLuint()
-        glGenVertexArrays(1, pointer(vao))
-        glBindVertexArray(vao)
 
         self._init_shaders()
 
@@ -280,7 +275,7 @@ class OpenGLRenderer(BaseRenderer):
 
             void main()
             {
-                outColor = fill_color;
+                gl_FragColor = fill_color;
             }
         """
         shaders = [
@@ -291,8 +286,6 @@ class OpenGLRenderer(BaseRenderer):
         for shader in shaders:
             shader.compile()
             self.shader_program.attach(shader)
-
-        glBindFragDataLocation(self.shader_program.pid, 0, b"outColor")
 
     def _create_buffers(self, shape):
         """Create the required buffers for the given shape.
