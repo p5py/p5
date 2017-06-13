@@ -30,11 +30,16 @@ _attrs = {
     'background_color': None,
     'fill_color': None,
     'stroke_color': None,
+
+    'fill_enabled': True,
+    'stroke_enabled': True,
+
+    'debug': False,
+    'gl_version': None,
 }
 
 _window = None
 _renderer = None
-
 
 def _initialize(*args, **kwargs):
     _window.set_visible()
@@ -79,8 +84,12 @@ _window = pyglet.window.Window(
     vsync=True,
 )
 
+
 _renderer = OpenGLRenderer()
 _renderer.initialize()
+
+_gl_version_string = _window.context.get_info().get_version()
+_attrs['gl_version'] = _gl_version_string[:3]
 
 @_window.event
 def on_exit():

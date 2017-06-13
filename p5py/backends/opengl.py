@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from collections import namedtuple
 from ctypes import *
 
 from pyglet.gl import *
@@ -55,22 +56,43 @@ class Shader:
         'fragment': GL_FRAGMENT_SHADER
     }
 
-    def __init__(self, source, kind, from_file=False):
+    _glsl_versions = { '2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
+        '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410, '4.2': 420,
+        '4.3': 430, '4.4': 440, '4.5': 450, }
+
+    def __init__(self, source, kind, from_file=False, preprocess=False):
         if from_file:
             with open(self.filename) as f:
                 src = f.read()
-            self.source = src
+            self.source = stc.encode('utf-8')
         else:
-            self.source = source
+            self.source = source.encode('utf-8')
 
         if kind in self._supported_shader_types:
-            self._kind = kind
+            self.kind = kind
         else:
             raise TypeError("Shader type not supported.")
 
-        self._attached_programs = set()
+        if preprocess:
+            glsl_version = self._glsl_versions[sketch_attrs['gl_version']]
+            self.preprocess(glsl_version)
 
         self._sid = None
+
+    def preprocess(self, glsl_version):
+        """Preprocess a shader.
+
+        The GLSL syntax has changed significantly, to make sure that
+        our shader is compatible with the version of OpenGL that
+        pyglet is running, we change the shader's internal syntax
+        before compilation.
+
+        :param gl_version: The version of glsl we should process the
+            shader for.
+        :type gl_version: str
+
+        """
+        pass
 
     def compile(self):
         """Generate a shader id and compile the shader"""
@@ -84,33 +106,23 @@ class Shader:
             None
         )
         glCompileShader(self._sid)
+        self.log_info()
 
     def attach(self, program):
         """Attach the shader to the given program.
 
-        :param program: The shader program to which we need to attach
-            the shader.
-        :type pid: ShaderProgram
-        
-        :raises ValueError: If the shader is already attached to the
-            program.
+        :param program: The shader program
+        :type program: ShaderProgram
 
         """
-        if program.pid in self._attached_programs:
-            raise ValueError("Shader already attached to the program.")
-        self._attached_programs.add(program.pid)
-        glAttachShader(program.pid, self.sid)
+        program.attach_shader(self)
 
-        self.log_info(verbose=True)
-
-    def log_info(self, verbose=False):
+    def log_info(self, verbose=sketch_attrs['debug']):
         """Print the shader log and raise appropriate errors.
 
         :param verbose: Verbose state (False by default)
         :type verbose: bool
 
-        :raises RuntimeError: When the shader compiler reports an
-            error.
         """
         status_code = c_int(0)
         glGetShaderiv(self._sid, GL_COMPILE_STATUS, pointer(status_code))
@@ -120,40 +132,15 @@ class Shader:
 
         log_message = create_string_buffer(log_size.value)
         glGetShaderInfoLog(self._sid, log_size, None, log_message)
+        log_message = log_message.value.decode('utf-8')
 
-        if log_message.value:
-            if verbose:
-                print("Shader compilation status code: {}.".format(status_code.value))
-                print("Log size is {} bytes".format(log_size.value))
-                print("Shader source:")
-                print(self._source.decode('utf-8'))
-            error_message = log_message.value.decode('utf-8')
-            raise RuntimeError("Error compiling {} shader.\n"
-                               "\t{}".format(self._kind, error_message))
-
-    @property
-    def source(self):
-        """Return the GLSL source code for the shader.
-
-        :rtype: bytes
-        """
-        return self._source
-    
-    @source.setter
-    def source(self, src):
-        if isinstance(src, bytes):
-            self._source = src
-        else:
-            self._source = src.encode('utf-8')
-
-    @property
-    def kind(self):
-        """Return the type of the shader.
-
-        :rtype: str
-
-        """
-        return self._kind
+        if verbose:
+            print("Shader compilation status code: {}.".format(status_code.value))
+            print("Log size is {} bytes".format(log_size.value))
+            print("Shader source:")
+            print(self._source.decode('utf-8'))
+            print("Log:")
+            print(log_message)
 
     @property
     def sid(self):
@@ -168,14 +155,6 @@ class Shader:
         else:
             raise NameError("Shader hasn't been created yet.")
 
-    @property
-    def attached_programs(self):
-        """Returns the ids of the program to which the shader is attached.
-
-        :rtype: set
-
-        """
-        return self._attached_programs
 
 class ShaderProgram:
     """A thin abstraction layer that helps work with shader programs."""
@@ -183,15 +162,46 @@ class ShaderProgram:
     def __init__(self):
         #: The program ID for the current shader program.
         self.pid = glCreateProgram()
+        self._uniforms = {}
 
-    def attach(self, *shaders):
+    def add_uniform(self, uniform_name, uniform_function):
+        """Add a uniform to the shader program.
+
+        :param uniform_name: name of the uniform.
+        :type uniform_name: str
+
+        :param uniform_function: function to call while setting the
+            current uniform.
+        :type uniform_function: function
+
+        """
+        Uniform = namedtuple('Uniform', ['uid', 'function'])
+        self._uniforms[uniform_name] = Uniform(
+            glGetUniformLocation(self.pid, uniform_name.encode()),
+            uniform_function
+        )
+
+    def set_uniform_data(self, uni_name, *data):
+        """Set data for the given uniform.
+
+        :param uni_name: Name of the uniform.
+        :type uni_name: str
+
+        :param data: data to which the uniform should be set to.
+        :type data: tuple
+
+        """
+        uniform = self._uniforms[uni_name]
+        uniform.function(uniform.uid, *data)
+
+    def attach_shader(self, *shaders):
         """Attach a list of shaders to the current program.
 
         :param shaders: The list of shaders to be attached.
         :type shaders: list of Shader objects
         """
         for shader in shaders:
-            shader.attach(self)
+            glAttachShader(self.pid, shader.sid)
 
     def link(self):
         """Link the current shader."""
@@ -225,7 +235,6 @@ class OpenGLRenderer(BaseRenderer):
         #
         self.shader_program = ShaderProgram()
 
-        self.shader_uniforms = {}
         self.geoms = {}
 
     def initialize(self):
@@ -237,23 +246,9 @@ class OpenGLRenderer(BaseRenderer):
 
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
-
         glViewport(0, 0, sketch_attrs['width'], sketch_attrs['height'])
 
         self._init_shaders()
-
-        self.shader_program.link()
-        self.shader_program.activate()
-
-        self.shader_uniforms['fill_color'] = glGetUniformLocation(
-            self.shader_program.pid, b"fill_color" )
-
-    def check_support(self):
-        # TODO (abhikpal, 2017-06-06)
-        #
-        # - decide on a base OpenGL class and use gl_info.have_version
-        #   to implement this.
-        pass
 
     def _init_shaders(self):
         vertex_shader_source = """
@@ -285,7 +280,12 @@ class OpenGLRenderer(BaseRenderer):
 
         for shader in shaders:
             shader.compile()
-            self.shader_program.attach(shader)
+            shader.attach(self.shader_program)
+
+        self.shader_program.link()
+        self.shader_program.activate()
+
+        self.shader_program.add_uniform('fill_color', glUniform4f)
 
     def _create_buffers(self, shape):
         """Create the required buffers for the given shape.
@@ -301,6 +301,10 @@ class OpenGLRenderer(BaseRenderer):
         # - Ideally, this should be implemented by the Shape's
         #   __hash__ so that we can use the shape itself as the dict
         #   key and get rid of this str(__dict__(...) business.
+        #
+        # TODO (abhikpal, 2017-06-14)
+        #
+        # All of the buffer stuff needs refactoring.
         #
         shape_hash = str(shape.__dict__)
         if shape_hash in self.geoms:
@@ -352,29 +356,39 @@ class OpenGLRenderer(BaseRenderer):
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-        glUniform4f(self.shader_uniforms['fill_color'],
-                     *sketch_attrs['fill_color'].normalized)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
-        glDrawElements(
-            GL_TRIANGLES,
-            self.geoms[shape_hash]['num_elements'],
-            GL_UNSIGNED_INT,
-            0
-        )
+        if sketch_attrs['fill_enabled']:
+            self.shader_program.set_uniform_data(
+                'fill_color',
+                *sketch_attrs['fill_color'].normalized
+            )
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
+            glDrawElements(
+                GL_TRIANGLES,
+                self.geoms[shape_hash]['num_elements'],
+                GL_UNSIGNED_INT,
+                0
+            )
+
         #
         # TODO (abhikpal, 2017-06-08)
         #
         # Figure out a way to get stroke_width
-        # 
-        glUniform4f(self.shader_uniforms['fill_color'],
-                     *sketch_attrs['stroke_color'].normalized)
-        glDrawElements(
-            GL_LINE_LOOP,
-            self.geoms[shape_hash]['num_elements'],
-            GL_UNSIGNED_INT,
-            0
-        )
+        #
+
+        if sketch_attrs['stroke_enabled']:
+            self.shader_program.set_uniform_data(
+                'fill_color',
+                *sketch_attrs['stroke_color'].normalized
+            )
+
+            glDrawElements(
+                GL_LINE_LOOP,
+                self.geoms[shape_hash]['num_elements'],
+                GL_UNSIGNED_INT,
+                0
+            )
 
     def render(self, shape):
         """Use the renderer to render a shape.
@@ -426,4 +440,3 @@ class OpenGLRenderer(BaseRenderer):
             core.fill(norm_i, 1 - norm_i, 0.1, 1.0)
 
             self.render(r)
-
