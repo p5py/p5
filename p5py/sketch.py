@@ -33,12 +33,20 @@ _attrs = {
 
     'fill_enabled': True,
     'stroke_enabled': True,
-
-    'debug': False,
-    'gl_version': None,
 }
 
-_window = None
+
+_window = pyglet.window.Window(
+    width=_attrs['width'],
+    height=_attrs['height'],
+    caption=_attrs['title'],
+    resizable=False,
+    vsync=True,
+)
+
+_debug = False
+_gl_version = _window.context.get_info().get_version()[:3]
+
 _renderer = None
 
 def _initialize(*args, **kwargs):
@@ -71,23 +79,12 @@ def _update(dt):
     _renderer.clear()
     _renderer.test_render()
 
-from .backends import OpenGLRenderer
-
-_window = pyglet.window.Window(
-    width=_attrs['width'],
-    height=_attrs['height'],
-    caption=_attrs['title'],
-    resizable=False,
-    vsync=True,
-)
-
-_renderer = OpenGLRenderer()
-_renderer.initialize()
-
-_gl_version_string = _window.context.get_info().get_version()
-_attrs['gl_version'] = _gl_version_string[:3]
-
 @_window.event
 def on_exit():
     _renderer.cleanup()
     _window.close()
+
+
+from .opengl import OpenGLRenderer
+_renderer = OpenGLRenderer()
+_renderer.initialize()

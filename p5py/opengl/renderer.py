@@ -23,199 +23,95 @@ from pyglet.gl import *
 
 from .. import core
 from .. import sketch
-from ..backends import BaseRenderer
+
+from .shader import Shader
+from .shader import ShaderProgram
+
+__all__ = ['OpenGLRenderer', 'BaseRenderer']
 
 sketch_attrs = sketch._attrs
 
-# This should only have the renderer.
-__all__ = ['OpenGLRenderer']
+#
+# TODO (abhikpal, 2017-06-06);
+#
+# - Fill in the missing args for all methods (maybe after
+#   OpenGLRenderer is done?)
+#
+class BaseRenderer:
+    """Base abstraction layer for all renderers."""
+    def __init__(self):
+        raise NotImplementedError("Abstract")
 
+    def initialize(self):
+        """Initilization routine for the renderer."""
+        raise NotImplementedError("Abstract")
 
-class Shader:
-    """Represents a shader in OpenGL.
+    def check_support(self):
+        """Check if the the system supports the current renderer.
 
-    :param source: GLSL source code/filename for the shader.
-    :type source: str or bytes
+        :returns: True if the renderer is supported.
+        :rtype: bool
 
-    :param kind: the type of shader {'vertex', 'fragment', etc}
-    :type kind: str
+        :raises RuntimeError: if the renderer is not supported.
+        """
+        raise NotImplementedError("Abstract")
 
-    :param pid: The ID of the program to which the shader belongs.
-        (Optional; defaults to None)
-    :type pid: int
+    def pre_render(self):
+        """Run the pre-render routine(s).
 
-    :param from_file: Set to True if `source` specifies a filename;
-        False otherwise.
-    :type filename: bool
+        The pre_render is called before the renderer is used to draw
+        anything in the current iteration of the draw*() loop. This
+        method could, for instance:
 
-    :raises TypeError: When the give shader type is not supported. 
-
-    """
-    _supported_shader_types = {
-        'vertex': GL_VERTEX_SHADER,
-        'fragment': GL_FRAGMENT_SHADER
-    }
-
-    _glsl_versions = { '2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
-        '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410, '4.2': 420,
-        '4.3': 430, '4.4': 440, '4.5': 450, }
-
-    def __init__(self, source, kind, from_file=False, preprocess=False):
-        if from_file:
-            with open(self.filename) as f:
-                src = f.read()
-            self.source = stc.encode('utf-8')
-        else:
-            self.source = source.encode('utf-8')
-
-        if kind in self._supported_shader_types:
-            self.kind = kind
-        else:
-            raise TypeError("Shader type not supported.")
-
-        if preprocess:
-            glsl_version = self._glsl_versions[sketch_attrs['gl_version']]
-            self.preprocess(glsl_version)
-
-        self._sid = None
-
-    def preprocess(self, glsl_version):
-        """Preprocess a shader.
-
-        The GLSL syntax has changed significantly, to make sure that
-        our shader is compatible with the version of OpenGL that
-        pyglet is running, we change the shader's internal syntax
-        before compilation.
-
-        :param gl_version: The version of glsl we should process the
-            shader for.
-        :type gl_version: str
-
+        - reset the transformations for the viewport
+        - clear the screen,
+        - etc.
         """
         pass
 
-    def compile(self):
-        """Generate a shader id and compile the shader"""
-        shader_type = self._supported_shader_types.get(self.kind)
-        self._sid = glCreateShader(shader_type)
-        src = c_char_p(self.source)
-        glShaderSource(
-            self._sid,
-            1,
-            cast(pointer(src), POINTER(POINTER(c_char))),
-            None
-        )
-        glCompileShader(self._sid)
-        self.log_info()
+    def render(self, shape):
+        """Use the renderer to render the given shape.
 
-    def attach(self, program):
-        """Attach the shader to the given program.
-
-        :param program: The shader program
-        :type program: ShaderProgram
-
+        :param shape: The shape that needs to be rendered.
+        :type shape: Shape
         """
-        program.attach_shader(self)
+        raise NotImplementedError("Abstract")
 
-    def log_info(self, verbose=sketch_attrs['debug']):
-        """Print the shader log and raise appropriate errors.
+    def post_render(self):
+        """Run the post-render routine(s).
 
-        :param verbose: Verbose state (False by default)
-        :type verbose: bool
-
+        The post_render is called when we are done drawing things for
+        the current iteration of the draw call. Any draw-loop specific
+        cleanup steps should go here.
         """
-        status_code = c_int(0)
-        glGetShaderiv(self._sid, GL_COMPILE_STATUS, pointer(status_code))
+        pass
 
-        log_size = c_int(0)
-        glGetShaderiv(self._sid, GL_INFO_LOG_LENGTH, pointer(log_size))
+    def clear(self):
+        """Clear the screen."""
+        raise NotImplementedError("Abstract")
 
-        log_message = create_string_buffer(log_size.value)
-        glGetShaderInfoLog(self._sid, log_size, None, log_message)
-        log_message = log_message.value.decode('utf-8')
+    def cleanup(self):
+        """Run the cleanup routine for the renderer.
 
-        if verbose:
-            print("Shader compilation status code: {}.".format(status_code.value))
-            print("Log size is {} bytes".format(log_size.value))
-            print("Shader source:")
-            print(self._source.decode('utf-8'))
-            print("Log:")
-            print(log_message)
-
-    @property
-    def sid(self):
-        """Return the shader id of the shader.
-
-        :rtype: into
-        :raises NameError: If the shader hasn't been created.
-
+        This is the FINAL cleanup routine for the renderer and would
+        ideally be called when the program is about to exit.
         """
-        if self._sid:
-            return self._sid
-        else:
-            raise NameError("Shader hasn't been created yet.")
+        pass
 
+    def test_render(self):
+        """Render the renderer's default test drawing.
 
-class ShaderProgram:
-    """A thin abstraction layer that helps work with shader programs."""
-
-    def __init__(self):
-        #: The program ID for the current shader program.
-        self.pid = glCreateProgram()
-        self._uniforms = {}
-
-    def add_uniform(self, uniform_name, uniform_function):
-        """Add a uniform to the shader program.
-
-        :param uniform_name: name of the uniform.
-        :type uniform_name: str
-
-        :param uniform_function: function to call while setting the
-            current uniform.
-        :type uniform_function: function
-
+        The render() methods requires a Shape object. In the absence
+        of such an object/class the user should be able to check that
+        the renderer is working by calling this method.
         """
-        Uniform = namedtuple('Uniform', ['uid', 'function'])
-        self._uniforms[uniform_name] = Uniform(
-            glGetUniformLocation(self.pid, uniform_name.encode()),
-            uniform_function
-        )
-
-    def set_uniform_data(self, uni_name, *data):
-        """Set data for the given uniform.
-
-        :param uni_name: Name of the uniform.
-        :type uni_name: str
-
-        :param data: data to which the uniform should be set to.
-        :type data: tuple
-
-        """
-        uniform = self._uniforms[uni_name]
-        uniform.function(uniform.uid, *data)
-
-    def attach_shader(self, *shaders):
-        """Attach a list of shaders to the current program.
-
-        :param shaders: The list of shaders to be attached.
-        :type shaders: list of Shader objects
-        """
-        for shader in shaders:
-            glAttachShader(self.pid, shader.sid)
-
-    def link(self):
-        """Link the current shader."""
-        glLinkProgram(self.pid)
-
-    def activate(self):
-        """Activate the current shader."""
-        glUseProgram(self.pid)
+        raise NotImplementedError("Abstract")
 
     def __repr__(self):
-        return "{}( pid={})".format(self.__class__.__name__, self.pid)
+        print("{}( version: {} )".format(self.__class__.__name__, self.version))
 
     __str__ = __repr__
-    
+
 
 class OpenGLRenderer(BaseRenderer):
     """The main OpenGL renderer.

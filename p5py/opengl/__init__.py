@@ -16,7 +16,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from . import sketch
-from .core import *
-from .opengl import *
-from .pmath import *
+from .shader import *
+from .renderer import *
