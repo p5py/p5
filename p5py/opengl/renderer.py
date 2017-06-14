@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from collections import namedtuple
 from ctypes import *
 import math
 
@@ -27,7 +26,8 @@ from .. import sketch
 from ..tmp import Matrix4
 from .shader import Shader
 from .shader import ShaderProgram
-
+from .shader import fragment_default
+from .shader import vertex_default
 
 __all__ = ['OpenGLRenderer', 'BaseRenderer']
 
@@ -213,34 +213,9 @@ class OpenGLRenderer(BaseRenderer):
         self.shader_program['projection'] = sketch.mat_projection
 
     def _init_shaders(self):
-        vertex_shader_source = """
-            #version 130
-
-            in vec3 position;
-
-            uniform mat4 model;
-            uniform mat4 view;
-            uniform mat4 projection;
-
-            void main()
-            {
-                gl_Position = projection * view * model * vec4(position, 1.0);
-            }
-        """
-
-        fragment_shader_source = """
-            #version 130
-
-            uniform vec4 fill_color;
-
-            void main()
-            {
-                gl_FragColor = fill_color;
-            }
-        """
         shaders = [
-            Shader(vertex_shader_source, 'vertex'),
-            Shader(fragment_shader_source, 'fragment'),
+            Shader(vertex_default, 'vertex'),
+            Shader(fragment_default, 'fragment'),
         ]
 
         for shader in shaders:
