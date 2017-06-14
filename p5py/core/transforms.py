@@ -22,19 +22,17 @@ from .. import sketch
 from ..tmp.euclid import Vector3
 from ..tmp.euclid import Matrix4
 
-sketch_attrs = sketch._attrs
-
 def reset_transforms():
-    cz = (sketch_attrs['height'] / 2) / math.tan(math.radians(30))
+    cz = (sketch.height / 2) / math.tan(math.radians(30))
     sketch.mat_projection = Matrix4.new_perspective(
         math.radians(60),
-        sketch_attrs['width']/sketch_attrs['height'],
+        sketch.width/sketch.height,
         0.1 * cz,
         10 * cz
     )
     sketch.mat_view = Matrix4()
-    sketch.mat_view.translate(-sketch_attrs['width'] / 2,
-                              -sketch_attrs['height']/2, -cz)
+    sketch.mat_view.translate(-sketch.width / 2,
+                              -sketch.height/2, -cz)
     sketch.mat_model = Matrix4()
 
 def translate(x, y, z=0):

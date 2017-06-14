@@ -18,8 +18,6 @@
 
 from .. import sketch
 
-sketch_attrs = sketch._attrs
-
 __all__ = [
     'Color', 'background', 'color_mode',
     'fill', 'no_fill',
@@ -72,25 +70,25 @@ class Color:
 
 def fill(*color_args):
     """Set the fill color of the shapes."""
-    sketch_attrs['fill_enabled'] = True
-    sketch_attrs['fill_color'] = Color(*color_args)
+    sketch.fill_enabled = True
+    sketch.fill_color = Color(*color_args)
 
 def no_fill():
     """Disable filling geometry."""
-    sketch_attrs['fill_enabled'] = False
+    sketch.fill_enabled = False
 
 def stroke(*color_args):
     """Set the color used to draw lines around shapes"""
-    sketch_attrs['stroke_enabled'] = True
-    sketch_attrs['stroke_color'] = Color(*color_args)
+    sketch.stroke_enabled = True
+    sketch.stroke_color = Color(*color_args)
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""
-    sketch_attrs['stroke_enabled'] = False
+    sketch.stroke_enabled = False
     
 def background(*color_args):
     """Set the background color for the sketch."""
-    sketch_attrs['background_color'] = Color(*color_args)
+    sketch.background_color = Color(*color_args)
 
 def color_mode(mode):
     """Set the color mode of the sketch.
@@ -100,8 +98,8 @@ def color_mode(mode):
     :type mode: str
 
     """
-    sketch_attrs['color_mode'] = mode
+    sketch.color_mode = mode
 
-sketch_attrs['background_color'] = Color(0.9, 0.9, 0.9, 1.0)
-sketch_attrs['fill_color'] = Color(0.5, 0.5, 0.5, 1.0)
-sketch_attrs['stroke_color'] = Color(0.1, 0.1, 0.1, 1.0)
+sketch.background_color = Color(0.9, 0.9, 0.9, 1.0)
+sketch.fill_color = Color(0.5, 0.5, 0.5, 1.0)
+sketch.stroke_color = Color(0.1, 0.1, 0.1, 1.0)

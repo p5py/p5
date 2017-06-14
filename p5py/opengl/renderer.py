@@ -24,14 +24,12 @@ from pyglet.gl import *
 
 from .. import core
 from .. import sketch
-
+from ..tmp import Matrix4
 from .shader import Shader
 from .shader import ShaderProgram
-from ..tmp import Matrix4
+
 
 __all__ = ['OpenGLRenderer', 'BaseRenderer']
-
-sketch_attrs = sketch._attrs
 
 #
 # TODO (abhikpal, 2017-06-06);
@@ -205,7 +203,7 @@ class OpenGLRenderer(BaseRenderer):
 
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
-        glViewport(0, 0, sketch_attrs['width'], sketch_attrs['height'])
+        glViewport(0, 0, sketch.width, sketch.height)
 
         self._init_shaders()
 
@@ -327,8 +325,8 @@ class OpenGLRenderer(BaseRenderer):
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-        if sketch_attrs['fill_enabled']:
-            self.shader_program['fill_color'] =  sketch_attrs['fill_color'].normalized
+        if sketch.fill_enabled:
+            self.shader_program['fill_color'] =  sketch.fill_color.normalized
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
             glDrawElements(
@@ -338,8 +336,8 @@ class OpenGLRenderer(BaseRenderer):
                 0
             )
 
-        if sketch_attrs['stroke_enabled']:
-            self.shader_program['fill_color'] = sketch_attrs['stroke_color'].normalized
+        if sketch.stroke_enabled:
+            self.shader_program['fill_color'] = sketch.stroke_color.normalized
             glDrawElements(
                 GL_LINE_LOOP,
                 self.geoms[shape_hash]['num_elements'],
@@ -359,7 +357,7 @@ class OpenGLRenderer(BaseRenderer):
 
     def clear(self):
         """Clear the screen."""
-        glClearColor(*sketch_attrs['background_color'].normalized)
+        glClearColor(*sketch.background_color.normalized)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     def pre_render(self):

@@ -20,49 +20,50 @@ from functools import wraps
 
 import pyglet
 
-_attrs = {
-    'title': "p5py",
-    'width': 800,
-    'min_width': 100,
-    'height': 600,
-    'min_height': 100,
+# This should only have the relevant sketch contants.
+__all__ = []
 
-    'background_color': None,
-    'fill_color': None,
-    'stroke_color': None,
+title = "p5py"
+min_width = 100
+min_height = 100
+width = 800
+height = 600
 
-    'fill_enabled': True,
-    'stroke_enabled': True,
-}
+background_color = None
+fill_color = None
+stroke_color = None
+
+fill_enabled = True
+stroke_enabled = True
 
 mat_projection = None
 mat_view = None
 mat_model = None
 
-_window = pyglet.window.Window(
-    width=_attrs['width'],
-    height=_attrs['height'],
-    caption=_attrs['title'],
+window = pyglet.window.Window(
+    width=width,
+    height=height,
+    caption=title,
     resizable=False,
     vsync=True,
 )
 
-_debug = True
-_gl_version = _window.context.get_info().get_version()[:3]
+debug = True
+gl_version = window.context.get_info().get_version()[:3]
 
-_renderer = None
+renderer = None
 
-def _initialize(*args, **kwargs):
-    _window.set_visible()
+def initialize(*args, **kwargs):
+    window.set_visible()
 
-def _run(*args, **kwargs):
+def run(*args, **kwargs):
     # set up required handlers depending on how the sketch is being
     # run (i.e., are we running from a standalone script, or are we
     # running inside the REPL?)
-    pyglet.clock.schedule(_update)
+    pyglet.clock.schedule(update)
     pyglet.app.run()
 
-def _artist(f):
+def artist(f):
     # a decorator that will wrap around the the "artists" in the
     # sketch -- these are functions that draw stuff on the screen like
     # rect(), line(), etc.
@@ -72,22 +73,22 @@ def _artist(f):
     #        # code that creates a rectangular Shape object and
     #        # returns it.
     @wraps(f)
-    def _artist(*args, **kwargs):
+    def decorated(*args, **kwargs):
         shape = f(*args, **kwargs)
-        _renderer.render(shape)
+        renderer.render(shape)
         return shape
-    return _artist
+    return decorated
 
-def _update(dt):
-    _renderer.pre_render()
-    _renderer.test_render()
-    _renderer.post_render()
+def update(dt):
+    renderer.pre_render()
+    renderer.test_render()
+    renderer.post_render()
 
-@_window.event
+@window.event
 def on_exit():
-    _renderer.cleanup()
-    _window.close()
+    renderer.cleanup()
+    window.close()
 
 from .opengl import OpenGLRenderer
-_renderer = OpenGLRenderer()
-_renderer.initialize()
+renderer = OpenGLRenderer()
+renderer.initialize()

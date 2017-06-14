@@ -44,7 +44,7 @@ class Shape:
 
     __str__ = __repr__
 
-@sketch._artist
+@sketch.artist
 def point(x, y, z=0):
     """Returns a point Shape.
 
@@ -63,7 +63,7 @@ def point(x, y, z=0):
     """
     return Shape('POLY', [(x, y, z)])
 
-@sketch._artist
+@sketch.artist
 def line(start_point, end_point):
     """Returns a line Shape.
 
@@ -83,7 +83,7 @@ def line(start_point, end_point):
         end_point = *end_point, 0
     return Shape('POLY', [start_point, end_point], [(0, 1)])
 
-@sketch._artist
+@sketch.artist
 def rect(*args):
     """Returns a rect object."""
     raise NotImplementedError

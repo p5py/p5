@@ -75,8 +75,8 @@ class Shader:
         self.kind = kind
         self._id = None
         if preprocess:
-            target_version = self._glsl_versions[sketch._gl_version]
-            self.preprocess(target__version)
+            target_version = self._glsl_versions[sketch.gl_version]
+            self.preprocess(target_version)
 
     def preprocess(self, target_version):
         """Preprocess a shader.
@@ -106,7 +106,7 @@ class Shader:
         )
         glCompileShader(self._id)
 
-        if sketch._debug:
+        if sketch.debug:
             status_code = c_int(0)
             glGetShaderiv(self._id, GL_COMPILE_STATUS, pointer(status_code))
 
