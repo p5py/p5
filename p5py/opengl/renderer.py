@@ -176,7 +176,7 @@ class OpenGLRenderer(BaseRenderer):
 
         for shader in shaders:
             shader.compile()
-            shader.attach(self.shader_program)
+            self.shader_program.attach(shader)
 
         self.shader_program.link()
         self.shader_program.activate()
@@ -254,10 +254,7 @@ class OpenGLRenderer(BaseRenderer):
 
 
         if sketch_attrs['fill_enabled']:
-            self.shader_program.set_uniform_data(
-                'fill_color',
-                *sketch_attrs['fill_color'].normalized
-            )
+            self.shader_program['fill_color'] =  sketch_attrs['fill_color'].normalized
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
             glDrawElements(
@@ -274,11 +271,7 @@ class OpenGLRenderer(BaseRenderer):
         #
 
         if sketch_attrs['stroke_enabled']:
-            self.shader_program.set_uniform_data(
-                'fill_color',
-                *sketch_attrs['stroke_color'].normalized
-            )
-
+            self.shader_program['fill_color'] = sketch_attrs['stroke_color'].normalized
             glDrawElements(
                 GL_LINE_LOOP,
                 self.geoms[shape_hash]['num_elements'],
