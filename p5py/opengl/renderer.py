@@ -18,6 +18,7 @@
 
 from collections import namedtuple
 from ctypes import *
+import math
 
 from pyglet.gl import *
 
@@ -26,6 +27,7 @@ from .. import sketch
 
 from .shader import Shader
 from .shader import ShaderProgram
+from ..tmp import Matrix4
 
 __all__ = ['OpenGLRenderer', 'BaseRenderer']
 
@@ -105,7 +107,68 @@ class BaseRenderer:
         of such an object/class the user should be able to check that
         the renderer is working by calling this method.
         """
-        raise NotImplementedError("Abstract")
+        class Shape:
+            def __init__(self):
+                self.vertices = []
+                self.faces = []
+
+        class TestRect(Shape):
+            def __init__(self, x, y, w, h):
+                self.vertices = [
+                    (x - w/2, y - h/2, 0),
+                    (x - w/2, y + h/2, 0),
+                    (x + w/2, y + h/2, 0),
+                    (x + w/2, y - h/2, 0)
+                ]
+                self.faces = [(0, 1, 2), (2, 3, 0)]
+
+            def __eq__(self, other):
+                return self.__dict__ == other.__dict__
+
+        self.clear()
+
+        r = TestRect(0, 0, 90, 90)
+
+        core.fill(0.8, 0.8, 0.8, 0.5)
+        core.translate(100, 300)
+        self.render(r)
+        core.reset_transforms()
+
+        core.fill(0.8, 0.8, 0.4, 0.5)
+        core.translate(200, 300)
+        core.rotate(math.radians(45))
+        self.render(r)
+        core.reset_transforms()
+
+        core.fill(0.8, 0.4, 0.8, 0.5)
+        core.translate(300, 300)
+        core.shear_y(math.radians(45))
+        self.render(r)
+        core.reset_transforms()
+
+        core.fill(0.8, 0.4, 0.4, 0.5)
+        core.translate(400, 300)
+        core.shear_x(math.radians(45))
+        self.render(r)
+        core.reset_transforms()
+
+        core.fill(0.4, 0.8, 0.8, 0.5)
+        core.translate(500, 300)
+        core.scale(0.5)
+        self.render(r)
+        core.reset_transforms()
+
+        core.fill(0.4, 0.8, 0.4, 0.5)
+        core.translate(600, 300)
+        core.scale(1.5)
+        self.render(r)
+        core.reset_transforms()
+
+        core.fill(0.4, 0.4, 0.8, 0.5)
+        core.translate(700, 300)
+        core.scale(1.25, 2)
+        self.render(r)
+        core.reset_transforms()
 
     def __repr__(self):
         print("{}( version: {} )".format(self.__class__.__name__, self.version))
@@ -146,22 +209,30 @@ class OpenGLRenderer(BaseRenderer):
 
         self._init_shaders()
 
+        core.reset_transforms()
+        self.shader_program['model'] = sketch.mat_model
+        self.shader_program['view'] = sketch.mat_view
+        self.shader_program['projection'] = sketch.mat_projection
+
     def _init_shaders(self):
         vertex_shader_source = """
             #version 130
 
             in vec3 position;
 
+            uniform mat4 model;
+            uniform mat4 view;
+            uniform mat4 projection;
+
             void main()
             {
-                gl_Position = vec4(position, 1.0);
+                gl_Position = projection * view * model * vec4(position, 1.0);
             }
         """
 
         fragment_shader_source = """
             #version 130
 
-            out vec4 outColor;
             uniform vec4 fill_color;
 
             void main()
@@ -181,7 +252,10 @@ class OpenGLRenderer(BaseRenderer):
         self.shader_program.link()
         self.shader_program.activate()
 
-        self.shader_program.add_uniform('fill_color', glUniform4f)
+        self.shader_program.add_uniform('fill_color', 'vec4')
+        self.shader_program.add_uniform('projection', 'mat4')
+        self.shader_program.add_uniform('view', 'mat4')
+        self.shader_program.add_uniform('model', 'mat4')
 
     def _create_buffers(self, shape):
         """Create the required buffers for the given shape.
@@ -246,12 +320,12 @@ class OpenGLRenderer(BaseRenderer):
         return shape_hash
 
     def _draw_buffers(self, shape_hash):
+        self.shader_program['model'] = sketch.mat_model
         glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
 
         if sketch_attrs['fill_enabled']:
             self.shader_program['fill_color'] =  sketch_attrs['fill_color'].normalized
@@ -263,12 +337,6 @@ class OpenGLRenderer(BaseRenderer):
                 GL_UNSIGNED_INT,
                 0
             )
-
-        #
-        # TODO (abhikpal, 2017-06-08)
-        #
-        # Figure out a way to get stroke_width
-        #
 
         if sketch_attrs['stroke_enabled']:
             self.shader_program['fill_color'] = sketch_attrs['stroke_color'].normalized
@@ -294,38 +362,6 @@ class OpenGLRenderer(BaseRenderer):
         glClearColor(*sketch_attrs['background_color'].normalized)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    def test_render(self):
-        class Shape:
-            def __init__(self):
-                self.vertices = []
-                self.faces = []
-
-        class TestRect(Shape):
-            def __init__(self, x, y, w, h):
-                self.vertices = [
-                    (x, y, 0),
-                    (x + w, y, 0),
-                    (x + w, y - h, 0),
-                    (x, y - h, 0)
-                ]
-                self.faces = [(0, 1, 2), (2, 3, 0)]
-
-            def __eq__(self, other):
-                return self.__dict__ == other.__dict__
-
-        lim = 16
-        for i in range(-1*lim, lim):
-            norm_i = (i + lim)/(lim * 2)
-
-            r = TestRect(i/8, 0.95, 0.2, 0.6)
-            core.fill(1 - norm_i, 0.1, norm_i)
-            self.render(r)
-
-            r = TestRect(i/8, 0.3, 0.2, 0.6)
-            core.fill(0.1, norm_i, 1 - norm_i, 1.0)
-            self.render(r)
-
-            r = TestRect(i/8, -0.35, 0.2, 0.6)
-            core.fill(norm_i, 1 - norm_i, 0.1, 1.0)
-
-            self.render(r)
+    def pre_render(self):
+        sketch.mat_model = Matrix4()
+        self.shader_program['model'] = sketch.mat_model

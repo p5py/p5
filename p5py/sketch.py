@@ -35,6 +35,9 @@ _attrs = {
     'stroke_enabled': True,
 }
 
+mat_projection = None
+mat_view = None
+mat_model = None
 
 _window = pyglet.window.Window(
     width=_attrs['width'],
@@ -44,7 +47,7 @@ _window = pyglet.window.Window(
     vsync=True,
 )
 
-_debug = False
+_debug = True
 _gl_version = _window.context.get_info().get_version()[:3]
 
 _renderer = None
@@ -76,14 +79,14 @@ def _artist(f):
     return _artist
 
 def _update(dt):
-    _renderer.clear()
+    _renderer.pre_render()
     _renderer.test_render()
+    _renderer.post_render()
 
 @_window.event
 def on_exit():
     _renderer.cleanup()
     _window.close()
-
 
 from .opengl import OpenGLRenderer
 _renderer = OpenGLRenderer()

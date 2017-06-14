@@ -25,6 +25,19 @@ from .. import sketch
 
 ShaderUniform = namedtuple('Uniform', ['name', 'uid', 'function'])
 
+def _uvec4(uniform, data):
+    glUniform4f(uniform, *data)
+
+def _umat4(uniform, matrix):
+    flattened = matrix[:]
+    glUniformMatrix4fv(uniform, 1, GL_FALSE, (GLfloat * 16)(*flattened))
+
+_uniform_function_map = {
+    'vec4': _uvec4,
+    'mat4': _umat4,
+}
+
+
 class Shader:
     """Represents a shader in OpenGL.
 
@@ -155,17 +168,17 @@ class ShaderProgram:
         """The program id of the shader."""
         return self._id
 
-    def add_uniform(self, uniform_name, uniform_function):
+    def add_uniform(self, uniform_name, dtype):
         """Add a uniform to the shader program.
 
         :param uniform_name: name of the uniform.
         :type uniform_name: str
 
-        :param uniform_function: function to call while setting the
-            current uniform.
-        :type uniform_function: function
+        :param dtype: data type of the uniform: 'vec3', 'mat4', etc
+        :type dtype: str
 
         """
+        uniform_function = _uniform_function_map[dtype]
         self._uniforms[uniform_name] = ShaderUniform(
             uniform_name,
             glGetUniformLocation(self.pid, uniform_name.encode()),
@@ -186,7 +199,7 @@ class ShaderProgram:
 
         """
         uniform = self._uniforms[uni_name]
-        uniform.function(uniform.uid, *data)
+        uniform.function(uniform.uid, data)
 
     def attach(self, shader):
         """Attach a shader to the current program.

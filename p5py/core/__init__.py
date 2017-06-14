@@ -18,3 +18,4 @@
 
 from .color import *
 from .primitives import *
+from .transforms import *
