@@ -18,12 +18,61 @@
 
 from collections import namedtuple
 from ctypes import *
+import re
 
 from pyglet.gl import *
 
 from .. import sketch
 
-ShaderUniform = namedtuple('Uniform', ['name', 'uid', 'function'])
+_glsl_versions = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
+                  '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410,
+                  '4.2': 420, '4.3': 430, '4.4': 440, '4.5': 450, }
+
+_shader_preprocessor = """
+#ifdef GL_ES
+precision mediump float;
+precision mediump int;
+#endif
+"""
+
+vertex_default = """
+attribute vec3 position;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0);
+}
+"""
+
+fragment_default = """
+uniform vec4 fill_color;
+
+void main()
+{
+    gl_FragColor = fill_color;
+}
+"""
+
+_re_glsl_id = "(?<![0-9A-Z_a-z])({})(?![0-9A-Z_a-z]|\\s*\\()"
+_re_glsl_fn = "(?<![0-9A-Z_a-z])(%s)(?=\\s*\\()"
+
+_preprocess_vertex_patterns = [
+    (_re_glsl_id, "varying", "out"),
+    (_re_glsl_id, "attribute", "in"),
+    (_re_glsl_id, "texture", "texMap"),
+    (_re_glsl_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture"),
+]
+
+_preprocess_fragment_patterns = [
+    (_re_glsl_id, "varying|attribute", "in"),
+    (_re_glsl_id, "texture", "texMap"),
+    (_re_glsl_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture"),
+    (_re_glsl_id, "gl_FragColor", "_fragColor"),
+]
 
 def _uvec4(uniform, data):
     glUniform4f(uniform, *data)
@@ -37,39 +86,7 @@ _uniform_function_map = {
     'mat4': _umat4,
 }
 
-_shader_preprocessor = """
-    #ifdef GL_ES
-    precision mediump float;
-    precision mediump int;
-    #endif
-"""
-
-vertex_default = """
-    #version 130
-
-    in vec3 position;
-
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
-
-    void main()
-    {
-        gl_Position = projection * view * model * vec4(position, 1.0);
-    }
-"""
-
-fragment_default = """
-    #version 130
-
-    uniform vec4 fill_color;
-
-    void main()
-    {
-        gl_FragColor = fill_color;
-    }
-"""
-
+ShaderUniform = namedtuple('Uniform', ['name', 'uid', 'function'])
 
 class Shader:
     """Represents a shader in OpenGL.
@@ -88,27 +105,15 @@ class Shader:
         'fragment': GL_FRAGMENT_SHADER
     }
 
-    _glsl_versions = {
-        '2.0': 110,
-        '2.1': 120,
-        '3.0': 130,
-        '3.1': 140,
-        '3.2': 150,
-        '3.3': 330,
-        '4.0': 400,
-        '4.1': 410,
-        '4.2': 420,
-        '4.3': 430,
-        '4.4': 440,
-        '4.5': 450,
-    }
-
-    def __init__(self, source, kind, preprocess=False):
+    def __init__(self, source, kind, preprocess=True):
         self.source = source
         self.kind = kind
         self._id = None
-        if preprocess:
-            target_version = self._glsl_versions[sketch.gl_version]
+
+        # preprocessing only makes sense if the shader doesn't have an
+        # explicitly defined version string.
+        if preprocess and ("#version" not in self.source):
+            target_version = _glsl_versions[sketch.gl_version]
             self.preprocess(target_version)
 
     def preprocess(self, target_version):
@@ -124,7 +129,24 @@ class Shader:
         :type gl_version: str
 
         """
-        pass
+        processed_shader = "#version {}\n".format(target_version)
+
+        if target_version < 130:
+            return processed_shader + self.source
+
+        if self.kind == 'vertex':
+            patterns = _preprocess_vertex_patterns
+        elif self.kind == 'fragment':
+            patterns = _preprocess_fragment_patterns
+            processed_shader += "out vec4 _fragColor;"
+
+        for line in self.source.split('\n'):
+            processed_line = line
+            for regex, search, replace in patterns:
+                processed_line = re.sub(regex.format(search), replace, processed_line)
+            processed_shader += processed_line + '\n'
+
+        self.source = processed_shader
 
     def compile(self):
         """Generate a shader id and compile the shader"""
@@ -151,6 +173,7 @@ class Shader:
             log_message = log_message.value.decode('utf-8')
 
             if len(log_message) > 0:
+                print(self.source)
                 raise Exception(log_message)
 
     @property
