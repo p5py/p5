@@ -18,10 +18,20 @@
 
 import math
 from collections import deque
+from contextlib import contextmanager
 
 from .. import sketch
 from ..tmp.euclid import Vector3
 from ..tmp.euclid import Matrix4
+
+@contextmanager
+def push_matrix():
+    current_matrix = sketch.model_matrix_stack[0].copy()
+    sketch.model_matrix_stack.appendleft(current_matrix)
+    try:
+        yield current_matrix
+    finally:
+        sketch.model_matrix_stack.popleft()
 
 def reset_transforms():
     cz = (sketch.height / 2) / math.tan(math.radians(30))
