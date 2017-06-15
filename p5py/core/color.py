@@ -18,11 +18,8 @@
 
 from .. import sketch
 
-__all__ = [
-    'Color', 'background', 'color_mode',
-    'fill', 'no_fill',
-    'stroke', 'no_stroke',
-]
+__all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
+            'stroke', 'no_stroke', ]
 
 class Color:
     """Represents a color."""

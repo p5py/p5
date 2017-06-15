@@ -127,46 +127,46 @@ class BaseRenderer:
 
         r = TestRect(0, 0, 90, 90)
 
-        core.fill(0.8, 0.8, 0.8, 0.5)
-        core.translate(100, 300)
-        self.render(r)
-        core.reset_transforms()
+        with core.push_matrix():
+            core.translate(100, 300)
+            core.fill(0.8, 0.8, 0.8, 0.5)
+            self.render(r)
 
-        core.fill(0.8, 0.8, 0.4, 0.5)
-        core.translate(200, 300)
-        core.rotate(math.radians(45))
-        self.render(r)
-        core.reset_transforms()
+        with core.push_matrix():
+            core.fill(0.8, 0.8, 0.4, 0.5)
+            core.translate(200, 300)
+            core.rotate(math.radians(45))
+            self.render(r)
 
-        core.fill(0.8, 0.4, 0.8, 0.5)
-        core.translate(300, 300)
-        core.shear_y(math.radians(45))
-        self.render(r)
-        core.reset_transforms()
+        with core.push_matrix():
+            core.fill(0.8, 0.4, 0.8, 0.5)
+            core.translate(300, 300)
+            core.shear_y(math.radians(45))
+            self.render(r)
 
-        core.fill(0.8, 0.4, 0.4, 0.5)
-        core.translate(400, 300)
-        core.shear_x(math.radians(45))
-        self.render(r)
-        core.reset_transforms()
+        with core.push_matrix():
+            core.fill(0.8, 0.4, 0.4, 0.5)
+            core.translate(400, 300)
+            core.shear_x(math.radians(45))
+            self.render(r)
 
-        core.fill(0.4, 0.8, 0.8, 0.5)
-        core.translate(500, 300)
-        core.scale(0.5)
-        self.render(r)
-        core.reset_transforms()
+        with core.push_matrix():
+            core.fill(0.4, 0.8, 0.8, 0.5)
+            core.translate(500, 300)
+            core.scale(0.5)
+            self.render(r)
 
-        core.fill(0.4, 0.8, 0.4, 0.5)
-        core.translate(600, 300)
-        core.scale(1.5)
-        self.render(r)
-        core.reset_transforms()
+        with core.push_matrix():
+            core.fill(0.4, 0.8, 0.4, 0.5)
+            core.translate(600, 300)
+            core.scale(1.5)
+            self.render(r)
 
-        core.fill(0.4, 0.4, 0.8, 0.5)
-        core.translate(700, 300)
-        core.scale(1.25, 2)
-        self.render(r)
-        core.reset_transforms()
+        with core.push_matrix():
+            core.fill(0.4, 0.4, 0.8, 0.5)
+            core.translate(700, 300)
+            core.scale(1.25, 2)
+            self.render(r)
 
     def __repr__(self):
         print("{}( version: {} )".format(self.__class__.__name__, self.version))
@@ -208,7 +208,7 @@ class OpenGLRenderer(BaseRenderer):
         self._init_shaders()
 
         core.reset_transforms()
-        self.shader_program['model'] = sketch.mat_model
+        self.shader_program['model'] = sketch.model_matrix_stack[0]
         self.shader_program['view'] = sketch.mat_view
         self.shader_program['projection'] = sketch.mat_projection
 
@@ -293,7 +293,7 @@ class OpenGLRenderer(BaseRenderer):
         return shape_hash
 
     def _draw_buffers(self, shape_hash):
-        self.shader_program['model'] = sketch.mat_model
+        self.shader_program['model'] = sketch.model_matrix_stack[0]
         glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
@@ -336,5 +336,5 @@ class OpenGLRenderer(BaseRenderer):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     def pre_render(self):
-        sketch.mat_model = Matrix4()
-        self.shader_program['model'] = sketch.mat_model
+        sketch.model_matrix_stack[0] = Matrix4()
+        self.shader_program['model'] = sketch.model_matrix_stack[0]

@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from collections import deque
 from functools import wraps
 
 import pyglet
@@ -38,7 +39,7 @@ stroke_enabled = True
 
 mat_projection = None
 mat_view = None
-mat_model = None
+model_matrix_stack = deque()
 
 window = pyglet.window.Window(
     width=width,

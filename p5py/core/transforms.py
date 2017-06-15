@@ -16,11 +16,26 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from collections import deque
+from contextlib import contextmanager
 import math
 
 from .. import sketch
-from ..tmp.euclid import Vector3
 from ..tmp.euclid import Matrix4
+from ..tmp.euclid import Vector3
+
+__all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
+           'rotate_x', 'rotate_y', 'rotate_z', 'scale', 'shear_x',
+           'shear_y', 'camera', 'frustum', 'ortho', 'perspective']
+
+@contextmanager
+def push_matrix():
+    current_matrix = sketch.model_matrix_stack[0].copy()
+    sketch.model_matrix_stack.appendleft(current_matrix)
+    try:
+        yield current_matrix
+    finally:
+        sketch.model_matrix_stack.popleft()
 
 def reset_transforms():
     cz = (sketch.height / 2) / math.tan(math.radians(30))
@@ -33,22 +48,23 @@ def reset_transforms():
     sketch.mat_view = Matrix4()
     sketch.mat_view.translate(-sketch.width / 2,
                               -sketch.height/2, -cz)
-    sketch.mat_model = Matrix4()
+    sketch.model_matrix_stack = deque()
+    sketch.model_matrix_stack.append(Matrix4())
 
 def translate(x, y, z=0):
-    sketch.mat_model.translate(x, y, z)
+    sketch.model_matrix_stack[0].translate(x, y, z)
 
 def rotate(theta, axis=Vector3(0, 0, 1)):
-    sketch.mat_model.rotate_axis(theta, axis)
+    sketch.model_matrix_stack[0].rotate_axis(theta, axis)
     
 def rotate_x(theta):
-    sketch.mat_model.rotatex(theta)
+    sketch.model_matrix_stack[0].rotatex(theta)
 
 def rotate_y(theta):
-    sketch.mat_model.rotatey(theta)
+    sketch.model_matrix_stack[0].rotatey(theta)
 
 def rotate_z(theta):
-    sketch.mat_model.rotatez(theta)
+    sketch.model_matrix_stack[0].rotatez(theta)
 
 def scale(sx, sy=None, sz=None):
     if (not sy) and (not sz):
@@ -56,7 +72,7 @@ def scale(sx, sy=None, sz=None):
         sz = sx
     elif not sz:
         sz = 1
-    sketch.mat_model.scale(sx, sy, sz)
+    sketch.model_matrix_stack[0].scale(sx, sy, sz)
 
 #
 # Matrix structure:
@@ -68,12 +84,12 @@ def scale(sx, sy=None, sz=None):
 def shear_x(theta):
     shear_mat = Matrix4()
     shear_mat.b = math.tan(theta)
-    sketch.mat_model = sketch.mat_model * shear_mat
+    sketch.model_matrix_stack[0] = sketch.model_matrix_stack[0] * shear_mat
 
 def shear_y(theta):
     shear_mat = Matrix4()
     shear_mat.e = math.tan(theta)
-    sketch.mat_model = sketch.mat_model * shear_mat
+    sketch.model_matrix_stack[0] = sketch.model_matrix_stack[0] * shear_mat
 
 def camera():
     raise NotImplementedError

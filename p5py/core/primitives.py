@@ -18,6 +18,9 @@
 
 from .. import sketch
 
+__all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
+           'rect', 'circle', 'ellipse']
+
 class Shape:
     """Represents a Shape in p5py.
 
@@ -84,6 +87,26 @@ def line(start_point, end_point):
     return Shape('POLY', [start_point, end_point], [(0, 1)])
 
 @sketch.artist
+def arc(*args):
+    raise NotImplementedError
+
+@sketch.artist
+def triangle(*args):
+    raise NotImplementedError
+
+@sketch.artist
+def quad(*args):
+    raise NotImplementedError
+
+@sketch.artist
 def rect(*args):
     """Returns a rect object."""
+    raise NotImplementedError
+
+@sketch.artist
+def ellipse(*args):
+    raise NotImplementedError
+
+@sketch.artist
+def circle(*args):
     raise NotImplementedError
