@@ -37,6 +37,13 @@ _uniform_function_map = {
     'mat4': _umat4,
 }
 
+_shader_preprocessor = """
+    #ifdef GL_ES
+    precision mediump float;
+    precision mediump int;
+    #endif
+"""
+
 vertex_default = """
     #version 130
 
