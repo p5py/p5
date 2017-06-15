@@ -208,7 +208,7 @@ class OpenGLRenderer(BaseRenderer):
         self._init_shaders()
 
         core.reset_transforms()
-        self.shader_program['model'] = sketch.mat_model
+        self.shader_program['model'] = sketch.model_matrix_stack[0]
         self.shader_program['view'] = sketch.mat_view
         self.shader_program['projection'] = sketch.mat_projection
 
@@ -318,7 +318,7 @@ class OpenGLRenderer(BaseRenderer):
         return shape_hash
 
     def _draw_buffers(self, shape_hash):
-        self.shader_program['model'] = sketch.mat_model
+        self.shader_program['model'] = sketch.model_matrix_stack[0]
         glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
@@ -361,5 +361,5 @@ class OpenGLRenderer(BaseRenderer):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     def pre_render(self):
-        sketch.mat_model = Matrix4()
-        self.shader_program['model'] = sketch.mat_model
+        sketch.model_matrix_stack[0] = Matrix4()
+        self.shader_program['model'] = sketch.model_matrix_stack[0]
