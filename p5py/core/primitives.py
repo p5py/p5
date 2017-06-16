@@ -16,10 +16,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from collections import namedtuple
+
 from .. import sketch
 
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
-           'rect', 'circle', 'ellipse']
+           'rect', 'square', 'circle', 'ellipse']
+
+_Point = namedtuple('Point', ['x', 'y', 'z'])
+_Point.__new__.__defaults__ = (None, None, 0)
 
 class Shape:
     """Represents a Shape in p5py.
@@ -37,10 +42,10 @@ class Shape:
 
     """
 
-    def __init__(self, kind, vertices, edges=[]):
+    def __init__(self, kind, vertices, faces=[]):
         self.kind = kind
         self.vertices = vertices
-        self.edges = edges
+        self.faces = faces
 
     def __repr__(self):
         return "({} Shape with vertices {})".format(self.kind, self.vertices)
@@ -64,44 +69,107 @@ def point(x, y, z=0):
     :rtype: Shape
 
     """
-    return Shape('POLY', [(x, y, z)])
+    return Shape('POINT', [_Point(x, y, z)], [(0,)])
 
 @sketch.artist
-def line(start_point, end_point):
+def line(p1, p2):
     """Returns a line Shape.
 
-    :param start_point: Coordinates of the starting point of the line.
-    :type start_point: tuple
+    :param p1: Coordinates of the starting point of the line.
+    :type p1: tuple
 
-    :param end_point: Coordinates of the end point of the line.
-    :type end_point: tuple
+    :param p2: Coordinates of the end point of the line.
+    :type p2: tuple
 
     :returns: A line Shape.
     :rtype: Shape
 
     """
-    if len(start_point) == 2:
-        start_point = *start_point, 0
-    if len(end_point) == 2:
-        end_point = *end_point, 0
-    return Shape('POLY', [start_point, end_point], [(0, 1)])
+    return Shape('LINE', [_Point(*p1), _Point(*p2)], [(0, 1)])
 
 @sketch.artist
 def arc(*args):
     raise NotImplementedError
 
 @sketch.artist
-def triangle(*args):
-    raise NotImplementedError
+def triangle(p1, p2, p3):
+    """Return a triangle.
+
+    :param p1: coordinates of the first point of the triangle
+    :type p1: 3-tuple
+
+    :param p2: coordinates of the second point of the triangle
+    :type p2: 3-tuple
+
+    :param p3: coordinates of the third point of the triangle
+    :type p3: 3-tuple
+
+    :returns: A triangle.
+    :rtype: Shape
+    """
+    vertices = [_Point(*p1), _Point(*p2), _Point(*p3)]
+    faces = [(0, 1, 2)]
+    return Shape('POLY', vertices, faces)
 
 @sketch.artist
-def quad(*args):
-    raise NotImplementedError
+def quad(p1, p2, p3, p4):
+    """Return a quad.
 
-@sketch.artist
-def rect(*args):
-    """Returns a rect object."""
-    raise NotImplementedError
+    :param p1: coordinates of the first point of the quad
+    :type p1: 3-tuple
+
+    :param p2: coordinates of the second point of the quad
+    :type p2: 3-tuple
+
+    :param p3: coordinates of the third point of the quad
+    :type p3: 3-tuple
+
+    :param p4: coordinates of the fourth point of the quad
+    :type p4: 3-tuple
+
+    :returns: A triangle.
+    :rtype: Shape
+    """
+    vertices = [_Point(*p1), _Point(*p2), _Point(*p3), _Point(*p4)]
+    faces = [(0, 1, 2), (2, 3, 0)]
+    return Shape('POLY', vertices, faces)
+
+def rect(coordinate, width, height):
+    """Return a rectangle.
+
+    :param coordinate: The lower-left corner of the rectangle.
+    :type coordinate: 3-tuple
+
+    :param width: The width of the rectangle.
+    :type: width: int or float
+
+    :param height: The height of the rectangle.
+    :type: height: int or float
+
+    :returns: A rectangle.
+    :rtype: Shape
+
+    """
+    p1 = _Point(*coordinate)
+    p2 = _Point(p1.x + width, p1.y, p1.z)
+    p3 = _Point(p2.x, p2.y + height, p2.z)
+    p4 = _Point(p1.x, p3.y, p3.z)
+    return quad(p1, p2, p3, p4)
+
+def square(coordinate, side_length):
+    """Return a square.
+
+    :param coordinate: The lower-left corner of the square.
+    :type coordinate: 3-tuple
+
+    :param side_length: The side_length of the square.
+    :type side_length: int or float
+
+    :returns: A rectangle.
+    :rtype: Shape
+
+    """
+    return rect(coordinate, side_length, side_length)
 
 @sketch.artist
 def ellipse(*args):

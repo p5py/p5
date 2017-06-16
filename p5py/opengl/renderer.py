@@ -119,6 +119,7 @@ class BaseRenderer:
                     (x + w/2, y - h/2, 0)
                 ]
                 self.faces = [(0, 1, 2), (2, 3, 0)]
+                self.kind = 'POLY'
 
             def __eq__(self, other):
                 return self.__dict__ == other.__dict__
@@ -130,7 +131,8 @@ class BaseRenderer:
         with core.push_matrix():
             core.translate(100, 300)
             core.fill(0.8, 0.8, 0.8, 0.5)
-            self.render(r)
+            core.square((-45, -45), 90)
+            # self.render(r)
 
         with core.push_matrix():
             core.fill(0.8, 0.8, 0.4, 0.5)
@@ -292,15 +294,16 @@ class OpenGLRenderer(BaseRenderer):
         }
         return shape_hash
 
-    def _draw_buffers(self, shape_hash):
+    def _draw_buffers(self, shape, shape_hash):
         self.shader_program['model'] = sketch.model_matrix_stack[0]
+
         glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
 
         position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-        if sketch.fill_enabled:
+        if sketch.fill_enabled and (shape.kind not in ['POINT', 'LINE']):
             self.shader_program['fill_color'] =  sketch.fill_color.normalized
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
@@ -313,12 +316,20 @@ class OpenGLRenderer(BaseRenderer):
 
         if sketch.stroke_enabled:
             self.shader_program['fill_color'] = sketch.stroke_color.normalized
-            glDrawElements(
-                GL_LINE_LOOP,
-                self.geoms[shape_hash]['num_elements'],
-                GL_UNSIGNED_INT,
-                0
-            )
+            if shape.kind is 'POINT':
+                glDrawElements(
+                    GL_POINTS,
+                    self.geoms[shape_hash]['num_elements'],
+                    GL_UNSIGNED_INT,
+                    0
+                )
+            else:
+                glDrawElements(
+                    GL_LINE_LOOP,
+                    self.geoms[shape_hash]['num_elements'],
+                    GL_UNSIGNED_INT,
+                    0
+                )
 
     def render(self, shape):
         """Use the renderer to render a shape.
@@ -328,7 +339,7 @@ class OpenGLRenderer(BaseRenderer):
 
         """
         shape_hash = self._create_buffers(shape)
-        self._draw_buffers(shape_hash)
+        self._draw_buffers(shape, shape_hash)
 
     def clear(self):
         """Clear the screen."""
