@@ -174,7 +174,14 @@ class Shader:
 
             if len(log_message) > 0:
                 print(self.source)
-                raise Exception(log_message)
+                print(log_message)
+                # In Windows (OpenGL 3.3 + intel card) the log_message
+                # is set to "No errors" on a successful compilation
+                # and the code raises the Exception even though it
+                # shouldn't. There should be a proper fix, but getting
+                # rid of this line for now, will fix it.
+                # 
+                # raise Exception(log_message)
 
     @property
     def sid(self):
