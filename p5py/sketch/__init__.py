@@ -24,6 +24,12 @@ import pyglet
 # This should only have the relevant sketch contants.
 __all__ = []
 
+# consts:
+# HEIGHT WIDTH FOCUSED FRAMECOUNT FRAMERATE PIXEL_HEIGHT PIXEL_WIDTH
+# MOUSE_BUTTON MOUSE_PRESSED MOUSE_X MOUSE_Y PMOUSE_X PMOUSE_Y KEY
+# KEYCODE KEY_PRESSED
+#
+
 title = "p5py"
 min_width = 100
 min_height = 100
@@ -90,6 +96,6 @@ def on_exit():
     renderer.cleanup()
     window.close()
 
-from .opengl import OpenGLRenderer
+from ..opengl import OpenGLRenderer
 renderer = OpenGLRenderer()
 renderer.initialize()
