@@ -1,18 +1,18 @@
-.. p5py documentation master file, created by
+.. p5 documentation master file, created by
    sphinx-quickstart on Thu May 25 17:28:12 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-p5py
+p5
 ====
 
-p5py is a Python package based on the core ideas of `Processing
+p5 is a Python package based on the core ideas of `Processing
 <https://processing.org>`_. It aims to make programming more
 accessible for beginners, artists, and educators by combining Python's
 readability with Processing's emphasis on learning to code in a visual
 context.
 
-p5py programs are called "sketches" (we borrow this metaphor from
+p5 programs are called "sketches" (we borrow this metaphor from
 Processing) and can be run as normal Python programs. A typical sketch
 often looks like:
 
@@ -20,7 +20,7 @@ often looks like:
 
    # Example adapted from "Recursion" Processing example
    
-   from p5py import *
+   from p5 import *
 
    def setup():
        size(640, 360)
@@ -52,7 +52,7 @@ To get started, use the links below:
 
    api
 
-p5py is being developed by `Abhik Pal <https://github.com/abhikpal>`_
+p5 is being developed by `Abhik Pal <https://github.com/abhikpal>`_
 as a `project
 <https://summerofcode.withgoogle.com/projects/#5809403503575040>`_
 under the `Processing Foundation <https://processingfoundation.org/>`_

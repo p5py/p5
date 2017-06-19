@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# p5py documentation build configuration file, created by
+# p5 documentation build configuration file, created by
 # sphinx-quickstart on Thu May 25 17:28:12 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'p5py'
+project = 'p5'
 copyright = '2017, Abhik Pal'
 author = 'Abhik Pal'
 
@@ -94,8 +94,8 @@ html_theme = 'alabaster'
 #
 html_theme_options = {
     'show_powered_by': False,
-    'github_user': 'abhikpal',
-    'github_repo': 'p5py',
+    'github_user': 'p5py',
+    'github_repo': 'p5',
     'github_banner': True
 }
 
@@ -135,7 +135,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'p5py.tex', 'p5py Documentation',
+    (master_doc, 'p5.tex', 'p5 Documentation',
      'Abhik Pal', 'manual'),
 ]
 
@@ -145,7 +145,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'p5py', 'p5py Documentation',
+    (master_doc, 'p5', 'p5 Documentation',
      [author], 1)
 ]
 
@@ -156,8 +156,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'p5py', 'p5py Documentation',
-     author, 'p5py', 'One line description of project.',
+    (master_doc, 'p5', 'p5 Documentation',
+     author, 'p5', 'p5 is a Python package based on the core ideas of Processing.',
      'Miscellaneous'),
 ]
 
