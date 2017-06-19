@@ -21,6 +21,8 @@ from functools import wraps
 
 import pyglet
 
+from ..opengl import renderer
+
 # This should only have the relevant sketch contants.
 __all__ = []
 
@@ -36,29 +38,18 @@ min_height = 100
 width = 800
 height = 600
 
-background_color = None
-fill_color = None
-stroke_color = None
-
-fill_enabled = True
-stroke_enabled = True
-
-mat_projection = None
-mat_view = None
-model_matrix_stack = deque()
-
 window = pyglet.window.Window(
     width=width,
     height=height,
     caption=title,
     resizable=False,
     vsync=True,
+    visible=False,
 )
 
-debug = True
-gl_version = window.context.get_info().get_version()[:3]
-
 def initialize(*args, **kwargs):
+    gl_version = window.context.get_info().get_version()[:3]
+    renderer.initialize(width, height, gl_version)
     window.set_visible()
 
 def run(*args, **kwargs):
@@ -93,6 +84,3 @@ def update(dt):
 def on_exit():
     renderer.cleanup()
     window.close()
-
-from ..opengl import renderer
-renderer.initialize()

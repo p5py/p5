@@ -22,7 +22,7 @@ import re
 
 from pyglet.gl import *
 
-from .. import sketch
+debug = True
 
 _glsl_versions = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
                   '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410,
@@ -105,7 +105,7 @@ class Shader:
         'fragment': GL_FRAGMENT_SHADER
     }
 
-    def __init__(self, source, kind, preprocess=True):
+    def __init__(self, source, kind, version='110', preprocess=True):
         self.source = source
         self.kind = kind
         self._id = None
@@ -113,7 +113,7 @@ class Shader:
         # preprocessing only makes sense if the shader doesn't have an
         # explicitly defined version string.
         if preprocess and ("#version" not in self.source):
-            target_version = _glsl_versions[sketch.gl_version]
+            target_version = _glsl_versions[version]
             self.preprocess(target_version)
 
     def preprocess(self, target_version):
@@ -161,7 +161,7 @@ class Shader:
         )
         glCompileShader(self._id)
 
-        if sketch.debug:
+        if debug:
             status_code = c_int(0)
             glGetShaderiv(self._id, GL_COMPILE_STATUS, pointer(status_code))
 

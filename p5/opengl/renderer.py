@@ -20,41 +20,62 @@
 from ctypes import *
 import math
 
+from collections import deque
+
 from pyglet.gl import *
 
-from .. import core
-from .. import sketch
 from ..tmp import Matrix4
 from .shader import Shader
 from .shader import ShaderProgram
 from .shader import fragment_default
 from .shader import vertex_default
 
-_shader_program = ShaderProgram()
+
+# Geometry cache for the renderer
+#
+# Regenerating buffers and binding them to arrays can get very
+# expensive. We use this dictionary to cache the shape the fist time
+# its drawn and reuse the information if the same shape is asked to be
+# drawn again.
+#
 _geometries = {}
 
-def initialize():
+_shader_program = ShaderProgram()
+
+# All the user transformations are stored in this matrix stack.
+# Whenver we try to draw a shape, we pull out the topmost matrix from
+# this stack and pass the said matrix to our shader program.
+#
+_matrix_stack = deque([Matrix4()])
+
+_attributes = {
+    'background_color': (0.8, 0.8, 0.8, 1.0),
+    'fill_color': (1.0, 1.0, 1.0, 1.0),
+    'stroke_color': (0, 0, 0, 1.0),
+
+    'fill_enabled': True,
+    'stroke_enabled': True,
+
+    'model': _matrix_stack[0],
+    'view': Matrix4(),
+    'projection': Matrix4(),
+}
+
+
+def initialize(width, height, gl_version):
     """Initialize the OpenGL renderer.
 
-    For an OpenGL renderer this shouudl setup the required buffers,
-    compile the default shaders, etc.
+    For an OpenGL based renderer this sets up the viewport and creates
+    the shader program.
 
     """
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
-    glViewport(0, 0, sketch.width, sketch.height)
+    glViewport(0, 0, width, height)
 
-    _init_shaders()
-
-    core.reset_transforms()
-    _shader_program['model'] = sketch.model_matrix_stack[0]
-    _shader_program['view'] = sketch.mat_view
-    _shader_program['projection'] = sketch.mat_projection
-
-def _init_shaders():
     shaders = [
-        Shader(vertex_default, 'vertex'),
-        Shader(fragment_default, 'fragment'),
+        Shader(vertex_default, 'vertex', version=gl_version),
+        Shader(fragment_default, 'fragment', version=gl_version),
     ]
 
     for shader in shaders:
@@ -69,17 +90,32 @@ def _init_shaders():
     _shader_program.add_uniform('view', 'mat4')
     _shader_program.add_uniform('model', 'mat4')
 
+    cz = (height / 2) / math.tan(math.radians(30))
+    projection = Matrix4.new_perspective(
+        math.radians(60),
+        width / height,
+        0.1 * cz,
+        10 * cz
+    )
+    view = Matrix4().translate(-width/2, -height/2, -cz)
+
+    _attributes['view'] =  view
+    _attributes['projection'] =  projection
+
 def cleanup():
     """Run the clean-up routine for the renderer"""
     pass
 
 def clear():
-    glClearColor(*sketch.background_color.normalized)
+    """Use the background color to clear the screen."""
+    glClearColor(*_attributes['background_color'])
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 def pre_render():
-    sketch.model_matrix_stack[0] = Matrix4()
-    _shader_program['model'] = sketch.model_matrix_stack[0]
+    _matrix_stack[0] = Matrix4()
+    _shader_program['model'] =  _matrix_stack[0]
+    _shader_program['view'] = _attributes['view']
+    _shader_program['projection'] = _attributes['projection']
 
 def post_render():
     pass
@@ -143,7 +179,7 @@ def render(shape):
             'num_elements': len(elements)
         }
 
-    _shader_program['model'] = sketch.model_matrix_stack[0]
+    _shader_program['model'] = _matrix_stack[0]
 
     glBindBuffer(GL_ARRAY_BUFFER, _geometries[shape_hash]['vertex_buffer'])
 
@@ -151,8 +187,8 @@ def render(shape):
     glEnableVertexAttribArray(position_attr)
     glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-    if sketch.fill_enabled and (shape.kind not in ['POINT', 'LINE']):
-        _shader_program['fill_color'] =  sketch.fill_color.normalized
+    if _attributes['fill_enabled'] and (shape.kind not in ['POINT', 'LINE']):
+        _shader_program['fill_color'] =  _attributes['fill_color']
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _geometries[shape_hash]['index_buffer'])
         glDrawElements(
@@ -161,9 +197,8 @@ def render(shape):
             GL_UNSIGNED_INT,
             0
         )
-
-    if sketch.stroke_enabled:
-        _shader_program['fill_color'] = sketch.stroke_color.normalized
+    if _attributes['stroke_enabled']:
+        _shader_program['fill_color'] = _attributes['stroke_color']
         if shape.kind is 'POINT':
             glDrawElements(
                 GL_POINTS,
@@ -180,72 +215,33 @@ def render(shape):
             )
 
 def test_render():
-    """Render the renderer's default test drawing.
-
-    The render() methods requires a Shape object. In the absence
-    of such an object/class the user should be able to check that
-    the renderer is working by calling this method.
-    """
-    class Shape:
+    """Render the renderer's default test drawing."""
+    class Triangle:
         def __init__(self):
-            self.vertices = []
-            self.faces = []
-
-    class TestRect(Shape):
-        def __init__(self, x, y, w, h):
+            self.faces = [(0, 1, 2)]
+            self.kind = 'POLY'
             self.vertices = [
-                (x - w/2, y - h/2, 0),
-                (x - w/2, y + h/2, 0),
-                (x + w/2, y + h/2, 0),
-                (x + w/2, y - h/2, 0)
+                (450, 150, 0),
+                (600, 450, 0),
+                (750, 150, 0)
             ]
+
+    class Square:
+        def __init__(self):
             self.faces = [(0, 1, 2), (2, 3, 0)]
             self.kind = 'POLY'
+            self.vertices = [
+                (50, 150, 0),
+                (50, 450, 0),
+                (350, 450, 0),
+                (350, 150, 0)
+            ]
 
-        def __eq__(self, other):
-            return self.__dict__ == other.__dict__
-
+    _attributes['background_color'] = (1.0, 1.0, 1.0, 1.0)
     clear()
+    
+    _attributes['fill_color'] = (0.8, 0.8, 0.4, 1.0)
+    render(Triangle())
 
-    r = TestRect(0, 0, 90, 90)
-
-    with core.push_matrix():
-        core.translate(100, 300)
-        core.fill(0.8, 0.8, 0.8, 0.5)
-        core.square((-45, -45), 90)
-
-    with core.push_matrix():
-        core.fill(0.8, 0.8, 0.4, 0.5)
-        core.translate(200, 300)
-        core.rotate(math.radians(45))
-        render(r)
-
-    with core.push_matrix():
-        core.fill(0.8, 0.4, 0.8, 0.5)
-        core.translate(300, 300)
-        core.shear_y(math.radians(45))
-        render(r)
-
-    with core.push_matrix():
-        core.fill(0.8, 0.4, 0.4, 0.5)
-        core.translate(400, 300)
-        core.shear_x(math.radians(45))
-        render(r)
-
-    with core.push_matrix():
-        core.fill(0.4, 0.8, 0.8, 0.5)
-        core.translate(500, 300)
-        core.scale(0.5)
-        render(r)
-
-    with core.push_matrix():
-        core.fill(0.4, 0.8, 0.4, 0.5)
-        core.translate(600, 300)
-        core.scale(1.5)
-        render(r)
-
-    with core.push_matrix():
-        core.fill(0.4, 0.4, 0.8, 0.5)
-        core.translate(700, 300)
-        core.scale(1.25, 2)
-        render(r)
+    _attributes['fill_color'] = (0.4, 0.4, 0.8, 1.0)
+    render(Square())
