@@ -1,17 +1,11 @@
 .. _api:
 
-p5py API Documentation
+p5 API Documentation
 ======================
-
-Drawing Primitives
-------------------
-
-.. automodule:: p5py.primitives
-   :members:
 
 Mathematics
 -----------
 
-.. automodule:: p5py.pmath
+.. automodule:: p5.pmath
    :members:
    :special-members:

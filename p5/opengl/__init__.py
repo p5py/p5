@@ -1,5 +1,5 @@
 #
-# Part of p5py: A Python package based on Processing
+# Part of p5: A Python package based on Processing
 # Copyright (C) 2017 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify

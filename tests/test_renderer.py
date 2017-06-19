@@ -5,8 +5,8 @@ import os
 import sys
 sys.path.append(os.path.abspath('..'))
 
-import p5py as p
+import p5
 
-p.sketch.initialize()
-p.sketch.run()
+p5.sketch.initialize()
+p5.sketch.run()
 exit()

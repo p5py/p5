@@ -3,16 +3,16 @@
     :align: center
     :alt: ---
 
-p5py
-====
+p5
+===
 
-p5py is a Python package based on the core ideas of `Processing
+p5 is a Python package based on the core ideas of `Processing
 <https://processing.org>`_. It aims to make programming more
 accessible for beginners, artists, and educators by combining Python's
 readability with Processing's emphasis on learning to code in a visual
 context.
 
-p5py programs are called "sketches" (we borrow this metaphor from
+p5 programs are called "sketches" (we borrow this metaphor from
 Processing) and can be run as normal Python programs. A typical sketch
 often looks like:
 
@@ -20,7 +20,7 @@ often looks like:
 
    # Example adapted from "Recursion" Processing example
    
-   from p5py import *
+   from p5 import *
 
    def setup():
        size(640, 360)
@@ -45,7 +45,7 @@ When run, this sketch produces:
    :alt: Sample sketch output
 
 
-p5py is in its early development phase right now and is being
+p5 is in its early development phase right now and is being
 developed as a `project
 <https://summerofcode.withgoogle.com/projects/#5809403503575040>`_
 under the `Processing Foundation <https://processingfoundation.org/>`_
@@ -58,33 +58,15 @@ for `Google Summer of Code 2017
 Features Overview
 -----------------
 
-In addition to supporting the Processing API, p5py will also:
+In addition to supporting the Processing API, p5 will also:
 
 #. Try to have as few dependencies as possible (we are only using
    `pyglet <http://pyglet.org>`_ as of now :) .
 
-#. Minimize boilerplate required to get started. A sketch will
-   typically require only one ``import`` (p5py automatically takes care
-   of running the Python file as a Processing sketch.) 
-
-   .. code:: python
-
-     from p5py import *
-
-     def setup():
-         size(400, 300)
-         background(51)
-         no_fill()
-
-     def draw():
-         stroke(127)
-         ellipse(mouse_x, mouse_y, 50, 50)
-
-     def mouse_pressed():
-         background(51)
+#. Minimize boilerplate required to get started.
 
 #. Support live coding of sketches in the Python REPL (here's a
-   `screencast <https://abhikpal.github.io/videos/p5py-screencast.webm>`_ from
+   `screencast <https://p5py.github.io/videos/p5-repl-demo.webm>`_ from
    an earlier prototype).
 
 #. Introduce Python's keyword arguments to existing Processing
@@ -109,39 +91,41 @@ In addition to supporting the Processing API, p5py will also:
 Setup
 -----
 
-p5py is heavily under development right now and once it reaches some
+p5 is heavily under development right now and once it reaches some
 level of stability, we plan to make it available on PyPI. If you would
 like to play around with the existing devlopment code, first clone the
 repository
 
 .. code:: shell
 
-   git clone https://github.com/abhikpal/p5py
+   git clone https://github.com/p5py/p5
 
 and then install all requirements:
 
 .. code:: shell
 
-   cd p5py
+   cd p5
    pip install -r requirements.txt
 
-You can now use p5py (as long as you stay in the current folder) like
-a python package. If you would like to use p5py from arbitrary
+You can now use p5 (as long as you stay in the current folder) like
+a python package. If you would like to use p5 from arbitrary
 locations on your drive, you can hack the PYTHONPATH environment
 variable.
 
 .. code:: shell
 
-   export PYTHONPATH=$PYTHONPATH:/path/to/the/p5py-repo
+   export PYTHONPATH=$PYTHONPATH:/path/to/the/p5-repo
+
+Contributing
+------------
 
 If you think you've found a bug, please use the `Issues
-<https://github.com/abhikpal/p5py/issues>`_ tab for this repository.
-
+<https://github.com/p5py/p5/issues>`_ tab for this repository.
 
 License
 -------
 
-p5py is licensed under the GPLv3. See `LICENSE <LICENSE>`_ for more details
+p5 is licensed under the GPLv3. See `LICENSE <LICENSE>`_ for more details.
 
 .. image :: docs/_static/processing-header-thin.png
     :width: 100%
