@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+"""The OpenGL renderer for p5."""
 
 from ctypes import *
 import math
@@ -29,232 +30,81 @@ from .shader import ShaderProgram
 from .shader import fragment_default
 from .shader import vertex_default
 
-__all__ = ['OpenGLRenderer', 'BaseRenderer']
+_shader_program = ShaderProgram()
+_geometries = {}
 
-#
-# TODO (abhikpal, 2017-06-06);
-#
-# - Fill in the missing args for all methods (maybe after
-#   OpenGLRenderer is done?)
-#
-class BaseRenderer:
-    """Base abstraction layer for all renderers."""
-    def __init__(self):
-        raise NotImplementedError("Abstract")
+def initialize():
+    """Initialize the OpenGL renderer.
 
-    def initialize(self):
-        """Initilization routine for the renderer."""
-        raise NotImplementedError("Abstract")
+    For an OpenGL renderer this shouudl setup the required buffers,
+    compile the default shaders, etc.
 
-    def check_support(self):
-        """Check if the the system supports the current renderer.
+    """
+    glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LEQUAL)
+    glViewport(0, 0, sketch.width, sketch.height)
 
-        :returns: True if the renderer is supported.
-        :rtype: bool
+    _init_shaders()
 
-        :raises RuntimeError: if the renderer is not supported.
-        """
-        raise NotImplementedError("Abstract")
+    core.reset_transforms()
+    _shader_program['model'] = sketch.model_matrix_stack[0]
+    _shader_program['view'] = sketch.mat_view
+    _shader_program['projection'] = sketch.mat_projection
 
-    def pre_render(self):
-        """Run the pre-render routine(s).
+def _init_shaders():
+    shaders = [
+        Shader(vertex_default, 'vertex'),
+        Shader(fragment_default, 'fragment'),
+    ]
 
-        The pre_render is called before the renderer is used to draw
-        anything in the current iteration of the draw*() loop. This
-        method could, for instance:
+    for shader in shaders:
+        shader.compile()
+        _shader_program.attach(shader)
 
-        - reset the transformations for the viewport
-        - clear the screen,
-        - etc.
-        """
-        pass
+    _shader_program.link()
+    _shader_program.activate()
 
-    def render(self, shape):
-        """Use the renderer to render the given shape.
+    _shader_program.add_uniform('fill_color', 'vec4')
+    _shader_program.add_uniform('projection', 'mat4')
+    _shader_program.add_uniform('view', 'mat4')
+    _shader_program.add_uniform('model', 'mat4')
 
-        :param shape: The shape that needs to be rendered.
-        :type shape: Shape
-        """
-        raise NotImplementedError("Abstract")
+def cleanup():
+    """Run the clean-up routine for the renderer"""
+    pass
 
-    def post_render(self):
-        """Run the post-render routine(s).
+def clear():
+    glClearColor(*sketch.background_color.normalized)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        The post_render is called when we are done drawing things for
-        the current iteration of the draw call. Any draw-loop specific
-        cleanup steps should go here.
-        """
-        pass
+def pre_render():
+    sketch.model_matrix_stack[0] = Matrix4()
+    _shader_program['model'] = sketch.model_matrix_stack[0]
 
-    def clear(self):
-        """Clear the screen."""
-        raise NotImplementedError("Abstract")
+def post_render():
+    pass
 
-    def cleanup(self):
-        """Run the cleanup routine for the renderer.
+def render(shape):
+    """Use the renderer to render a Shape.
 
-        This is the FINAL cleanup routine for the renderer and would
-        ideally be called when the program is about to exit.
-        """
-        pass
-
-    def test_render(self):
-        """Render the renderer's default test drawing.
-
-        The render() methods requires a Shape object. In the absence
-        of such an object/class the user should be able to check that
-        the renderer is working by calling this method.
-        """
-        class Shape:
-            def __init__(self):
-                self.vertices = []
-                self.faces = []
-
-        class TestRect(Shape):
-            def __init__(self, x, y, w, h):
-                self.vertices = [
-                    (x - w/2, y - h/2, 0),
-                    (x - w/2, y + h/2, 0),
-                    (x + w/2, y + h/2, 0),
-                    (x + w/2, y - h/2, 0)
-                ]
-                self.faces = [(0, 1, 2), (2, 3, 0)]
-                self.kind = 'POLY'
-
-            def __eq__(self, other):
-                return self.__dict__ == other.__dict__
-
-        self.clear()
-
-        r = TestRect(0, 0, 90, 90)
-
-        with core.push_matrix():
-            core.translate(100, 300)
-            core.fill(0.8, 0.8, 0.8, 0.5)
-            core.square((-45, -45), 90)
-            # self.render(r)
-
-        with core.push_matrix():
-            core.fill(0.8, 0.8, 0.4, 0.5)
-            core.translate(200, 300)
-            core.rotate(math.radians(45))
-            self.render(r)
-
-        with core.push_matrix():
-            core.fill(0.8, 0.4, 0.8, 0.5)
-            core.translate(300, 300)
-            core.shear_y(math.radians(45))
-            self.render(r)
-
-        with core.push_matrix():
-            core.fill(0.8, 0.4, 0.4, 0.5)
-            core.translate(400, 300)
-            core.shear_x(math.radians(45))
-            self.render(r)
-
-        with core.push_matrix():
-            core.fill(0.4, 0.8, 0.8, 0.5)
-            core.translate(500, 300)
-            core.scale(0.5)
-            self.render(r)
-
-        with core.push_matrix():
-            core.fill(0.4, 0.8, 0.4, 0.5)
-            core.translate(600, 300)
-            core.scale(1.5)
-            self.render(r)
-
-        with core.push_matrix():
-            core.fill(0.4, 0.4, 0.8, 0.5)
-            core.translate(700, 300)
-            core.scale(1.25, 2)
-            self.render(r)
-
-    def __repr__(self):
-        print("{}( version: {} )".format(self.__class__.__name__, self.version))
-
-    __str__ = __repr__
-
-
-class OpenGLRenderer(BaseRenderer):
-    """The main OpenGL renderer.
-
-    :param sketch_attrs: The main dictionary containing all attributes
-        for the sketch.
-    :type sketch_attrs: dict
+    :param shape: The shape to be rendered.
+    :type shape: Shape
     """
 
-    def __init__(self):
-        #
-        # TODO (abhikpal, 2017-06-06)
-        #
-        # - Do we want to initialize the renderer here or get the
-        #   sketch to do it explicitly when it has everything else
-        #   ready?
-        #
-        self.shader_program = ShaderProgram()
+    #
+    # TODO (abhikpal, 2017-06-10)
+    #
+    # - Ideally, this should be implemented by the Shape's
+    #   __hash__ so that we can use the shape itself as the dict
+    #   key and get rid of this str(__dict__(...) business.
+    #
+    # TODO (abhikpal, 2017-06-14)
+    #
+    # All of the buffer stuff needs refactoring.
+    #
+    shape_hash = str(shape.__dict__)
 
-        self.geoms = {}
-
-    def initialize(self):
-        """Run the renderer initialization routine.
-
-        For an OpenGL renderer this should setup the required buffers,
-        compile the shaders, etc.
-        """
-
-        glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LEQUAL)
-        glViewport(0, 0, sketch.width, sketch.height)
-
-        self._init_shaders()
-
-        core.reset_transforms()
-        self.shader_program['model'] = sketch.model_matrix_stack[0]
-        self.shader_program['view'] = sketch.mat_view
-        self.shader_program['projection'] = sketch.mat_projection
-
-    def _init_shaders(self):
-        shaders = [
-            Shader(vertex_default, 'vertex'),
-            Shader(fragment_default, 'fragment'),
-        ]
-
-        for shader in shaders:
-            shader.compile()
-            self.shader_program.attach(shader)
-
-        self.shader_program.link()
-        self.shader_program.activate()
-
-        self.shader_program.add_uniform('fill_color', 'vec4')
-        self.shader_program.add_uniform('projection', 'mat4')
-        self.shader_program.add_uniform('view', 'mat4')
-        self.shader_program.add_uniform('model', 'mat4')
-
-    def _create_buffers(self, shape):
-        """Create the required buffers for the given shape.
-
-        :param shape: Create buffers for this shape.
-        :type shape: Shape
-
-        """
-
-        #
-        # TODO (abhikpal, 2017-06-10)
-        #
-        # - Ideally, this should be implemented by the Shape's
-        #   __hash__ so that we can use the shape itself as the dict
-        #   key and get rid of this str(__dict__(...) business.
-        #
-        # TODO (abhikpal, 2017-06-14)
-        #
-        # All of the buffer stuff needs refactoring.
-        #
-        shape_hash = str(shape.__dict__)
-        if shape_hash in self.geoms:
-            return shape_hash
-
+    if shape_hash not in _geometries:
         vertex_buffer = GLuint()
         glGenBuffers(1, pointer(vertex_buffer))
 
@@ -283,69 +133,119 @@ class OpenGLRenderer(BaseRenderer):
             GL_STATIC_DRAW
         )
 
-        position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
+        position_attr = glGetAttribLocation(_shader_program.pid, b"position")
         glEnableVertexAttribArray(position_attr)
         glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-        self.geoms[shape_hash] = {
+        _geometries[shape_hash] = {
             'vertex_buffer': vertex_buffer,
             'index_buffer': index_buffer,
             'num_elements': len(elements)
         }
-        return shape_hash
 
-    def _draw_buffers(self, shape, shape_hash):
-        self.shader_program['model'] = sketch.model_matrix_stack[0]
+    _shader_program['model'] = sketch.model_matrix_stack[0]
 
-        glBindBuffer(GL_ARRAY_BUFFER, self.geoms[shape_hash]['vertex_buffer'])
+    glBindBuffer(GL_ARRAY_BUFFER, _geometries[shape_hash]['vertex_buffer'])
 
-        position_attr = glGetAttribLocation(self.shader_program.pid, b"position")
-        glEnableVertexAttribArray(position_attr)
-        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+    position_attr = glGetAttribLocation(_shader_program.pid, b"position")
+    glEnableVertexAttribArray(position_attr)
+    glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-        if sketch.fill_enabled and (shape.kind not in ['POINT', 'LINE']):
-            self.shader_program['fill_color'] =  sketch.fill_color.normalized
+    if sketch.fill_enabled and (shape.kind not in ['POINT', 'LINE']):
+        _shader_program['fill_color'] =  sketch.fill_color.normalized
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.geoms[shape_hash]['index_buffer'])
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _geometries[shape_hash]['index_buffer'])
+        glDrawElements(
+            GL_TRIANGLES,
+            _geometries[shape_hash]['num_elements'],
+            GL_UNSIGNED_INT,
+            0
+        )
+
+    if sketch.stroke_enabled:
+        _shader_program['fill_color'] = sketch.stroke_color.normalized
+        if shape.kind is 'POINT':
             glDrawElements(
-                GL_TRIANGLES,
-                self.geoms[shape_hash]['num_elements'],
+                GL_POINTS,
+                _geometries[shape_hash]['num_elements'],
+                GL_UNSIGNED_INT,
+                0
+            )
+        else:
+            glDrawElements(
+                GL_LINE_LOOP,
+                _geometries[shape_hash]['num_elements'],
                 GL_UNSIGNED_INT,
                 0
             )
 
-        if sketch.stroke_enabled:
-            self.shader_program['fill_color'] = sketch.stroke_color.normalized
-            if shape.kind is 'POINT':
-                glDrawElements(
-                    GL_POINTS,
-                    self.geoms[shape_hash]['num_elements'],
-                    GL_UNSIGNED_INT,
-                    0
-                )
-            else:
-                glDrawElements(
-                    GL_LINE_LOOP,
-                    self.geoms[shape_hash]['num_elements'],
-                    GL_UNSIGNED_INT,
-                    0
-                )
+def test_render():
+    """Render the renderer's default test drawing.
 
-    def render(self, shape):
-        """Use the renderer to render a shape.
+    The render() methods requires a Shape object. In the absence
+    of such an object/class the user should be able to check that
+    the renderer is working by calling this method.
+    """
+    class Shape:
+        def __init__(self):
+            self.vertices = []
+            self.faces = []
 
-        :param shape: The shape to be rendered.
-        :type shape: Shape
+    class TestRect(Shape):
+        def __init__(self, x, y, w, h):
+            self.vertices = [
+                (x - w/2, y - h/2, 0),
+                (x - w/2, y + h/2, 0),
+                (x + w/2, y + h/2, 0),
+                (x + w/2, y - h/2, 0)
+            ]
+            self.faces = [(0, 1, 2), (2, 3, 0)]
+            self.kind = 'POLY'
 
-        """
-        shape_hash = self._create_buffers(shape)
-        self._draw_buffers(shape, shape_hash)
+        def __eq__(self, other):
+            return self.__dict__ == other.__dict__
 
-    def clear(self):
-        """Clear the screen."""
-        glClearColor(*sketch.background_color.normalized)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    clear()
 
-    def pre_render(self):
-        sketch.model_matrix_stack[0] = Matrix4()
-        self.shader_program['model'] = sketch.model_matrix_stack[0]
+    r = TestRect(0, 0, 90, 90)
+
+    with core.push_matrix():
+        core.translate(100, 300)
+        core.fill(0.8, 0.8, 0.8, 0.5)
+        core.square((-45, -45), 90)
+
+    with core.push_matrix():
+        core.fill(0.8, 0.8, 0.4, 0.5)
+        core.translate(200, 300)
+        core.rotate(math.radians(45))
+        render(r)
+
+    with core.push_matrix():
+        core.fill(0.8, 0.4, 0.8, 0.5)
+        core.translate(300, 300)
+        core.shear_y(math.radians(45))
+        render(r)
+
+    with core.push_matrix():
+        core.fill(0.8, 0.4, 0.4, 0.5)
+        core.translate(400, 300)
+        core.shear_x(math.radians(45))
+        render(r)
+
+    with core.push_matrix():
+        core.fill(0.4, 0.8, 0.8, 0.5)
+        core.translate(500, 300)
+        core.scale(0.5)
+        render(r)
+
+    with core.push_matrix():
+        core.fill(0.4, 0.8, 0.4, 0.5)
+        core.translate(600, 300)
+        core.scale(1.5)
+        render(r)
+
+    with core.push_matrix():
+        core.fill(0.4, 0.4, 0.8, 0.5)
+        core.translate(700, 300)
+        core.scale(1.25, 2)
+        render(r)

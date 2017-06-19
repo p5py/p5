@@ -58,8 +58,6 @@ window = pyglet.window.Window(
 debug = True
 gl_version = window.context.get_info().get_version()[:3]
 
-renderer = None
-
 def initialize(*args, **kwargs):
     window.set_visible()
 
@@ -96,6 +94,5 @@ def on_exit():
     renderer.cleanup()
     window.close()
 
-from ..opengl import OpenGLRenderer
-renderer = OpenGLRenderer()
+from ..opengl import renderer
 renderer.initialize()
