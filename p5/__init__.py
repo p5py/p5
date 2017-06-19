@@ -18,5 +18,4 @@
 
 from . import sketch
 from .core import *
-from .opengl import *
 from .pmath import *

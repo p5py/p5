@@ -6,7 +6,4 @@ import sys
 sys.path.append(os.path.abspath('..'))
 
 import p5
-
-p5.sketch.initialize()
-p5.sketch.run()
-exit()
+p5.sketch.test_run()
