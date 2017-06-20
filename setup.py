@@ -1,14 +1,15 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
+
+from os import path
 
 setup(
     name='p5',
     version='0.1.0dev1',
-    description="p5 is a python package based on the core ideas of Processing.",
     license="GPLv3",
+    description="p5 is a python package based on the core ideas of Processing.",
     author="Abhik Pal",
     author_email='theabhikpal@gmail.com',
     url='https://p5py.github.io',
-    packages=[
-        'p5', 'p5.core','p5.opengl', 'p5.pmath', 'p5.sketch', 'p5.tmp'
-    ],
+    packages=find_packages(exclude=['tmp', 'tests', 'tools']),
+    install_requires=['pyglet'],
 )
