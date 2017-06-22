@@ -16,15 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-#
-# This should only have the relevant sketch constants.
-# __all__ = []
-#
-# HEIGHT WIDTH FOCUSED FRAMECOUNT FRAMERATE PIXEL_HEIGHT PIXEL_WIDTH
-# MOUSE_BUTTON MOUSE_PRESSED MOUSE_X MOUSE_Y PMOUSE_X PMOUSE_Y KEY
-# KEYCODE KEY_PRESSED
-#
-
-
-from .base import initialize, run, artist, test_run
+from .base import run, artist, test_run
 from .events import *
+
+__all__ = ['run']

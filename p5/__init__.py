@@ -16,6 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from . import sketch
+from .sketch import *
 from .core import *
 from .pmath import *

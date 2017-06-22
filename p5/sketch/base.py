@@ -43,13 +43,27 @@ def initialize(*args, **kwargs):
     renderer.initialize(width, height, gl_version)
     window.set_visible()
 
-def run(*args, **kwargs):
+def _default_draw():
+    renderer.clear()
+
+def _default_setup():
+    pass
+
+def run(draw=_default_draw, setup=_default_setup):
     # set up required handlers depending on how the sketch is being
     # run (i.e., are we running from a standalone script, or are we
     # running inside the REPL?)
+
+    def update(dt):
+        renderer.pre_render()
+        draw()
+        renderer.post_render()
+
+    initialize()
+    setup()
     pyglet.clock.schedule(update)
     pyglet.app.run()
-    
+
 def artist(f):
     # a decorator that will wrap around the the "artists" in the
     # sketch -- these are functions that draw stuff on the screen like
@@ -74,8 +88,3 @@ def test_run():
         renderer.post_render()
     pyglet.clock.schedule(tester)
     pyglet.app.run()
-    
-def update(dt):
-    renderer.pre_render()
-    renderer.post_render()
-
