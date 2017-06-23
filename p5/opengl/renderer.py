@@ -62,7 +62,7 @@ _attributes = {
 }
 
 
-def initialize(width, height, gl_version):
+def initialize(gl_version):
     """Initialize the OpenGL renderer.
 
     For an OpenGL based renderer this sets up the viewport and creates
@@ -71,7 +71,7 @@ def initialize(width, height, gl_version):
     """
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
-    glViewport(0, 0, width, height)
+    glViewport(0, 0, WIDTH, HEIGHT)
 
     shaders = [
         Shader(vertex_default, 'vertex', version=gl_version),
@@ -90,14 +90,14 @@ def initialize(width, height, gl_version):
     _shader_program.add_uniform('view', 'mat4')
     _shader_program.add_uniform('model', 'mat4')
 
-    cz = (height / 2) / math.tan(math.radians(30))
+    cz = (HEIGHT / 2) / math.tan(math.radians(30))
     projection = Matrix4.new_perspective(
         math.radians(60),
-        width / height,
+        WIDTH / HEIGHT,
         0.1 * cz,
         10 * cz
     )
-    view = Matrix4().translate(-width/2, -height/2, -cz)
+    view = Matrix4().translate(-WIDTH/2, -HEIGHT/2, -cz)
 
     _attributes['view'] =  view
     _attributes['projection'] =  projection

@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .base import run, artist, test_run
+from .base import run, artist, test_run, size
 from .events import *
 
 __all__ = ['run']

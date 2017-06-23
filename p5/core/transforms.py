@@ -21,7 +21,6 @@ from contextlib import contextmanager
 import math
 
 from ..opengl import renderer
-from .. import sketch
 from ..tmp.euclid import Matrix4
 from ..tmp.euclid import Vector3
 
@@ -43,13 +42,13 @@ def reset_transforms():
 
     projection = Matrix4.new_perspective(
         math.radians(60),
-        sketch.width/sketch.height,
+        WIDTH/HEIGHT,
         0.1 * cz,
         10 * cz
     )
     view = Matrix4()
-    view.translate(-sketch.width / 2,
-                   -sketch.height/2, -cz)
+    view.translate(-WIDTH / 2,
+                   -HEIGHT / 2, -cz)
 
     renderer._matrix_stack = deque()
     renderer._matrix_stack.append(Matrix4())

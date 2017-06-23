@@ -16,10 +16,20 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import builtins
+
 from .base import window
 from ..opengl import renderer
 
-__all__ = []
+builtins.MOUSE_BUTTON = None
+builtins.MOUSE_PRESSED = None
+builtins.MOUSE_X = None
+builtins.MOUSE_Y = None
+builtins.PMOUSE_X = None
+builtins.PMOUSE_Y = None
+builtins.KEY = None
+builtins.KEYCODE = None
+builtins.KEY_PRESSED = None
 
 @window.event
 def on_exit():

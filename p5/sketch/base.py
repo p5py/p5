@@ -18,29 +18,37 @@
 
 """Base module for a sketch."""
 
+import builtins
 from functools import wraps
+
 import pyglet
 
 from ..opengl import renderer
 
-title = "p5py"
-min_width = 100
-min_height = 100
-width = 800
-height = 600
+_title = "p5py"
+_min_width = 100
+_min_height = 100
+
+builtins.WIDTH = 800
+builtins.HEIGHT = 600
+builtins.FOCUSED = False
+builtins.FRAMECOUNT = None
+builtins.FRAMERATE = None
+
+# builtins.PIXEL_HEIGHT = None
+# builtins.PIXEL_WIDTH = None
 
 window = pyglet.window.Window(
-    width=width,
-    height=height,
-    caption=title,
+    width=WIDTH,
+    height=HEIGHT,
+    caption=_title,
     resizable=False,
-    vsync=True,
     visible=False,
 )
 
 def initialize(*args, **kwargs):
     gl_version = window.context.get_info().get_version()[:3]
-    renderer.initialize(width, height, gl_version)
+    renderer.initialize(gl_version)
     window.set_visible()
 
 def _default_draw():
@@ -49,7 +57,18 @@ def _default_draw():
 def _default_setup():
     pass
 
+def size():
+    """Resize the window.
+    """
+    pass
+
+def title(new_title):
+    """Set the title of the p5 window.
+    """
+
 def run(draw=_default_draw, setup=_default_setup):
+    """Run a sketch.
+    """
     # set up required handlers depending on how the sketch is being
     # run (i.e., are we running from a standalone script, or are we
     # running inside the REPL?)
