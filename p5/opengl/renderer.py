@@ -90,6 +90,21 @@ def initialize(gl_version):
     _shader_program.add_uniform('view', 'mat4')
     _shader_program.add_uniform('model', 'mat4')
 
+    reset_view()
+    clear()
+
+def cleanup():
+    """Run the clean-up routine for the renderer"""
+    pass
+
+def clear():
+    """Use the background color to clear the screen."""
+    glClearColor(*_attributes['background_color'])
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+def reset_view():
+    """Reset the view of the renderer.
+    """
     cz = (HEIGHT / 2) / math.tan(math.radians(30))
     projection = Matrix4.new_perspective(
         math.radians(60),
@@ -100,16 +115,13 @@ def initialize(gl_version):
     view = Matrix4().translate(-WIDTH/2, -HEIGHT/2, -cz)
 
     _attributes['view'] =  view
+    _shader_program['view'] = view
+
     _attributes['projection'] =  projection
+    _shader_program['projection'] = projection
 
-def cleanup():
-    """Run the clean-up routine for the renderer"""
-    pass
-
-def clear():
-    """Use the background color to clear the screen."""
-    glClearColor(*_attributes['background_color'])
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    _matrix_stack[0] = Matrix4()
+    _shader_program['model'] =  _matrix_stack[0]
 
 def pre_render():
     _matrix_stack[0] = Matrix4()

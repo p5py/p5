@@ -35,3 +35,8 @@ builtins.KEY_PRESSED = None
 def on_exit():
     renderer.cleanup()
     window.close()
+
+@window.event
+def on_resize(width, height):
+    renderer.reset_view()
+    renderer.clear()

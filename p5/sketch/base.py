@@ -21,19 +21,21 @@
 import builtins
 from functools import wraps
 
+import __main__ as user_sketch
+
 import pyglet
 
 from ..opengl import renderer
 
-_title = "p5py"
 _min_width = 100
 _min_height = 100
 
 builtins.WIDTH = 800
 builtins.HEIGHT = 600
+builtins.TITLE = "p5py"
 builtins.FOCUSED = False
-builtins.FRAMECOUNT = None
-builtins.FRAMERATE = None
+builtins.FRAME_COUNT = None
+builtins.FRAME_RATE = None
 
 # builtins.PIXEL_HEIGHT = None
 # builtins.PIXEL_WIDTH = None
@@ -41,10 +43,13 @@ builtins.FRAMERATE = None
 window = pyglet.window.Window(
     width=WIDTH,
     height=HEIGHT,
-    caption=_title,
+    caption=TITLE,
     resizable=False,
     visible=False,
+    vsync=True
 )
+
+window.set_minimum_size(100, 100)
 
 def initialize(*args, **kwargs):
     gl_version = window.context.get_info().get_version()[:3]
@@ -57,21 +62,46 @@ def _default_draw():
 def _default_setup():
     pass
 
-def size():
+def size(width, height):
     """Resize the window.
+
+    :param width: width of the sketch window.
+    :type width: int
+
+    :param height: height of the sketch window.
+    :type height: int
+
     """
-    pass
+    builtins.WIDTH = int(width)
+    builtins.HEIGHT = int(height)
+    window.set_size(width, height)
 
 def title(new_title):
     """Set the title of the p5 window.
-    """
 
-def run(draw=_default_draw, setup=_default_setup):
+    :param new_title: new title of the window.
+    :type new_title: str
+
+    """
+    window.set_caption("{} - p5".format(new_title))
+
+def run(setup=None, draw=None):
     """Run a sketch.
     """
     # set up required handlers depending on how the sketch is being
     # run (i.e., are we running from a standalone script, or are we
     # running inside the REPL?)
+
+    if (setup is None) and (draw is None):
+        if hasattr(user_sketch, 'draw'):
+            setup = user_sketch.setup
+        if hasattr(user_sketch, 'setup'):
+            draw = user_sketch.draw
+
+    if setup is None:
+        setup = _default_setup
+    elif draw is None:
+        draw = _default_draw
 
     def update(dt):
         renderer.pre_render()
