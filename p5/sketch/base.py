@@ -21,7 +21,7 @@
 import builtins
 from functools import wraps
 
-import __main__ as user_sketch
+import __main__
 
 import pyglet
 
@@ -33,7 +33,6 @@ _min_height = 100
 builtins.WIDTH = 800
 builtins.HEIGHT = 600
 builtins.TITLE = "p5py"
-builtins.FOCUSED = False
 builtins.FRAME_COUNT = None
 builtins.FRAME_RATE = None
 
@@ -50,6 +49,16 @@ window = pyglet.window.Window(
 )
 
 window.set_minimum_size(100, 100)
+
+def _dummy_handler(*args, **kwargs):
+    return pyglet.event.EVENT_HANDLED
+
+handler_names = [ 'key_press', 'key_pressed', 'key_released',
+                  'key_typed', 'mouse_clicked', 'mouse_dragged',
+                  'mouse_moved', 'mouse_pressed', 'mouse_released',
+                  'mouse_wheel',]
+
+handlers =  dict.fromkeys(handler_names, _dummy_handler)
 
 def initialize(*args, **kwargs):
     gl_version = window.context.get_info().get_version()[:3]
@@ -93,15 +102,19 @@ def run(setup=None, draw=None):
     # running inside the REPL?)
 
     if (setup is None) and (draw is None):
-        if hasattr(user_sketch, 'draw'):
-            setup = user_sketch.setup
-        if hasattr(user_sketch, 'setup'):
-            draw = user_sketch.draw
+        if hasattr(__main__, 'setup'):
+            setup = __main__.setup
+        if hasattr(__main__, 'draw'):
+            draw = __main__.draw
 
     if setup is None:
         setup = _default_setup
     elif draw is None:
         draw = _default_draw
+
+    for handler in handler_names:
+        if hasattr(__main__, handler):
+            handlers[handler] = getattr(__main__, handler)
 
     def update(dt):
         renderer.pre_render()

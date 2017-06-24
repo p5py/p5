@@ -17,16 +17,21 @@
 #
 
 import builtins
+import __main__
+
+import pyglet
 
 from .base import window
+from .base import handlers
 from ..opengl import renderer
 
+builtins.FOCUSED = True
 builtins.MOUSE_BUTTON = None
-builtins.MOUSE_PRESSED = None
-builtins.MOUSE_X = None
-builtins.MOUSE_Y = None
-builtins.PMOUSE_X = None
-builtins.PMOUSE_Y = None
+builtins.MOUSE_PRESSED = False
+builtins.MOUSE_X = 0
+builtins.MOUSE_Y = 0
+builtins.PMOUSE_X = 0
+builtins.PMOUSE_Y = 0
 builtins.KEY = None
 builtins.KEYCODE = None
 builtins.KEY_PRESSED = None
@@ -40,3 +45,74 @@ def on_exit():
 def on_resize(width, height):
     renderer.reset_view()
     renderer.clear()
+
+def _update_mouse_coords(new_x, new_y):
+    builtins.PMOUSE_X = builtins.MOUSE_X
+    builtins.PMOUSE_Y = builtins.MOUSE_Y
+    builtins.MOUSE_X = new_x
+    builtins.MOUSE_Y = new_y
+
+@window.event
+def on_mouse_enter(x, y):
+    _update_mouse_coords(x, y)
+
+@window.event
+def on_mouse_leave(x, y):
+    _update_mouse_coords(x, y)
+
+@window.event
+def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
+    _update_mouse_coords(x, y)
+    builtins.KEY_CODE = modifiers
+    handlers['mouse_dragged']()
+
+@window.event
+def on_mouse_motion(x, y, dx, dy):
+    _update_mouse_coords(x, y)
+    handlers['mouse_moved']()
+
+@window.event
+def on_mouse_press(x, y, button, modifiers):
+    _update_mouse_coords(x, y)
+    builtins.KEY_CODE = modifiers
+    builtins.MOUSE_PRESSED = True
+    handlers['mouse_pressed']()
+
+@window.event
+def on_mouse_release(x, y, buttons, modifiers):
+    _update_mouse_coords(x, y)
+    builtins.KEY_CODE = modifiers
+    builtins.MOUSE_PRESSED = False
+    handlers['mouse_released']()
+    handlers['mouse_clicked']()
+
+@window.event
+def on_mouse_scroll(x, y, scroll_x, scroll_y):
+    _update_mouse_coords(x, y)
+    handlers['mouse_wheel']()
+
+@window.event
+def on_key_press(symbol, modifiers):
+    builtins.KEY = symbol
+    builtins.KEY_CODE = modifiers
+    builtins.KEY_PRESSED = True
+    handlers['key_pressed']()
+
+@window.event
+def on_key_release(symbol, modifiers):
+    builtins.KEY = symbol
+    builtins.KEY_CODE = modifiers
+    builtins.KEY_PRESSED = False
+    handlers['key_released']()
+
+@window.event
+def on_text(text):
+    handlers['key_typed']()
+
+@window.event
+def on_activate():
+    builtins.FOCUSED = True
+
+@window.event
+def on_deactivate():
+    builtins.FOCUSED = False
