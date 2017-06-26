@@ -6,121 +6,118 @@
 p5
 ===
 
-p5 is a Python package based on the core ideas of `Processing
-<https://processing.org>`_. It aims to make programming more
-accessible for beginners, artists, and educators by combining Python's
-readability with Processing's emphasis on learning to code in a visual
-context.
+p5 is a Python library that provides high level functions to work with
+graphics. p5 combines the core ideas of Processing — learning to code
+in a visual context — with Python's readability to make programming
+more accessible to beginners and artists.
 
-p5 programs are called "sketches" (we borrow this metaphor from
-Processing) and can be run as normal Python programs. A typical sketch
-often looks like:
+There's a lot of work happening on p5 right now; it is being developed
+by `Abhik Pal <https://github.com/abhikpal>`_ as a `project
+<https://summerofcode.withgoogle.com/projects/#5809403503575040>`_ for
+the `Google Summer of Code 2017
+<https://summerofcode.withgoogle.com/>`_. `Manindra Moharana
+<http://www.mkmoharana.com/>`_ of the `Processing Foundation
+<https://processingfoundation.org/>`_ is mentoring the project.
+
+Documentation for the project is available at `p5.readthedocs.io
+<http://p5.readthedocs.io/>`_ and `p5py.github.io
+<https://p5py.github.io/>`_ has links to other relevant resources.
+
+If you've found a bug in p5, please file it under the `"Issues" tab
+<https://github.com/p5py/p5/issues>`_ for this repository. For now,
+you can also use the issues tab to propose new features. Please read
+the relevant section from the `Contributing <CONTRIBUTING.rst>`_ file
+before opening an issue.
+
+
+Example
+-------
+
+p5 borrows Processing's metaphor of software "sketches". A typical
+sketch looks like:
 
 .. code:: python
 
-   # Example adapted from "Recursion" Processing example
-   
-   from p5 import *
+    from p5 import *
 
-   def setup():
-       size(640, 360)
-       no_stroke()
-       no_loop()
+    background_color = (0.1, 0.1, 0.1, 1.0)
 
-   def draw():
-       draw_circle(WIDTH/2, 280, 6)
+    def setup():
+        size(800, 600)
+        title("Example Sketch")
+        no_stroke()
 
-   def draw_circle(x, radius, level):
-       fill(126 * level / 4)
-       circle(x, HEIGHT/2, radius*2*)
-       if level > 1:
-           level = level - 1
-          draw_circle(x - radius/1, radius/2, level)
-          draw_circle(x + radius/1, radius/2, level)
+    def draw():
+        scale(2.0)
+        background(*background_color)
+
+        with push_matrix():
+            translate(160, 150)
+
+            fill(1.0, 0.6, 0.0, 1.0)
+            square((-30, -30), 60)
+            square((-30, -50), 20)
+
+            fill(*background_color)
+            square((-10, -10), 20)
+
+        with push_matrix():
+            translate(240, 170)
+
+            fill(1.0, 0.8, 0.0, 1.0)
+            rect((-30, -50), 60, 100)
+
+            fill(*background_color)
+            rect((-30, -30), 40, 20)
+            rect((-10, 10), 40, 20)
+
+    if __name__ == '__main__':
+        run()
            
-When run, this sketch produces:
+...and, when run, produces:
 
-.. image:: docs/_static/sample_output.png
+.. image:: docs/_static/example_output.png
    :align: center
    :alt: Sample sketch output
 
 
-p5 is in its early development phase right now and is being
-developed as a `project
-<https://summerofcode.withgoogle.com/projects/#5809403503575040>`_
-under the `Processing Foundation <https://processingfoundation.org/>`_
-for `Google Summer of Code 2017
-<https://summerofcode.withgoogle.com/>`_. `Manindra Moharana
-<http://www.mkmoharana.com/>`_ will be mentoring me (`Abhik Pal
-<https://github.com/abhikpal>`_) for the duration of the GSOC.
+Installation
+------------
+
+p5 requires Python 3. Once you have that installed, you can then run
+
+.. code:: bash
+
+   pip install p5
+
+from the command line. p5 includes a test script and you can run
+
+.. code:: python
+
+   >>> import p5
+   >>> p5.sketch.test_run()
+
+from the interactive prompt to view the test render.
 
 
-Features Overview
------------------
+Features Roadmap
+----------------
 
-In addition to supporting the Processing API, p5 will also:
+For the next couple of months, we plan to focus on the following
+features:
 
-#. Try to have as few dependencies as possible (we are only using
-   `pyglet <http://pyglet.org>`_ as of now :) .
+#. Support most 2D drawing primitives and related utility functions
+   from the Processing API (the `Project Status wiki page
+   <https://github.com/p5py/p5/wiki/Project-Status>`_ for this repo
+   has a proper checklist.)
 
-#. Minimize boilerplate required to get started.
+#. Port relevant tutorials and reference material from Processing's
+   documentation.
 
 #. Support live coding of sketches in the Python REPL (here's a
    `screencast <https://p5py.github.io/videos/p5-repl-demo.webm>`_ from
    an earlier prototype).
 
-#. Introduce Python's keyword arguments to existing Processing
-   functions to make them more intuitive to use.
-
-#. Use context managers to simplify ``begin*()/end*()`` and
-   ``push*()/pop*()`` pairs.
-
-   .. code:: python
-
-      # this:
-
-      push_matrix()
-      # code
-      pop_matrix()
-
-      # becomes:
-
-      with push_matrix():
-         # code
-         
-Setup
------
-
-p5 is heavily under development right now and once it reaches some
-level of stability, we plan to make it available on PyPI. If you would
-like to play around with the existing devlopment code, first clone the
-repository
-
-.. code:: shell
-
-   git clone https://github.com/p5py/p5
-
-and then install all requirements:
-
-.. code:: shell
-
-   cd p5
-   pip install -r requirements.txt
-
-You can now use p5 (as long as you stay in the current folder) like
-a python package. If you would like to use p5 from arbitrary
-locations on your drive, you can hack the PYTHONPATH environment
-variable.
-
-.. code:: shell
-
-   export PYTHONPATH=$PYTHONPATH:/path/to/the/p5-repo
-
-Contributing
-------------
-
-If you think you've found a bug, please use the `Issues
-<https://github.com/p5py/p5/issues>`_ tab for this repository.
 
 License
 -------
