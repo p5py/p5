@@ -114,7 +114,6 @@ def run(setup=None, draw=None):
     if draw is not None:
         _draw = draw
     elif hasattr(__main__, 'draw'):
-        print("setting custom draw...")
         _draw = __main__.draw
 
     for handler in handler_names:
