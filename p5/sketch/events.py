@@ -17,10 +17,10 @@
 #
 
 import builtins
-import __main__
 
 import pyglet
 
+from . import base
 from .base import window
 from .base import handlers
 from ..opengl import renderer
@@ -64,50 +64,50 @@ def on_mouse_leave(x, y):
 def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
     _update_mouse_coords(x, y)
     builtins.KEY_CODE = modifiers
-    handlers['mouse_dragged']()
+    base.handler_queue.append(handlers['mouse_dragged'])
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):
     _update_mouse_coords(x, y)
-    handlers['mouse_moved']()
+    base.handler_queue.append(handlers['mouse_moved'])
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
     _update_mouse_coords(x, y)
     builtins.KEY_CODE = modifiers
     builtins.MOUSE_PRESSED = True
-    handlers['mouse_pressed']()
+    base.handler_queue.append(handlers['mouse_pressed'])
 
 @window.event
 def on_mouse_release(x, y, buttons, modifiers):
     _update_mouse_coords(x, y)
     builtins.KEY_CODE = modifiers
     builtins.MOUSE_PRESSED = False
-    handlers['mouse_released']()
-    handlers['mouse_clicked']()
+    base.handler_queue.append(handlers['mouse_released'])
+    base.handler_queue.append(handlers['mouse_clicked'])
 
 @window.event
 def on_mouse_scroll(x, y, scroll_x, scroll_y):
     _update_mouse_coords(x, y)
-    handlers['mouse_wheel']()
+    base.handler_queue.append(handlers['mouse_wheel'])
 
 @window.event
 def on_key_press(symbol, modifiers):
     builtins.KEY = symbol
     builtins.KEY_CODE = modifiers
     builtins.KEY_PRESSED = True
-    handlers['key_pressed']()
+    base.handler_queue.append(handlers['key_pressed'])
 
 @window.event
 def on_key_release(symbol, modifiers):
     builtins.KEY = symbol
     builtins.KEY_CODE = modifiers
     builtins.KEY_PRESSED = False
-    handlers['key_released']()
+    base.handler_queue.append(handlers['key_released'])
 
 @window.event
 def on_text(text):
-    handlers['key_typed']()
+    base.handler_queue.append(handlers['key_typed'])
 
 @window.event
 def on_activate():

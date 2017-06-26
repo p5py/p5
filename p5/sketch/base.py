@@ -33,7 +33,7 @@ _min_height = 100
 builtins.WIDTH = 800
 builtins.HEIGHT = 600
 builtins.TITLE = "p5py"
-builtins.FRAME_COUNT = None
+builtins.FRAME_COUNT = -1
 builtins.FRAME_RATE = None
 
 # builtins.PIXEL_HEIGHT = None
@@ -45,7 +45,7 @@ window = pyglet.window.Window(
     caption=TITLE,
     resizable=False,
     visible=False,
-    vsync=True
+    vsync=False
 )
 
 window.set_minimum_size(100, 100)
@@ -60,16 +60,18 @@ handler_names = [ 'key_press', 'key_pressed', 'key_released',
 
 handlers =  dict.fromkeys(handler_names, _dummy_handler)
 
+handler_queue = []
+
+def _draw():
+    pass
+
+def _setup():
+    pass
+
 def initialize(*args, **kwargs):
     gl_version = window.context.get_info().get_version()[:3]
     renderer.initialize(gl_version)
     window.set_visible()
-
-def _default_draw():
-    renderer.clear()
-
-def _default_setup():
-    pass
 
 def size(width, height):
     """Resize the window.
@@ -101,30 +103,43 @@ def run(setup=None, draw=None):
     # run (i.e., are we running from a standalone script, or are we
     # running inside the REPL?)
 
-    if (setup is None) and (draw is None):
-        if hasattr(__main__, 'setup'):
-            setup = __main__.setup
-        if hasattr(__main__, 'draw'):
-            draw = __main__.draw
+    global _draw
+    global _setup
 
-    if setup is None:
-        setup = _default_setup
-    elif draw is None:
-        draw = _default_draw
+    if setup is not None:
+        _setup = setup
+    elif hasattr(__main__, 'setup'):
+        _setup = __main__.setup
+
+    if draw is not None:
+        _draw = draw
+    elif hasattr(__main__, 'draw'):
+        print("setting custom draw...")
+        _draw = __main__.draw
 
     for handler in handler_names:
         if hasattr(__main__, handler):
             handlers[handler] = getattr(__main__, handler)
 
     def update(dt):
-        renderer.pre_render()
-        draw()
-        renderer.post_render()
+        builtins.FRAME_COUNT += 1
 
     initialize()
-    setup()
-    pyglet.clock.schedule(update)
+    pyglet.clock.schedule_interval(update, 1/30.0)
     pyglet.app.run()
+
+@window.event
+def on_draw():
+    global handler_queue
+    pyglet.clock.tick()
+    renderer.pre_render()
+    if FRAME_COUNT == 0:
+        _setup()
+    _draw()
+    for handler_function in handler_queue:
+        handler_function()
+    handler_queue = []
+    renderer.post_render()
 
 def artist(f):
     # a decorator that will wrap around the the "artists" in the
