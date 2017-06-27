@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import builtins
 from collections import deque
 from contextlib import contextmanager
 import math
@@ -42,13 +43,13 @@ def reset_transforms():
 
     projection = Matrix4.new_perspective(
         math.radians(60),
-        WIDTH/HEIGHT,
+        builtins.width/builtins.height,
         0.1 * cz,
         10 * cz
     )
     view = Matrix4()
-    view.translate(-WIDTH / 2,
-                   -HEIGHT / 2, -cz)
+    view.translate(-builtins.width / 2,
+                   -builtins.height / 2, -cz)
 
     renderer._matrix_stack = deque()
     renderer._matrix_stack.append(Matrix4())

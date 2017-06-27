@@ -17,6 +17,7 @@
 #
 """The OpenGL renderer for p5."""
 
+import builtins
 from ctypes import *
 import math
 
@@ -71,7 +72,7 @@ def initialize(gl_version):
     """
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
-    glViewport(0, 0, WIDTH, HEIGHT)
+    glViewport(0, 0, builtins.width, builtins.height)
 
     shaders = [
         Shader(vertex_default, 'vertex', version=gl_version),
@@ -105,14 +106,14 @@ def clear():
 def reset_view():
     """Reset the view of the renderer.
     """
-    cz = (HEIGHT / 2) / math.tan(math.radians(30))
+    cz = (builtins.height / 2) / math.tan(math.radians(30))
     projection = Matrix4.new_perspective(
         math.radians(60),
-        WIDTH / HEIGHT,
+        builtins.width / builtins.height,
         0.1 * cz,
         10 * cz
     )
-    view = Matrix4().translate(-WIDTH/2, -HEIGHT/2, -cz)
+    view = Matrix4().translate(-builtins.width/2, -builtins.height/2, -cz)
 
     _attributes['view'] =  view
     _shader_program['view'] = view

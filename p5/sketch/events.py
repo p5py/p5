@@ -25,16 +25,16 @@ from .base import window
 from .base import handlers
 from ..opengl import renderer
 
-builtins.FOCUSED = True
-builtins.MOUSE_BUTTON = None
-builtins.MOUSE_PRESSED = False
-builtins.MOUSE_X = 0
-builtins.MOUSE_Y = 0
-builtins.PMOUSE_X = 0
-builtins.PMOUSE_Y = 0
-builtins.KEY = None
-builtins.KEYCODE = None
-builtins.KEY_PRESSED = None
+builtins.focused = True
+builtins.mouse_button = None
+builtins.mouse_pressed = False
+builtins.mouse_x = 0
+builtins.mouse_y = 0
+builtins.pmouse_x = 0
+builtins.pmouse_y = 0
+builtins.key = None
+builtins.key_code = None
+builtins.key_pressed = None
 
 @window.event
 def on_exit():
@@ -47,10 +47,10 @@ def on_resize(width, height):
     renderer.clear()
 
 def _update_mouse_coords(new_x, new_y):
-    builtins.PMOUSE_X = builtins.MOUSE_X
-    builtins.PMOUSE_Y = builtins.MOUSE_Y
-    builtins.MOUSE_X = new_x
-    builtins.MOUSE_Y = new_y
+    builtins.pmouse_x = builtins.mouse_x
+    builtins.pmouse_y = builtins.mouse_y
+    builtins.mouse_x = new_x
+    builtins.mouse_y = new_y
 
 @window.event
 def on_mouse_enter(x, y):
@@ -63,7 +63,7 @@ def on_mouse_leave(x, y):
 @window.event
 def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
     _update_mouse_coords(x, y)
-    builtins.KEY_CODE = modifiers
+    builtins.key_code = modifiers
     base.handler_queue.append(handlers['mouse_dragged'])
 
 @window.event
@@ -74,15 +74,15 @@ def on_mouse_motion(x, y, dx, dy):
 @window.event
 def on_mouse_press(x, y, button, modifiers):
     _update_mouse_coords(x, y)
-    builtins.KEY_CODE = modifiers
-    builtins.MOUSE_PRESSED = True
+    builtins.key_code = modifiers
+    builtins.mouse_pressed = True
     base.handler_queue.append(handlers['mouse_pressed'])
 
 @window.event
 def on_mouse_release(x, y, buttons, modifiers):
     _update_mouse_coords(x, y)
-    builtins.KEY_CODE = modifiers
-    builtins.MOUSE_PRESSED = False
+    builtins.key_code = modifiers
+    builtins.mouse_pressed = False
     base.handler_queue.append(handlers['mouse_released'])
     base.handler_queue.append(handlers['mouse_clicked'])
 
@@ -93,16 +93,16 @@ def on_mouse_scroll(x, y, scroll_x, scroll_y):
 
 @window.event
 def on_key_press(symbol, modifiers):
-    builtins.KEY = symbol
-    builtins.KEY_CODE = modifiers
-    builtins.KEY_PRESSED = True
+    builtins.key = symbol
+    builtins.key_code = modifiers
+    builtins.key_pressed = True
     base.handler_queue.append(handlers['key_pressed'])
 
 @window.event
 def on_key_release(symbol, modifiers):
-    builtins.KEY = symbol
-    builtins.KEY_CODE = modifiers
-    builtins.KEY_PRESSED = False
+    builtins.key = symbol
+    builtins.key_code = modifiers
+    builtins.key_pressed = False
     base.handler_queue.append(handlers['key_released'])
 
 @window.event
@@ -111,8 +111,8 @@ def on_text(text):
 
 @window.event
 def on_activate():
-    builtins.FOCUSED = True
+    builtins.focused = True
 
 @window.event
 def on_deactivate():
-    builtins.FOCUSED = False
+    builtins.focused = False

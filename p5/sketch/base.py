@@ -30,19 +30,19 @@ from ..opengl import renderer
 _min_width = 100
 _min_height = 100
 
-builtins.WIDTH = 800
-builtins.HEIGHT = 600
-builtins.TITLE = "p5py"
-builtins.FRAME_COUNT = -1
-builtins.FRAME_RATE = None
+builtins.width = 800
+builtins.height = 600
+builtins.title = "p5py"
+builtins.frame_count = -1
+builtins.frame_rate = None
 
 # builtins.PIXEL_HEIGHT = None
 # builtins.PIXEL_WIDTH = None
 
 window = pyglet.window.Window(
-    width=WIDTH,
-    height=HEIGHT,
-    caption=TITLE,
+    width=width,
+    height=height,
+    caption=title,
     resizable=False,
     visible=False,
     vsync=False
@@ -83,8 +83,8 @@ def size(width, height):
     :type height: int
 
     """
-    builtins.WIDTH = int(width)
-    builtins.HEIGHT = int(height)
+    builtins.width = int(width)
+    builtins.height = int(height)
     window.set_size(width, height)
 
 def title(new_title):
@@ -94,6 +94,7 @@ def title(new_title):
     :type new_title: str
 
     """
+    builtins.title = new_title
     window.set_caption("{} - p5".format(new_title))
 
 def run(setup=None, draw=None):
@@ -121,7 +122,7 @@ def run(setup=None, draw=None):
             handlers[handler] = getattr(__main__, handler)
 
     def update(dt):
-        builtins.FRAME_COUNT += 1
+        builtins.frame_count += 1
 
     initialize()
     pyglet.clock.schedule_interval(update, 1/30.0)
@@ -132,7 +133,7 @@ def on_draw():
     global handler_queue
     pyglet.clock.tick()
     renderer.pre_render()
-    if FRAME_COUNT == 0:
+    if builtins.frame_count == 0:
         _setup()
     _draw()
     for handler_function in handler_queue:
