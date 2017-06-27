@@ -27,8 +27,8 @@ If you've found a bug in p5, please file it under the `"Issues" tab
 <https://github.com/p5py/p5/issues>`_ for this repository. For now,
 you can also use the issues tab to propose new features. Please read
 the relevant section from the `Contributing
-<https://github.com/p5py/p5/CONTRIBUTING.rst>`_ file before opening an
-issue.
+<https://github.com/p5py/p5/blob/master/CONTRIBUTING.rst>`_ file
+before opening an issue.
 
 
 Example
@@ -124,4 +124,4 @@ License
 -------
 
 p5 is licensed under the GPLv3. See `LICENSE
-<https://github.com/p5py/p5/LICENSE>`_ for more details.
+<https://github.com/p5py/p5/blob/master/LICENSE>`_ for more details.
