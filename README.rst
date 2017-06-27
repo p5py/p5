@@ -122,7 +122,22 @@ features:
 License
 -------
 
-p5 is licensed under the GPLv3. See `LICENSE <LICENSE>`_ for more details.
+p5 is licensed under the GPLv3. See `LICENSE <LICENSE>`_ for more
+details. p5 also includes the following components from other open
+source projects:
+
+- OpenGL shaders `from the Processing
+  <https://github.com/processing/processing/tree/master/core/src/processing/opengl/shaders>`_
+  project. Licensed under LGPL v2.1. See `LICENSES/lgpl-2.1.txt
+  <LICENSES/lgpl-2.1.txt>`_ for the full license text.
+
+- Alex Holkner's `pyeuclid
+  <https://code.google.com/archive/p/pyeuclid/>`_. Licensed under LGPL
+  v2.1. See `LICENSES/lgpl-2.1.txt <LICENSES/lgpl-2.1.txt>`_ for the
+  full license text.
+
+All licenses for these external components are available in the
+``LICENSES`` folder.
 
 .. image :: docs/_static/processing-header-thin.png
     :width: 100%
