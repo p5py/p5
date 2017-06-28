@@ -27,25 +27,22 @@ import pyglet
 
 from ..opengl import renderer
 
-_min_width = 100
-_min_height = 100
-
 builtins.width = 800
 builtins.height = 600
-builtins.title = "p5py"
+builtins.title = "p5"
 builtins.frame_count = -1
-builtins.frame_rate = None
+builtins.frame_rate = 30
 
 # builtins.PIXEL_HEIGHT = None
 # builtins.PIXEL_WIDTH = None
 
 window = pyglet.window.Window(
-    width=width,
-    height=height,
-    caption=title,
+    width=builtins.width,
+    height=builtins.height,
+    caption=builtins.title,
     resizable=False,
     visible=False,
-    vsync=False
+    vsync=False,
 )
 
 window.set_minimum_size(100, 100)
@@ -62,16 +59,46 @@ handlers =  dict.fromkeys(handler_names, _dummy_handler)
 
 handler_queue = []
 
+_looping = True
+_redraw = False
+_done_setting_up = False
+
 def _draw():
     pass
 
 def _setup():
     pass
 
-def initialize(*args, **kwargs):
-    gl_version = window.context.get_info().get_version()[:3]
-    renderer.initialize(gl_version)
-    window.set_visible()
+@window.event
+def on_draw():
+    global handler_queue
+    global _redraw
+    global _done_setting_up
+
+    renderer.pre_render()
+    if not _done_setting_up:
+        _setup()
+        _done_setting_up = True
+    if _looping or _redraw:
+        _draw()
+        _redraw = False
+    for handler_function in handler_queue:
+        handler_function()
+    handler_queue = []
+    renderer.post_render()
+
+def no_loop():
+    global _looping
+    _looping = False
+
+def loop():
+    global _looping
+    _looping = True
+
+def redraw():
+    global _redraw
+    if not _looping:
+        _redraw = True
 
 def size(width, height):
     """Resize the window.
@@ -96,6 +123,11 @@ def title(new_title):
     """
     builtins.title = new_title
     window.set_caption("{} - p5".format(new_title))
+
+def _initialize(*args, **kwargs):
+    gl_version = window.context.get_info().get_version()[:3]
+    renderer.initialize(gl_version)
+    window.set_visible()
 
 def run(setup=None, draw=None):
     """Run a sketch.
@@ -124,29 +156,16 @@ def run(setup=None, draw=None):
     def update(dt):
         builtins.frame_count += 1
 
-    initialize()
+    _initialize()
     pyglet.clock.schedule_interval(update, 1/30.0)
     pyglet.app.run()
-
-@window.event
-def on_draw():
-    global handler_queue
-    pyglet.clock.tick()
-    renderer.pre_render()
-    if builtins.frame_count == 0:
-        _setup()
-    _draw()
-    for handler_function in handler_queue:
-        handler_function()
-    handler_queue = []
-    renderer.post_render()
 
 def artist(f):
     # a decorator that will wrap around the the "artists" in the
     # sketch -- these are functions that draw stuff on the screen like
     # rect(), line(), etc.
     #
-    #    @_p5_artist
+    #    @artist
     #    def rect(*args, **kwargs):
     #        # code that creates a rectangular Shape object and
     #        # returns it.
@@ -158,7 +177,7 @@ def artist(f):
     return decorated
 
 def test_run():
-    initialize()
+    _initialize()
     def tester(dt):
         renderer.pre_render()
         renderer.test_render()

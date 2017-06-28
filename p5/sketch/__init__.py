@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .base import run, artist, test_run, size, title
+from .base import run, artist, test_run, size, title, no_loop, loop, redraw
 from .events import *
 
-__all__ = ['run', 'size', 'title']
+__all__ = ['run', 'size', 'title', 'no_loop', 'loop', 'redraw']
