@@ -28,6 +28,7 @@ GLSL_VERSIONS = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
                   '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410,
                   '4.2': 420, '4.3': 430, '4.4': 440, '4.5': 450, }
 
+
 vertex_default = """
 attribute vec3 position;
 
@@ -50,7 +51,8 @@ void main()
 }
 """
 
-ShaderUniform = namedtuple('Uniform', ['name', 'uid', 'function'])
+
+Uniform = namedtuple('Uniform', ['name', 'uid', 'function'])
 
 def _uvec4(uniform, data):
     glUniform4f(uniform, *data)
@@ -65,12 +67,12 @@ _uniform_function_map = {
 }
 
 
-class ShaderProgram:
+class Shader:
     """A thin abstraction layer that helps work with shader programs."""
 
-    def __init__(self, vertex_source, fragment_source):
-        self._vertex_source = vertex_source
-        self._fragment_source = fragment_source
+    def __init__(self, vertex, fragment, version='2.0'):
+        self._vertex_source = preprocess_shader(vertex, 'vert', version)
+        self._fragment_source = preprocess_shader(fragment, 'frag', version)
         self._pid = glCreateProgram()
 
         self.compile_vertex_shader()
@@ -151,7 +153,7 @@ class ShaderProgram:
 
         """
         uniform_function = _uniform_function_map[dtype]
-        self._uniforms[uniform_name] = ShaderUniform(
+        self._uniforms[uniform_name] = Uniform(
             uniform_name,
             glGetUniformLocation(self._pid, uniform_name.encode()),
             uniform_function
@@ -239,14 +241,14 @@ def preprocess_shader(shader_source, shader_type, open_gl_version):
     # textures.)
     #
     # DO NOT CHANGE THE ORDER OF THE SEARCH/REPALCE PATTERNS.
-    if shader_type == 'vertex':
+    if shader_type == 'vert':
         patterns = [
             (repid, "varying", "out"),
             (repid, "attribute", "in"),
             (repid, "texture", "texMap"),
             (re_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture")
         ]
-    elif shader_type == 'fragment':
+    elif shader_type == 'frag':
         patterns = [
             (repid, "varying|attribute", "in"),
             (repid, "texture", "texMap"),
@@ -263,4 +265,4 @@ def preprocess_shader(shader_source, shader_type, open_gl_version):
             new_line = re.sub(regex.format(search), replace, new_line)
         processed_shader += new_line + '\n'
 
-    return processed_shader    
+    return processed_shader

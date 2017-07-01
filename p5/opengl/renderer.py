@@ -24,12 +24,11 @@ import math
 from pyglet.gl import *
 
 from ..tmp import Matrix4
-from .shader import ShaderProgram
+from .shader import Shader
 from .shader import fragment_default
 from .shader import vertex_default
-from .shader import preprocess_shader
 
-shader_program = None
+default_shader = None
 
 # All user transformations are stored in these matrices. We send off
 # the matrix data as uniforms while rendering a shape.
@@ -58,20 +57,19 @@ def initialize(gl_version):
     """
     global vertex_buffer
     global index_buffer
-    global shader_program
+    global default_shader
 
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
 
-    vert_src = preprocess_shader(vertex_default, 'vertex', gl_version)
-    frag_src = preprocess_shader(fragment_default, 'fragment', gl_version)
-    shader_program = ShaderProgram(vert_src, frag_src)
-    shader_program.activate()
+    default_shader = Shader(vertex_default, fragment_default, gl_version)
 
-    shader_program.add_uniform('fill_color', 'vec4')
-    shader_program.add_uniform('projection', 'mat4')
-    shader_program.add_uniform('modelview', 'mat4')
-    shader_program.add_uniform('transform', 'mat4')
+    default_shader.activate()
+    default_shader.add_uniform('fill_color', 'vec4')
+    default_shader.add_uniform('projection', 'mat4')
+    default_shader.add_uniform('modelview', 'mat4')
+    default_shader.add_uniform('transform', 'mat4')
+    default_shader.deactivate()
 
     vertex_buffer = GLuint()
     glGenBuffers(1, pointer(vertex_buffer))
@@ -114,10 +112,11 @@ def reset_view():
     transform_matrix = Matrix4()
     modelview_matrix = view
     projection_matrix =  projection
-
-    shader_program.update_uniform('transform', transform_matrix)
-    shader_program.update_uniform('modelview', modelview_matrix)
-    shader_program.update_uniform('projection', projection_matrix)
+    default_shader.activate()
+    default_shader.update_uniform('transform', transform_matrix)
+    default_shader.update_uniform('modelview', modelview_matrix)
+    default_shader.update_uniform('projection', projection_matrix)
+    default_shader.deactivate()
 
 def pre_render():
     global transform_matrix
@@ -125,16 +124,16 @@ def pre_render():
 
     glViewport(*viewport)
 
-    shader_program.activate()
+    default_shader.activate()
 
-    shader_program.update_uniform('transform', transform_matrix)
-    shader_program.update_uniform('modelview', modelview_matrix)
-    shader_program.update_uniform('projection', projection_matrix)
+    default_shader.update_uniform('transform', transform_matrix)
+    default_shader.update_uniform('modelview', modelview_matrix)
+    default_shader.update_uniform('projection', projection_matrix)
 
 def post_render():
     glBindBuffer(GL_ARRAY_BUFFER, 0)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
-    shader_program.deactivate()
+    default_shader.deactivate()
 
 def render(shape):
     """Use the renderer to render a Shape.
@@ -143,7 +142,7 @@ def render(shape):
     :type shape: Shape
     """
 
-    shader_program.update_uniform('transform', transform_matrix)
+    default_shader.update_uniform('transform', transform_matrix)
 
     vertices = [vi for vertex in shape.vertices for vi in vertex]
     vertices_typed =  (GLfloat * len(vertices))(*vertices)
@@ -169,14 +168,14 @@ def render(shape):
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
-    position_attr = glGetAttribLocation(shader_program.pid, b"position")
+    position_attr = glGetAttribLocation(default_shader.pid, b"position")
     glEnableVertexAttribArray(position_attr)
     glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
     if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
-        shader_program.update_uniform('fill_color', fill_color)
+        default_shader.update_uniform('fill_color', fill_color)
         glDrawElements(
             GL_TRIANGLES,
             len(elements),
@@ -184,7 +183,7 @@ def render(shape):
             0
         )
     if stroke_enabled:
-        shader_program.update_uniform('fill_color', stroke_color)
+        default_shader.update_uniform('fill_color', stroke_color)
         if shape.kind is 'POINT':
             glDrawElements(
                 GL_POINTS,
