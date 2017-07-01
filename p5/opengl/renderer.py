@@ -69,6 +69,7 @@ def initialize(gl_version):
     default_shader.add_uniform('projection', 'mat4')
     default_shader.add_uniform('modelview', 'mat4')
     default_shader.add_uniform('transform', 'mat4')
+    default_shader.add_attribute('position', '3f')
     default_shader.deactivate()
 
     vertex_buffer = GLuint()
@@ -167,11 +168,7 @@ def render(shape):
     )
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
-    position_attr = glGetAttribLocation(default_shader.pid, b"position")
-    glEnableVertexAttribArray(position_attr)
-    glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
-    glBindBuffer(GL_ARRAY_BUFFER, 0)
+    default_shader.update_attribute('position', vertex_buffer)
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
     if fill_enabled and (shape.kind not in ['POINT', 'LINE']):

@@ -54,6 +54,10 @@ void main()
 
 Uniform = namedtuple('Uniform', ['name', 'uid', 'function'])
 
+Attribute = namedtuple('Attribute', ['name', 'loc', 'size',
+                                     'dtype','norm', 'stride',
+                                     'offset'])
+
 def _uvec4(uniform, data):
     glUniform4f(uniform, *data)
 
@@ -61,9 +65,14 @@ def _umat4(uniform, matrix):
     flattened = matrix[:]
     glUniformMatrix4fv(uniform, 1, GL_FALSE, (GLfloat * 16)(*flattened))
 
-_uniform_function_map = {
+uniform_function_map = {
     'vec4': _uvec4,
     'mat4': _umat4,
+}
+
+attribute_dtype_map = {
+    'f': GL_FLOAT,
+    'float': GL_FLOAT,
 }
 
 
@@ -84,6 +93,7 @@ class Shader:
         glLinkProgram(self._pid)
 
         self._uniforms = {}
+        self._attributes = {}
 
     @property
     def pid(self):
@@ -152,7 +162,7 @@ class Shader:
         :type dtype: str
 
         """
-        uniform_function = _uniform_function_map[dtype]
+        uniform_function = uniform_function_map[dtype]
         self._uniforms[uniform_name] = Uniform(
             uniform_name,
             glGetUniformLocation(self._pid, uniform_name.encode()),
@@ -171,6 +181,24 @@ class Shader:
         """
         uniform = self._uniforms[uniform_name]
         uniform.function(uniform.uid, data)
+
+    def add_attribute(self, name, data_format,
+                      normed=False, stride=0, offset=0):
+
+        size = int(data_format[0])
+        dtype = attribute_dtype_map[data_format[1:]]
+        norm = GL_TRUE if normed else GL_FALSE
+        loc = glGetAttribLocation(self._pid, name.encode('utf-8'))
+        self._attributes[name] = Attribute(name, loc, size, dtype,
+                                           norm, stride, offset)
+
+    def update_attribute(self, name, vbo_id, ):
+        attr = self._attributes[name]
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_id)
+        glEnableVertexAttribArray(attr.loc)
+        glVertexAttribPointer(attr.loc, attr.size, attr.dtype, attr.norm,
+                              attr.stride, attr.offset)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     def activate(self):
         """Activate the current shader."""
