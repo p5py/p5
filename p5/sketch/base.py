@@ -59,29 +59,34 @@ handlers =  dict.fromkeys(handler_names, _dummy_handler)
 
 handler_queue = []
 
-_looping = True
-_redraw = False
-_done_setting_up = False
+looping = True
+redraw = False
+setup_done = False
+target_frame_rate = 60.0
 
-def _draw():
+def draw():
     pass
 
-def _setup():
+def setup():
     pass
 
-@window.event
-def on_draw():
+fps_display = pyglet.clock.ClockDisplay()
+
+def update(dt):
     global handler_queue
-    global _redraw
-    global _done_setting_up
+    global redraw
+    global setup_done
+
+    builtins.frame_count += 1
+    builtins.frame_rate = int(1 / (dt + 0.0001))
 
     renderer.pre_render()
-    if not _done_setting_up:
-        _setup()
-        _done_setting_up = True
-    if _looping or _redraw:
-        _draw()
-        _redraw = False
+    if not setup_done:
+        setup()
+        setup_done = True
+    if looping or redraw:
+        draw()
+        redraw = False
     for handler_function in handler_queue:
         handler_function()
     handler_queue = []
@@ -124,40 +129,33 @@ def title(new_title):
     builtins.title = new_title
     window.set_caption("{} - p5".format(new_title))
 
-def _initialize(*args, **kwargs):
+def initialize(*args, **kwargs):
     gl_version = window.context.get_info().get_version()[:3]
     renderer.initialize(gl_version)
     window.set_visible()
 
-def run(setup=None, draw=None):
+def run(user_setup=None, user_draw=None):
     """Run a sketch.
     """
-    # set up required handlers depending on how the sketch is being
-    # run (i.e., are we running from a standalone script, or are we
-    # running inside the REPL?)
+    global draw
+    global setup
 
-    global _draw
-    global _setup
-
-    if setup is not None:
-        _setup = setup
+    if user_setup is not None:
+        setup = user_setup
     elif hasattr(__main__, 'setup'):
-        _setup = __main__.setup
+        setup = __main__.setup
 
-    if draw is not None:
-        _draw = draw
+    if user_draw is not None:
+        draw = user_draw
     elif hasattr(__main__, 'draw'):
-        _draw = __main__.draw
+        draw = __main__.draw
 
     for handler in handler_names:
         if hasattr(__main__, handler):
             handlers[handler] = getattr(__main__, handler)
 
-    def update(dt):
-        builtins.frame_count += 1
-
-    _initialize()
-    pyglet.clock.schedule_interval(update, 1/30.0)
+    initialize()
+    pyglet.clock.schedule_interval(update, 1/(target_frame_rate + 1))
     pyglet.app.run()
 
 def artist(f):
@@ -177,7 +175,7 @@ def artist(f):
     return decorated
 
 def test_run():
-    _initialize()
+    initialize()
     def tester(dt):
         renderer.pre_render()
         renderer.test_render()
