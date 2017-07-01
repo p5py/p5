@@ -28,87 +28,6 @@ GLSL_VERSIONS = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
                   '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410,
                   '4.2': 420, '4.3': 430, '4.4': 440, '4.5': 450, }
 
-def preprocess_shader(shader_source, shader_type, open_gl_version):
-    """Preprocess a shader to be compatible with the given OpenGL version.
-
-    :param shader_source: Source code of the shader.
-    :type shader_source: str
-
-    :shader_type: type of shader we are using. Should be one of
-         {'vertex', 'fragment'}
-    :type shader_type: str
-
-    :param open_gl_version: The version of OpenGL we should process the
-        shader for.
-    :type open_gl_version: str
-
-    :returns: The modified shader code that is compatible with the
-        given OpenGL version.
-    :rtype: str
-
-    :raises TypeError: if the shader type is unsupported.
-
-    """
-
-    target_glsl_version = GLSL_VERSIONS[open_gl_version]
-
-    # If the user has already defined a version string for the shader,
-    # we can safely assume that they know what they are doing and we
-    # don't do any preprocessing.
-    #
-    if "#version" in shader_source:
-        return shader_source
-
-    processed_shader = "#version {}\n".format(target_glsl_version)
-
-    # We are assuming that the shader source code was written for
-    # older versions of OpenGL (< 3.0). If the target version is
-    # indeed below 3.0, we don't need to do any preprocessing.
-    #
-    if target_glsl_version < 130:
-        return processed_shader + shader_source
-
-    # Processing uses the following regexes to find and replace
-    # identifiers (re_id) and function names (re_fn) from the old GLSL
-    # versions and change them to the newever syntax.
-    #
-    # See: GLSL_ID_REGEX and GLSL_FN_REGEX in PGL.java (~line 1981).
-    #
-    re_id = "(?<![0-9A-Z_a-z])({})(?![0-9A-Z_a-z]|\\s*\\()"
-    re_fn = "(?<![0-9A-Z_a-z])({})(?=\\s*\\()"
-
-    # The search and replace strings for different shader types.
-    # Terrible things will happen if the search replace isn't applied
-    # in the order defined here (this is especially true for the
-    # textures.)
-    #
-    # DO NOT CHANGE THE ORDER OF THE SEARCH/REPALCE PATTERNS.
-    if shader_type == 'vertex':
-        patterns = [
-            (re_id, "varying", "out"),
-            (re_id, "attribute", "in"),
-            (re_id, "texture", "texMap"),
-            (re_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture")
-        ]
-    elif shader_type == 'fragment':
-        patterns = [
-            (re_id, "varying|attribute", "in"),
-            (re_id, "texture", "texMap"),
-            (re_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture"),
-            (re_id, "gl_FragColor", "_fragColor"),
-        ]
-        processed_shader += "out vec4 _fragColor;"
-    else:
-        raise TypeError("Cannot preprocess {} shader.".format(shader_type))
-
-    for line in shader_source.split('\n'):
-        new_line = line
-        for regex, search, replace in patterns:
-            new_line = re.sub(regex.format(search), replace, new_line)
-        processed_shader += new_line + '\n'
-
-    return processed_shader
-
 vertex_default = """
 attribute vec3 position;
 
@@ -131,6 +50,8 @@ void main()
 }
 """
 
+ShaderUniform = namedtuple('Uniform', ['name', 'uid', 'function'])
+
 def _uvec4(uniform, data):
     glUniform4f(uniform, *data)
 
@@ -143,7 +64,6 @@ _uniform_function_map = {
     'mat4': _umat4,
 }
 
-ShaderUniform = namedtuple('Uniform', ['name', 'uid', 'function'])
 
 class Shader:
     """Represents a shader in OpenGL.
@@ -164,7 +84,7 @@ class Shader:
 
     def __init__(self, source, kind, version='2.0', preprocess=True):
         self.kind = kind
-        self._id = None
+        self.sid = None
 
         if preprocess:
             self.source = preprocess_shader(source, kind, version)
@@ -174,25 +94,25 @@ class Shader:
     def compile(self):
         """Generate a shader id and compile the shader"""
         shader_type = self._supported_shader_types[self.kind]
-        self._id = glCreateShader(shader_type)
+        self.sid = glCreateShader(shader_type)
         src = c_char_p(self.source.encode('utf-8'))
         glShaderSource(
-            self._id,
+            self.sid,
             1,
             cast(pointer(src), POINTER(POINTER(c_char))),
             None
         )
-        glCompileShader(self._id)
+        glCompileShader(self.sid)
 
         if debug:
             status_code = c_int(0)
-            glGetShaderiv(self._id, GL_COMPILE_STATUS, pointer(status_code))
+            glGetShaderiv(self.sid, GL_COMPILE_STATUS, pointer(status_code))
 
             log_size = c_int(0)
-            glGetShaderiv(self._id, GL_INFO_LOG_LENGTH, pointer(log_size))
+            glGetShaderiv(self.sid, GL_INFO_LOG_LENGTH, pointer(log_size))
 
             log_message = create_string_buffer(log_size.value)
-            glGetShaderInfoLog(self._id, log_size, None, log_message)
+            glGetShaderInfoLog(self.sid, log_size, None, log_message)
             log_message = log_message.value.decode('utf-8')
 
             if len(log_message) > 0:
@@ -206,53 +126,13 @@ class Shader:
                 # 
                 # raise Exception(log_message)
 
-    @property
-    def sid(self):
-        """Return the shader id of the shader.
-
-        :rtype: int
-        :raises NameError: If the shader hasn't been created.
-
-        """
-        if self._id:
-            return self._id
-        else:
-            raise NameError("Shader hasn't been created yet.")
-
-    @classmethod
-    def create_from_file(cls, filename, kind, **kwargs):
-        """Create a shader from a file.
-
-        :param filename: file name of the shader source code.
-        :type filename: str
-
-        :param kind: the type of shader
-        :type kind: str
-
-        :para kwargs: extra keyword arguments for the Shader
-            constuctor.
-        :type kwargs: dict
-
-        :returns: A shader constucted using the given filename.
-        :rtype: Shader
-
-        """
-        with open(filename) as f:
-            shader_source = f.read()
-        return cls(shader_source, kind, **kwargs)
-
 
 class ShaderProgram:
     """A thin abstraction layer that helps work with shader programs."""
 
     def __init__(self):
-        self._id = glCreateProgram()
+        self.pid = glCreateProgram()
         self._uniforms = {}
-
-    @property
-    def pid(self):
-        """The program id of the shader."""
-        return self._id
 
     def add_uniform(self, uniform_name, dtype):
         """Add a uniform to the shader program.
@@ -308,3 +188,85 @@ class ShaderProgram:
         return "{}( pid={})".format(self.__class__.__name__, self.pid)
 
     __str__ = __repr__
+
+
+def preprocess_shader(shader_source, shader_type, open_gl_version):
+    """Preprocess a shader to be compatible with the given OpenGL version.
+
+    :param shader_source: Source code of the shader.
+    :type shader_source: str
+
+    :shader_type: type of shader we are using. Should be one of
+         {'vertex', 'fragment'}
+    :type shader_type: str
+
+    :param open_gl_version: The version of OpenGL we should process the
+        shader for.
+    :type open_gl_version: str
+
+    :returns: The modified shader code that is compatible with the
+        given OpenGL version.
+    :rtype: str
+
+    :raises TypeError: if the shader type is unsupported.
+
+    """
+
+    target_glsl_version = GLSL_VERSIONS[open_gl_version]
+
+    # If the user has already defined a version string for the shader,
+    # we can safely assume that they know what they are doing and we
+    # don't do any preprocessing.
+    #
+    if "#version" in shader_source:
+        return shader_source
+
+    processed_shader = "#version {}\n".format(target_glsl_version)
+
+    # We are assuming that the shader source code was written for
+    # older versions of OpenGL (< 3.0). If the target version is
+    # indeed below 3.0, we don't need to do any preprocessing.
+    #
+    if target_glsl_version < 130:
+        return processed_shader + shader_source
+
+    # Processing uses the following regexes to find and replace
+    # identifiers (repid) and function names (re_fn) from the old GLSL
+    # versions and change them to the newever syntax.
+    #
+    # See: GLSL_ID_REGEX and GLSL_FN_REGEX in PGL.java (~line 1981).
+    #
+    repid = "(?<![0-9A-Z_a-z])({})(?![0-9A-Z_a-z]|\\s*\\()"
+    re_fn = "(?<![0-9A-Z_a-z])({})(?=\\s*\\()"
+
+    # The search and replace strings for different shader types.
+    # Terrible things will happen if the search replace isn't applied
+    # in the order defined here (this is especially true for the
+    # textures.)
+    #
+    # DO NOT CHANGE THE ORDER OF THE SEARCH/REPALCE PATTERNS.
+    if shader_type == 'vertex':
+        patterns = [
+            (repid, "varying", "out"),
+            (repid, "attribute", "in"),
+            (repid, "texture", "texMap"),
+            (re_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture")
+        ]
+    elif shader_type == 'fragment':
+        patterns = [
+            (repid, "varying|attribute", "in"),
+            (repid, "texture", "texMap"),
+            (re_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture"),
+            (repid, "gl_FragColor", "_fragColor"),
+        ]
+        processed_shader += "out vec4 _fragColor;"
+    else:
+        raise TypeError("Cannot preprocess {} shader.".format(shader_type))
+
+    for line in shader_source.split('\n'):
+        new_line = line
+        for regex, search, replace in patterns:
+            new_line = re.sub(regex.format(search), replace, new_line)
+        processed_shader += new_line + '\n'
+
+    return processed_shader    
