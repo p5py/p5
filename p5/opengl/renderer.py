@@ -70,7 +70,6 @@ def initialize(gl_version):
     default_shader.add_uniform('modelview', 'mat4')
     default_shader.add_uniform('transform', 'mat4')
     default_shader.add_attribute('position', '3f')
-    default_shader.deactivate()
 
     vertex_buffer = GLuint()
     glGenBuffers(1, pointer(vertex_buffer))
@@ -113,11 +112,9 @@ def reset_view():
     transform_matrix = Matrix4()
     modelview_matrix = view
     projection_matrix =  projection
-    default_shader.activate()
     default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
-    default_shader.deactivate()
 
 def pre_render():
     global transform_matrix
