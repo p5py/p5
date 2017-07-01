@@ -38,6 +38,8 @@ transform_matrix = Matrix4()
 modelview_matrix = Matrix4()
 projection_matrix = Matrix4()
 
+viewport = None
+
 background_color = (0.8, 0.8, 0.8, 1.0)
 fill_color = (1.0, 1.0, 1.0, 1.0)
 stroke_color = (0, 0, 0, 1.0)
@@ -59,7 +61,6 @@ def initialize(gl_version):
 
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
-    glViewport(0, 0, builtins.width, builtins.height)
 
     shaders = [
         Shader(vertex_default, 'vertex', version=gl_version),
@@ -75,8 +76,8 @@ def initialize(gl_version):
 
     shader_program.add_uniform('fill_color', 'vec4')
     shader_program.add_uniform('projection', 'mat4')
-    shader_program.add_uniform('view', 'mat4')
-    shader_program.add_uniform('model', 'mat4')
+    shader_program.add_uniform('modelview', 'mat4')
+    shader_program.add_uniform('transform', 'mat4')
 
     vertex_buffer = GLuint()
     glGenBuffers(1, pointer(vertex_buffer))
@@ -102,6 +103,10 @@ def reset_view():
     global transform_matrix
     global modelview_matrix
     global projection_matrix
+    global viewport
+
+    viewport = (0, 0, builtins.width, builtins.height)
+    glViewport(*viewport)
 
     cz = (builtins.height / 2) / math.tan(math.radians(30))
     projection = Matrix4.new_perspective(
@@ -116,17 +121,20 @@ def reset_view():
     modelview_matrix = view
     projection_matrix =  projection
 
-    shader_program.update_uniform('model', transform_matrix)
-    shader_program.update_uniform('view', modelview_matrix)
+    shader_program.update_uniform('transform', transform_matrix)
+    shader_program.update_uniform('modelview', modelview_matrix)
     shader_program.update_uniform('projection', projection_matrix)
 
 def pre_render():
     global transform_matrix
-    shader_program.activate()
     transform_matrix = Matrix4()
 
-    shader_program.update_uniform('model', transform_matrix)
-    shader_program.update_uniform('view', modelview_matrix)
+    glViewport(*viewport)
+
+    shader_program.activate()
+
+    shader_program.update_uniform('transform', transform_matrix)
+    shader_program.update_uniform('modelview', modelview_matrix)
     shader_program.update_uniform('projection', projection_matrix)
 
 def post_render():
@@ -141,7 +149,7 @@ def render(shape):
     :type shape: Shape
     """
 
-    shader_program.update_uniform('model', transform_matrix)
+    shader_program.update_uniform('transform', transform_matrix)
 
     vertices = [vi for vertex in shape.vertices for vi in vertex]
     vertices_typed =  (GLfloat * len(vertices))(*vertices)
