@@ -277,6 +277,10 @@ class ShaderProgram:
         """Activate the current shader."""
         glUseProgram(self.pid)
 
+    def deactivate(self):
+        """Deactivate the current shader"""
+        glUseProgram(0)
+
     def __repr__(self):
         return "{}( pid={})".format(self.__class__.__name__, self.pid)
 

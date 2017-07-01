@@ -29,7 +29,7 @@ from .shader import ShaderProgram
 from .shader import fragment_default
 from .shader import vertex_default
 
-_shader_program = ShaderProgram()
+shader_program = ShaderProgram()
 
 # All user transformations are stored in these matrices. We send off
 # the matrix data as uniforms while rendering a shape.
@@ -68,15 +68,15 @@ def initialize(gl_version):
 
     for shader in shaders:
         shader.compile()
-        _shader_program.attach(shader)
+        shader_program.attach(shader)
 
-    _shader_program.link()
-    _shader_program.activate()
+    shader_program.link()
+    shader_program.activate()
 
-    _shader_program.add_uniform('fill_color', 'vec4')
-    _shader_program.add_uniform('projection', 'mat4')
-    _shader_program.add_uniform('view', 'mat4')
-    _shader_program.add_uniform('model', 'mat4')
+    shader_program.add_uniform('fill_color', 'vec4')
+    shader_program.add_uniform('projection', 'mat4')
+    shader_program.add_uniform('view', 'mat4')
+    shader_program.add_uniform('model', 'mat4')
 
     vertex_buffer = GLuint()
     glGenBuffers(1, pointer(vertex_buffer))
@@ -116,23 +116,23 @@ def reset_view():
     modelview_matrix = view
     projection_matrix =  projection
 
-    _shader_program.update_uniform('model', transform_matrix)
-    _shader_program.update_uniform('view', modelview_matrix)
-    _shader_program.update_uniform('projection', projection_matrix)
+    shader_program.update_uniform('model', transform_matrix)
+    shader_program.update_uniform('view', modelview_matrix)
+    shader_program.update_uniform('projection', projection_matrix)
 
 def pre_render():
     global transform_matrix
-    _shader_program.activate()
+    shader_program.activate()
     transform_matrix = Matrix4()
 
-    _shader_program.update_uniform('model', transform_matrix)
-    _shader_program.update_uniform('view', modelview_matrix)
-    _shader_program.update_uniform('projection', projection_matrix)
+    shader_program.update_uniform('model', transform_matrix)
+    shader_program.update_uniform('view', modelview_matrix)
+    shader_program.update_uniform('projection', projection_matrix)
 
 def post_render():
     glBindBuffer(GL_ARRAY_BUFFER, 0)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
-    glUseProgram(0)
+    shader_program.deactivate()
 
 def render(shape):
     """Use the renderer to render a Shape.
@@ -141,7 +141,7 @@ def render(shape):
     :type shape: Shape
     """
 
-    _shader_program.update_uniform('model', transform_matrix)
+    shader_program.update_uniform('model', transform_matrix)
 
     vertices = [vi for vertex in shape.vertices for vi in vertex]
     vertices_typed =  (GLfloat * len(vertices))(*vertices)
@@ -167,14 +167,14 @@ def render(shape):
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
-    position_attr = glGetAttribLocation(_shader_program.pid, b"position")
+    position_attr = glGetAttribLocation(shader_program.pid, b"position")
     glEnableVertexAttribArray(position_attr)
     glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
     if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
-        _shader_program.update_uniform('fill_color', fill_color)
+        shader_program.update_uniform('fill_color', fill_color)
         glDrawElements(
             GL_TRIANGLES,
             len(elements),
@@ -182,7 +182,7 @@ def render(shape):
             0
         )
     if stroke_enabled:
-        _shader_program.update_uniform('fill_color', stroke_color)
+        shader_program.update_uniform('fill_color', stroke_color)
         if shape.kind is 'POINT':
             glDrawElements(
                 GL_POINTS,
