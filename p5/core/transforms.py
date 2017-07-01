@@ -17,7 +17,6 @@
 #
 
 import builtins
-from collections import deque
 from contextlib import contextmanager
 import math
 
@@ -31,47 +30,32 @@ __all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
 
 @contextmanager
 def push_matrix():
-    current_matrix = renderer._matrix_stack[0].copy()
-    renderer._matrix_stack.appendleft(current_matrix)
+    previous_matrix = renderer.transform_matrix.copy()
     try:
-        yield current_matrix
+        yield previous_matrix
     finally:
-        renderer._matrix_stack.popleft()
+        renderer.transform_matrix = previous_matrix
 
 def reset_transforms():
-    cz = (sketch.height / 2) / math.tan(math.radians(30))
+    """Reset all transformations to their default state.
 
-    projection = Matrix4.new_perspective(
-        math.radians(60),
-        builtins.width/builtins.height,
-        0.1 * cz,
-        10 * cz
-    )
-    view = Matrix4()
-    view.translate(-builtins.width / 2,
-                   -builtins.height / 2, -cz)
-
-    renderer._matrix_stack = deque()
-    renderer._matrix_stack.append(Matrix4())
-
-    renderer.modelview_matrix = view
-    renderer.projection_matrix = projection
-    renderer.transform_matrix = renderer._matrix_stack[0]
+    """
+    renderer.reset_view()
 
 def translate(x, y, z=0):
-    renderer._matrix_stack[0].translate(x, y, z)
+    renderer.transform_matrix.translate(x, y, z)
 
 def rotate(theta, axis=Vector3(0, 0, 1)):
-    renderer._matrix_stack[0].rotate_axis(theta, axis)
+    renderer.transform_matrix.rotate_axis(theta, axis)
     
 def rotate_x(theta):
-    renderer._matrix_stack[0].rotatex(theta)
+    renderer.transform_matrix.rotatex(theta)
 
 def rotate_y(theta):
-    renderer._matrix_stack[0].rotatey(theta)
+    renderer.transform_matrix.rotatey(theta)
 
 def rotate_z(theta):
-    renderer._matrix_stack[0].rotatez(theta)
+    renderer.transform_matrix.rotatez(theta)
 
 def scale(sx, sy=None, sz=None):
     if (not sy) and (not sz):
@@ -79,9 +63,8 @@ def scale(sx, sy=None, sz=None):
         sz = sx
     elif not sz:
         sz = 1
-    renderer._matrix_stack[0].scale(sx, sy, sz)
+    renderer.transform_matrix.scale(sx, sy, sz)
 
-#
 # Matrix structure:
 #     a b c d
 #     e f g h
@@ -91,12 +74,12 @@ def scale(sx, sy=None, sz=None):
 def shear_x(theta):
     shear_mat = Matrix4()
     shear_mat.b = math.tan(theta)
-    renderer._matrix_stack[0] = renderer._matrix_stack[0] * shear_mat
+    renderer.transform_matrix = renderer.transform_matrix * shear_mat
 
 def shear_y(theta):
     shear_mat = Matrix4()
     shear_mat.e = math.tan(theta)
-    renderer._matrix_stack[0] = renderer._matrix_stack[0] * shear_mat
+    renderer.transform_matrix = renderer.transform_matrix * shear_mat
 
 def camera():
     raise NotImplementedError

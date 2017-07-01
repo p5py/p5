@@ -21,8 +21,6 @@ import builtins
 from ctypes import *
 import math
 
-from collections import deque
-
 from pyglet.gl import *
 
 from ..tmp import Matrix4
@@ -42,12 +40,10 @@ _geometries = {}
 
 _shader_program = ShaderProgram()
 
-# All the user transformations are stored in this matrix stack.
-# Whenver we try to draw a shape, we pull out the topmost matrix from
-# this stack and pass the said matrix to our shader program.
+# All user transformations are stored in these matrices. We send off
+# the matrix data as uniforms while rendering a shape.
 #
-_matrix_stack = deque([Matrix4()])
-transform_matrix = _matrix_stack[0]
+transform_matrix = Matrix4()
 modelview_matrix = Matrix4()
 projection_matrix = Matrix4()
 
@@ -113,8 +109,7 @@ def reset_view():
     )
     view = Matrix4().translate(-builtins.width/2, -builtins.height/2, -cz)
 
-    _matrix_stack[0] = Matrix4()
-    transform_matrix = _matrix_stack[0]
+    transform_matrix = Matrix4()
     modelview_matrix = view
     projection_matrix =  projection
 
@@ -123,8 +118,9 @@ def reset_view():
     _shader_program['projection'] = projection
 
 def pre_render():
-    _matrix_stack[0] = Matrix4()
-    _shader_program['model'] =  _matrix_stack[0]
+    global transform_matrix
+    transform_matrix = Matrix4()
+    _shader_program['model'] = transform_matrix
     _shader_program['view'] = modelview_matrix
     _shader_program['projection'] = projection_matrix
 
@@ -190,7 +186,7 @@ def render(shape):
             'num_elements': len(elements)
         }
 
-    _shader_program['model'] = _matrix_stack[0]
+    _shader_program['model'] = transform_matrix
 
     glBindBuffer(GL_ARRAY_BUFFER, _geometries[shape_hash]['vertex_buffer'])
 
