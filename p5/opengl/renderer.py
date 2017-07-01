@@ -116,17 +116,18 @@ def reset_view():
     modelview_matrix = view
     projection_matrix =  projection
 
-    _shader_program['model'] =  transform_matrix
-    _shader_program['view'] = modelview_matrix
-    _shader_program['projection'] = projection
+    _shader_program.update_uniform('model', transform_matrix)
+    _shader_program.update_uniform('view', modelview_matrix)
+    _shader_program.update_uniform('projection', projection_matrix)
 
 def pre_render():
     global transform_matrix
     _shader_program.activate()
     transform_matrix = Matrix4()
-    _shader_program['model'] = transform_matrix
-    _shader_program['view'] = modelview_matrix
-    _shader_program['projection'] = projection_matrix
+
+    _shader_program.update_uniform('model', transform_matrix)
+    _shader_program.update_uniform('view', modelview_matrix)
+    _shader_program.update_uniform('projection', projection_matrix)
 
 def post_render():
     glBindBuffer(GL_ARRAY_BUFFER, 0)
@@ -140,7 +141,7 @@ def render(shape):
     :type shape: Shape
     """
 
-    _shader_program['model'] = transform_matrix
+    _shader_program.update_uniform('model', transform_matrix)
 
     vertices = [vi for vertex in shape.vertices for vi in vertex]
     vertices_typed =  (GLfloat * len(vertices))(*vertices)
@@ -173,7 +174,7 @@ def render(shape):
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
     if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
-        _shader_program['fill_color'] =  fill_color
+        _shader_program.update_uniform('fill_color', fill_color)
         glDrawElements(
             GL_TRIANGLES,
             len(elements),
@@ -181,7 +182,7 @@ def render(shape):
             0
         )
     if stroke_enabled:
-        _shader_program['fill_color'] = stroke_color
+        _shader_program.update_uniform('fill_color', stroke_color)
         if shape.kind is 'POINT':
             glDrawElements(
                 GL_POINTS,

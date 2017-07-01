@@ -248,20 +248,17 @@ class ShaderProgram:
             uniform_function
         )
 
-    def __getitem__(self, uniform_name):
-        return self._uniforms[uniform_name]
-
-    def __setitem__(self, uni_name, data):
+    def update_uniform(self, uniform_name, data):
         """Set data for the given uniform.
 
-        :param uni_name: Name of the uniform.
-        :type uni_name: str
+        :param uniform_name: Name of the uniform.
+        :type uniform_name: str
 
         :param data: data to which the uniform should be set to.
         :type data: tuple
 
         """
-        uniform = self._uniforms[uni_name]
+        uniform = self._uniforms[uniform_name]
         uniform.function(uniform.uid, data)
 
     def attach(self, shader):
