@@ -24,12 +24,12 @@ import math
 from pyglet.gl import *
 
 from ..tmp import Matrix4
-from .shader import Shader
 from .shader import ShaderProgram
 from .shader import fragment_default
 from .shader import vertex_default
+from .shader import preprocess_shader
 
-shader_program = ShaderProgram()
+shader_program = None
 
 # All user transformations are stored in these matrices. We send off
 # the matrix data as uniforms while rendering a shape.
@@ -58,20 +58,14 @@ def initialize(gl_version):
     """
     global vertex_buffer
     global index_buffer
+    global shader_program
 
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
 
-    shaders = [
-        Shader(vertex_default, 'vertex', version=gl_version),
-        Shader(fragment_default, 'fragment', version=gl_version),
-    ]
-
-    for shader in shaders:
-        shader.compile()
-        shader_program.attach(shader)
-
-    shader_program.link()
+    vert_src = preprocess_shader(vertex_default, 'vertex', gl_version)
+    frag_src = preprocess_shader(fragment_default, 'fragment', gl_version)
+    shader_program = ShaderProgram(vert_src, frag_src)
     shader_program.activate()
 
     shader_program.add_uniform('fill_color', 'vec4')

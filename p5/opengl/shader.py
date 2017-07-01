@@ -65,74 +65,80 @@ _uniform_function_map = {
 }
 
 
-class Shader:
-    """Represents a shader in OpenGL.
+class ShaderProgram:
+    """A thin abstraction layer that helps work with shader programs."""
 
-    :param source: GLSL source code of the shader.
-    :type source: str
+    def __init__(self, vertex_source, fragment_source):
+        self._vertex_source = vertex_source
+        self._fragment_source = fragment_source
+        self._pid = glCreateProgram()
 
-    :param kind: the type of shader {'vertex', 'fragment', etc}
-    :type kind: str
+        self.compile_vertex_shader()
+        self.compile_fragment_shader()
 
-    :raises TypeError: When the give shader type is not supported. 
+        glAttachShader(self._pid, self._vid)
+        glAttachShader(self._pid, self._fid)
 
-    """
-    _supported_shader_types = {
-        'vertex': GL_VERTEX_SHADER,
-        'fragment': GL_FRAGMENT_SHADER
-    }
+        glLinkProgram(self._pid)
 
-    def __init__(self, source, kind, version='2.0', preprocess=True):
-        self.kind = kind
-        self.sid = None
+        self._uniforms = {}
 
-        if preprocess:
-            self.source = preprocess_shader(source, kind, version)
-        else:
-            self.source = source
+    @property
+    def pid(self):
+        return self._pid
 
-    def compile(self):
-        """Generate a shader id and compile the shader"""
-        shader_type = self._supported_shader_types[self.kind]
-        self.sid = glCreateShader(shader_type)
-        src = c_char_p(self.source.encode('utf-8'))
+    def _compile(self, source, kind):
+        """Compile a shader from its source code.
+
+        :param source: Source code of the shader to be compiled.
+        :type source: str
+
+        :param kind: The kind of shader we are compiling.
+        :type kind: int
+
+        :returns: The shader id of the compiled shader.
+        :rtype: int
+
+        """
+        shader_id = glCreateShader(kind)
+        src = c_char_p(source.encode('utf-8'))
         glShaderSource(
-            self.sid,
+            shader_id,
             1,
             cast(pointer(src), POINTER(POINTER(c_char))),
             None
         )
-        glCompileShader(self.sid)
+        glCompileShader(shader_id)
+        status_code = c_int(0)
+        glGetShaderiv(shader_id, GL_COMPILE_STATUS, pointer(status_code))
 
-        if debug:
-            status_code = c_int(0)
-            glGetShaderiv(self.sid, GL_COMPILE_STATUS, pointer(status_code))
+        log_size = c_int(0)
+        glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, pointer(log_size))
 
-            log_size = c_int(0)
-            glGetShaderiv(self.sid, GL_INFO_LOG_LENGTH, pointer(log_size))
+        log_message = create_string_buffer(log_size.value)
+        glGetShaderInfoLog(shader_id, log_size, None, log_message)
+        log_message = log_message.value.decode('utf-8')
 
-            log_message = create_string_buffer(log_size.value)
-            glGetShaderInfoLog(self.sid, log_size, None, log_message)
-            log_message = log_message.value.decode('utf-8')
+        if len(log_message) > 0:
+            print(source)
+            print(log_message)
+            # In Windows (OpenGL 3.3 + intel card) the log_message
+            # is set to "No errors" on a successful compilation
+            # and the code raises the Exception even though it
+            # shouldn't. There should be a proper fix, but getting
+            # rid of this line for now, will fix it.
+            #
+            # raise Exception(log_message)
 
-            if len(log_message) > 0:
-                print(self.source)
-                print(log_message)
-                # In Windows (OpenGL 3.3 + intel card) the log_message
-                # is set to "No errors" on a successful compilation
-                # and the code raises the Exception even though it
-                # shouldn't. There should be a proper fix, but getting
-                # rid of this line for now, will fix it.
-                # 
-                # raise Exception(log_message)
+        return shader_id
 
+    def compile_vertex_shader(self):
+        """Compile the vertex shader associated with this program."""
+        self._vid = self._compile(self._vertex_source, GL_VERTEX_SHADER)
 
-class ShaderProgram:
-    """A thin abstraction layer that helps work with shader programs."""
-
-    def __init__(self):
-        self.pid = glCreateProgram()
-        self._uniforms = {}
+    def compile_fragment_shader(self):
+        """Compile the fragmen shader associated with this program."""
+        self._fid = self._compile(self._fragment_source, GL_FRAGMENT_SHADER)
 
     def add_uniform(self, uniform_name, dtype):
         """Add a uniform to the shader program.
@@ -147,7 +153,7 @@ class ShaderProgram:
         uniform_function = _uniform_function_map[dtype]
         self._uniforms[uniform_name] = ShaderUniform(
             uniform_name,
-            glGetUniformLocation(self.pid, uniform_name.encode()),
+            glGetUniformLocation(self._pid, uniform_name.encode()),
             uniform_function
         )
 
@@ -164,28 +170,16 @@ class ShaderProgram:
         uniform = self._uniforms[uniform_name]
         uniform.function(uniform.uid, data)
 
-    def attach(self, shader):
-        """Attach a shader to the current program.
-
-        :param shader:The shader to be attached.
-        :type shader: Shader
-        """
-        glAttachShader(self.pid, shader.sid)
-
-    def link(self):
-        """Link the current shader."""
-        glLinkProgram(self.pid)
-
     def activate(self):
         """Activate the current shader."""
-        glUseProgram(self.pid)
+        glUseProgram(self._pid)
 
     def deactivate(self):
         """Deactivate the current shader"""
         glUseProgram(0)
 
     def __repr__(self):
-        return "{}( pid={})".format(self.__class__.__name__, self.pid)
+        return "{}( pid={} )".format(self.__class__.__name__, self._pid)
 
     __str__ = __repr__
 
