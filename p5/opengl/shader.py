@@ -24,16 +24,90 @@ from pyglet.gl import *
 
 debug = True
 
-_glsl_versions = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
+GLSL_VERSIONS = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
                   '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410,
                   '4.2': 420, '4.3': 430, '4.4': 440, '4.5': 450, }
 
-_shader_preprocessor = """
-#ifdef GL_ES
-precision mediump float;
-precision mediump int;
-#endif
-"""
+def preprocess_shader(shader_source, shader_type, open_gl_version):
+    """Preprocess a shader to be compatible with the given OpenGL version.
+
+    :param shader_source: Source code of the shader.
+    :type shader_source: str
+
+    :shader_type: type of shader we are using. Should be one of
+         {'vertex', 'fragment'}
+    :type shader_type: str
+
+    :param open_gl_version: The version of OpenGL we should process the
+        shader for.
+    :type open_gl_version: str
+
+    :returns: The modified shader code that is compatible with the
+        given OpenGL version.
+    :rtype: str
+
+    :raises TypeError: if the shader type is unsupported.
+
+    """
+
+    target_glsl_version = GLSL_VERSIONS[open_gl_version]
+
+    # If the user has already defined a version string for the shader,
+    # we can safely assume that they know what they are doing and we
+    # don't do any preprocessing.
+    #
+    if "#version" in shader_source:
+        return shader_source
+
+    processed_shader = "#version {}\n".format(target_glsl_version)
+
+    # We are assuming that the shader source code was written for
+    # older versions of OpenGL (< 3.0). If the target version is
+    # indeed below 3.0, we don't need to do any preprocessing.
+    #
+    if target_glsl_version < 130:
+        return processed_shader + shader_source
+
+    # Processing uses the following regexes to find and replace
+    # identifiers (re_id) and function names (re_fn) from the old GLSL
+    # versions and change them to the newever syntax.
+    #
+    # See: GLSL_ID_REGEX and GLSL_FN_REGEX in PGL.java (~line 1981).
+    #
+    re_id = "(?<![0-9A-Z_a-z])({})(?![0-9A-Z_a-z]|\\s*\\()"
+    re_fn = "(?<![0-9A-Z_a-z])({})(?=\\s*\\()"
+
+    # The search and replace strings for different shader types.
+    # Terrible things will happen if the search replace isn't applied
+    # in the order defined here (this is especially true for the
+    # textures.)
+    #
+    # DO NOT CHANGE THE ORDER OF THE SEARCH/REPALCE PATTERNS.
+    if shader_type == 'vertex':
+        patterns = [
+            (re_id, "varying", "out"),
+            (re_id, "attribute", "in"),
+            (re_id, "texture", "texMap"),
+            (re_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture")
+        ]
+    elif shader_type == 'fragment':
+        patterns = [
+            (re_id, "varying|attribute", "in"),
+            (re_id, "texture", "texMap"),
+            (re_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture"),
+            (re_id, "gl_FragColor", "_fragColor"),
+        ]
+        processed_shader += "out vec4 _fragColor;"
+    else:
+        raise TypeError("Cannot preprocess {} shader.".format(shader_type))
+
+    for line in shader_source.split('\n'):
+        new_line = line
+        for regex, search, replace in patterns:
+            new_line = re.sub(regex.format(search), replace, new_line)
+        processed_shader += new_line + '\n'
+
+    return processed_shader
 
 vertex_default = """
 attribute vec3 position;
@@ -56,23 +130,6 @@ void main()
     gl_FragColor = fill_color;
 }
 """
-
-_re_glsl_id = "(?<![0-9A-Z_a-z])({})(?![0-9A-Z_a-z]|\\s*\\()"
-_re_glsl_fn = "(?<![0-9A-Z_a-z])(%s)(?=\\s*\\()"
-
-_preprocess_vertex_patterns = [
-    (_re_glsl_id, "varying", "out"),
-    (_re_glsl_id, "attribute", "in"),
-    (_re_glsl_id, "texture", "texMap"),
-    (_re_glsl_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture"),
-]
-
-_preprocess_fragment_patterns = [
-    (_re_glsl_id, "varying|attribute", "in"),
-    (_re_glsl_id, "texture", "texMap"),
-    (_re_glsl_fn, "texture2DRect|texture2D|texture3D|textureCube", "texture"),
-    (_re_glsl_id, "gl_FragColor", "_fragColor"),
-]
 
 def _uvec4(uniform, data):
     glUniform4f(uniform, *data)
@@ -105,48 +162,14 @@ class Shader:
         'fragment': GL_FRAGMENT_SHADER
     }
 
-    def __init__(self, source, kind, version='110', preprocess=True):
-        self.source = source
+    def __init__(self, source, kind, version='2.0', preprocess=True):
         self.kind = kind
         self._id = None
 
-        # preprocessing only makes sense if the shader doesn't have an
-        # explicitly defined version string.
-        if preprocess and ("#version" not in self.source):
-            target_version = _glsl_versions[version]
-            self.preprocess(target_version)
-
-    def preprocess(self, target_version):
-        """Preprocess a shader.
-
-        The GLSL syntax has changed significantly, to make sure that
-        our shader is compatible with the version of OpenGL that
-        pyglet is running, we change the shader's internal syntax
-        before compilation.
-
-        :param target_version: The version of glsl we should process the
-            shader for.
-        :type gl_version: str
-
-        """
-        processed_shader = "#version {}\n".format(target_version)
-
-        if target_version < 130:
-            return processed_shader + self.source
-
-        if self.kind == 'vertex':
-            patterns = _preprocess_vertex_patterns
-        elif self.kind == 'fragment':
-            patterns = _preprocess_fragment_patterns
-            processed_shader += "out vec4 _fragColor;"
-
-        for line in self.source.split('\n'):
-            processed_line = line
-            for regex, search, replace in patterns:
-                processed_line = re.sub(regex.format(search), replace, processed_line)
-            processed_shader += processed_line + '\n'
-
-        self.source = processed_shader
+        if preprocess:
+            self.source = preprocess_shader(source, kind, version)
+        else:
+            self.source = source
 
     def compile(self):
         """Generate a shader id and compile the shader"""
