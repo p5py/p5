@@ -67,29 +67,29 @@ class Color:
 
 def fill(*color_args):
     """Set the fill color of the shapes."""
-    renderer._attributes['fill_enabled'] = True
-    renderer._attributes['fill_color'] = Color(*color_args).normalized
+    renderer.fill_enabled = True
+    renderer.fill_color = Color(*color_args).normalized
 
 def no_fill():
     """Disable filling geometry."""
-    renderer._attributes['fill_enabled'] = False
+    renderer.fill_enabled = False
 
 def stroke(*color_args):
     """Set the color used to draw lines around shapes"""
-    renderer._attributes['stroke_enabled'] = True
-    renderer._attributes['stroke_color'] = Color(*color_args).normalized
+    renderer.stroke_enabled = True
+    renderer.stroke_color = Color(*color_args).normalized
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""
-    renderer._attributes['stroke_enabled'] = False
+    renderer.stroke_enabled = False
     
 def background(*color_args):
-    """Set the background color for the renderer._attributes[']"""
-    renderer._attributes['background_color'] = Color(*color_args).normalized
+    """Set the background color for the renderer."""
+    renderer.background_color = Color(*color_args).normalized
     renderer.clear()
 
 def color_mode(mode):
-    """Set the color mode of the renderer._attributes[']
+    """Set the color mode of the renderer.
     
     :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
         or Hue/Saturation/Brightness

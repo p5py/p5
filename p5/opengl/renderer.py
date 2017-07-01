@@ -31,7 +31,6 @@ from .shader import ShaderProgram
 from .shader import fragment_default
 from .shader import vertex_default
 
-
 # Geometry cache for the renderer
 #
 # Regenerating buffers and binding them to arrays can get very
@@ -48,20 +47,15 @@ _shader_program = ShaderProgram()
 # this stack and pass the said matrix to our shader program.
 #
 _matrix_stack = deque([Matrix4()])
+transform_matrix = _matrix_stack[0]
+modelview_matrix = Matrix4()
+projection_matrix = Matrix4()
 
-_attributes = {
-    'background_color': (0.8, 0.8, 0.8, 1.0),
-    'fill_color': (1.0, 1.0, 1.0, 1.0),
-    'stroke_color': (0, 0, 0, 1.0),
-
-    'fill_enabled': True,
-    'stroke_enabled': True,
-
-    'model': _matrix_stack[0],
-    'view': Matrix4(),
-    'projection': Matrix4(),
-}
-
+background_color = (0.8, 0.8, 0.8, 1.0)
+fill_color = (1.0, 1.0, 1.0, 1.0)
+stroke_color = (0, 0, 0, 1.0)
+fill_enabled = True
+stroke_enabled = True
 
 def initialize(gl_version):
     """Initialize the OpenGL renderer.
@@ -100,12 +94,16 @@ def cleanup():
 
 def clear():
     """Use the background color to clear the screen."""
-    glClearColor(*_attributes['background_color'])
+    glClearColor(*background_color)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 def reset_view():
     """Reset the view of the renderer.
     """
+    global transform_matrix
+    global modelview_matrix
+    global projection_matrix
+
     cz = (builtins.height / 2) / math.tan(math.radians(30))
     projection = Matrix4.new_perspective(
         math.radians(60),
@@ -115,20 +113,20 @@ def reset_view():
     )
     view = Matrix4().translate(-builtins.width/2, -builtins.height/2, -cz)
 
-    _attributes['view'] =  view
-    _shader_program['view'] = view
-
-    _attributes['projection'] =  projection
-    _shader_program['projection'] = projection
-
     _matrix_stack[0] = Matrix4()
-    _shader_program['model'] =  _matrix_stack[0]
+    transform_matrix = _matrix_stack[0]
+    modelview_matrix = view
+    projection_matrix =  projection
+
+    _shader_program['model'] =  transform_matrix
+    _shader_program['view'] = modelview_matrix
+    _shader_program['projection'] = projection
 
 def pre_render():
     _matrix_stack[0] = Matrix4()
     _shader_program['model'] =  _matrix_stack[0]
-    _shader_program['view'] = _attributes['view']
-    _shader_program['projection'] = _attributes['projection']
+    _shader_program['view'] = modelview_matrix
+    _shader_program['projection'] = projection_matrix
 
 def post_render():
     pass
@@ -200,8 +198,8 @@ def render(shape):
     glEnableVertexAttribArray(position_attr)
     glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-    if _attributes['fill_enabled'] and (shape.kind not in ['POINT', 'LINE']):
-        _shader_program['fill_color'] =  _attributes['fill_color']
+    if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
+        _shader_program['fill_color'] =  fill_color
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _geometries[shape_hash]['index_buffer'])
         glDrawElements(
@@ -210,8 +208,8 @@ def render(shape):
             GL_UNSIGNED_INT,
             0
         )
-    if _attributes['stroke_enabled']:
-        _shader_program['fill_color'] = _attributes['stroke_color']
+    if stroke_enabled:
+        _shader_program['fill_color'] = stroke_color
         if shape.kind is 'POINT':
             glDrawElements(
                 GL_POINTS,
@@ -229,6 +227,9 @@ def render(shape):
 
 def test_render():
     """Render the renderer's default test drawing."""
+    global background_color
+    global fill_color
+
     class Triangle:
         def __init__(self):
             self.faces = [(0, 1, 2)]
@@ -250,11 +251,11 @@ def test_render():
                 (350, 150, 0)
             ]
 
-    _attributes['background_color'] = (1.0, 1.0, 1.0, 1.0)
+    background_color = (1.0, 1.0, 1.0, 1.0)
     clear()
-    
-    _attributes['fill_color'] = (0.8, 0.8, 0.4, 1.0)
+
+    fill_color = (0.8, 0.8, 0.4, 1.0)
     render(Triangle())
 
-    _attributes['fill_color'] = (0.4, 0.4, 0.8, 1.0)
+    fill_color = (0.4, 0.4, 0.8, 1.0)
     render(Square())

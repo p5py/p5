@@ -54,9 +54,9 @@ def reset_transforms():
     renderer._matrix_stack = deque()
     renderer._matrix_stack.append(Matrix4())
 
-    renderer._attribute['view'] =  view
-    renderer._attribute['projection'] =  projection
-    renderer._attribute['model'] =  renderer._matrix_stack[0]
+    renderer.modelview_matrix = view
+    renderer.projection_matrix = projection
+    renderer.transform_matrix = renderer._matrix_stack[0]
 
 def translate(x, y, z=0):
     renderer._matrix_stack[0].translate(x, y, z)
