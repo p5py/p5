@@ -29,15 +29,6 @@ from .shader import ShaderProgram
 from .shader import fragment_default
 from .shader import vertex_default
 
-# Geometry cache for the renderer
-#
-# Regenerating buffers and binding them to arrays can get very
-# expensive. We use this dictionary to cache the shape the fist time
-# its drawn and reuse the information if the same shape is asked to be
-# drawn again.
-#
-_geometries = {}
-
 _shader_program = ShaderProgram()
 
 # All user transformations are stored in these matrices. We send off
@@ -53,6 +44,9 @@ stroke_color = (0, 0, 0, 1.0)
 fill_enabled = True
 stroke_enabled = True
 
+vertex_buffer = -1
+index_buffer = -1
+
 def initialize(gl_version):
     """Initialize the OpenGL renderer.
 
@@ -60,6 +54,9 @@ def initialize(gl_version):
     the shader program.
 
     """
+    global vertex_buffer
+    global index_buffer
+
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
     glViewport(0, 0, builtins.width, builtins.height)
@@ -80,6 +77,12 @@ def initialize(gl_version):
     _shader_program.add_uniform('projection', 'mat4')
     _shader_program.add_uniform('view', 'mat4')
     _shader_program.add_uniform('model', 'mat4')
+
+    vertex_buffer = GLuint()
+    glGenBuffers(1, pointer(vertex_buffer))
+
+    index_buffer = GLuint()
+    glGenBuffers(1, pointer(index_buffer))
 
     reset_view()
     clear()
@@ -119,13 +122,16 @@ def reset_view():
 
 def pre_render():
     global transform_matrix
+    _shader_program.activate()
     transform_matrix = Matrix4()
     _shader_program['model'] = transform_matrix
     _shader_program['view'] = modelview_matrix
     _shader_program['projection'] = projection_matrix
 
 def post_render():
-    pass
+    glBindBuffer(GL_ARRAY_BUFFER, 0)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+    glUseProgram(0)
 
 def render(shape):
     """Use the renderer to render a Shape.
@@ -134,73 +140,43 @@ def render(shape):
     :type shape: Shape
     """
 
-    #
-    # TODO (abhikpal, 2017-06-10)
-    #
-    # - Ideally, this should be implemented by the Shape's
-    #   __hash__ so that we can use the shape itself as the dict
-    #   key and get rid of this str(__dict__(...) business.
-    #
-    # TODO (abhikpal, 2017-06-14)
-    #
-    # All of the buffer stuff needs refactoring.
-    #
-    shape_hash = str(shape.__dict__)
-
-    if shape_hash not in _geometries:
-        vertex_buffer = GLuint()
-        glGenBuffers(1, pointer(vertex_buffer))
-
-        index_buffer = GLuint()
-        glGenBuffers(1, pointer(index_buffer))
-
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
-
-        vertices = [vi for vertex in shape.vertices for vi in vertex]
-        vertices_typed =  (GLfloat * len(vertices))(*vertices)
-
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            sizeof(vertices_typed),
-            vertices_typed,
-            GL_STATIC_DRAW
-        )
-
-        elements = [idx for face in shape.faces for idx in face]
-        elements_typed = (GLuint * len(elements))(*elements)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            sizeof(elements_typed),
-            elements_typed,
-            GL_STATIC_DRAW
-        )
-
-        position_attr = glGetAttribLocation(_shader_program.pid, b"position")
-        glEnableVertexAttribArray(position_attr)
-        glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
-        _geometries[shape_hash] = {
-            'vertex_buffer': vertex_buffer,
-            'index_buffer': index_buffer,
-            'num_elements': len(elements)
-        }
-
     _shader_program['model'] = transform_matrix
 
-    glBindBuffer(GL_ARRAY_BUFFER, _geometries[shape_hash]['vertex_buffer'])
+    vertices = [vi for vertex in shape.vertices for vi in vertex]
+    vertices_typed =  (GLfloat * len(vertices))(*vertices)
 
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(vertices_typed),
+        vertices_typed,
+        GL_STATIC_DRAW
+    )
+    glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+    elements = [idx for face in shape.faces for idx in face]
+    elements_typed = (GLuint * len(elements))(*elements)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(elements_typed),
+        elements_typed,
+        GL_STATIC_DRAW
+    )
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
     position_attr = glGetAttribLocation(_shader_program.pid, b"position")
     glEnableVertexAttribArray(position_attr)
     glVertexAttribPointer(position_attr, 3, GL_FLOAT, GL_FALSE, 0, 0)
+    glBindBuffer(GL_ARRAY_BUFFER, 0)
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
     if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
         _shader_program['fill_color'] =  fill_color
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _geometries[shape_hash]['index_buffer'])
         glDrawElements(
             GL_TRIANGLES,
-            _geometries[shape_hash]['num_elements'],
+            len(elements),
             GL_UNSIGNED_INT,
             0
         )
@@ -209,17 +185,18 @@ def render(shape):
         if shape.kind is 'POINT':
             glDrawElements(
                 GL_POINTS,
-                _geometries[shape_hash]['num_elements'],
+                len(elements),
                 GL_UNSIGNED_INT,
                 0
             )
         else:
             glDrawElements(
                 GL_LINE_LOOP,
-                _geometries[shape_hash]['num_elements'],
+                len(elements),
                 GL_UNSIGNED_INT,
                 0
             )
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
 def test_render():
     """Render the renderer's default test drawing."""
