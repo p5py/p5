@@ -208,6 +208,12 @@ class Shader:
         """Deactivate the current shader"""
         glUseProgram(0)
 
+    def delete(self):
+        """Delete the current shader."""
+        glDeleteProgram(self._pid)
+        glDeleteShader(self._fid)
+        glDeleteShader(self._vid)
+
     def __repr__(self):
         return "{}( pid={} )".format(self.__class__.__name__, self._pid)
 

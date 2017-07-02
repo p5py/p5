@@ -82,7 +82,9 @@ def initialize(gl_version):
 
 def cleanup():
     """Run the clean-up routine for the renderer"""
-    pass
+    default_shader.delete()
+    glDeleteBuffers(1, vertex_buffer)
+    glDeleteBuffers(1, index_buffer)
 
 def clear():
     """Use the background color to clear the screen."""
