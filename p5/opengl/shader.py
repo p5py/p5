@@ -18,10 +18,10 @@
 """Helper functions and classed to work with OpenGL shaders.
 """
 from collections import namedtuple
-from ctypes import *
+import ctypes as ct
 import re
 
-from pyglet.gl import *
+from pyglet import gl
 
 debug = True
 
@@ -83,11 +83,11 @@ Attribute = namedtuple('Attribute', ['name', 'loc', 'size',
 # functions to set data to uniforms. All of them take *ONLY* two
 # params: the uniform location and the data to be set.
 def _uvec4(uniform, data):
-    glUniform4f(uniform, *data)
+    gl.glUniform4f(uniform, *data)
 
 def _umat4(uniform, matrix):
-    flattened = matrix[:]
-    glUniformMatrix4fv(uniform, 1, GL_FALSE, (GLfloat * 16)(*flattened))
+    data_array = (gl.GLfloat * 16)(*matrix[:])
+    gl.glUniformMatrix4fv(uniform, 1, gl.GL_FALSE, data_array)
 
 uniform_function_map = {
     'vec4': _uvec4,
@@ -95,8 +95,8 @@ uniform_function_map = {
 }
 
 attribute_dtype_map = {
-    'f': GL_FLOAT,
-    'float': GL_FLOAT,
+    'f': gl.GL_FLOAT,
+    'float': gl.GL_FLOAT,
 }
 
 
@@ -124,17 +124,18 @@ class Shader:
     """
 
     def __init__(self, vertex, fragment, version=None):
+        self._pid = gl.glCreateProgram()
+
         self._vertex_source = preprocess_shader(vertex, 'vert', version)
         self._fragment_source = preprocess_shader(fragment, 'frag', version)
-        self._pid = glCreateProgram()
 
         self.compile_vertex_shader()
         self.compile_fragment_shader()
 
-        glAttachShader(self._pid, self._vid)
-        glAttachShader(self._pid, self._fid)
+        gl.glAttachShader(self._pid, self._vid)
+        gl.glAttachShader(self._pid, self._fid)
 
-        glLinkProgram(self._pid)
+        gl.glLinkProgram(self._pid)
 
         self._uniforms = {}
         self._attributes = {}
@@ -152,23 +153,22 @@ class Shader:
         :rtype: int
 
         """
-        shader_id = glCreateShader(kind)
-        src = c_char_p(source.encode('utf-8'))
-        glShaderSource(
-            shader_id,
-            1,
-            cast(pointer(src), POINTER(POINTER(c_char))),
-            None
-        )
-        glCompileShader(shader_id)
-        status_code = c_int(0)
-        glGetShaderiv(shader_id, GL_COMPILE_STATUS, pointer(status_code))
+        shader_id = gl.glCreateShader(kind)
+        _src = ct.c_char_p(source.encode('utf-8'))
+        src = ct.cast(ct.pointer(_src), ct.POINTER(ct.POINTER(ct.c_char)))
+        gl.glShaderSource(shader_id, 1, src, None)
 
-        log_size = c_int(0)
-        glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, pointer(log_size))
+        gl.glCompileShader(shader_id)
+        status_code = ct.c_int(0)
+        status_code_pointer = ct.pointer(status_code)
+        gl.glGetShaderiv(shader_id, gl.GL_COMPILE_STATUS, status_code_pointer)
 
-        log_message = create_string_buffer(log_size.value)
-        glGetShaderInfoLog(shader_id, log_size, None, log_message)
+        log_size = ct.c_int(0)
+        log_size_pointer = ct.pointer(log_size)
+        gl.glGetShaderiv(shader_id, gl.GL_INFO_LOG_LENGTH, log_size_pointer)
+
+        log_message = ct.create_string_buffer(log_size.value)
+        gl.glGetShaderInfoLog(shader_id, log_size, None, log_message)
         log_message = log_message.value.decode('utf-8')
 
         if len(log_message) > 0:
@@ -186,40 +186,37 @@ class Shader:
 
     def compile_vertex_shader(self):
         """Compile the vertex shader associated with this program."""
-        self._vid = self._compile(self._vertex_source, GL_VERTEX_SHADER)
+        self._vid = self._compile(self._vertex_source, gl.GL_VERTEX_SHADER)
 
     def compile_fragment_shader(self):
         """Compile the fragment shader associated with this program."""
-        self._fid = self._compile(self._fragment_source, GL_FRAGMENT_SHADER)
+        self._fid = self._compile(self._fragment_source, gl.GL_FRAGMENT_SHADER)
 
-    def add_uniform(self, uniform_name, dtype):
+    def add_uniform(self, uname, dtype):
         """Add a uniform to the shader program.
 
-        :param uniform_name: name of the uniform.
-        :type uniform_name: str
+        :param uname: name of the uniform.
+        :type uname: str
 
         :param dtype: data type of the uniform -- 'vec3', 'mat4', etc
         :type dtype: str
 
         """
-        uniform_function = uniform_function_map[dtype]
-        self._uniforms[uniform_name] = Uniform(
-            uniform_name,
-            glGetUniformLocation(self._pid, uniform_name.encode()),
-            uniform_function
-        )
+        ufunc = uniform_function_map[dtype]
+        loc = gl.glGetUniformLocation(self._pid, uname.encode())
+        self._uniforms[uname] = Uniform(uname, loc, ufunc)
 
-    def update_uniform(self, uniform_name, data):
+    def update_uniform(self, uname, data):
         """Set data for the given uniform.
 
-        :param uniform_name: Name of the uniform.
-        :type uniform_name: str
+        :param uname: Name of the uniform.
+        :type uname: str
 
         :param data: data to which the uniform should be set to.
         :type data: dependent on the uniform
 
         """
-        uniform = self._uniforms[uniform_name]
+        uniform = self._uniforms[uname]
         uniform.function(uniform.uid, data)
 
     def add_attribute(self, name, data_format,
@@ -253,8 +250,8 @@ class Shader:
 
         size = int(data_format[0])
         dtype = attribute_dtype_map[data_format[1:]]
-        norm = GL_TRUE if normalize else GL_FALSE
-        loc = glGetAttribLocation(self._pid, name.encode('utf-8'))
+        norm = gl.GL_TRUE if normalize else gl.GL_FALSE
+        loc = gl.glGetAttribLocation(self._pid, name.encode('utf-8'))
         self._attributes[name] = Attribute(name, loc, size, dtype,
                                            norm, stride, offset)
 
@@ -270,25 +267,25 @@ class Shader:
 
         """
         attr = self._attributes[name]
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_id)
-        glEnableVertexAttribArray(attr.loc)
-        glVertexAttribPointer(attr.loc, attr.size, attr.dtype,
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo_id)
+        gl.glEnableVertexAttribArray(attr.loc)
+        gl.glVertexAttribPointer(attr.loc, attr.size, attr.dtype,
                               attr.norm, attr.stride, attr.offset)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
     def activate(self):
         """Activate the current shader."""
-        glUseProgram(self._pid)
+        gl.glUseProgram(self._pid)
 
     def deactivate(self):
         """Deactivate the current shader"""
-        glUseProgram(0)
+        gl.glUseProgram(0)
 
     def delete(self):
         """Delete the current shader."""
-        glDeleteProgram(self._pid)
-        glDeleteShader(self._fid)
-        glDeleteShader(self._vid)
+        gl.glDeleteProgram(self._pid)
+        gl.glDeleteShader(self._fid)
+        gl.glDeleteShader(self._vid)
 
     def __repr__(self):
         return "{}( pid={} )".format(self.__class__.__name__, self._pid)
