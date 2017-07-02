@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-"""Helper functions and classed to work with OpenGL shaders.
+"""Helper functions and classes to work with OpenGL shaders.
 """
 from collections import namedtuple
 import ctypes as ct
