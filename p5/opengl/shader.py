@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-
+"""Helper functions and classed to work with OpenGL shaders.
+"""
 from collections import namedtuple
 from ctypes import *
 import re
@@ -24,11 +25,15 @@ from pyglet.gl import *
 
 debug = True
 
+# A mapping from OpenGL versions to the corresponding GLSL version.
+# Required for preprocessing shaders and determining GLSL shader
+# versions to use.
 GLSL_VERSIONS = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
                   '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410,
                   '4.2': 420, '4.3': 430, '4.4': 440, '4.5': 450, }
 
 
+# Default vertex and fragment shaders.
 vertex_default = """
 attribute vec3 position;
 
@@ -52,12 +57,31 @@ void main()
 """
 
 
+# A named tuple that descibes a shader uniform.
+#
+# - name: name of the shader uniform.
+# - uid: uniform id, location of the uniform.
+# - function: function that needs to be called while setting the
+#   shader
 Uniform = namedtuple('Uniform', ['name', 'uid', 'function'])
 
+
+# A named tuple that descibes a attribute.
+#
+# - name: name of the attribute
+# - loc: location of the attribute
+# - size: number of values that descibe this attribute.
+# - dtype: data type of the attribute.
+# - norm: should the attribute be normalized to the (0, 1) range?
+# - stride: stride in the main data array descibing the attribute.
+# - offset: offset in the main data array descibing the attribute.
+#
 Attribute = namedtuple('Attribute', ['name', 'loc', 'size',
                                      'dtype','norm', 'stride',
                                      'offset'])
 
+# functions to set data to uniforms. All of them take *ONLY* two
+# params: the uniform location and the data to be set.
 def _uvec4(uniform, data):
     glUniform4f(uniform, *data)
 
@@ -77,9 +101,29 @@ attribute_dtype_map = {
 
 
 class Shader:
-    """A thin abstraction layer that helps work with shader programs."""
+    """Encapsulates a GLSL shader program.
 
-    def __init__(self, vertex, fragment, version='2.0'):
+    Every shader requires the vertex and fragment sources during
+    initialization. These shaders are preprocessed to be compatible
+    with the OpenGL version of the user's GL context. So,
+    additionally, the OpenGL version of the context is also required
+    during initialization.
+
+    Note that shader sources that explicitly mention the required
+    OpenGL version (using `#version`) *ARE NOT* preprocessed.
+
+    :param vertex: source code of the vertex shader.
+    :type vertex: str
+
+    :param fragment: source code of the fragment. shader.
+    :type fragment: str
+
+    :param version: OpenGL version being used (defaults to None)
+    :type version: str
+
+    """
+
+    def __init__(self, vertex, fragment, version=None):
         self._vertex_source = preprocess_shader(vertex, 'vert', version)
         self._fragment_source = preprocess_shader(fragment, 'frag', version)
         self._pid = glCreateProgram()
@@ -94,10 +138,6 @@ class Shader:
 
         self._uniforms = {}
         self._attributes = {}
-
-    @property
-    def pid(self):
-        return self._pid
 
     def _compile(self, source, kind):
         """Compile a shader from its source code.
@@ -149,7 +189,7 @@ class Shader:
         self._vid = self._compile(self._vertex_source, GL_VERTEX_SHADER)
 
     def compile_fragment_shader(self):
-        """Compile the fragmen shader associated with this program."""
+        """Compile the fragment shader associated with this program."""
         self._fid = self._compile(self._fragment_source, GL_FRAGMENT_SHADER)
 
     def add_uniform(self, uniform_name, dtype):
@@ -158,7 +198,7 @@ class Shader:
         :param uniform_name: name of the uniform.
         :type uniform_name: str
 
-        :param dtype: data type of the uniform: 'vec3', 'mat4', etc
+        :param dtype: data type of the uniform -- 'vec3', 'mat4', etc
         :type dtype: str
 
         """
@@ -176,28 +216,64 @@ class Shader:
         :type uniform_name: str
 
         :param data: data to which the uniform should be set to.
-        :type data: tuple
+        :type data: dependent on the uniform
 
         """
         uniform = self._uniforms[uniform_name]
         uniform.function(uniform.uid, data)
 
     def add_attribute(self, name, data_format,
-                      normed=False, stride=0, offset=0):
+                      normalize=False, stride=0, offset=0):
+        """Add an attribute to the current shader.
+
+        :param name: name of the attribute being added.
+        :type name: str
+
+        :param data_format: a string describing the data format of the
+            attribute. The general syntax is `<size><data_type>` where
+            size is the number of the data points that describe the
+            attribute and data_type represents the data type of the
+            data points. For example '3f' describes an attribute with
+            3 floating point data points.
+        :type data_format: str
+
+        :param normalize: When set to True, OpenGL will normalize the
+            data to the range [0.0, 1.0] (defaults to False)
+        :type normalize: bool
+
+        :param stride: Specifies the offset between consecutive
+            attributes (defaults to 0).
+        :type stride: int
+
+        :param offset: Location of the first component of the
+            attribute in the data array (defaults to 0).
+        :type offset: int
+
+        """
 
         size = int(data_format[0])
         dtype = attribute_dtype_map[data_format[1:]]
-        norm = GL_TRUE if normed else GL_FALSE
+        norm = GL_TRUE if normalize else GL_FALSE
         loc = glGetAttribLocation(self._pid, name.encode('utf-8'))
         self._attributes[name] = Attribute(name, loc, size, dtype,
                                            norm, stride, offset)
 
-    def update_attribute(self, name, vbo_id, ):
+    def update_attribute(self, name, vbo_id):
+        """Update the value of the given attribute.
+
+        :param name: name of the attribute to be updated.
+        :type name: str
+
+        :param vbo_id: The id of the vertex buffer object that
+            contains the data for the given attribute.
+        :type vbo_id: int
+
+        """
         attr = self._attributes[name]
         glBindBuffer(GL_ARRAY_BUFFER, vbo_id)
         glEnableVertexAttribArray(attr.loc)
-        glVertexAttribPointer(attr.loc, attr.size, attr.dtype, attr.norm,
-                              attr.stride, attr.offset)
+        glVertexAttribPointer(attr.loc, attr.size, attr.dtype,
+                              attr.norm, attr.stride, attr.offset)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     def activate(self):
