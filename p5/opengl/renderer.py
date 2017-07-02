@@ -17,8 +17,8 @@
 #
 """The OpenGL renderer for p5."""
 
-import builtins
 from ctypes import *
+import builtins
 import math
 
 from pyglet.gl import *
@@ -30,9 +30,6 @@ from .shader import vertex_default
 
 default_shader = None
 
-# All user transformations are stored in these matrices. We send off
-# the matrix data as uniforms while rendering a shape.
-#
 transform_matrix = Matrix4()
 modelview_matrix = Matrix4()
 projection_matrix = Matrix4()
@@ -46,7 +43,7 @@ fill_enabled = True
 stroke_enabled = True
 
 vertex_buffer = -1
-index_buffer = -1
+element_buffer = -1
 
 def initialize(gl_version):
     """Initialize the OpenGL renderer.
@@ -54,9 +51,12 @@ def initialize(gl_version):
     For an OpenGL based renderer this sets up the viewport and creates
     the shader program.
 
+    :param gl_version: The version of OpenGL to use.
+    :type gl_version: str
+
     """
     global vertex_buffer
-    global index_buffer
+    global element_buffer
     global default_shader
 
     glEnable(GL_DEPTH_TEST)
@@ -65,35 +65,41 @@ def initialize(gl_version):
     default_shader = Shader(vertex_default, fragment_default, gl_version)
 
     default_shader.activate()
+
     default_shader.add_uniform('fill_color', 'vec4')
     default_shader.add_uniform('projection', 'mat4')
     default_shader.add_uniform('modelview', 'mat4')
     default_shader.add_uniform('transform', 'mat4')
+
     default_shader.add_attribute('position', '3f')
 
     vertex_buffer = GLuint()
     glGenBuffers(1, pointer(vertex_buffer))
 
-    index_buffer = GLuint()
-    glGenBuffers(1, pointer(index_buffer))
+    element_buffer = GLuint()
+    glGenBuffers(1, pointer(element_buffer))
 
     reset_view()
     clear()
 
 def cleanup():
-    """Run the clean-up routine for the renderer"""
+    """Run the clean-up routine for the renderer.
+
+    This method is called when all drawing has been completed and the
+    program is about to exit.
+
+    """
     default_shader.delete()
     glDeleteBuffers(1, vertex_buffer)
-    glDeleteBuffers(1, index_buffer)
+    glDeleteBuffers(1, element_buffer)
 
 def clear():
-    """Use the background color to clear the screen."""
+    """Clear the renderer background."""
     glClearColor(*background_color)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 def reset_view():
-    """Reset the view of the renderer.
-    """
+    """Reset the view of the renderer."""
     global transform_matrix
     global modelview_matrix
     global projection_matrix
@@ -119,6 +125,12 @@ def reset_view():
     default_shader.update_uniform('projection', projection_matrix)
 
 def pre_render():
+    """Initialize things for a draw call.
+
+    The pre_render is the first thing that is called when we want to
+    refresh/redraw the contents of the screen on each draw call.
+
+    """
     global transform_matrix
     transform_matrix = Matrix4()
 
@@ -131,6 +143,12 @@ def pre_render():
     default_shader.update_uniform('projection', projection_matrix)
 
 def post_render():
+    """Cleanup things after a draw call.
+
+    The post_render is called once all the rendering is done for the
+    last draw call.
+
+    """
     glBindBuffer(GL_ARRAY_BUFFER, 0)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
     default_shader.deactivate()
@@ -158,7 +176,7 @@ def render(shape):
 
     elements = [idx for face in shape.faces for idx in face]
     elements_typed = (GLuint * len(elements))(*elements)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
         sizeof(elements_typed),
@@ -169,7 +187,7 @@ def render(shape):
 
     default_shader.update_attribute('position', vertex_buffer)
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
     if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
         default_shader.update_uniform('fill_color', fill_color)
         glDrawElements(
