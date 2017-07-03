@@ -23,6 +23,7 @@ import math
 
 from pyglet.gl import *
 
+from . import support
 from ..tmp import Matrix4
 from .shader import Shader
 from .shader import fragment_default
