@@ -28,6 +28,7 @@ _Point = namedtuple('Point', ['x', 'y', 'z'])
 _Point.__new__.__defaults__ = (None, None, 0)
 
 _rect_mode = 'CORNER'
+_ellipse_mode = 'CENTER'
 
 builtins.CORNER = 'CORNER'
 builtins.CORNERS = 'CORNERS'
@@ -246,3 +247,13 @@ def ellipse(*args):
 @sketch.artist
 def circle(*args):
     raise NotImplementedError
+
+def ellipse_mode(mode):
+    """Change the ellipse drawing mode for the sketch.
+
+    :param mode: The new mode for drawing ellipses. Should be one of
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}
+    :type mode: str
+    """
+    global _ellipse_mode
+    _ellipse_mode = mode
