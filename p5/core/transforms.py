@@ -20,7 +20,7 @@ import builtins
 from contextlib import contextmanager
 import math
 
-from ..opengl import renderer
+from ..sketch import renderer
 from ..tmp.euclid import Matrix4
 from ..tmp.euclid import Vector3
 

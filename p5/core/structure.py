@@ -17,7 +17,7 @@
 #
 from contextlib import contextmanager
 
-from ..opengl import renderer
+from ..sketch import renderer
 
 @contextmanager
 def push_style():

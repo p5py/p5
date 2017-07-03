@@ -21,9 +21,9 @@ import builtins
 import pyglet
 
 from . import base
-from .base import window
 from .base import handlers
-from ..opengl import renderer
+from .base import renderer
+from .base import window
 
 builtins.focused = True
 builtins.mouse_button = None

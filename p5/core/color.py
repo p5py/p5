@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from ..opengl import renderer
+from ..sketch import renderer
 
 __all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
             'stroke', 'no_stroke', ]
