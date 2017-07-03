@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import builtins
 from collections import namedtuple
 
 from .. import sketch
@@ -25,6 +26,13 @@ __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
 
 _Point = namedtuple('Point', ['x', 'y', 'z'])
 _Point.__new__.__defaults__ = (None, None, 0)
+
+_rect_mode = 'CORNER'
+
+builtins.CORNER = 'CORNER'
+builtins.CORNERS = 'CORNERS'
+builtins.CENTER = 'CENTER'
+builtins.RADIUS = 'RADIUS'
 
 class Shape:
     """Represents a Shape in p5py.
@@ -134,42 +142,102 @@ def quad(p1, p2, p3, p4):
     faces = [(0, 1, 2), (2, 3, 0)]
     return Shape('POLY', vertices, faces)
 
-def rect(coordinate, width, height):
+def rect(coordinate, *args, mode=_rect_mode):
     """Return a rectangle.
 
-    :param coordinate: The lower-left corner of the rectangle.
+    :param coordinate: Represents the lower left corner of then
+        rectangle when mode is 'CORNER', the center of the rectangle
+        when mode is 'CENTER' or 'RADIUS', and an arbitrary corner
+        when mode is 'CORNERS'
+
     :type coordinate: 3-tuple
 
-    :param width: The width of the rectangle.
-    :type: width: int or float
+    :param args: For modes'CORNER' or 'CENTER' this has the form
+        (width, height); for the 'RADIUS' this has the form
+        (half_width, half_height); and for the 'CORNERS' mode, args
+        should be the corner opposite to `coordinate`.
 
-    :param height: The height of the rectangle.
-    :type: height: int or float
+    :type: tuple
+
+    :param mode: The drawing mode for the rectangle. Should be one of
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
+        mode being used by the sketch.)
+
+    :type mode: str
 
     :returns: A rectangle.
     :rtype: Shape
 
     """
-    p1 = _Point(*coordinate)
+    if mode == 'CORNER':
+        corner = coordinate
+        width, height = args
+    elif mode == 'CENTER':
+        center = _Point(*coordinate)
+        width, height = args
+        corner = _Point(center.x - width/2, center.y - height/2, center.z)
+    elif mode == 'RADIUS':
+        center = _Point(*coordinate)
+        half_width, half_height = args
+        corner = _Point(center.x - half_width, center.y - half_height, center.z)
+        width = 2 * half_width
+        height = 2 * half_height
+    elif mode == 'CORNERS':
+        corner = _Point(*coordinate)
+        corner_2, = args
+        corner_2 = _Point(*corner_2)
+        width = corner_2.x - corner.x
+        height = corner_2.y - corner.y
+    else:
+        raise ValueError("Unknown rect mode {}".format(mode))
+
+    p1 = _Point(*corner)
     p2 = _Point(p1.x + width, p1.y, p1.z)
     p3 = _Point(p2.x, p2.y + height, p2.z)
     p4 = _Point(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
-def square(coordinate, side_length):
+def square(coordinate, side_length, mode=_rect_mode):
     """Return a square.
 
-    :param coordinate: The lower-left corner of the square.
+    :param coordinate: When mode is set to 'CORNER', the coordinate
+        represents the lower-left corner of the square. For modes
+        'CENTER' and 'RADIUS' the coordinate represents the center of
+        the square.
+
     :type coordinate: 3-tuple
 
-    :param side_length: The side_length of the square.
+    :param side_length: The side_length of the square (for modes
+        'CORNER' and 'CENTER') or hald of the side length (for the
+        'RADIUS' mode)
+
     :type side_length: int or float
+
+    :param mode: The drawing mode for the square. Should be one of
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
+        mode being used by the sketch.)
+
+    :type mode: str
 
     :returns: A rectangle.
     :rtype: Shape
 
+    :raises ValueError: When the mode is set to 'CORNERS'
+
     """
-    return rect(coordinate, side_length, side_length)
+    if mode == 'CORNERS':
+        raise ValueError("Cannot draw square with {} mode".format(mode))
+    return rect(coordinate, side_length, side_length, mode=mode)
+
+def rect_mode(mode):
+    """Change the rect mode for the sketch.
+
+    :param mode: The new mode for drawing rectangles. Should be one of
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}
+    :type mode: str
+    """
+    global _rect_mode
+    _rect_mode = mode
 
 @sketch.artist
 def ellipse(*args):
