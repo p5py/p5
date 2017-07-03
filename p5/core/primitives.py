@@ -230,11 +230,13 @@ def square(coordinate, side_length, mode=_rect_mode):
         raise ValueError("Cannot draw square with {} mode".format(mode))
     return rect(coordinate, side_length, side_length, mode=mode)
 
-def rect_mode(mode):
+def rect_mode(mode='CORNER'):
     """Change the rect mode for the sketch.
 
-    :param mode: The new mode for drawing rectangles. Should be one of
-        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}
+    :param mode: The new mode for drawing rects. Should be one of
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
+        'CORNER' so calling rect_mode without parameters will reset
+        the sketch's rect mode.
     :type mode: str
     """
     global _rect_mode
@@ -248,12 +250,15 @@ def ellipse(*args):
 def circle(*args):
     raise NotImplementedError
 
-def ellipse_mode(mode):
+def ellipse_mode(mode='CENTER'):
     """Change the ellipse drawing mode for the sketch.
 
     :param mode: The new mode for drawing ellipses. Should be one of
-        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
+        'CENTER' so calling ellipse_mode without parameters will reset
+        the sketch's ellipse mode.
     :type mode: str
+
     """
     global _ellipse_mode
     _ellipse_mode = mode
