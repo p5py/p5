@@ -45,19 +45,25 @@ stroke_enabled = True
 vertex_buffer = -1
 element_buffer = -1
 
-def initialize(gl_version):
+context = None
+
+def initialize(window_context):
     """Initialize the OpenGL renderer.
 
     For an OpenGL based renderer this sets up the viewport and creates
     the shader program.
 
-    :param gl_version: The version of OpenGL to use.
-    :type gl_version: str
+    :param window_context: The OpenGL context associated with this renderer.
+    :type window_context: pyglet.gl.Context
 
     """
+    global context
     global vertex_buffer
     global element_buffer
     global default_shader
+
+    context = window_context
+    gl_version = context.get_info().get_version()[:3]
 
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)

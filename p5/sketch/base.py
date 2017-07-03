@@ -130,8 +130,7 @@ def title(new_title):
     window.set_caption("{} - p5".format(new_title))
 
 def initialize(*args, **kwargs):
-    gl_version = window.context.get_info().get_version()[:3]
-    renderer.initialize(gl_version)
+    renderer.initialize(window.context)
     window.set_visible()
 
 def run(user_setup=None, user_draw=None):
