@@ -253,7 +253,7 @@ def rect_mode(mode='CORNER'):
 
 @sketch.artist
 def ellipse(coordinate, *args, mode=_ellipse_mode):
-    """Return a rectangle.
+    """Return a ellipse.
 
     :param coordinate: Represents the center of the ellipse when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
