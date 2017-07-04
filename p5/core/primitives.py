@@ -24,8 +24,8 @@ from .. import sketch
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse']
 
-_Point = namedtuple('Point', ['x', 'y', 'z'])
-_Point.__new__.__defaults__ = (None, None, 0)
+Vertex = namedtuple('Vertex', ['x', 'y', 'z'])
+Vertex.__new__.__defaults__ = (None, None, 0)
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
@@ -61,6 +61,15 @@ class Shape:
 
     __str__ = __repr__
 
+class Ellipse(Shape):
+    def __init__(self, center, x_radius, y_radius):
+        self.kind = 'ELLIPSE'
+        self.vertices = None
+        self.faces = None
+        self.center = Vertex(*center)
+        self.xrad = x_radius
+        self.yrad = y_radius
+
 @sketch.artist
 def point(x, y, z=0):
     """Returns a point Shape.
@@ -78,7 +87,7 @@ def point(x, y, z=0):
     :rtype: Shape
 
     """
-    return Shape('POINT', [_Point(x, y, z)], [(0,)])
+    return Shape('POINT', [Vertex(x, y, z)], [(0,)])
 
 @sketch.artist
 def line(p1, p2):
@@ -94,7 +103,7 @@ def line(p1, p2):
     :rtype: Shape
 
     """
-    return Shape('LINE', [_Point(*p1), _Point(*p2)], [(0, 1)])
+    return Shape('LINE', [Vertex(*p1), Vertex(*p2)], [(0, 1)])
 
 @sketch.artist
 def arc(*args):
@@ -116,7 +125,7 @@ def triangle(p1, p2, p3):
     :returns: A triangle.
     :rtype: Shape
     """
-    vertices = [_Point(*p1), _Point(*p2), _Point(*p3)]
+    vertices = [Vertex(*p1), Vertex(*p2), Vertex(*p3)]
     faces = [(0, 1, 2)]
     return Shape('POLY', vertices, faces)
 
@@ -139,7 +148,7 @@ def quad(p1, p2, p3, p4):
     :returns: A triangle.
     :rtype: Shape
     """
-    vertices = [_Point(*p1), _Point(*p2), _Point(*p3), _Point(*p4)]
+    vertices = [Vertex(*p1), Vertex(*p2), Vertex(*p3), Vertex(*p4)]
     faces = [(0, 1, 2), (2, 3, 0)]
     return Shape('POLY', vertices, faces)
 
@@ -174,28 +183,28 @@ def rect(coordinate, *args, mode=_rect_mode):
         corner = coordinate
         width, height = args
     elif mode == 'CENTER':
-        center = _Point(*coordinate)
+        center = Vertex(*coordinate)
         width, height = args
-        corner = _Point(center.x - width/2, center.y - height/2, center.z)
+        corner = Vertex(center.x - width/2, center.y - height/2, center.z)
     elif mode == 'RADIUS':
-        center = _Point(*coordinate)
+        center = Vertex(*coordinate)
         half_width, half_height = args
-        corner = _Point(center.x - half_width, center.y - half_height, center.z)
+        corner = Vertex(center.x - half_width, center.y - half_height, center.z)
         width = 2 * half_width
         height = 2 * half_height
     elif mode == 'CORNERS':
-        corner = _Point(*coordinate)
+        corner = Vertex(*coordinate)
         corner_2, = args
-        corner_2 = _Point(*corner_2)
+        corner_2 = Vertex(*corner_2)
         width = corner_2.x - corner.x
         height = corner_2.y - corner.y
     else:
         raise ValueError("Unknown rect mode {}".format(mode))
 
-    p1 = _Point(*corner)
-    p2 = _Point(p1.x + width, p1.y, p1.z)
-    p3 = _Point(p2.x, p2.y + height, p2.z)
-    p4 = _Point(p1.x, p3.y, p3.z)
+    p1 = Vertex(*corner)
+    p2 = Vertex(p1.x + width, p1.y, p1.z)
+    p3 = Vertex(p2.x, p2.y + height, p2.z)
+    p4 = Vertex(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
 def square(coordinate, side_length, mode=_rect_mode):
@@ -243,11 +252,58 @@ def rect_mode(mode='CORNER'):
     _rect_mode = mode
 
 @sketch.artist
-def ellipse(*args):
-    raise NotImplementedError
+def ellipse(coordinate, *args, mode=_ellipse_mode):
+    """Return a rectangle.
 
-@sketch.artist
-def circle(*args):
+    :param coordinate: Represents the center of the ellipse when mode
+        is 'CENTER' (the default) or 'RADIUS', the lower-left corner
+        of the ellipse when mode is 'CORNER' or, and an arbitrary
+        corner when mode is 'CORNERS'.
+
+    :type coordinate: 3-tuple
+
+    :param args: For modes'CORNER' or 'CENTER' this has the form
+        (width, height); for the 'RADIUS' this has the form
+        (x_radius, y_radius); and for the 'CORNERS' mode, args
+        should be the corner opposite to `coordinate`.
+
+    :type: tuple
+
+    :param mode: The drawing mode for the ellipse. Should be one of
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
+        mode being used by the sketch.)
+
+    :type mode: str
+
+    :returns: An ellipse.
+    :rtype: Ellipse
+
+    """
+
+    if mode == 'CORNER':
+        corner = Vertex(*coordinate)
+        width, height = args
+        xrad = width/2
+        yrad = height/2
+        center = Vertex(corner.x + xrad, corner.y + yrad, corner.z)
+    elif mode == 'CENTER':
+        center = Vertex(*coordinate)
+        xrad, yrad = args
+    elif mode == 'RADIUS':
+        center = Vertex(*coordinate)
+        xrad, yrad = args
+    elif mode == 'CORNERS':
+        corner = Vertex(*coordinate)
+        corner_2, = args
+        corner_2 = Vertex(*corner_2)
+        xrad = (corner_2.x - corner.x)/2
+        yrad = (corner_2.y - corner.y)/2
+        center = Vertex(corner.x + xrad, corner.y + yrad, corner.z)
+    else:
+        raise ValueError("Unknown ellipse mode {}".format(mode))
+    return Ellipse(center, xrad, yrad)
+
+def circle(coordinate, *args, mode=_ellipse_mode):
     raise NotImplementedError
 
 def ellipse_mode(mode='CENTER'):
