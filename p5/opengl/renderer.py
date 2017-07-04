@@ -160,6 +160,48 @@ def post_render():
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
     default_shader.deactivate()
 
+def flatten(vertex_list):
+    """Flatten a vertex list
+
+    An unflattened list of vertices is a list of tuples [(x1, y2, z1),
+    (x2, y2, z2), ...] where as a list of flattened vertices doesn't
+    have any tuples [x1, y1, z2, x2, y2, z2, ...]
+
+    :param vertex_list: list of vertices to be flattened.
+    :type vertex_list: list of 3-tuples
+
+    :returns: a flattened vertex_list
+    :rtype: list
+
+    """
+    return [vi for vertex in vertex_list for vi in vertex]
+
+def tessellate(shape):
+    """Generate vertices from Shape data.
+
+    :param shape: The input shape.
+    :type shape: Shape
+
+    :returns: The tesselated shape
+    :rtype: Shape
+
+    """
+    if shape.kind == 'POLY':
+        return shape
+    elif shape.kind == 'ELLIPSE':
+        shape.vertices = [
+            (
+                shape.center.x + shape.xrad*math.cos(math.radians(angle / 2)),
+                shape.center.y + shape.yrad*math.sin(math.radians(angle / 2)),
+                shape.center.z
+            )
+            for angle in range(720)
+        ]
+        shape.faces = [
+            (0, i, (i + 1)) for i in range(1, 719)
+        ]
+        return shape
+
 def render(shape):
     """Use the renderer to render a Shape.
 
@@ -169,7 +211,9 @@ def render(shape):
 
     default_shader.update_uniform('transform', transform_matrix)
 
-    vertices = [vi for vertex in shape.vertices for vi in vertex]
+    tessellated_shape = tessellate(shape)
+
+    vertices = flatten(tessellated_shape.vertices)
     vertices_typed =  (GLfloat * len(vertices))(*vertices)
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
@@ -181,7 +225,7 @@ def render(shape):
     )
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-    elements = [idx for face in shape.faces for idx in face]
+    elements = [idx for face in tessellated_shape.faces for idx in face]
     elements_typed = (GLuint * len(elements))(*elements)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
     glBufferData(
@@ -194,8 +238,8 @@ def render(shape):
 
     default_shader.update_attribute('position', vertex_buffer)
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
     if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
         default_shader.update_uniform('fill_color', fill_color)
         glDrawElements(
             GL_TRIANGLES,
@@ -203,7 +247,11 @@ def render(shape):
             GL_UNSIGNED_INT,
             0
         )
-    if stroke_enabled:
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+
+    # Temporarily disable stroking ellipses
+    if stroke_enabled and shape.kind is not 'ELLIPSE':
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
         default_shader.update_uniform('fill_color', stroke_color)
         if shape.kind is 'POINT':
             glDrawElements(
@@ -219,7 +267,7 @@ def render(shape):
                 GL_UNSIGNED_INT,
                 0
             )
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
 def test_render():
     """Render the renderer's default test drawing."""
