@@ -37,10 +37,6 @@ builtins.mouse_y = 0
 builtins.pmouse_x = 0
 builtins.pmouse_y = 0
 
-builtins.MOUSE_LEFT = mouse.LEFT
-builtins.MOUSE_CENTER = mouse.MIDDLE
-builtins.MOUSE_RIGHT = mouse.RIGHT
-
 builtins.key = None
 builtins.key_is_pressed = False
 
@@ -118,14 +114,28 @@ class MouseButton:
         self._buttons = buttons
 
     def __eq__(self, other):
-        if other in [mouse.LEFT, mouse.MIDDLE, mouse.RIGHT]:
-            return self._buttons & other
+        if isinstance(other, str):
+            button_map = {
+                'CENTER': mouse.MIDDLE,
+                'MIDDLE': mouse.MIDDLE,
+                'LEFT': mouse.LEFT,
+                'RIGHT': mouse.RIGHT,
+            }
+            if other.upper() in button_map:
+                return self._buttons & button_map[other.upper()]
+            else:
+                return False
+        # What if the `other` is actually a MouseButton?
+        # +- YES? Compare the _buttons!
+        # +-- NO? Nothing to be done. Let the error bubble up...
         return self._buttons == other._buttons
 
-    def __repr__(self):
+    def __str__(self):
         return mouse.buttons_string(self._buttons)
 
-    __str__ = __repr__
+    def __repr__(self):
+        fvalues = self._buttons, str(self)
+        return "MouseButton( code={}, buttons={} )".format(*fvalues)
 
 
 class MouseEvent(Event):
@@ -235,7 +245,7 @@ class Key:
         self._key_code == other._key_code
 
     def __str__(self):
-        return "{}".format(key.symbol_string(self._key_code))
+        return key.symbol_string(self._key_code)
 
     def __repr__(self):
         return "Key( code={}, symbol={} )".format(self._key_code, str(self))

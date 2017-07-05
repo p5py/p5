@@ -8,11 +8,11 @@ def setup():
 def draw():
     background(1, 1, 1, 1)
     if mouse_is_pressed:
-        if mouse_button == MOUSE_LEFT:
+        if mouse_button == 'LEFT':
             fill(0.9, 0.1, 0.1, 1)
-        elif mouse_button == MOUSE_RIGHT:
+        elif mouse_button == 'RIGHT':
             fill(0.1, 0.9, 0.1, 1)
-        elif mouse_button == MOUSE_CENTER:
+        elif mouse_button == 'CENTER':
             fill(0.1, 0.1, 0.9, 1)
         else:
             fill(0.5, 0.5, 0.5, 1)
