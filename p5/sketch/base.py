@@ -87,8 +87,8 @@ def update(dt):
     if looping or redraw:
         draw()
         redraw = False
-    for handler_function in handler_queue:
-        handler_function()
+    for function, event in handler_queue:
+        function(event)
     handler_queue = []
     renderer.post_render()
 
@@ -133,6 +133,22 @@ def initialize(*args, **kwargs):
     renderer.initialize(window.context)
     window.set_visible()
 
+def fix_handler_interface(func):
+    """Make sure that `func` takes at least one argument as input.
+
+    :returns: a new function that accepts arguments.
+    :rtype: func
+    """
+    @wraps(func)
+    def fixed_func(*args, **kwargs):
+        return_value = func()
+        return return_value
+
+    if func.__code__.co_argcount == 0:
+        return fixed_func
+    else:
+        return func
+
 def run(user_setup=None, user_draw=None):
     """Run a sketch.
     """
@@ -151,7 +167,8 @@ def run(user_setup=None, user_draw=None):
 
     for handler in handler_names:
         if hasattr(__main__, handler):
-            handlers[handler] = getattr(__main__, handler)
+            handler_func = getattr(__main__, handler)
+            handlers[handler] = fix_handler_interface(handler_func)
 
     initialize()
     pyglet.clock.schedule_interval(update, 1/(target_frame_rate + 1))
