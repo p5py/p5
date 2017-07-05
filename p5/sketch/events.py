@@ -42,14 +42,14 @@ builtins.MOUSE_CENTER = mouse.MIDDLE
 builtins.MOUSE_RIGHT = mouse.RIGHT
 
 builtins.key = None
-builtins.key_code = None
-builtins.key_pressed = None
+builtins.key_is_pressed = False
 
 Position = namedtuple('Position', ['x', 'y'])
 
 class Event:
-    def __init__(self, modifiers):
+    def __init__(self, modifiers, handler_name=None):
         self.modifiers = modifiers
+        self.handler_name = handler_name
 
     def is_shift_down(self):
         """Was shift held down during the event?
@@ -99,7 +99,17 @@ class Event:
 
     def _add_to_handler_queue(self):
         """Add the current event to the main handler queue."""
-        raise NotImplementedError("abstract")
+        if self.handler_name in base.handler_names:
+            base.handler_queue.append((handlers[self.handler_name], self))
+
+    @staticmethod
+    def _generate_hander_name(prefix, action):
+        """Generate a handler name from a prefix and action.
+        """
+        if action.upper().endswith('E'):
+            return "{}_{}d".format(prefix, action.lower())
+        else:
+            return "{}_{}ed".format(prefix, action.lower())
 
 
 class MouseButton:
@@ -173,10 +183,7 @@ class MouseEvent(Event):
         if handler_name is not None:
             self.handler_name = handler_name
         else:
-            if self.action.endswith('E'):
-                self.handler_name = "mouse_{}d".format(action.lower())
-            else:
-                self.handler_name = "mouse_{}ed".format(action.lower())
+            self.handler_name = self._generate_hander_name('mouse', action)
 
         self._update_globals()
         self._add_to_handler_queue()
@@ -188,16 +195,112 @@ class MouseEvent(Event):
         builtins.mouse_y = self.y
         builtins.mouse_button = self.button
 
-    def _add_to_handler_queue(self):
-        if self.handler_name in base.handler_names:
-            base.handler_queue.append((handlers[self.handler_name], self))
-
     def __repr__(self):
         button_string = 'NO' if self.button is None else str(self.button)
         fvalues = self.action, self.position, button_string
         return "MouseEvent( {} at {} with {} button(s) )".format(*fvalues)
 
     __str__ = __repr__
+
+
+class Key:
+    """A higher level abstraction over a single key press.
+
+    :param key_code: The key_code symbol for this key (should be a
+        symbol defined in pyglet.window.key)
+    :type key_code: int
+
+    """
+    def __init__(self, key_code):
+        self._key_code = key_code
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            # to check if two keys are equal, we get the equivalent
+            # attribute form pyglet.window.key and then compare the
+            # key codes.
+            if hasattr(key, other.upper()):
+                other_key = getattr(key, other.upper())
+                return other_key == self._key_code
+            # the numeric keys in pyglet.window.key are prefixed with
+            # an underscrore. This workaround makes sure that we check
+            # if a numeric key is pressed when the first condition
+            # fails.
+            elif hasattr(key, '_' + other):
+                other_key = get_attr(key, '_' + other)
+                return other_key == self._key_code
+            else:
+                return False
+        # maybe `other` is actually a Key?
+        self._key_code == other._key_code
+
+    def __str__(self):
+        return "{}".format(key.symbol_string(self._key_code))
+
+    def __repr__(self):
+        return "Key( code={}, symbol={} )".format(self._key_code, str(self))
+
+
+class KeyEvent(Event):
+    """Encapsulates information about a key event.
+
+    :param action: The action type for this key event. Should be one
+        of {'PRESS', 'RELEASE', 'TYPE'}
+    :type action: str
+
+    :param key_text: The key-text for this event (defaults to None).
+    :type key_text: str
+
+    :param key_code: The symbol for the key that was pressed (defaults
+        to None). This should be symbol defined in pyglet.window.key
+    :param key_code: int
+
+    :param modifiers: The modifier keys pressed at the time of the
+        event.
+    :type modifiers: int
+
+    :param handler_name: The name of the handler function to be
+        attached to this event (defaults to None). When this is not
+        specified, KeyEvent automatically tried to generate a function
+        name to use using the `action` string.
+    :type handler_name: str
+
+    :raises ValueError: When both key_text and key_code are None
+        during initialization.
+
+    """
+    def __init__(self, action, key_text=None, key_code=None,
+                 modifiers=0, handler_name=None):
+
+        self.action = action
+
+        if key_text is not None:
+            self.key = key_text
+        elif key_code is not None:
+            self.key = Key(key_code)
+        else:
+            raise ValueError('Failed to assign a key to the event!')
+
+        if handler_name is not None:
+            self.handler_name = handler_name
+        else:
+            self.handler_name = self._generate_hander_name('key', action)
+
+        self._update_globals()
+        self._add_to_handler_queue()
+
+    def _update_globals(self):
+        builtins.key = self.key
+        if self.action == 'PRESS':
+            builtins.key_is_pressed = True
+        elif self.action == 'RELEASE':
+            builtins.key_is_pressed = False
+
+    def __repr__(self):
+        return "KeyEvent( {} key {} )".format(self.action, str(self.key))
+
+    __str__ = __repr__
+
 
 @window.event
 def on_exit():
@@ -246,24 +349,15 @@ def on_mouse_scroll(x, y, scroll_x, scroll_y):
 
 @window.event
 def on_key_press(symbol, modifiers):
-    builtins.key = symbol
-    builtins.key_code = modifiers
-    builtins.key_pressed = True
-    event = Event(modifiers)
-    base.handler_queue.append((handlers['key_pressed'], event))
+    event = KeyEvent('PRESS', key_code=symbol, modifiers=modifiers)
 
 @window.event
 def on_key_release(symbol, modifiers):
-    builtins.key = symbol
-    builtins.key_code = modifiers
-    builtins.key_pressed = False
-    event = Event(modifiers)
-    base.handler_queue.append((handlers['key_released'], event))
+    event = KeyEvent('RELEASE', key_code=symbol, modifiers=modifiers)
 
 @window.event
 def on_text(text):
-    event = Event(modifiers)
-    base.handler_queue.append((handlers['key_typed'], event))
+    event = KeyEvent('TYPE', key_text=text)
 
 @window.event
 def on_activate():
