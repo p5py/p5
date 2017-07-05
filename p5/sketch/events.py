@@ -204,6 +204,13 @@ class MouseEvent(Event):
         builtins.mouse_x = self.x
         builtins.mouse_y = self.y
         builtins.mouse_button = self.button
+        if self.action == 'PRESS':
+            builtins.mouse_is_pressed = True
+        elif self.action == 'DRAG':
+            builtins.mouse_is_dragging = True
+        elif self.action == 'RELEASE':
+            builtins.mouse_is_pressed = False
+            builtins.mouse_is_dragging = False
 
     def __repr__(self):
         button_string = 'NO' if self.button is None else str(self.button)
@@ -311,17 +318,6 @@ class KeyEvent(Event):
 
     __str__ = __repr__
 
-
-@window.event
-def on_exit():
-    renderer.cleanup()
-    window.close()
-
-@window.event
-def on_resize(width, height):
-    renderer.reset_view()
-    renderer.clear()
-
 @window.event
 def on_mouse_enter(x, y):
     event = MouseEvent('ENTER', x, y)
@@ -336,19 +332,15 @@ def on_mouse_motion(x, y, dx, dy):
 
 @window.event
 def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
-    builtins.mouse_is_dragging = True
     event = MouseEvent('DRAG', x, y, change=(dx, dy), buttons=buttons,
                        modifiers=modifiers, handler_name='mouse_dragged')
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
-    builtins.mouse_is_pressed = True
     event = MouseEvent('PRESS', x, y, buttons=button, modifiers=modifiers)
 
 @window.event
 def on_mouse_release(x, y, buttons, modifiers):
-    builtins.mouse_is_dragging = False
-    builtins.mouse_is_pressed = False
     event = MouseEvent('RELEASE', x, y, buttons=buttons, modifiers=modifiers)
     event = MouseEvent('CLICK', x, y, buttons=buttons, modifiers=modifiers)
 
@@ -376,3 +368,13 @@ def on_activate():
 @window.event
 def on_deactivate():
     builtins.focused = False
+
+@window.event
+def on_exit():
+    renderer.cleanup()
+    window.close()
+
+@window.event
+def on_resize(width, height):
+    renderer.reset_view()
+    renderer.clear()
