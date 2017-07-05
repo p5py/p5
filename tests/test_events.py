@@ -30,4 +30,8 @@ def mouse_pressed(e): print(e)
 def mouse_released(e): print(e)
 def mouse_wheel(e): print(e)
 
+def key_pressed(e): print(e)
+def key_released(e): print(e)
+def key_typed(e): print(e)
+
 run()
