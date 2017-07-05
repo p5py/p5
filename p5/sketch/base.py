@@ -129,6 +129,31 @@ def title(new_title):
     builtins.title = new_title
     window.set_caption("{} - p5".format(new_title))
 
+def no_cursor():
+    window.set_mouse_visible(False)
+
+def cursor(cursor_type='ARROW'):
+    """Set the cursor to the specified type.
+
+    :param cursor_type: The cursor type to be used (defaults to
+        'ARROW'). Should be one of: {'ARROW','CROSS','HAND', 'MOVE',
+        'TEXT', 'WAIT'}
+    :type cursor_type: str
+
+    """
+    cursor_map = {
+        'ARROW': window.CURSOR_DEFAULT,
+        'CROSS': window.CURSOR_CROSSHAIR,
+        'HAND': window.CURSOR_HAND,
+        'MOVE': window.CURSOR_SIZE,
+        'TEXT': window.CURSOR_TEXT,
+        'WAIT': window.CURSOR_WAIT
+    }
+    selected_cursor = cursor_map.get(cursor_type, 'ARROW')
+    cursor = window.get_system_mouse_cursor(selected_cursor)
+    window.set_mouse_visible(True)
+    window.set_mouse_cursor(cursor)
+
 def initialize(*args, **kwargs):
     renderer.initialize(window.context)
     window.set_visible()
