@@ -303,8 +303,37 @@ def ellipse(coordinate, *args, mode=_ellipse_mode):
         raise ValueError("Unknown ellipse mode {}".format(mode))
     return Ellipse(center, xrad, yrad)
 
-def circle(coordinate, *args, mode=_ellipse_mode):
-    raise NotImplementedError
+def circle(coordinate, radius, mode=_ellipse_mode):
+    """Return a ellipse.
+
+    :param coordinate: Represents the center of the ellipse when mode
+        is 'CENTER' (the default) or 'RADIUS', the lower-left corner
+        of the ellipse when mode is 'CORNER' or, and an arbitrary
+        corner when mode is 'CORNERS'.
+
+    :type coordinate: 3-tuple
+
+    :param radius: For modes'CORNER' or 'CENTER' this actually
+        represents the diameter; for the 'RADIUS' this represents the
+        radius.
+
+    :type: tuple
+
+    :param mode: The drawing mode for the ellipse. Should be one of
+        {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
+        mode being used by the sketch.)
+
+    :type mode: str
+
+    :returns: An ellipse.
+    :rtype: Ellipse
+
+    :raises ValueError: When mode is set to 'CORNERS'
+
+    """
+    if mode == 'CORNERS':
+        raise ValueError("Cannot create circle in CORNERS mode")
+    return ellipse(coordinate, radius, radius, mode=mode)
 
 def ellipse_mode(mode='CENTER'):
     """Change the ellipse drawing mode for the sketch.
