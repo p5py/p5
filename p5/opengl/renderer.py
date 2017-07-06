@@ -290,12 +290,11 @@ def tessellate(shape):
     :rtype: Shape
 
     """
-    if shape.kind == 'POLY':
-        return shape
-    elif shape.kind == 'ELLIPSE':
+    if shape.kind == 'ELLIPSE':
         if shape.vertices is None:
             shape._tesseallate()
-        return shape
+    return shape
+
 
 def render(shape):
     """Use the renderer to render a Shape.
