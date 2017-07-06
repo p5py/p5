@@ -130,7 +130,7 @@ def line(p1, p2):
     :rtype: Shape
 
     """
-    return Shape('LINE', [Point(*p1), Point(*p2)], [(0, 1)])
+    return Shape('PATH', [Point(*p1), Point(*p2)], [(0, 1)])
 
 @sketch.artist
 def arc(*args):

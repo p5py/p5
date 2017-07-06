@@ -333,7 +333,7 @@ def render(shape):
 
     default_shader.update_attribute('position', vertex_buffer)
 
-    if fill_enabled and (shape.kind not in ['POINT', 'LINE']):
+    if fill_enabled and (shape.kind not in ['POINT', 'PATH']):
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
         default_shader.update_uniform('fill_color', fill_color)
         glDrawElements(
