@@ -82,7 +82,7 @@ uniform sampler2D texMap;
 varying vec2 vert_tex_coord;
 
 void main() {
-    gl_FragColor = texture2D(texMap, vert_tex_coord.st)
+    gl_FragColor = texture2D(texMap, vert_tex_coord.st);
 }
 """
 screen_texture_frag = SHADER_PREPROCESSOR + screen_texture_frag
@@ -119,9 +119,13 @@ def _umat4(uniform, matrix):
     data_array = (gl.GLfloat * 16)(*matrix[:])
     gl.glUniformMatrix4fv(uniform, 1, gl.GL_FALSE, data_array)
 
+def _uint(uniform, data):
+    gl.glUniform1i(uniform, data)
+
 uniform_function_map = {
     'vec4': _uvec4,
     'mat4': _umat4,
+    'int': _uint,
 }
 
 attribute_dtype_map = {
