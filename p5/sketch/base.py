@@ -36,6 +36,22 @@ builtins.frame_rate = 30
 # builtins.PIXEL_HEIGHT = None
 # builtins.PIXEL_WIDTH = None
 
+platform = pyglet.window.get_platform()
+display = platform.get_default_display()
+screen = display.get_default_screen()
+
+# We really want some antialiasing. So, keep trying.
+template = pyglet.gl.Config(samples_buffers=1, samples=4)
+try:
+    config = screen.get_best_config(template)
+except pyglet.window.NoSuchConfigException:
+    template = pyglet.gl.Config(samples_buffers=1, samples=2)
+    try:
+        config = screen.get_best_config(template)
+    except pyglet.window.NoSuchConfigException:
+        template = pyglet.gl.Config()
+        config = screen.get_best_config(template)
+
 window = pyglet.window.Window(
     width=builtins.width,
     height=builtins.height,
@@ -43,6 +59,7 @@ window = pyglet.window.Window(
     resizable=False,
     visible=False,
     vsync=False,
+    config=config
 )
 
 window.set_minimum_size(100, 100)
