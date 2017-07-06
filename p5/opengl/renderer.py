@@ -26,8 +26,8 @@ from pyglet.gl import *
 from . import support
 from ..tmp import Matrix4
 from .shader import Shader
-from .shader import fragment_default
-from .shader import vertex_default
+from .shader import vertex_default, fragment_default
+from .shader import screen_texture_vert, screen_texture_frag
 
 default_shader = None
 
@@ -43,10 +43,103 @@ stroke_color = (0, 0, 0, 1.0)
 fill_enabled = True
 stroke_enabled = True
 
+context = None
+
 vertex_buffer = -1
 element_buffer = -1
 
-context = None
+fbo_support = False
+frame_buffer = None
+back_texture = None
+front_texture = None
+screen_shader = None
+
+# screen quad (SQ) vertex and texture data
+_SQ_vert_coords = [ -1, 1, 1, 1, 1, -1, -1, -1]
+_SQ_vert_data = (GLfloat * len(_SQ_vert_coords))(*_SQ_vert_coords)
+
+_SQ_tex_coords = [ 0, 1, 1, 1, 1, 0, 0, 0 ]
+_SQ_tex_data = (GLfloat * len(_SQ_tex_coords))(*_SQ_tex_coords)
+
+
+class FrameBuffer:
+    """Encapsulates an OpenGL FrameBuffer."""
+    def __init__(self):
+        self._id = Gluint()
+        glGenFramebuffersEXT(1, pointer(self._id))
+
+        self._check_completion_status()
+
+    def _check_completion_status(self):
+        """Check the completion status of the framebuffer.
+
+        :raises Exception: When the frame buffer is incomplete.
+        """
+        status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)
+        if status != GL_FRAMEBUFFER_COMPLETE_EXT:
+            msg = "ERR {}: FrameBuffer could not be created.".format(status)
+            raise Exception(msg)
+
+    def activate(self):
+        """Activate the current framebuffer."""
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self._id)
+
+    def deactivate(self):
+        """Deactivate the current framebuffer."""
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self._id)
+
+    def attach_texture(self, texture):
+        self.activate()
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D, texture.id, 0)
+        self.deactivate()
+
+    def delete(self):
+        """Delete the current frame buffer."""
+        glDeleteFramebuffersEXT(self._id)
+
+    def __del__(self):
+        self.delete()
+
+
+class FrameTexture:
+    """A texture to be used with the FrameBuffer"""
+    def __init__(self, width, height):
+        self._id = Gluint()
+        glGenTextures(1, pointer(self._id))
+
+        self.activate()
+
+        _blank_texture = (GLubyte * (width * height * 4))()
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, _blank_texture)
+        self._init_texture()
+
+        self.deactivate()
+
+    def _init_texture(self):
+        # Initialize the texture bu uniformly filling with the
+        # background color.
+        pass
+
+    @property
+    def id(self):
+        return self._id
+
+    def activate(self):
+        """Activate the current texture."""
+        glBindTexture(GL_TEXTURE_2D, self._id)
+
+    def deactivate(self):
+        """Deactivate the current texture."""
+        glBindTexture(GL_TEXTURE_2D, 0)
+
 
 def initialize(window_context):
     """Initialize the OpenGL renderer.
@@ -62,12 +155,23 @@ def initialize(window_context):
     global vertex_buffer
     global element_buffer
     global default_shader
+    global screen_shader
+
+    global fbo_support
 
     context = window_context
     gl_version = context.get_info().get_version()[:3]
+    fbo_support = support.has_fbo(context)
 
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
+
+    screen_shader = Shader(screen_texture_vert, screen_texture_frag, gl_version)
+    screen_shader.activate()
+    screen_shader.add_uniform('texMap', 'int')
+    screen_shader.add_attribute('position', '2f')
+    screen_shader.add_attribute('tex_coord', '2f')
+    screen_shader.deactivate()
 
     default_shader = Shader(vertex_default, fragment_default, gl_version)
 
