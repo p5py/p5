@@ -18,6 +18,7 @@
 from contextlib import contextmanager
 
 from ..sketch import renderer
+from . import primitives
 
 @contextmanager
 def push_style():
@@ -30,14 +31,14 @@ def push_style():
     - background
     - fill, no_fill
     - stroke, no_stroke
+    - rect_mode
+    - ellipse_mode
+    - shape_mode
     - (*) tint
     - (*) stroke_weight
     - (*) stroke_cap
     - (*) stroke_join
     - (*) image_mode
-    - (*) rect_mode
-    - (*) ellipse_mode
-    - (*) shape_mode
     - (*) color_mode
     - (*) text_align
     - (*) text_font
@@ -55,6 +56,9 @@ def push_style():
     prev_stroke_color = renderer.stroke_color
     prev_fill_enabled = renderer.fill_enabled
     prev_stroke_enabled = renderer.stroke_enabled
+    prev_ellipse_mode = primitives._ellipse_mode
+    prev_rect_mode = primitives._rect_mode
+    prev_shape_mode = primitives._shape_mode
     try:
         yield
     finally:
@@ -63,4 +67,7 @@ def push_style():
         renderer.stroke_color = prev_stroke_color
         renderer.fill_enabled = prev_fill_enabled
         renderer.stroke_enabled = prev_stroke_enabled
+        primitives._ellipse_mode = prev_ellipse_mode
+        primitives._rect_mode = prev_rect_mode
+        primitives._shape_mode = prev_shape_mode
 

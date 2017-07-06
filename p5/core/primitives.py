@@ -31,6 +31,7 @@ Vertex.__new__.__defaults__ = (None, None, 0)
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
+_shape_mode = 'CORNER'
 
 class Shape:
     """Represents a Shape in p5py.
