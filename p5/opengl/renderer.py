@@ -226,7 +226,8 @@ def reset_view():
         0.1 * cz,
         10 * cz
     )
-    view = Matrix4().translate(-builtins.width/2, -builtins.height/2, -cz)
+    view = Matrix4().translate(-builtins.width/2, builtins.height/2, -cz)
+    view.scale(1, -1, 1)
 
     transform_matrix = Matrix4()
     modelview_matrix = view
