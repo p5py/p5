@@ -28,3 +28,4 @@ HALF_TAU = math.pi
 
 from .vector import *
 from .matrix import *
+from .curves import *
