@@ -293,17 +293,8 @@ def tessellate(shape):
     if shape.kind == 'POLY':
         return shape
     elif shape.kind == 'ELLIPSE':
-        shape.vertices = [
-            (
-                shape.center.x + shape.xrad*math.cos(math.radians(angle / 2)),
-                shape.center.y + shape.yrad*math.sin(math.radians(angle / 2)),
-                shape.center.z
-            )
-            for angle in range(720)
-        ]
-        shape.faces = [
-            (0, i, (i + 1)) for i in range(1, 719)
-        ]
+        if shape.vertices is None:
+            shape._tesseallate()
         return shape
 
 def render(shape):

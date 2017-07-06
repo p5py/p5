@@ -18,12 +18,14 @@
 
 import builtins
 from collections import namedtuple
+import math
 
 from .. import sketch
 
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse']
 
+Point = namedtuple('Point', ['x', 'y'])
 Vertex = namedtuple('Vertex', ['x', 'y', 'z'])
 Vertex.__new__.__defaults__ = (None, None, 0)
 
@@ -57,13 +59,41 @@ class Shape:
     __str__ = __repr__
 
 class Ellipse(Shape):
-    def __init__(self, center, x_radius, y_radius):
+    def __init__(self, center, x_radius, y_radius, tessellate=False):
         self.kind = 'ELLIPSE'
         self.vertices = None
         self.faces = None
         self.center = Vertex(*center)
-        self.xrad = x_radius
-        self.yrad = y_radius
+        self.radius = Vertex(x_radius, y_radius)
+
+        if tessellate:
+            self._tesseallate
+
+    def _tesseallate(self, resolution=2):
+        """Generate vertex and face data using radii.
+
+        :param resolution: Determines the number of vertices per angle
+            (in degrees) to produce
+        :type resolution: int
+
+        """
+        self.vertices = [
+            (
+                self.center.x +
+                self.radius.x *
+                math.cos(math.radians(angle / resolution)),
+
+                self.center.y +
+                self.radius.y *
+                math.sin(math.radians(angle / resolution)),
+
+                self.center.z
+            ) for angle in range(360 * resolution)
+        ]
+
+        self.faces = [
+            (0, i, (i + 1)) for i in range(1, 360*resolution - 1)
+        ]
 
 @sketch.artist
 def point(x, y, z=0):
