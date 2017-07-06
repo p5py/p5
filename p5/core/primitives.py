@@ -22,12 +22,13 @@ import math
 
 from .. import sketch
 
+from ..pmath.curves import Point
+
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse']
 
-Point = namedtuple('Point', ['x', 'y'])
-Vertex = namedtuple('Vertex', ['x', 'y', 'z'])
-Vertex.__new__.__defaults__ = (None, None, 0)
+Point = namedtuple('vert', ['x', 'y', 'z'])
+Point.__new__.__defaults__ = (None, None, 0)
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
@@ -64,8 +65,8 @@ class Ellipse(Shape):
         self.kind = 'ELLIPSE'
         self.vertices = None
         self.faces = None
-        self.center = Vertex(*center)
-        self.radius = Vertex(x_radius, y_radius)
+        self.center = Point(*center)
+        self.radius = Point(x_radius, y_radius)
 
         if tessellate:
             self._tesseallate
@@ -113,7 +114,7 @@ def point(x, y, z=0):
     :rtype: Shape
 
     """
-    return Shape('POINT', [Vertex(x, y, z)], [(0,)])
+    return Shape('POINT', [Point(x, y, z)], [(0,)])
 
 @sketch.artist
 def line(p1, p2):
@@ -129,7 +130,7 @@ def line(p1, p2):
     :rtype: Shape
 
     """
-    return Shape('LINE', [Vertex(*p1), Vertex(*p2)], [(0, 1)])
+    return Shape('LINE', [Point(*p1), Point(*p2)], [(0, 1)])
 
 @sketch.artist
 def arc(*args):
@@ -151,7 +152,7 @@ def triangle(p1, p2, p3):
     :returns: A triangle.
     :rtype: Shape
     """
-    vertices = [Vertex(*p1), Vertex(*p2), Vertex(*p3)]
+    vertices = [Point(*p1), Point(*p2), Point(*p3)]
     faces = [(0, 1, 2)]
     return Shape('POLY', vertices, faces)
 
@@ -174,7 +175,7 @@ def quad(p1, p2, p3, p4):
     :returns: A triangle.
     :rtype: Shape
     """
-    vertices = [Vertex(*p1), Vertex(*p2), Vertex(*p3), Vertex(*p4)]
+    vertices = [Point(*p1), Point(*p2), Point(*p3), Point(*p4)]
     faces = [(0, 1, 2), (2, 3, 0)]
     return Shape('POLY', vertices, faces)
 
@@ -209,28 +210,28 @@ def rect(coordinate, *args, mode=_rect_mode):
         corner = coordinate
         width, height = args
     elif mode == 'CENTER':
-        center = Vertex(*coordinate)
+        center = Point(*coordinate)
         width, height = args
-        corner = Vertex(center.x - width/2, center.y - height/2, center.z)
+        corner = Point(center.x - width/2, center.y - height/2, center.z)
     elif mode == 'RADIUS':
-        center = Vertex(*coordinate)
+        center = Point(*coordinate)
         half_width, half_height = args
-        corner = Vertex(center.x - half_width, center.y - half_height, center.z)
+        corner = Point(center.x - half_width, center.y - half_height, center.z)
         width = 2 * half_width
         height = 2 * half_height
     elif mode == 'CORNERS':
-        corner = Vertex(*coordinate)
+        corner = Point(*coordinate)
         corner_2, = args
-        corner_2 = Vertex(*corner_2)
+        corner_2 = Point(*corner_2)
         width = corner_2.x - corner.x
         height = corner_2.y - corner.y
     else:
         raise ValueError("Unknown rect mode {}".format(mode))
 
-    p1 = Vertex(*corner)
-    p2 = Vertex(p1.x + width, p1.y, p1.z)
-    p3 = Vertex(p2.x, p2.y + height, p2.z)
-    p4 = Vertex(p1.x, p3.y, p3.z)
+    p1 = Point(*corner)
+    p2 = Point(p1.x + width, p1.y, p1.z)
+    p3 = Point(p2.x, p2.y + height, p2.z)
+    p4 = Point(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
 def square(coordinate, side_length, mode=_rect_mode):
@@ -307,24 +308,24 @@ def ellipse(coordinate, *args, mode=_ellipse_mode):
     """
 
     if mode == 'CORNER':
-        corner = Vertex(*coordinate)
+        corner = Point(*coordinate)
         width, height = args
         xrad = width/2
         yrad = height/2
-        center = Vertex(corner.x + xrad, corner.y + yrad, corner.z)
+        center = Point(corner.x + xrad, corner.y + yrad, corner.z)
     elif mode == 'CENTER':
-        center = Vertex(*coordinate)
+        center = Point(*coordinate)
         xrad, yrad = args
     elif mode == 'RADIUS':
-        center = Vertex(*coordinate)
+        center = Point(*coordinate)
         xrad, yrad = args
     elif mode == 'CORNERS':
-        corner = Vertex(*coordinate)
+        corner = Point(*coordinate)
         corner_2, = args
-        corner_2 = Vertex(*corner_2)
+        corner_2 = Point(*corner_2)
         xrad = (corner_2.x - corner.x)/2
         yrad = (corner_2.y - corner.y)/2
-        center = Vertex(corner.x + xrad, corner.y + yrad, corner.z)
+        center = Point(corner.x + xrad, corner.y + yrad, corner.z)
     else:
         raise ValueError("Unknown ellipse mode {}".format(mode))
     return Ellipse(center, xrad, yrad)
