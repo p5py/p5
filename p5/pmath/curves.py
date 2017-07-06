@@ -20,6 +20,7 @@
 
 from collections import namedtuple
 from functools import wraps
+from functools import reduce
 import math
 
 __all__ = [ 'bezier_point', 'bezier_tangent', 'bezier_detail',
@@ -53,7 +54,7 @@ def _point_typecast(func):
     """Typecast all but the last argument of the function to Points.
 
     """
-    @wraps(func):
+    @wraps(func)
     def decorated(*args, **kwargs):
         parameter = args[-1]
         new_args = [Point(*arg) for arg in args[:-1]]
@@ -62,7 +63,7 @@ def _point_typecast(func):
     return decorated
 
 @_point_typecast
-def bezier_point(start, stop, control_1, control_2, parameter):
+def bezier_point(start, control_1, control_2, stop, parameter):
     """Return the coordinate of a point along a bezier curve.
 
     :param start: The start point of the bezier curve
@@ -86,10 +87,19 @@ def bezier_point(start, stop, control_1, control_2, parameter):
     :rtype: Point (namedtuple with x, y, z attributes)
 
     """
-    raise NotImplementedError()
+    t = parameter
+    t_ = 1 - parameter
+
+    P = [start, control_1, control_2, stop]
+    coeffs = [t_*t_*t_, 3*t*t_*t_,  3*t*t*t_, t*t*t]
+
+    x = sum(pt.x * c for pt, c in zip(P, coeffs))
+    y = sum(pt.y * c for pt, c in zip(P, coeffs))
+
+    return Point(x, y)
 
 @_point_typecast
-def bezier_tangent(start, stop, control_1, control_2, parameter):
+def bezier_tangent(start, control_1, control_2, stop, parameter):
     """Return the tangent at a point along a bezier curve.
 
     :param start: The start point of the bezier curve
@@ -115,8 +125,14 @@ def bezier_tangent(start, stop, control_1, control_2, parameter):
     :rtype: Point (namedtuple with x, y, z attributes)
 
     """
-    raise NotImplementedError()
-    
+    t = parameter
+    tangent = lambda a, b, c, d: 3*t*t*(3*b - 3*c + d - a) + \
+                                 6*t*(a - 2*b + c) + \
+                                 3*(b - a)
+    x = tangent(start.x, control_1.x, control_2.x, stop.x)
+    y = tangent(start.y, control_1.y, control_2.y, stop.y)
+    return Point(x, y)
+
 @_point_typecast
 def curve_point(point_1, point_2, point_3, point_4, parameter):
     """Return the coordinates of a point along a curve.
