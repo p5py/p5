@@ -25,7 +25,7 @@ from .. import sketch
 from ..pmath.curves import Point
 
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
-           'rect', 'square', 'circle', 'ellipse']
+           'rect', 'square', 'circle', 'ellipse', 'ellipse_mode', 'rect_mode']
 
 Point = namedtuple('vert', ['x', 'y', 'z'])
 Point.__new__.__defaults__ = (None, None, 0)
