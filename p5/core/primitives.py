@@ -58,6 +58,17 @@ class Shape:
     def __repr__(self):
         return "({} Shape with vertices {})".format(self.kind, self.vertices)
 
+    def _dict_hash(self):
+        return hash(str(self.__dict__))
+
+    def __hash__(self):
+        if self.vertices is not None:
+            vert_str = '-'.join(['{:.3f}'.format(vi)
+                                 for vertex in self.vertices[:3]
+                                 for vi in vertex])
+            return hash('{}:{}'.format(self.kind, vert_str))
+        return _dict_hash()
+
     __str__ = __repr__
 
 class Ellipse(Shape):
@@ -67,7 +78,6 @@ class Ellipse(Shape):
         self.faces = None
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
-
         if tessellate:
             self._tesseallate
 
@@ -96,6 +106,12 @@ class Ellipse(Shape):
         self.faces = [
             (0, i, (i + 1)) for i in range(1, 360*resolution - 1)
         ]
+
+    def __hash__(self):
+        center_str = 'x{:.3f}y{:.3f}z{:.3f}'.format(*self.center)
+        rad_str = '{}x{}'.format(self.radius.x, self.radius.y)
+        hash_str = '{}:{}-{}'.format(self.kind, center_str, rad_str)
+        return hash(hash_str)
 
 @sketch.artist
 def point(x, y, z=0):
