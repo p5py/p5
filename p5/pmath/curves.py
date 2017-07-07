@@ -23,6 +23,8 @@ from functools import wraps
 from functools import reduce
 import math
 
+from ..tmp import Matrix4
+
 __all__ = [ 'bezier_point', 'bezier_tangent', 'bezier_detail',
             'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness']
 
@@ -31,7 +33,10 @@ Point.__new__.__defaults__ = (None, None, 0)
 
 curve_resolution = 20
 curve_tightness_amount = 0
-bezier_resolution = 20
+curve_basis_matrix = None
+curve_draw_matrix = None
+
+bezier_resolution = None
 
 def bezier_detail(detail_value):
     """Change the resolution used to draw bezier curves.
@@ -41,6 +46,30 @@ def bezier_detail(detail_value):
     """
     global bezier_resolution
     bezier_resolution = detail_value
+
+def _reinit_curve_matrices():
+    global curve_basis_matrix
+    global curve_draw_matrix
+
+    s = curve_tightness_amount
+    curve_basis_matrix = Matrix4()
+    curve_basis_matrix[:] = [
+        0.5*(s - 1),  0.5*(s + 3), -0.5*(s + 3), 0.5*(1 - s),
+        1 - s,       -0.5*(s + 5), s + 2,        0.5*(s - 1),
+        0.5*(s - 1),  0,           0.5*(1 - s),  0,
+        0,            1,           0,            0,
+    ]
+
+    # curve_draw_matrix = Matrix4()
+    # f = 1 / curve_resolution
+    # curve_draw_matrix[:] = [
+    #     0,        0,        0,  1,
+    #     f**3,     f**2,     f,  0,
+    #     6*(f**3), 2*(f**2), 0,  0,
+    #     6*(f**3), 0,        0,  0
+    # ]
+    #
+    # curve_draw_matrix = curve_draw_matrix * curve_basis_matrix
 
 def curve_detail(detail_value):
     """Change the resolution used to draw bezier curves.
@@ -59,6 +88,7 @@ def curve_tightness(amount):
     """
     global curve_tightness_amount
     curve_tightness_amount = amount
+    _reinit_curve_matrices()
 
 def _point_typecast(func):
     """Typecast all but the last argument of the function to Points.
@@ -170,7 +200,16 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
     :rtype: Point (namedtuple with x, y, z attributes)
 
     """
-    raise NotImplementedError()
+    t = parameter
+    basis = curve_basis_matrix
+    P = [point_1, point_2, point_3, point_4]
+
+    coeffs = [sum(t**(3 - i) * basis[4*i + j] for i in range(4)) for j in range(4)]
+
+    x = sum(pt.x * c for pt, c in zip(P, coeffs))
+    y = sum(pt.y * c for pt, c in zip(P, coeffs))
+
+    return Point(x, y)
 
 @_point_typecast
 def curve_tangent(point_1, point_2, point_3, point_4, parameter):
@@ -199,3 +238,9 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
 
     """
     raise NotImplementedError()
+
+
+# Set the default values.
+bezier_detail(20)
+curve_detail(20)
+curve_tightness(0)
