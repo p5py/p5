@@ -25,7 +25,7 @@ from ..pmath import curves
 
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
-           'rect_mode', 'bezier']
+           'rect_mode', 'bezier', 'curve']
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
@@ -92,13 +92,22 @@ class Shape:
         if all(pi == 'D' for pi in psig):
             # the path is already tessellated. Nothing to be done.
             self.vertices = self._raw_vertices
-        if psig == 'DBBD':
+        elif psig == 'DBBD':
             self.vertices = []
             steps = curves.bezier_resolution
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.bezier_point(*self._raw_vertices, t)
                 self.vertices.append(p)
+        elif psig == 'DCCD':
+            self.vertices = []
+            steps = curves.curve_resolution
+            for i in range(steps + 1):
+                t = i / steps
+                p = curves.curve_point(*self._raw_vertices, t)
+                self.vertices.append(p)
+        else:
+            raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
     def _compute_hash_string(self):
         vert_str = [
@@ -200,6 +209,16 @@ def bezier(start, control_point_1, control_point_2, stop):
         BezierPoint(*control_point_1),
         BezierPoint(*control_point_2),
         Point(*stop)
+    ]
+    return Shape(vertices=points, kind='PATH')
+
+@sketch.artist
+def curve(point_1, point_2, point_3, point_4):
+    points = [
+        Point(*point_1),
+        CurvePoint(*point_2),
+        CurvePoint(*point_3),
+        Point(*point_4)
     ]
     return Shape(vertices=points, kind='PATH')
 
