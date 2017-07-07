@@ -24,7 +24,7 @@ from functools import reduce
 import math
 
 __all__ = [ 'bezier_point', 'bezier_tangent', 'bezier_detail',
-            'curve_point', 'curve_tangent', 'curve_detail', ]
+            'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness']
 
 Point = namedtuple('Point', ['x', 'y', 'z'])
 Point.__new__.__defaults__ = (None, None, 0)
