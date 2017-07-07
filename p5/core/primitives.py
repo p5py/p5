@@ -127,7 +127,7 @@ class Shape:
         return hash(str(self.__dict__))
 
 class Ellipse(Shape):
-    def __init__(self, center, x_radius, y_radius, tessellate=False):
+    def __init__(self, center, x_radius, y_radius):
         self.kind = 'ELLIPSE'
 
         self.vertices = None
@@ -136,8 +136,6 @@ class Ellipse(Shape):
 
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
-        if tessellate:
-            self._tesseallate
 
     def tessellate(self, resolution=2):
         """Generate vertex and face data using radii.
@@ -200,27 +198,31 @@ def line(p1, p2):
     :rtype: Shape
 
     """
-    return Shape([Point(*p1), Point(*p2)], kind='PATH')
+    path = [
+        Point(*p1),
+        Point(*p2)
+    ]
+    return Shape(path, kind='PATH')
 
 @sketch.artist
 def bezier(start, control_point_1, control_point_2, stop):
-    points = [
+    path = [
         Point(*start),
         BezierPoint(*control_point_1),
         BezierPoint(*control_point_2),
         Point(*stop)
     ]
-    return Shape(vertices=points, kind='PATH')
+    return Shape(path, kind='PATH')
 
 @sketch.artist
 def curve(point_1, point_2, point_3, point_4):
-    points = [
+    path = [
         Point(*point_1),
         CurvePoint(*point_2),
         CurvePoint(*point_3),
         Point(*point_4)
     ]
-    return Shape(vertices=points, kind='PATH')
+    return Shape(path, kind='PATH')
 
 @sketch.artist
 def arc(*args):
