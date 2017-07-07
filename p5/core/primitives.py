@@ -21,10 +21,11 @@ from collections import namedtuple
 import math
 
 from .. import sketch
+from ..pmath import curves
 
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
-           'rect_mode']
+           'rect_mode', 'bezier']
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
@@ -91,13 +92,25 @@ class Shape:
         if all(pi == 'D' for pi in psig):
             # the path is already tessellated. Nothing to be done.
             self.vertices = self._raw_vertices
+        if psig == 'DBBD':
+            self.vertices = []
+            steps = curves.bezier_resolution
+            for i in range(steps + 1):
+                t = i / steps
+                p = curves.bezier_point(*self._raw_vertices, t)
+                self.vertices.append(p)
 
     def _compute_hash_string(self):
         vert_str = [
             '{}x{:.3f}y{:.3f}z{:.3f}'.format(get_point_type(p)[:2], p.x, p.y, p.z)
             for p in self._raw_vertices
         ]
-        return '{}:{}'.format(self.kind, ''.join(vert_str))
+        # a additionally, we need to store information about the
+        # current curve resolutions
+        meta_data = '/{}/{}/{}/'.format(curves.bezier_resolution,
+                                     curves.curve_resolution,
+                                     curves.curve_tightness_amount)
+        return '{}{}:{}'.format(meta_data, self.kind, ''.join(vert_str))
 
     def __hash__(self):
         if self._hash_string is not None:
@@ -179,6 +192,16 @@ def line(p1, p2):
 
     """
     return Shape([Point(*p1), Point(*p2)], kind='PATH')
+
+@sketch.artist
+def bezier(start, control_point_1, control_point_2, stop):
+    points = [
+        Point(*start),
+        BezierPoint(*control_point_1),
+        BezierPoint(*control_point_2),
+        Point(*stop)
+    ]
+    return Shape(vertices=points, kind='PATH')
 
 @sketch.artist
 def arc(*args):
