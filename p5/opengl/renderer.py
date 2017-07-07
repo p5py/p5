@@ -45,14 +45,13 @@ stroke_enabled = True
 
 context = None
 
-vertex_buffer = -1
-element_buffer = -1
-
 fbo_support = False
 frame_buffer = None
 back_texture = None
 front_texture = None
 screen_shader = None
+
+geometry_cache = {}
 
 # screen quad (SQ) vertex and texture data
 _SQ_vert_coords = [ -1, 1, 1, 1, 1, -1, -1, -1]
@@ -184,12 +183,6 @@ def initialize(window_context):
 
     default_shader.add_attribute('position', '3f')
 
-    vertex_buffer = GLuint()
-    glGenBuffers(1, pointer(vertex_buffer))
-
-    element_buffer = GLuint()
-    glGenBuffers(1, pointer(element_buffer))
-
     reset_view()
     clear()
 
@@ -201,8 +194,9 @@ def cleanup():
 
     """
     default_shader.delete()
-    glDeleteBuffers(1, vertex_buffer)
-    glDeleteBuffers(1, element_buffer)
+    for shape_hash, shape_buffers in geometry_cache.items():
+        glDeleteBuffers(1, shape_buffers['vertex_buffer'])
+        glDeleteBuffers(1, shape_buffers['element_buffer'])
 
 def clear():
     """Clear the renderer background."""
@@ -306,30 +300,49 @@ def render(shape):
 
     default_shader.update_uniform('transform', transform_matrix)
 
-    tessellated_shape = tessellate(shape)
+    shape_hash = hash(shape)
+    if shape_hash not in geometry_cache:
+        vertex_buffer = GLuint()
+        glGenBuffers(1, pointer(vertex_buffer))
 
-    vertices = flatten(tessellated_shape.vertices)
-    vertices_typed =  (GLfloat * len(vertices))(*vertices)
+        element_buffer = GLuint()
+        glGenBuffers(1, pointer(element_buffer))
 
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(vertices_typed),
-        vertices_typed,
-        GL_STATIC_DRAW
-    )
-    glBindBuffer(GL_ARRAY_BUFFER, 0)
+        tessellated_shape = tessellate(shape)
 
-    elements = [idx for face in tessellated_shape.faces for idx in face]
-    elements_typed = (GLuint * len(elements))(*elements)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(elements_typed),
-        elements_typed,
-        GL_STATIC_DRAW
-    )
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        vertices = flatten(tessellated_shape.vertices)
+        vertices_typed =  (GLfloat * len(vertices))(*vertices)
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(vertices_typed),
+            vertices_typed,
+            GL_STATIC_DRAW
+        )
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+        elements = [idx for face in tessellated_shape.faces for idx in face]
+        num_elements = len(elements)
+        elements_typed = (GLuint * num_elements)(*elements)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            sizeof(elements_typed),
+            elements_typed,
+            GL_STATIC_DRAW
+        )
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+
+        geometry_cache[shape_hash] = {
+            'vertex_buffer': vertex_buffer,
+            'element_buffer': element_buffer,
+            'num_elements': len(elements)
+        }
+    else:
+        vertex_buffer = geometry_cache[shape_hash]['vertex_buffer']
+        element_buffer = geometry_cache[shape_hash]['element_buffer']
+        num_elements = geometry_cache[shape_hash]['num_elements']
 
     default_shader.update_attribute('position', vertex_buffer)
 
@@ -338,7 +351,7 @@ def render(shape):
         default_shader.update_uniform('fill_color', fill_color)
         glDrawElements(
             GL_TRIANGLES,
-            len(elements),
+            num_elements,
             GL_UNSIGNED_INT,
             0
         )
@@ -351,14 +364,14 @@ def render(shape):
         if shape.kind is 'POINT':
             glDrawElements(
                 GL_POINTS,
-                len(elements),
+                num_elements,
                 GL_UNSIGNED_INT,
                 0
             )
         else:
             glDrawElements(
                 GL_LINE_LOOP,
-                len(elements),
+                num_elements,
                 GL_UNSIGNED_INT,
                 0
             )
