@@ -232,6 +232,13 @@ def artist(f):
         return shape
     return decorated
 
+def exit(*args, **kwargs):
+    """Override the system exit to make sure we perform necessary
+        cleanups, etc.
+    """
+    pyglet.app.exit()
+    builtins.exit(*args, **kwargs)
+
 def test_run():
     initialize()
     def tester(dt):
