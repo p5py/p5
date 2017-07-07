@@ -22,17 +22,26 @@ import math
 
 from .. import sketch
 
-from ..pmath.curves import Point
-
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
-           'rect', 'square', 'circle', 'ellipse', 'ellipse_mode', 'rect_mode']
-
-Point = namedtuple('vert', ['x', 'y', 'z'])
-Point.__new__.__defaults__ = (None, None, 0)
+           'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
+           'rect_mode']
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
 _shape_mode = 'CORNER'
+
+AnchorPoint = namedtuple('ANCHOR', ['x', 'y', 'z'])
+BezierPoint = namedtuple('BEZIER', ['x', 'y', 'z'])
+CurvePoint = namedtuple('CURVE', ['x', 'y', 'z'])
+Point = namedtuple('DEFAULT', ['x', 'y', 'z'])
+
+AnchorPoint.__new__.__defaults__ = (None, None, 0)
+BezierPoint.__new__.__defaults__ = (None, None, 0)
+CurvePoint.__new__.__defaults__ = (None, None, 0)
+Point.__new__.__defaults__ = (None, None, 0)
+
+def get_point_type(point):
+    return type(point).__name__
 
 class Shape:
     """Represents a Shape in p5py.
@@ -50,38 +59,65 @@ class Shape:
 
     """
 
-    def __init__(self, kind, vertices, faces=[]):
+    def __init__(self, vertices, kind='POLY', edges=None, faces=None):
         self.kind = kind
-        self.vertices = vertices
+        self.edges = edges
         self.faces = faces
+        self.vertices = None
 
-    def __repr__(self):
-        return "({} Shape with vertices {})".format(self.kind, self.vertices)
+        self._raw_vertices = vertices
+        self._hash_string = self._compute_hash_string()
 
-    def _dict_hash(self):
-        return hash(str(self.__dict__))
+    def compute_faces(self):
+        """Compute the faces for this shape."""
+        if self.faces is None:
+            self.faces = [
+                (0, k, k + 1)
+                for k in range(1, len(self.vertices) - 1)
+            ]
+
+    def compute_edges(self):
+        """Compute the edges for this shape."""
+        if self.edges is None:
+            self.edges = [
+                (k, k+1)
+                for k in range(len(self.vertices) - 1)
+            ]
+
+    def tessellate(self):
+        """Generate actual vertex data from limited number of parameters.
+        """
+        psig = ''.join(get_point_type(v)[0] for v in self._raw_vertices)
+        if all(pi == 'D' for pi in psig):
+            # the path is already tessellated. Nothing to be done.
+            self.vertices = self._raw_vertices
+
+    def _compute_hash_string(self):
+        vert_str = [
+            '{}x{:.3f}y{:.3f}z{:.3f}'.format(get_point_type(p)[:2], p.x, p.y, p.z)
+            for p in self._raw_vertices
+        ]
+        return '{}:{}'.format(self.kind, ''.join(vert_str))
 
     def __hash__(self):
-        if self.vertices is not None:
-            vert_str = '-'.join(['{:.3f}'.format(vi)
-                                 for vertex in self.vertices[:3]
-                                 for vi in vertex])
-            return hash('{}:{}'.format(self.kind, vert_str))
-        return _dict_hash()
-
-    __str__ = __repr__
+        if self._hash_string is not None:
+            return hash(self._hash_string)
+        return hash(str(self.__dict__))
 
 class Ellipse(Shape):
     def __init__(self, center, x_radius, y_radius, tessellate=False):
         self.kind = 'ELLIPSE'
+
         self.vertices = None
         self.faces = None
+        self.edges = None
+
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
         if tessellate:
             self._tesseallate
 
-    def _tesseallate(self, resolution=2):
+    def tessellate(self, resolution=2):
         """Generate vertex and face data using radii.
 
         :param resolution: Determines the number of vertices per angle
@@ -101,10 +137,6 @@ class Ellipse(Shape):
 
                 self.center.z
             ) for angle in range(360 * resolution)
-        ]
-
-        self.faces = [
-            (0, i, (i + 1)) for i in range(1, 360*resolution - 1)
         ]
 
     def __hash__(self):
@@ -130,7 +162,7 @@ def point(x, y, z=0):
     :rtype: Shape
 
     """
-    return Shape('POINT', [Point(x, y, z)], [(0,)])
+    return Shape([Point(x, y, z)], faces=[(0,)], edges=[(0,)], kind='POINT')
 
 @sketch.artist
 def line(p1, p2):
@@ -146,7 +178,7 @@ def line(p1, p2):
     :rtype: Shape
 
     """
-    return Shape('PATH', [Point(*p1), Point(*p2)], [(0, 1)])
+    return Shape([Point(*p1), Point(*p2)], kind='PATH')
 
 @sketch.artist
 def arc(*args):
@@ -168,9 +200,7 @@ def triangle(p1, p2, p3):
     :returns: A triangle.
     :rtype: Shape
     """
-    vertices = [Point(*p1), Point(*p2), Point(*p3)]
-    faces = [(0, 1, 2)]
-    return Shape('POLY', vertices, faces)
+    return Shape([Point(*p1), Point(*p2), Point(*p3)])
 
 @sketch.artist
 def quad(p1, p2, p3, p4):
@@ -191,9 +221,7 @@ def quad(p1, p2, p3, p4):
     :returns: A triangle.
     :rtype: Shape
     """
-    vertices = [Point(*p1), Point(*p2), Point(*p3), Point(*p4)]
-    faces = [(0, 1, 2), (2, 3, 0)]
-    return Shape('POLY', vertices, faces)
+    return Shape([Point(*p1), Point(*p2), Point(*p3), Point(*p4)])
 
 def rect(coordinate, *args, mode=_rect_mode):
     """Return a rectangle.

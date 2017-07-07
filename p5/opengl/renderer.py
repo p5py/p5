@@ -196,7 +196,9 @@ def cleanup():
     default_shader.delete()
     for shape_hash, shape_buffers in geometry_cache.items():
         glDeleteBuffers(1, shape_buffers['vertex_buffer'])
-        glDeleteBuffers(1, shape_buffers['element_buffer'])
+        glDeleteBuffers(1, shape_buffers['edge_buffer'])
+        glDeleteBuffers(1, shape_buffers['face_buffer'])
+
 
 def clear():
     """Clear the renderer background."""
@@ -285,11 +287,13 @@ def tessellate(shape):
     :rtype: Shape
 
     """
-    if shape.kind == 'ELLIPSE':
-        if shape.vertices is None:
-            shape._tesseallate()
+    if shape.vertices is None:
+        shape.tessellate()
+    if shape.kind in ['POLY', 'ELLIPSE', 'PATH']:
+       shape.compute_edges()
+    if shape.kind is not 'PATH':
+       shape.compute_faces()
     return shape
-
 
 def render(shape):
     """Use the renderer to render a Shape.
@@ -297,7 +301,6 @@ def render(shape):
     :param shape: The shape to be rendered.
     :type shape: Shape
     """
-
     default_shader.update_uniform('transform', transform_matrix)
 
     shape_hash = hash(shape)
@@ -305,13 +308,17 @@ def render(shape):
         vertex_buffer = GLuint()
         glGenBuffers(1, pointer(vertex_buffer))
 
-        element_buffer = GLuint()
-        glGenBuffers(1, pointer(element_buffer))
+        edge_buffer = GLuint()
+        glGenBuffers(1, pointer(edge_buffer))
+
+        face_buffer = GLuint()
+        glGenBuffers(1, pointer(face_buffer))
 
         tessellated_shape = tessellate(shape)
 
         vertices = flatten(tessellated_shape.vertices)
-        vertices_typed =  (GLfloat * len(vertices))(*vertices)
+        num_vertices = len(vertices)
+        vertices_typed = (GLfloat * num_vertices)(*vertices)
 
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
         glBufferData(
@@ -322,59 +329,76 @@ def render(shape):
         )
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-        elements = [idx for face in tessellated_shape.faces for idx in face]
-        num_elements = len(elements)
-        elements_typed = (GLuint * num_elements)(*elements)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
+        edges = flatten(tessellated_shape.edges)
+        num_edges = len(edges)
+        edges_typed = (GLuint * num_edges)(*edges)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, edge_buffer)
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
-            sizeof(elements_typed),
-            elements_typed,
+            sizeof(edges_typed),
+            edges_typed,
             GL_STATIC_DRAW
         )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
+        if shape.kind not in  ['PATH', 'POINT']:
+            faces = flatten(tessellated_shape.faces)
+            num_faces = len(faces)
+            faces_typed = (GLuint * num_faces)(*faces)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_buffer)
+            glBufferData(
+                GL_ELEMENT_ARRAY_BUFFER,
+                sizeof(faces_typed),
+                faces_typed,
+                GL_STATIC_DRAW
+            )
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        else:
+            faces = []
+            num_faces = 0
+
         geometry_cache[shape_hash] = {
             'vertex_buffer': vertex_buffer,
-            'element_buffer': element_buffer,
-            'num_elements': len(elements)
+            'edge_buffer': edge_buffer,
+            'face_buffer': face_buffer,
+
+            'num_vertices': num_vertices,
+            'num_edges': num_edges,
+            'num_faces': num_faces
         }
     else:
         vertex_buffer = geometry_cache[shape_hash]['vertex_buffer']
-        element_buffer = geometry_cache[shape_hash]['element_buffer']
-        num_elements = geometry_cache[shape_hash]['num_elements']
+        edge_buffer = geometry_cache[shape_hash]['edge_buffer']
+        face_buffer = geometry_cache[shape_hash]['face_buffer']
+
+        num_vertices = geometry_cache[shape_hash]['num_vertices']
+        num_edges = geometry_cache[shape_hash]['num_edges']
+        num_faces = geometry_cache[shape_hash]['num_faces']
 
     default_shader.update_attribute('position', vertex_buffer)
 
     if fill_enabled and (shape.kind not in ['POINT', 'PATH']):
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
         default_shader.update_uniform('fill_color', fill_color)
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_buffer)
         glDrawElements(
             GL_TRIANGLES,
-            num_elements,
+            num_faces,
             GL_UNSIGNED_INT,
             0
         )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
-    # Temporarily disable stroking ellipses
-    if stroke_enabled and shape.kind is not 'ELLIPSE':
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
+    if stroke_enabled:
         default_shader.update_uniform('fill_color', stroke_color)
-        if shape.kind is 'POINT':
-            glDrawElements(
-                GL_POINTS,
-                num_elements,
-                GL_UNSIGNED_INT,
-                0
-            )
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, edge_buffer)
+        if shape.kind == 'POINT':
+            glDrawElements(GL_POINTS, num_edges, GL_UNSIGNED_INT, 0)
+        elif shape.kind == 'PATH':
+            glDrawElements(GL_LINE_STRIP, num_edges, GL_UNSIGNED_INT, 0)
         else:
-            glDrawElements(
-                GL_LINE_LOOP,
-                num_elements,
-                GL_UNSIGNED_INT,
-                0
-            )
+            glDrawElements(GL_LINE_LOOP, num_edges, GL_UNSIGNED_INT, 0)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
 def test_render():
