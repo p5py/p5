@@ -267,7 +267,7 @@ def quad(p1, p2, p3, p4):
     """
     return Shape([Point(*p1), Point(*p2), Point(*p3), Point(*p4)])
 
-def rect(coordinate, *args, mode=_rect_mode):
+def rect(coordinate, *args, mode=None):
     """Return a rectangle.
 
     :param coordinate: Represents the lower left corner of then
@@ -294,6 +294,9 @@ def rect(coordinate, *args, mode=_rect_mode):
     :rtype: Shape
 
     """
+    if mode is None:
+        mode = _rect_mode
+
     if mode == 'CORNER':
         corner = coordinate
         width, height = args
@@ -322,7 +325,7 @@ def rect(coordinate, *args, mode=_rect_mode):
     p4 = Point(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
-def square(coordinate, side_length, mode=_rect_mode):
+def square(coordinate, side_length, mode=None):
     """Return a square.
 
     :param coordinate: When mode is set to 'CORNER', the coordinate
@@ -350,6 +353,9 @@ def square(coordinate, side_length, mode=_rect_mode):
     :raises ValueError: When the mode is set to 'CORNERS'
 
     """
+    if mode is None:
+        mode = _rect_mode
+
     if mode == 'CORNERS':
         raise ValueError("Cannot draw square with {} mode".format(mode))
     return rect(coordinate, side_length, side_length, mode=mode)
@@ -367,7 +373,7 @@ def rect_mode(mode='CORNER'):
     _rect_mode = mode
 
 @sketch.artist
-def ellipse(coordinate, *args, mode=_ellipse_mode):
+def ellipse(coordinate, *args, mode=None):
     """Return a ellipse.
 
     :param coordinate: Represents the center of the ellipse when mode
@@ -394,6 +400,8 @@ def ellipse(coordinate, *args, mode=_ellipse_mode):
     :rtype: Ellipse
 
     """
+    if mode is None:
+        mode = _ellipse_mode
 
     if mode == 'CORNER':
         corner = Point(*coordinate)
@@ -418,7 +426,7 @@ def ellipse(coordinate, *args, mode=_ellipse_mode):
         raise ValueError("Unknown ellipse mode {}".format(mode))
     return Ellipse(center, xrad, yrad)
 
-def circle(coordinate, radius, mode=_ellipse_mode):
+def circle(coordinate, radius, mode=None):
     """Return a ellipse.
 
     :param coordinate: Represents the center of the ellipse when mode
@@ -446,6 +454,9 @@ def circle(coordinate, radius, mode=_ellipse_mode):
     :raises ValueError: When mode is set to 'CORNERS'
 
     """
+    if mode is None:
+        mode = _ellipse_mode
+
     if mode == 'CORNERS':
         raise ValueError("Cannot create circle in CORNERS mode")
     return ellipse(coordinate, radius, radius, mode=mode)
