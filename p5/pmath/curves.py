@@ -237,8 +237,19 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     :rtype: Point (namedtuple with x, y, z attributes)
 
     """
-    raise NotImplementedError()
+    t = parameter
+    basis = curve_basis_matrix
+    P = [point_1, point_2, point_3, point_4]
 
+    coeffs = [
+        sum((3 - i)*(t**(2 - i)) * basis[4*i + j] for i in range(3))
+        for j in range(4)
+    ]
+
+    x = sum(pt.x * c for pt, c in zip(P, coeffs))
+    y = sum(pt.y * c for pt, c in zip(P, coeffs))
+
+    return Point(x, y)
 
 # Set the default values.
 bezier_detail(20)
