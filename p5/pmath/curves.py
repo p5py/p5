@@ -20,13 +20,13 @@
 
 from collections import namedtuple
 from functools import wraps
-from functools import reduce
 import math
 
 from ..tmp import Matrix4
 
 __all__ = [ 'bezier_point', 'bezier_tangent', 'bezier_detail',
-            'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness']
+            'curve_point', 'curve_tangent', 'curve_detail',
+            'curve_tightness']
 
 Point = namedtuple('Point', ['x', 'y', 'z'])
 Point.__new__.__defaults__ = (None, None, 0)
@@ -36,7 +36,17 @@ curve_tightness_amount = 0
 curve_basis_matrix = None
 curve_draw_matrix = None
 
-bezier_resolution = None
+bezier_resolution = 20
+
+def typecast_arguments_as_points(func):
+    """Typecast all but the last argument of the function as Points."""
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        parameter = args[-1]
+        new_args = [Point(*arg) for arg in args[:-1]]
+        ret_value = func(*new_args, parameter, **kwargs)
+        return ret_value
+    return decorated
 
 def bezier_detail(detail_value):
     """Change the resolution used to draw bezier curves.
@@ -46,6 +56,77 @@ def bezier_detail(detail_value):
     """
     global bezier_resolution
     bezier_resolution = detail_value
+
+@typecast_arguments_as_points
+def bezier_point(start, control_1, control_2, stop, parameter):
+    """Return the coordinate of a point along a bezier curve.
+
+    :param start: The start point of the bezier curve
+    :type start: 3-tuple.
+
+    :param control_1: The first control point of the bezier curve
+    :type control_1: 3-tuple.
+
+    :param control_2: The second control point of the bezier curve
+    :type control_2: 3-tuple.
+
+    :param stop: The end point of the bezier curve
+    :type stop: 3-tuple.
+
+    :param parameter: The parameter for the required location along
+        the curve. Should be in the range [0.0, 1.0] where 0 indicates
+        the start of the curve and 1 indicates the end of the curve.
+    :type parameter: float
+
+    :returns: The coordinate of the point along the bezier curve.
+    :rtype: Point (namedtuple with x, y, z attributes)
+
+    """
+    t = parameter
+    t_ = 1 - parameter
+
+    P = [start, control_1, control_2, stop]
+    coeffs = [t_*t_*t_, 3*t*t_*t_,  3*t*t*t_, t*t*t]
+
+    x = sum(pt.x * c for pt, c in zip(P, coeffs))
+    y = sum(pt.y * c for pt, c in zip(P, coeffs))
+
+    return Point(x, y)
+
+@typecast_arguments_as_points
+def bezier_tangent(start, control_1, control_2, stop, parameter):
+    """Return the tangent at a point along a bezier curve.
+
+    :param start: The start point of the bezier curve
+    :type start: 3-tuple.
+
+    :param control_1: The first control point of the bezier curve
+    :type control_1: 3-tuple.
+
+    :param control_2: The second control point of the bezier curve
+    :type control_2: 3-tuple.
+
+    :param stop: The end point of the bezier curve
+    :type stop: 3-tuple.
+
+    :param parameter: The parameter for the required tangent location
+        along the curve. Should be in the range [0.0, 1.0] where 0
+        indicates the start of the curve and 1 indicates the end of
+        the curve.
+    :type parameter: float
+
+    :returns: The tangent at the required point along the bezier
+        curve.
+    :rtype: Point (namedtuple with x, y, z attributes)
+
+    """
+    t = parameter
+    tangent = lambda a, b, c, d: 3*t*t*(3*b - 3*c + d - a) + \
+                                 6*t*(a - 2*b + c) + \
+                                 3*(b - a)
+    x = tangent(start.x, control_1.x, control_2.x, stop.x)
+    y = tangent(start.y, control_1.y, control_2.y, stop.y)
+    return Point(x, y)
 
 def _reinit_curve_matrices():
     global curve_basis_matrix
@@ -90,90 +171,7 @@ def curve_tightness(amount):
     curve_tightness_amount = amount
     _reinit_curve_matrices()
 
-def _point_typecast(func):
-    """Typecast all but the last argument of the function to Points.
-
-    """
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        parameter = args[-1]
-        new_args = [Point(*arg) for arg in args[:-1]]
-        ret_value = func(*new_args, parameter, **kwargs)
-        return ret_value
-    return decorated
-
-@_point_typecast
-def bezier_point(start, control_1, control_2, stop, parameter):
-    """Return the coordinate of a point along a bezier curve.
-
-    :param start: The start point of the bezier curve
-    :type start: 3-tuple.
-
-    :param control_1: The first control point of the bezier curve
-    :type control_1: 3-tuple.
-
-    :param control_2: The second control point of the bezier curve
-    :type control_2: 3-tuple.
-
-    :param stop: The end point of the bezier curve
-    :type stop: 3-tuple.
-
-    :param parameter: The parameter for the required location along
-        the curve. Should be in the range [0.0, 1.0] where 0 indicates
-        the start of the curve and 1 indicates the end of the curve.
-    :type parameter: float
-
-    :returns: The coordinate of the point along the bezier curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
-
-    """
-    t = parameter
-    t_ = 1 - parameter
-
-    P = [start, control_1, control_2, stop]
-    coeffs = [t_*t_*t_, 3*t*t_*t_,  3*t*t*t_, t*t*t]
-
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
-
-    return Point(x, y)
-
-@_point_typecast
-def bezier_tangent(start, control_1, control_2, stop, parameter):
-    """Return the tangent at a point along a bezier curve.
-
-    :param start: The start point of the bezier curve
-    :type start: 3-tuple.
-
-    :param control_1: The first control point of the bezier curve
-    :type control_1: 3-tuple.
-
-    :param control_2: The second control point of the bezier curve
-    :type control_2: 3-tuple.
-
-    :param stop: The end point of the bezier curve
-    :type stop: 3-tuple.
-
-    :param parameter: The parameter for the required tangent location
-        along the curve. Should be in the range [0.0, 1.0] where 0
-        indicates the start of the curve and 1 indicates the end of
-        the curve.
-    :type parameter: float
-
-    :returns: The tangent at the required point along the bezier
-        curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
-
-    """
-    t = parameter
-    tangent = lambda a, b, c, d: 3*t*t*(3*b - 3*c + d - a) + \
-                                 6*t*(a - 2*b + c) + \
-                                 3*(b - a)
-    x = tangent(start.x, control_1.x, control_2.x, stop.x)
-    y = tangent(start.y, control_1.y, control_2.y, stop.y)
-    return Point(x, y)
-
-@_point_typecast
+@typecast_arguments_as_points
 def curve_point(point_1, point_2, point_3, point_4, parameter):
     """Return the coordinates of a point along a curve.
 
@@ -211,7 +209,7 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
 
     return Point(x, y)
 
-@_point_typecast
+@typecast_arguments_as_points
 def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     """Return the tangent at a point along a curve.
 
