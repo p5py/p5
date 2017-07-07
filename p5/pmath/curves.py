@@ -30,6 +30,7 @@ Point = namedtuple('Point', ['x', 'y', 'z'])
 Point.__new__.__defaults__ = (None, None, 0)
 
 curve_resolution = 20
+curve_tightness_amount = 0
 bezier_resolution = 20
 
 def bezier_detail(detail_value):
@@ -49,6 +50,15 @@ def curve_detail(detail_value):
     """
     global curve_resolution
     curve_resolution = detail_value
+
+def curve_tightness(amount):
+    """Change the curve tightness used to draw curves.
+
+    :param amount: new curve tightness amount.
+    :type amount: int
+    """
+    global curve_tightness_amount
+    curve_tightness_amount = amount
 
 def _point_typecast(func):
     """Typecast all but the last argument of the function to Points.
