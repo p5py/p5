@@ -18,10 +18,9 @@
 
 """Base module for a sketch."""
 
+import __main__
 import builtins
 from functools import wraps
-
-import __main__
 
 import pyglet
 
@@ -33,8 +32,8 @@ builtins.title = "p5"
 builtins.frame_count = -1
 builtins.frame_rate = 30
 
-# builtins.PIXEL_HEIGHT = None
-# builtins.PIXEL_WIDTH = None
+builtins.pixel_width = 1
+builtins.pixel_height = 1
 
 platform = pyglet.window.get_platform()
 display = platform.get_default_display()
@@ -110,17 +109,17 @@ def update(dt):
     renderer.post_render()
 
 def no_loop():
-    global _looping
-    _looping = False
+    global looping
+    looping = False
 
 def loop():
-    global _looping
-    _looping = True
+    global looping
+    looping = True
 
 def redraw():
-    global _redraw
-    if not _looping:
-        _redraw = True
+    global redraw
+    if not looping:
+        redraw = True
 
 def size(width, height):
     """Resize the window.
