@@ -167,7 +167,7 @@ class Ellipse(Shape):
 
 @sketch.artist
 def point(x, y, z=0):
-    """Returns a point Shape.
+    """Returns a point.
 
     :param x: x-coordinate of the shape.
     :type x: int or float
@@ -186,7 +186,7 @@ def point(x, y, z=0):
 
 @sketch.artist
 def line(p1, p2):
-    """Returns a line Shape.
+    """Returns a line.
 
     :param p1: Coordinates of the starting point of the line.
     :type p1: tuple
@@ -244,7 +244,8 @@ def triangle(p1, p2, p3):
     :returns: A triangle.
     :rtype: Shape
     """
-    return Shape([Point(*p1), Point(*p2), Point(*p3)])
+    vertices = [Point(*p1), Point(*p2), Point(*p3)]
+    return Shape(vertices)
 
 @sketch.artist
 def quad(p1, p2, p3, p4):
@@ -262,10 +263,11 @@ def quad(p1, p2, p3, p4):
     :param p4: coordinates of the fourth point of the quad
     :type p4: 3-tuple
 
-    :returns: A triangle.
+    :returns: A quad.
     :rtype: Shape
     """
-    return Shape([Point(*p1), Point(*p2), Point(*p3), Point(*p4)])
+    vertices = [Point(*p1), Point(*p2), Point(*p3), Point(*p4)]
+    return Shape(vertices)
 
 def rect(coordinate, *args, mode=None):
     """Return a rectangle.
