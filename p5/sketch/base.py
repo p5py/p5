@@ -26,6 +26,9 @@ import pyglet
 
 from ..opengl import renderer
 
+__all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
+           'title', 'no_cursor', 'cursor', 'test_run', 'exit']
+
 builtins.width = 800
 builtins.height = 600
 builtins.title = "p5"
@@ -86,28 +89,6 @@ def draw():
 def setup():
     pass
 
-fps_display = pyglet.clock.ClockDisplay()
-
-def update(dt):
-    global handler_queue
-    global redraw
-    global setup_done
-
-    builtins.frame_count += 1
-    builtins.frame_rate = int(1 / (dt + 0.0001))
-
-    renderer.pre_render()
-    if not setup_done:
-        setup()
-        setup_done = True
-    if looping or redraw:
-        draw()
-        redraw = False
-    for function, event in handler_queue:
-        function(event)
-    handler_queue = []
-    renderer.post_render()
-
 def no_loop():
     global looping
     looping = False
@@ -146,6 +127,8 @@ def title(new_title):
     window.set_caption("{} - p5".format(new_title))
 
 def no_cursor():
+    """Hide the mouse cursor.
+    """
     window.set_mouse_visible(False)
 
 def cursor(cursor_type='ARROW'):
@@ -169,6 +152,33 @@ def cursor(cursor_type='ARROW'):
     cursor = window.get_system_mouse_cursor(selected_cursor)
     window.set_mouse_visible(True)
     window.set_mouse_cursor(cursor)
+
+def exit(*args, **kwargs):
+    """Override the system exit to make sure we perform necessary
+        cleanups, etc.
+    """
+    pyglet.app.exit()
+    builtins.exit(*args, **kwargs)
+
+def update(dt):
+    global handler_queue
+    global redraw
+    global setup_done
+
+    builtins.frame_count += 1
+    builtins.frame_rate = int(1 / (dt + 0.0001))
+
+    renderer.pre_render()
+    if not setup_done:
+        setup()
+        setup_done = True
+    if looping or redraw:
+        draw()
+        redraw = False
+    for function, event in handler_queue:
+        function(event)
+    handler_queue = []
+    renderer.post_render()
 
 def initialize(*args, **kwargs):
     renderer.initialize(window.context)
@@ -230,13 +240,6 @@ def artist(f):
         renderer.render(shape)
         return shape
     return decorated
-
-def exit(*args, **kwargs):
-    """Override the system exit to make sure we perform necessary
-        cleanups, etc.
-    """
-    pyglet.app.exit()
-    builtins.exit(*args, **kwargs)
 
 def test_run():
     initialize()
