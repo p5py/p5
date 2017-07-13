@@ -32,9 +32,8 @@ sys.path.append(os.path.abspath(os.pardir))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
-              'sphinx.ext.todo', 'sphinx.ext.mathjax',
-              'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
+              'sphinx.ext.mathjax',]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -93,10 +92,18 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
+    'logo': 'p5-logo.png',
     'show_powered_by': False,
     'github_user': 'p5py',
     'github_repo': 'p5',
     'github_banner': True
+}
+
+html_sidebars = {
+    '**': [
+        'localtoc.html',
+        'searchbox.html'
+    ]
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
