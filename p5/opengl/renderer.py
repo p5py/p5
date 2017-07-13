@@ -242,6 +242,7 @@ def pre_render():
     global transform_matrix
     transform_matrix = Matrix4()
 
+    clear()
     glViewport(*viewport)
 
     default_shader.activate()
