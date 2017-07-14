@@ -19,8 +19,54 @@
 #
 import os
 import sys
+from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath('..'))
+
+implementations = ["carbon", "cocoa", "win32", "xlib"]
+
+# For each module, a list of submodules that should not be imported.
+# If value is None, do not try to import any submodule.
+skip_modules = {
+    "pyglet": {
+        "pyglet.com": None,
+        "pyglet.compat": None,
+        "pyglet.lib": None,
+        "pyglet.libs": None,
+        "pyglet.app": implementations,
+        "pyglet.canvas": implementations + ["xlib_vidmoderestore"],
+        "pyglet.extlibs": None,
+        "pyglet.font": ["carbon",
+                        "quartz",
+                        "win32",
+                        "freetype", "freetype_lib",
+                        "fontconfig",
+                        "win32query",],
+        "pyglet.input": ["carbon_hid", "carbon_tablet",
+                         "darwin_hid",
+                         "directinput",
+                         "evdev",
+                         "wintab",
+                         "x11_xinput", "x11_xinput_tablet"],
+        "pyglet.image.codecs": ["gdiplus",
+                                "gdkpixbuf2",
+                                "pil",
+                                "quartz",
+                                "quicktime"],
+        "pyglet.gl": implementations + ["agl",
+                                        "glext_arb", "glext_nv",
+                                        "glx", "glx_info",
+                                        "glxext_arb", "glxext_mesa", "glxext_nv",
+                                        "lib_agl", "lib_glx", "lib_wgl",
+                                        "wgl", "wgl_info", "wglext_arb", "wglext_nv"],
+        "pyglet.media.drivers": ["directsound",
+                                 "openal",
+                                 "pulse"],
+        "pyglet.media.sources": ["avbin"],
+        "pyglet.window": implementations,
+    },
+}
+
 import p5
 
 
