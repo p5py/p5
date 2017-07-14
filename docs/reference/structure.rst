@@ -4,42 +4,42 @@ Structure
 
 .. module:: p5
 
-setup
------
+setup()
+=======
 
 .. autofunction:: setup
 
-draw
-----
+draw()
+======
 
 .. autofunction:: draw
 
-run
----
+run()
+=====
 
 .. autofunction:: run
 
-exit
-----
+exit()
+======
 
 .. autofunction:: exit
 
-loop
-----
+loop()
+======
 
 .. autofunction:: loop
 
-no_loop
--------
+no_loop()
+=========
 
 .. autofunction:: no_loop
 
-redraw
-------
+redraw()
+========
 
 .. autofunction:: redraw
 
-push_style
-----------
+push_style()
+============
 
 .. autofunction:: push_style

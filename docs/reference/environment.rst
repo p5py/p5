@@ -4,14 +4,14 @@ Environment
 
 .. automodule:: p5
 
-size
-====
+size()
+======
 
 .. autofunction:: size
 
 
-title
-=====
+title()
+=======
 
 .. autofunction:: title
 
@@ -22,14 +22,14 @@ height, width
 Global integers that store the current width and height of the sketch
 window.
 
-cursor
-======
+cursor()
+========
 
 .. autofunction:: cursor
 
 
-no_cursor
-=========
+no_cursor()
+===========
 
 .. autofunction:: no_cursor
 
