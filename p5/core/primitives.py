@@ -206,6 +206,26 @@ def line(p1, p2):
 
 @sketch.artist
 def bezier(start, control_point_1, control_point_2, stop):
+    """Return a bezier path defined by two control points.
+
+    :param start: The starting point of the bezier curve.
+    :type start: tuple.
+
+    :param control_point_1: The first control point of the bezier
+        curve.
+    :type control_point_1: tuple.
+
+    :param control_point_2: The second control point of the bezier
+        curve.
+    :type control_point_2: tuple.
+
+    :param stop: The end point of the bezier curve.
+    :type stop: tuple.
+
+    :returns: A bezier path.
+    :rtype: Shape.
+
+    """
     path = [
         Point(*start),
         BezierPoint(*control_point_1),
@@ -216,6 +236,24 @@ def bezier(start, control_point_1, control_point_2, stop):
 
 @sketch.artist
 def curve(point_1, point_2, point_3, point_4):
+    """Return a Catmull-Rom curve defined by four points.
+
+    :param point_1: The first point of the curve.
+    :type point_1: tuple
+
+    :param point_2: The first point of the curve.
+    :type point_2: tuple
+
+    :param point_3: The first point of the curve.
+    :type point_3: tuple
+
+    :param point_4: The first point of the curve.
+    :type point_4: tuple
+
+    :returns: A curved path.
+    :rtype: Shape
+
+    """
     path = [
         Point(*point_1),
         CurvePoint(*point_2),
@@ -363,13 +401,14 @@ def square(coordinate, side_length, mode=None):
     return rect(coordinate, side_length, side_length, mode=mode)
 
 def rect_mode(mode='CORNER'):
-    """Change the rect mode for the sketch.
+    """Change the rect and square drawing mode for the sketch.
 
     :param mode: The new mode for drawing rects. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
         'CORNER' so calling rect_mode without parameters will reset
         the sketch's rect mode.
     :type mode: str
+
     """
     global _rect_mode
     _rect_mode = mode
@@ -429,7 +468,7 @@ def ellipse(coordinate, *args, mode=None):
     return Ellipse(center, xrad, yrad)
 
 def circle(coordinate, radius, mode=None):
-    """Return a ellipse.
+    """Return a circle.
 
     :param coordinate: Represents the center of the ellipse when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
@@ -450,7 +489,7 @@ def circle(coordinate, radius, mode=None):
 
     :type mode: str
 
-    :returns: An ellipse.
+    :returns: A circle.
     :rtype: Ellipse
 
     :raises ValueError: When mode is set to 'CORNERS'
@@ -464,7 +503,7 @@ def circle(coordinate, radius, mode=None):
     return ellipse(coordinate, radius, radius, mode=mode)
 
 def ellipse_mode(mode='CENTER'):
-    """Change the ellipse drawing mode for the sketch.
+    """Change the ellipse and circle drawing mode for the sketch.
 
     :param mode: The new mode for drawing ellipses. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
