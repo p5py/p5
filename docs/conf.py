@@ -20,7 +20,8 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.pardir))
+sys.path.insert(0, os.path.abspath('..'))
+import p5
 
 
 # -- General configuration ------------------------------------------------
