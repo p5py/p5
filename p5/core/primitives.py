@@ -137,7 +137,7 @@ class Ellipse(Shape):
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
 
-    def tessellate(self, resolution=2):
+    def tessellate(self, resolution=0.1):
         """Generate vertex and face data using radii.
 
         :param resolution: Determines the number of vertices per angle
@@ -156,7 +156,7 @@ class Ellipse(Shape):
                 math.sin(math.radians(angle / resolution)),
 
                 self.center.z
-            ) for angle in range(360 * resolution)
+            ) for angle in range(int(360 * resolution))
         ]
 
     def __hash__(self):
