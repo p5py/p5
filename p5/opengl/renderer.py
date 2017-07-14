@@ -21,7 +21,7 @@ from ctypes import *
 import builtins
 import math
 
-from pyglet.gl import *
+from pyglet import gl
 
 from . import support
 from ..tmp import Matrix4
@@ -55,17 +55,17 @@ geometry_cache = {}
 
 # screen quad (SQ) vertex and texture data
 _SQ_vert_coords = [ -1, 1, 1, 1, 1, -1, -1, -1]
-_SQ_vert_data = (GLfloat * len(_SQ_vert_coords))(*_SQ_vert_coords)
+_SQ_vert_data = (gl.GLfloat * len(_SQ_vert_coords))(*_SQ_vert_coords)
 
 _SQ_tex_coords = [ 0, 1, 1, 1, 1, 0, 0, 0 ]
-_SQ_tex_data = (GLfloat * len(_SQ_tex_coords))(*_SQ_tex_coords)
+_SQ_tex_data = (gl.GLfloat * len(_SQ_tex_coords))(*_SQ_tex_coords)
 
 
 class FrameBuffer:
     """Encapsulates an OpenGL FrameBuffer."""
     def __init__(self):
         self._id = Gluint()
-        glGenFramebuffersEXT(1, pointer(self._id))
+        gl.glGenFramebuffersEXT(1, pointer(self._id))
 
         self._check_completion_status()
 
@@ -74,29 +74,29 @@ class FrameBuffer:
 
         :raises Exception: When the frame buffer is incomplete.
         """
-        status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT)
-        if status != GL_FRAMEBUFFER_COMPLETE_EXT:
+        status = gl.glCheckFramebufferStatusEXT(gl.GL_FRAMEBUFFER_EXT)
+        if status != gl.GL_FRAMEBUFFER_COMPLETE_EXT:
             msg = "ERR {}: FrameBuffer could not be created.".format(status)
             raise Exception(msg)
 
     def activate(self):
         """Activate the current framebuffer."""
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self._id)
+        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, self._id)
 
     def deactivate(self):
         """Deactivate the current framebuffer."""
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self._id)
+        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, self._id)
 
     def attach_texture(self, texture):
         self.activate()
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                                  GL_COLOR_ATTACHMENT0_EXT,
-                                  GL_TEXTURE_2D, texture.id, 0)
+        gl.glFramebufferTexture2DEXT(gl.GL_FRAMEBUFFER_EXT,
+                                     gl.GL_COLOR_ATTACHMENT0_EXT,
+                                     gl.GL_TEXTURE_2D, texture.id, 0)
         self.deactivate()
 
     def delete(self):
         """Delete the current frame buffer."""
-        glDeleteFramebuffersEXT(self._id)
+        gl.glDeleteFramebuffersEXT(self._id)
 
     def __del__(self):
         self.delete()
@@ -105,19 +105,19 @@ class FrameBuffer:
 class FrameTexture:
     """A texture to be used with the FrameBuffer"""
     def __init__(self, width, height):
-        self._id = Gluint()
-        glGenTextures(1, pointer(self._id))
+        self._id = gl.Gluint()
+        gl.glGenTextures(1, pointer(self._id))
 
         self.activate()
 
-        _blank_texture = (GLubyte * (width * height * 4))()
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+        _blank_texture = (gl.GLubyte * (width * height * 4))()
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE)
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                     GL_RGBA, GL_UNSIGNED_BYTE, _blank_texture)
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0,
+                        gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, _blank_texture)
         self._init_texture()
 
         self.deactivate()
@@ -133,11 +133,11 @@ class FrameTexture:
 
     def activate(self):
         """Activate the current texture."""
-        glBindTexture(GL_TEXTURE_2D, self._id)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self._id)
 
     def deactivate(self):
         """Deactivate the current texture."""
-        glBindTexture(GL_TEXTURE_2D, 0)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
 
 
 def initialize(window_context):
@@ -162,8 +162,8 @@ def initialize(window_context):
     gl_version = context.get_info().get_version()[:3]
     fbo_support = support.has_fbo(context)
 
-    glEnable(GL_DEPTH_TEST)
-    glDepthFunc(GL_LEQUAL)
+    gl.glEnable(gl.GL_DEPTH_TEST)
+    gl.glDepthFunc(gl.GL_LEQUAL)
 
     screen_shader = Shader(screen_texture_vert, screen_texture_frag, gl_version)
     screen_shader.activate()
@@ -195,15 +195,15 @@ def cleanup():
     """
     default_shader.delete()
     for shape_hash, shape_buffers in geometry_cache.items():
-        glDeleteBuffers(1, shape_buffers['vertex_buffer'])
-        glDeleteBuffers(1, shape_buffers['edge_buffer'])
-        glDeleteBuffers(1, shape_buffers['face_buffer'])
+        gl.glDeleteBuffers(1, shape_buffers['vertex_buffer'])
+        gl.glDeleteBuffers(1, shape_buffers['edge_buffer'])
+        gl.glDeleteBuffers(1, shape_buffers['face_buffer'])
 
 
 def clear():
     """Clear the renderer background."""
-    glClearColor(*background_color)
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    gl.glClearColor(*background_color)
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
 def reset_view():
     """Reset the view of the renderer."""
@@ -213,7 +213,7 @@ def reset_view():
     global viewport
 
     viewport = (0, 0, builtins.width, builtins.height)
-    glViewport(*viewport)
+    gl.glViewport(*viewport)
 
     cz = (builtins.height / 2) / math.tan(math.radians(30))
     projection = Matrix4.new_perspective(
@@ -243,7 +243,7 @@ def pre_render():
     transform_matrix = Matrix4()
 
     clear()
-    glViewport(*viewport)
+    gl.glViewport(*viewport)
 
     default_shader.activate()
 
@@ -258,8 +258,8 @@ def post_render():
     last draw call.
 
     """
-    glBindBuffer(GL_ARRAY_BUFFER, 0)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
     default_shader.deactivate()
 
 def flatten(vertex_list):
@@ -306,54 +306,54 @@ def render(shape):
 
     shape_hash = hash(shape)
     if shape_hash not in geometry_cache:
-        vertex_buffer = GLuint()
-        glGenBuffers(1, pointer(vertex_buffer))
+        vertex_buffer = gl.GLuint()
+        gl.glGenBuffers(1, pointer(vertex_buffer))
 
-        edge_buffer = GLuint()
-        glGenBuffers(1, pointer(edge_buffer))
+        edge_buffer = gl.GLuint()
+        gl.glGenBuffers(1, pointer(edge_buffer))
 
-        face_buffer = GLuint()
-        glGenBuffers(1, pointer(face_buffer))
+        face_buffer = gl.GLuint()
+        gl.glGenBuffers(1, pointer(face_buffer))
 
         tessellated_shape = tessellate(shape)
 
         vertices = flatten(tessellated_shape.vertices)
         num_vertices = len(vertices)
-        vertices_typed = (GLfloat * num_vertices)(*vertices)
+        vertices_typed = (gl.GLfloat * num_vertices)(*vertices)
 
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer)
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vertex_buffer)
+        gl.glBufferData(
+            gl.GL_ARRAY_BUFFER,
             sizeof(vertices_typed),
             vertices_typed,
-            GL_STATIC_DRAW
+            gl.GL_STATIC_DRAW
         )
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
         edges = flatten(tessellated_shape.edges)
         num_edges = len(edges)
-        edges_typed = (GLuint * num_edges)(*edges)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, edge_buffer)
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
+        edges_typed = (gl.GLuint * num_edges)(*edges)
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, edge_buffer)
+        gl.glBufferData(
+            gl.GL_ELEMENT_ARRAY_BUFFER,
             sizeof(edges_typed),
             edges_typed,
-            GL_STATIC_DRAW
+            gl.GL_STATIC_DRAW
         )
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
 
         if shape.kind not in  ['PATH', 'POINT']:
             faces = flatten(tessellated_shape.faces)
             num_faces = len(faces)
-            faces_typed = (GLuint * num_faces)(*faces)
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_buffer)
-            glBufferData(
-                GL_ELEMENT_ARRAY_BUFFER,
+            faces_typed = (gl.GLuint * num_faces)(*faces)
+            gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, face_buffer)
+            gl.glBufferData(
+                gl.GL_ELEMENT_ARRAY_BUFFER,
                 sizeof(faces_typed),
                 faces_typed,
-                GL_STATIC_DRAW
+                gl.GL_STATIC_DRAW
             )
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+            gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
         else:
             faces = []
             num_faces = 0
@@ -367,6 +367,7 @@ def render(shape):
             'num_edges': num_edges,
             'num_faces': num_faces
         }
+
     else:
         vertex_buffer = geometry_cache[shape_hash]['vertex_buffer']
         edge_buffer = geometry_cache[shape_hash]['edge_buffer']
@@ -381,26 +382,27 @@ def render(shape):
     if fill_enabled and (shape.kind not in ['POINT', 'PATH']):
         default_shader.update_uniform('fill_color', fill_color)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, face_buffer)
-        glDrawElements(
-            GL_TRIANGLES,
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, face_buffer)
+        gl.glDrawElements(
+            gl.GL_TRIANGLES,
             num_faces,
-            GL_UNSIGNED_INT,
+            gl.GL_UNSIGNED_INT,
             0
         )
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
 
     if stroke_enabled:
         default_shader.update_uniform('fill_color', stroke_color)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, edge_buffer)
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, edge_buffer)
         if shape.kind == 'POINT':
-            glDrawElements(GL_POINTS, num_edges, GL_UNSIGNED_INT, 0)
+            gl.glDrawElements(gl.GL_POINTS, num_edges, gl.GL_UNSIGNED_INT, 0)
         elif shape.kind == 'PATH':
-            glDrawElements(GL_LINE_STRIP, num_edges, GL_UNSIGNED_INT, 0)
+            gl.glDrawElements(gl.GL_LINE_STRIP, num_edges, gl.GL_UNSIGNED_INT, 0)
         else:
-            glDrawElements(GL_LINE_LOOP, num_edges, GL_UNSIGNED_INT, 0)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+            gl.glDrawElements(gl.GL_LINE_LOOP, num_edges, gl.GL_UNSIGNED_INT, 0)
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
+
 
 def test_render():
     """Render the renderer's default test drawing."""
