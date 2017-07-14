@@ -26,7 +26,26 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
         return MagicMock()
 
-MOCK_MODULES = ['pyglet', 'pyglet.gl']
+MOCK_MODULES = [
+    'pyglet', 
+    'pyglet.app', 
+    'pyglet.canvas', 
+    'pyglet.clock', 
+    'pyglet.event', 
+    'pyglet.extlibs', 
+    'pyglet.font', 
+    'pyglet.gl', 
+    'pyglet.graphics', 
+    'pyglet.image', 
+    'pyglet.info', 
+    'pyglet.input', 
+    'pyglet.media', 
+    'pyglet.resource', 
+    'pyglet.sprite', 
+    'pyglet.text', 
+    'pyglet.window',
+]
+    
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 sys.path.insert(0, os.path.abspath('../..'))
 
