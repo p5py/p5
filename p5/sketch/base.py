@@ -84,26 +84,70 @@ setup_done = False
 target_frame_rate = 60.0
 
 def draw():
+    """Continuously execute code defined inside.
+
+    The `draw()` function is called directly after `setup()` and all
+    code inside is continuously executed until the program is stopped
+    (using `exit()`) or `no_loop()` is called.
+
+    :note:
+
+        The screen is cleared *before* each call to draw(). This means
+        that any figures drawn on one iteration of draw() will be
+        cleared on the next. For now, use `background()` to make sure
+        your sketch clears to the correct background color.
+
+        This (screen clear prior to draw) isn't the desired behavior
+        and will be fixed in a future release.
+
+    """
     pass
 
 def setup():
+    """Called to setup initial sketch options.
+
+    The `setup()` function is run once when the program starts and is
+    used to define initial environment options for the sketch.
+
+    """
     pass
 
 def no_loop():
+    """Stop draw() from being continuously called.
+
+    By default, the sketch continuously calls `draw()` as long as it
+    runs. Calling `no_loop()` stops draw() from being called the next
+    time. Note that this only prevents execution of the code inside
+    `draw()` and the user can manipulate the screen contents through
+    event handlers like `mouse_pressed()`, etc.
+
+    """
     global looping
     looping = False
 
 def loop():
+    """Make sure `draw()` is being called continuously.
+
+    `loop()` reverts the effects of `no_loop()` and allows `draw()` to
+    be called continously again.
+
+    """
     global looping
     looping = True
 
 def redraw():
+    """Call `draw()` once.
+
+    If looping has been disabled using `no_loop()`, `redraw()` will
+    make sure that `draw()` is called *exactly* once.
+
+    """
     global redraw
     if not looping:
         redraw = True
 
 def size(width, height):
-    """Resize the window.
+    """Resize the sketch window.
 
     :param width: width of the sketch window.
     :type width: int
@@ -154,8 +198,18 @@ def cursor(cursor_type='ARROW'):
     window.set_mouse_cursor(cursor)
 
 def exit(*args, **kwargs):
-    """Override the system exit to make sure we perform necessary
-        cleanups, etc.
+    """Exit the sketch.
+
+    `exit()` overrides Python's builtin exit() function and makes sure
+    that necessary cleanup steps are performed before exiting the
+    sketch.
+
+    :param args: positional argumets to pass to Python's builtin
+        `exit()` function.
+
+    :param kwargs: keyword-arguments to pass to Python's builtin
+        `exit()` function.
+
     """
     pyglet.app.exit()
     builtins.exit(*args, **kwargs)
@@ -200,19 +254,31 @@ def fix_handler_interface(func):
     else:
         return func
 
-def run(user_setup=None, user_draw=None):
+def run(setup_func=None, draw_func=None):
     """Run a sketch.
+
+    if no `setup_func` and `draw_func` are specified, p5 automatically
+    "finds" the user-defined setup and draw functions.
+
+    :param setup_func: The setup function of the sketch (None by
+         default.)
+    :type setup_func: function
+
+    :param draw_func: The draw function of the sketch (None by
+        default.)
+    :type draw_func: function
+
     """
     global draw
     global setup
 
-    if user_setup is not None:
-        setup = user_setup
+    if setup_func is not None:
+        setup = setup_func
     elif hasattr(__main__, 'setup'):
         setup = __main__.setup
 
-    if user_draw is not None:
-        draw = user_draw
+    if draw_func is not None:
+        draw = draw_func
     elif hasattr(__main__, 'draw'):
         draw = __main__.draw
 
