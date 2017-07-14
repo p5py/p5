@@ -33,18 +33,21 @@ The p5 documentation is organized into the following sections:
 
 - :doc:`Tutorials <tutorials/index>` take you through a series of
   steps to create multiple p5 sketches and introduce you to the most
-  common features. Start here if you have never worked with Processing
-  and/or p5.
+  common features. Ideally you should start here if you have never
+  worked with Processing and/or p5.
 
 - :doc:`Guides <guides/index>` provide background information on p5
-  concepts and discuss topics at a high level.
+  concepts and discuss topics at a high level. The guides **do not**
+  have step-by-step instructions and assume a basic understanding of
+  p5.
 
-- :doc:`Reference <reference/index>` provides a detailed overview of
-  the p5 API.
+- The :doc:`Reference <reference/index>` provides a detailed overview
+  of the complete p5 API.
 
-Make sure to read through the `Quickstart <quickstart>`_ page to get
-started. If have programmed in Processing before, you should take a
-look at the `p5 for Processing users` guide.
+Make sure to read through the :doc:`Quickstart <quickstart>` and
+:doc:`Installation <install>` pages to get started. If have programmed
+in Processing before, you should also take a look at the :doc:`p5 for
+Processing users <guides/for-processing-users>` guide.
 
 If you would like to report a bug, request additional features, or
 would like to help out, please take a look at the `CONTRIBUTING
@@ -55,6 +58,7 @@ the `project repository on Github <https://github.com/p5py/p5/>`_.
    :hidden:
    :glob:
 
+   install
    quickstart
    tutorials/*
    guides/*
