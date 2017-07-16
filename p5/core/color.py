@@ -177,7 +177,18 @@ class Color:
         return red, green, blue, alpha
 
 def fill(*color_args, **color_kwargs):
-    """Set the fill color of the shapes."""
+    """Set the fill color of the shapes.
+
+    :param color_args: positional arguments to be parsed as a color.
+    :type color_args: tuple
+
+    :param color_kwargs: keyword arguments to be parsed as a color.
+    :type color_kwargs: dict
+
+    :note: Both color_args and color_kwargs are directly sent to
+        Color.parse_color
+
+    """
     renderer.fill_enabled = True
     renderer.fill_color = Color(*color_args, **color_kwargs).normalized
 
@@ -186,7 +197,17 @@ def no_fill():
     renderer.fill_enabled = False
 
 def stroke(*color_args, **color_kwargs):
-    """Set the color used to draw lines around shapes"""
+    """Set the color used to draw lines around shapes
+
+    :param color_args: positional arguments to be parsed as a color.
+    :type color_args: tuple
+
+    :param color_kwargs: keyword arguments to be parsed as a color.
+    :type color_kwargs: dict
+
+    :note: Both color_args and color_kwargs are directly sent to
+        Color.parse_color
+    """
     renderer.stroke_enabled = True
     renderer.stroke_color = Color(*color_args, **color_kwargs).normalized
 
@@ -195,7 +216,17 @@ def no_stroke():
     renderer.stroke_enabled = False
     
 def background(*color_args, **color_kwargs):
-    """Set the background color for the renderer."""
+    """Set the background color for the renderer.
+
+    :param color_args: positional arguments to be parsed as a color.
+    :type color_args: tuple
+
+    :param color_kwargs: keyword arguments to be parsed as a color.
+    :type color_kwargs: dict
+
+    :note: Both color_args and color_kwargs are directly sent to
+        Color.parse_color
+    """
     renderer.background_color = Color(*color_args, **color_kwargs).normalized
     renderer.clear()
 
@@ -207,4 +238,4 @@ def color_mode(mode):
     :type mode: str
 
     """
-    raise NotImplementedError
+    raise NotImplementedError()
