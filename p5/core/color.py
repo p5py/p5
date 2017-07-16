@@ -22,6 +22,8 @@ from ..sketch import renderer
 __all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
             'stroke', 'no_stroke', ]
 
+_color_mode = 'RGB'
+
 def to_rgb(h, s, v):
     r, g, b = colorsys.hsv_to_rgb(h/255, s/255, v/255)
     r *= 255
@@ -38,7 +40,9 @@ def to_hsv(r, g, b):
 
 class Color:
     """Represents a color."""
-    def __init__(self, *args, color_mode='RGBA', **kwargs):
+    def __init__(self, *args, color_mode=None, **kwargs):
+        if color_mode is None:
+            color_mode = _color_mode
         r, g, b, a = self.parse_color(*args, color_mode=color_mode, **kwargs)
         self._r = r
         self._g = g
@@ -238,4 +242,5 @@ def color_mode(mode):
     :type mode: str
 
     """
-    raise NotImplementedError()
+    global _color_mode
+    _color_mode = mode
