@@ -43,21 +43,73 @@ def reset_transforms():
     renderer.reset_view()
 
 def translate(x, y, z=0):
+    """Translate the display origin to the given location.
+
+    :param x: The displacement amount in the x-direction (controls the
+        left/right displacement)
+
+    :type x: int
+
+    :param y: The displacement amount in the y-direction (controls the
+        up/down displacement)
+
+    :type y: int
+
+    :param z: The displacement amount in the z-direction (0 by
+        default). This controls the displacement away-from/towards the
+        screen.
+    :type z: int
+
+    """
     renderer.transform_matrix.translate(x, y, z)
 
 def rotate(theta, axis=Vector3(0, 0, 1)):
+    """Rotate the display by the given angle along the given axis.
+
+    :param theta: The angle by which to rotate (in radians)
+    :type theta: float
+
+    :param axis: The axis along which to rotate (defaults to the z-axis)
+    :type axis: Vector3
+    """
     renderer.transform_matrix.rotate_axis(theta, axis)
     
 def rotate_x(theta):
+    """Rotate the view along the x axis.
+
+    :param theta: angle by which to rotate (in radians)
+    :type theta: float
+    """
     renderer.transform_matrix.rotatex(theta)
 
 def rotate_y(theta):
+    """Rotate the view along the y axis.
+
+    :param theta: angle by which to rotate (in radians)
+    :type theta: float
+    """
     renderer.transform_matrix.rotatey(theta)
 
 def rotate_z(theta):
+    """Rotate the view along the z axis.
+
+    :param theta: angle by which to rotate (in radians)
+    :type theta: float
+    """
     renderer.transform_matrix.rotatez(theta)
 
 def scale(sx, sy=None, sz=None):
+    """Scale the display by the given factor.
+
+    :param sx: scale factor along the x-axis.
+    :type sx: float
+
+    :param sy: scale factor along the y-axis (defaults to None)
+    :type sy: float
+
+    :param sz: scale factor along the z-axis (defaults to None)
+    :type sz: float
+    """
     if (not sy) and (not sz):
         sy = sx
         sz = sx
@@ -72,11 +124,21 @@ def scale(sx, sy=None, sz=None):
 #     m n o p
 
 def shear_x(theta):
+    """Shear display along the x-axis.
+
+    :param theta: angle to shear by (in radians)
+    :type theta: float
+    """
     shear_mat = Matrix4()
     shear_mat.b = math.tan(theta)
     renderer.transform_matrix = renderer.transform_matrix * shear_mat
 
 def shear_y(theta):
+    """Shear display along the y-axis.
+
+    :param theta: angle to shear by (in radians)
+    :type theta: float
+    """
     shear_mat = Matrix4()
     shear_mat.e = math.tan(theta)
     renderer.transform_matrix = renderer.transform_matrix * shear_mat
