@@ -117,6 +117,24 @@ def scale(sx, sy=None, sz=None):
         sz = 1
     renderer.transform_matrix.scale(sx, sy, sz)
 
+def apply_matrix(transform_matrix):
+    """Use the given matrix as the sketch's transform matrix.
+
+    :param transform_matrix: The new transform matrix.
+    :type transform_matrix: Matrix4
+    """
+    renderer.transform_matrix = transform_matrix
+
+def reset_matrix():
+    """Reset the current transform matrix.
+    """
+    renderer.transform_matrix = Matrix4()
+
+def print_matrix():
+    """Print the transform matrix being used by the sketch.
+    """
+    print(renderer.transform_matrix)
+
 # Matrix structure:
 #     a b c d
 #     e f g h
