@@ -24,20 +24,20 @@ rotate()
 
 .. autofunction:: rotate()
 
-rotate_X()
+rotate_x()
 ----------
 
-.. autofunction:: rotate_X()
+.. autofunction:: rotate_x()
 
-rotate_Y()
+rotate_y()
 ----------
 
-.. autofunction:: rotate_Y()
+.. autofunction:: rotate_y()
 
-rotate_Z()
+rotate_z()
 ----------
 
-.. autofunction:: rotate_Z()
+.. autofunction:: rotate_z()
 
 
 scale()
@@ -46,15 +46,15 @@ scale()
 .. autofunction:: scale()
 
 
-shear_X()
+shear_x()
 ---------
 
-.. autofunction:: shear_X()
+.. autofunction:: shear_x()
 
-shear_Y()
+shear_y()
 ---------
 
-.. autofunction:: shear_Y()
+.. autofunction:: shear_y()
 
 
 translate()
