@@ -358,8 +358,14 @@ class Vector:
     @classmethod
     def from_angle(cls, angle):
         """Return a new unit vector with the given angle.
+
+        :param angle: Angle to be used to create the vector (in
+            radians).
+        :type angle: float
         """
-        raise NotImplementedError()
+        vec = cls.random_2D()
+        vec.angle = angle
+        return vec
 
     @classmethod
     def random_2D(cls):
