@@ -16,17 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import math
-
-TWO_PI = 2 * math.pi
-PI = math.pi
-HALF_PI = math.pi / 2.0
-QUARTER_PI = math.pi / 4.0
-
-TAU = 2 * math.pi
-HALF_TAU = math.pi
-
 from .random import *
 from .vector import *
 from .matrix import *
 from .curves import *
+from .utils import *

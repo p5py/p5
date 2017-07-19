@@ -22,14 +22,12 @@ from collections import namedtuple
 from functools import wraps
 import math
 
+from .utils import Point
 from ..tmp import Matrix4
 
 __all__ = [ 'bezier_point', 'bezier_tangent', 'bezier_detail',
             'curve_point', 'curve_tangent', 'curve_detail',
             'curve_tightness']
-
-Point = namedtuple('Point', ['x', 'y', 'z'])
-Point.__new__.__defaults__ = (None, None, 0)
 
 curve_resolution = 20
 curve_tightness_amount = 0
