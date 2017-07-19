@@ -39,8 +39,6 @@ def noise(x, y=0, z=0):
     """
     raise NotImplementedError()
 
-# TODO: Double check the default falloff.
-#
 def noise_detail(octaves=4, falloff=0.5):
     """Adjust the level of noise detail produced by noise().
 
