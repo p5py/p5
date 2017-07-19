@@ -176,7 +176,7 @@ class Vector:
         return self.dot(self)
 
     @magnitude_sq.setter
-    def magnitude(self, new_magnitude_sq):
+    def magnitude_sq(self, new_magnitude_sq):
         self.magnitude = math.sqrt(new_magnitude_sq)
 
     def __abs__(self):
