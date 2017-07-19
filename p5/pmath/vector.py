@@ -117,8 +117,10 @@ class Vector:
         :type theta: float or int
 
         """
-        self.x = self.x * math.cos(theta) - self.y * math.sin(theta)
-        self.y = self.x * math.sin(theta) + self.y * math.cos(theta)
+        x = self.x * math.cos(theta) - self.y * math.sin(theta)
+        y = self.x * math.sin(theta) + self.y * math.cos(theta)
+        self.x = x
+        self.y = y
 
     def angle_between(self, other):
         """Calculate the angle between two vectors.
