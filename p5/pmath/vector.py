@@ -19,6 +19,8 @@
 import math
 import random
 
+from .utils import lerp
+
 class Vector:
     """Describes a vector in two or three dimensional space.
 
@@ -332,8 +334,17 @@ class Vector:
         """
         raise NotImplementedError()
 
-    def lerp(self, other):
-        raise NotImplementedError()
+    def lerp(self, other, amount):
+        """Linearly interpolate the vector to another vector.
+
+        :param other: Vector to be interpolate to.
+        :type other: Vector
+
+        :param amount: Amount by which to interpolate.
+        :type amount: float
+        """
+        components = (lerp(si, oi, amount) for si, oi in zip(self, other))
+        return Vector(*components)
 
     def __iter__(self):
         """Return the components of the vector as an iterator.
