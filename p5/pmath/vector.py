@@ -331,8 +331,13 @@ class Vector:
 
     def copy(self):
         """Return a copy of the vector.
+
+        :returns: A copy of the current vector.
+        :rtype: Vector
+
         """
-        raise NotImplementedError()
+        components = (si for si in self)
+        return Vector(*components)
 
     def lerp(self, other, amount):
         """Linearly interpolate the vector to another vector.
@@ -342,6 +347,11 @@ class Vector:
 
         :param amount: Amount by which to interpolate.
         :type amount: float
+
+        :returns: Vector obtained by linearly interpolating this
+            vector to the other vector by the given amount.
+        :rtype: Vector.
+
         """
         components = (lerp(si, oi, amount) for si, oi in zip(self, other))
         return Vector(*components)
