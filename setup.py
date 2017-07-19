@@ -4,7 +4,7 @@ from os import path
 
 setup(
     name='p5',
-    version='0.1.0dev3',
+    version='0.1.0dev4',
     license="GPLv3",
     description="p5 is a python package based on the core ideas of Processing.",
     author="Abhik Pal",
