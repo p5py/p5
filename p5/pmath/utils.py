@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+"""General purpose math utility functions.
+
+"""
 
 import math
 from math import ceil, floor, exp, log, sqrt
@@ -41,7 +44,7 @@ __all__ = [
 ]
 
 Point = namedtuple('Point', ['x', 'y', 'z'])
-Point.__new__.__defaults__ = (None, None, 0)
+Point.__new__.__defaults__ = (0, 0, 0)
 
 TWO_PI = 2 * math.pi
 PI = math.pi

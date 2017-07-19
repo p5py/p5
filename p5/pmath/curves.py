@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-"""Utility functions to work with curves.
+"""Functions to work with Bezier curves and Catmul-Rom splines.
+
 """
 
 from collections import namedtuple
@@ -25,9 +26,13 @@ import math
 from .utils import Point
 from ..tmp import Matrix4
 
-__all__ = [ 'bezier_point', 'bezier_tangent', 'bezier_detail',
-            'curve_point', 'curve_tangent', 'curve_detail',
-            'curve_tightness']
+__all__ = [
+    # BEZIER METHODS
+    'bezier_point', 'bezier_tangent', 'bezier_detail',
+
+    # CURVE METHODS
+    'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness'
+]
 
 curve_resolution = 20
 curve_tightness_amount = 0
