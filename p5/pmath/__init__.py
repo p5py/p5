@@ -26,6 +26,7 @@ QUARTER_PI = math.pi / 4.0
 TAU = 2 * math.pi
 HALF_TAU = math.pi
 
+from .random import *
 from .vector import *
 from .matrix import *
 from .curves import *
