@@ -36,12 +36,13 @@ class Vector:
         Vector(2.00, 3.00, 4.00)
 
     :param x: The x-component of the vector.
+    :type x: int or float
+
     :param y: The y-component of the vector.
+    :type y: int or float
+
     :param z: The z-component of the vector (0 by default; only
         required for 3D vectors; )
-
-    :type x: int or float
-    :type y: int or float
     :type z: int or float
 
     """
@@ -97,13 +98,11 @@ class Vector:
             >>> isclose(p.angle, pi/2)
             True
 
-        :raises AssertionError: If the vector is three-dimensional
+        :raises ValueError: If the vector is three-dimensional
 
         """
-        # TODO (abhikpal, 2017-05-25):
-        #    An assertion error when the value is undefined doens't
-        #    sound "right". Raise some other error instead?
-        assert self.z == 0, "Can't compute the angle for a 3D vector."
+        if self.z != 0:
+            raise ValueError("Can't compute the angle for a 3D vector.")
         return math.atan2(self.y, self.x)
 
     @angle.setter
@@ -174,19 +173,11 @@ class Vector:
         """Set the magnitude of the vector to one."""
         self.magnitude = 1
 
-    def __iter__(self):
-        """Return the components of the vector as an iterator.
-
-        Examples::
-
-            >>> p = Vector(2, 3, 4)
-            >>> print([ c for c in p])
-            [2, 3, 4]
+    def limit(self, limiting_magnitude):
+        """Limit the magnitude of the vector to the given value.
 
         """
-        yield self.x
-        yield self.y
-        yield self.z
+        raise NotImplementedError()
 
     def __add__(self, other):
         """Add two vectors.
@@ -319,14 +310,53 @@ class Vector:
     def __matmul__(self, other):
         return self.dot(other)
 
+    def copy(self):
+        """Return a copy of the vector.
+        """
+        raise NotImplementedError()
+
+    def lerp(self, other):
+        raise NotImplementedError()
+
+    def __iter__(self):
+        """Return the components of the vector as an iterator.
+
+        Examples::
+
+            >>> p = Vector(2, 3, 4)
+            >>> print([ c for c in p])
+            [2, 3, 4]
+
+        """
+        yield self.x
+        yield self.y
+        yield self.z
+
+    def __eq__(self, other):
+        raise NotImplementedError()
+
+    def __neq__(self, other):
+        raise NotImplementedError()
+
+    @classmethod
+    def from_angle(cls, angle):
+        """Return a new unit vector with the given angle.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def random_2D(cls):
+        """Return a random 2D unit vector.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def random_3D(cls):
+        """Return a new random 3D unit vector.
+        """
+        raise NotImplementedError()
+
     def __repr__(self):
         return "Vector({:.2f}, {:.2f}, {:.2f})".format(self.x, self.y, self.z)
 
     __str__ = __repr__
-
-    # TODO (abhikpal, 2017-05-26):
-    #    - comparison magic methods (__eq__, etc)
-    #    - limit -- limit the magnitude of the vector
-    #    - lerp -- Linearly interpolate one vec to another.
-    #    - random_2d
-    #    - random_3d
