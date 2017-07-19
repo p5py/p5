@@ -120,10 +120,24 @@ class Vector:
         self.y = self.x * math.sin(theta) + self.y * math.cos(theta)
 
     def angle_between(self, other):
-        """Calculate the angle between two vectors."""
-        # TODO (abhikpal, 2017-05-25):
-        #     Use a @ b == abs(a) * abs(b) * cos(theta) to get the req. angle.
-        raise NotImplementedError
+        """Calculate the angle between two vectors.
+
+        Examples::
+
+            >>> from math import degrees
+            >>> k = Vector(0, 1)
+            >>> j = Vector(1, 0)
+            >>> degrees(k.angle_between(j))
+            90.0
+
+        :param other:
+        :type other: Vector
+
+        :returns: The angle between `self` and `other` (in radians)
+        :rtype: float
+
+        """
+        return math.acos( (self @ other) / (self.magnitude * other.magnitude))
 
     @property
     def magnitude(self):
