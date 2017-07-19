@@ -157,7 +157,7 @@ class Vector:
 
             >>> p.magnitude = 14
             >>> p
-            Vector(4.0, 6.0, 12.0)
+            Vector(4.00, 6.00, 12.00)
 
             >>> p.normalize()
             >>> print(p)
