@@ -82,7 +82,7 @@ class Vector:
             >>> p.angle
             Traceback (most recent call last):
                 ...
-            AssertionError: Can't compute the angle for a 3D vector.
+            ValueError: Can't compute the angle for a 3D vector.
 
             >>> p = Vector(1, 1)
             >>> isclose(p.angle, pi/4)
@@ -347,10 +347,10 @@ class Vector:
         yield self.z
 
     def __eq__(self, other):
-        raise NotImplementedError()
+        return all(math.isclose(si, oi) for si, oi in zip(self, other))
 
     def __neq__(self, other):
-        raise NotImplementedError()
+        return not all(math.isclose(si, oi) for si, oi in zip(self, other))
 
     @classmethod
     def from_angle(cls, angle):
