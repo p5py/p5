@@ -20,6 +20,8 @@
 """
 
 import math
+
+from collections import namedtuple
 from math import ceil, floor, exp, log, sqrt
 from math import degrees, radians
 from math import sin, cos, tan

@@ -19,7 +19,6 @@
 
 """
 
-from collections import namedtuple
 from functools import wraps
 import math
 
