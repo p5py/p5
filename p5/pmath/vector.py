@@ -17,6 +17,7 @@
 #
 
 import math
+import random
 
 class Vector:
     """Describes a vector in two or three dimensional space.
@@ -362,13 +363,22 @@ class Vector:
     def random_2D(cls):
         """Return a random 2D unit vector.
         """
-        raise NotImplementedError()
+        x = random.random()
+        y = random.random()
+        vec = cls(x, y)
+        vec.normalize()
+        return vec
 
     @classmethod
     def random_3D(cls):
         """Return a new random 3D unit vector.
         """
-        raise NotImplementedError()
+        x = random.random()
+        y = random.random()
+        z = random.random()
+        vec = cls(x, y, z)
+        vec.normalize()
+        return vec
 
     def __repr__(self):
         return "Vector({:.2f}, {:.2f}, {:.2f})".format(self.x, self.y, self.z)
