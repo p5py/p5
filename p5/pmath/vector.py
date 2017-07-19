@@ -19,6 +19,7 @@
 import math
 import random
 
+from .utils import dist
 from .utils import lerp
 
 class Vector:
@@ -144,6 +145,40 @@ class Vector:
         """
         return math.acos( (self @ other) / (self.magnitude * other.magnitude))
 
+    def lerp(self, other, amount):
+        """Linearly interpolate the vector to another vector.
+
+        :param other: Vector to be interpolate to.
+        :type other: Vector
+
+        :param amount: Amount by which to interpolate.
+        :type amount: float
+
+        :returns: Vector obtained by linearly interpolating this
+            vector to the other vector by the given amount.
+        :rtype: Vector.
+
+        """
+        components = (lerp(si, oi, amount) for si, oi in zip(self, other))
+        return Vector(*components)
+
+    def distance(self, other):
+        """Return the distance between two points (tips of the vectors).
+
+        :param other:
+        :type other: Vector
+
+        :returns: The distance between the current vector's tip and
+            the other vector's tip.
+        :rtype: float
+
+        """
+        sc = (si for si in self)
+        oc = (oi for oi in other)
+        return dist(sc, oc)
+
+    dist = distance
+
     @property
     def magnitude(self):
         """The magnitude of the vector.
@@ -192,11 +227,28 @@ class Vector:
         """Set the magnitude of the vector to one."""
         self.magnitude = 1
 
-    def limit(self, limiting_magnitude):
-        """Limit the magnitude of the vector to the given value.
+    def limit(self, upper_limit=None, lower_limit=None):
+        """Limit the magnitude of the vector to the given range.
+
+        :param upper_limit: The upper limit for the limiting range
+            (defaults to None).
+        :type upper_limit: float
+
+        :param lower_limit: The lower limit for the limiting range
+            (defaults to None).
+        :type lower_limit: float
 
         """
-        raise NotImplementedError()
+        magnitude = self.magnitude
+        if upper_limit is None:
+            upper_limit = magnitude
+        if lower_limit is None:
+            lower_limit = magnitude
+
+        if magnitude < lower_limit:
+            self.magnitude = lower_limit
+        elif magnitude > upper_limit:
+            self.magnitude = upper_limit
 
     def __add__(self, other):
         """Add two vectors.
@@ -337,23 +389,6 @@ class Vector:
 
         """
         components = (si for si in self)
-        return Vector(*components)
-
-    def lerp(self, other, amount):
-        """Linearly interpolate the vector to another vector.
-
-        :param other: Vector to be interpolate to.
-        :type other: Vector
-
-        :param amount: Amount by which to interpolate.
-        :type amount: float
-
-        :returns: Vector obtained by linearly interpolating this
-            vector to the other vector by the given amount.
-        :rtype: Vector.
-
-        """
-        components = (lerp(si, oi, amount) for si, oi in zip(self, other))
         return Vector(*components)
 
     def __iter__(self):
