@@ -62,6 +62,18 @@ log()
 .. autofunction:: log
 
 
+sq()
+----
+
+.. autofunction:: sq
+
+
+pow()
+-----
+
+.. autofunction:: pow
+
+
 magnitude()
 -----------
 
