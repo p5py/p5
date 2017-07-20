@@ -17,6 +17,61 @@
 #
 """Provides an Object Oriented interface to OpenGL."""
 
+from pyglet import gl
+import ctypes as ct
+
+_buffer_type_map = {
+    'data': gl.GL_ARRAY_BUFFER,
+    'elem': gl.GL_ELEMENT_ARRAY_BUFFER
+}
+
+_dtype_map = {
+    'float': gl.GLfloat,
+    'uint': gl.GLuint
+}
+
+class VertexBuffer:
+    """Encapsulates an OpenGL VertexBuffer.
+    """
+    def __init__(self, dtype, buffer_type='data'):
+        self._type = _buffer_type_map[buffer_type]
+        self._data = None
+        self._dtype = _dtype_map[dtype]
+
+        self._id = gl.Gluint()
+        gl.glGenBuffers(1, ct.pointer(self._id))
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        value_typed = (self._dtype * len(value))(*value)
+        self.activate()
+        gl.glBufferData(
+            self._type,
+            ct.sizeof(value_typed),
+            value_typed,
+            gl.GL_STATIC_DRAW
+        )
+        self.deactivate()
+        self._data = value
+
+    def activate(self):
+        """Activate the current buffer.
+        """
+        gl.glBindBuffer(self._type, self._id)
+
+    def deactivate(self):
+        """Deactivate the current buffer.
+        """
+        gl.glBindBuffer(self._type, 0)
+
+    def __del__(self):
+        """Delete the current buffer."""
+        gl.glDeleteBuffers(1, self._id)
+
 class FrameBuffer:
     """Encapsulates an OpenGL FrameBuffer."""
     def __init__(self):
