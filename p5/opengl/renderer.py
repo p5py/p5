@@ -45,99 +45,7 @@ stroke_enabled = True
 
 context = None
 
-fbo_support = False
-frame_buffer = None
-back_texture = None
-front_texture = None
-screen_shader = None
-
 geometry_cache = {}
-
-# screen quad (SQ) vertex and texture data
-_SQ_vert_coords = [ -1, 1, 1, 1, 1, -1, -1, -1]
-_SQ_vert_data = (gl.GLfloat * len(_SQ_vert_coords))(*_SQ_vert_coords)
-
-_SQ_tex_coords = [ 0, 1, 1, 1, 1, 0, 0, 0 ]
-_SQ_tex_data = (gl.GLfloat * len(_SQ_tex_coords))(*_SQ_tex_coords)
-
-
-class FrameBuffer:
-    """Encapsulates an OpenGL FrameBuffer."""
-    def __init__(self):
-        self._id = Gluint()
-        gl.glGenFramebuffersEXT(1, pointer(self._id))
-
-        self._check_completion_status()
-
-    def _check_completion_status(self):
-        """Check the completion status of the framebuffer.
-
-        :raises Exception: When the frame buffer is incomplete.
-        """
-        status = gl.glCheckFramebufferStatusEXT(gl.GL_FRAMEBUFFER_EXT)
-        if status != gl.GL_FRAMEBUFFER_COMPLETE_EXT:
-            msg = "ERR {}: FrameBuffer could not be created.".format(status)
-            raise Exception(msg)
-
-    def activate(self):
-        """Activate the current framebuffer."""
-        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, self._id)
-
-    def deactivate(self):
-        """Deactivate the current framebuffer."""
-        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, self._id)
-
-    def attach_texture(self, texture):
-        self.activate()
-        gl.glFramebufferTexture2DEXT(gl.GL_FRAMEBUFFER_EXT,
-                                     gl.GL_COLOR_ATTACHMENT0_EXT,
-                                     gl.GL_TEXTURE_2D, texture.id, 0)
-        self.deactivate()
-
-    def delete(self):
-        """Delete the current frame buffer."""
-        gl.glDeleteFramebuffersEXT(self._id)
-
-    def __del__(self):
-        self.delete()
-
-
-class FrameTexture:
-    """A texture to be used with the FrameBuffer"""
-    def __init__(self, width, height):
-        self._id = gl.Gluint()
-        gl.glGenTextures(1, pointer(self._id))
-
-        self.activate()
-
-        _blank_texture = (gl.GLubyte * (width * height * 4))()
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE)
-
-        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, width, height, 0,
-                        gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, _blank_texture)
-        self._init_texture()
-
-        self.deactivate()
-
-    def _init_texture(self):
-        # Initialize the texture bu uniformly filling with the
-        # background color.
-        pass
-
-    @property
-    def id(self):
-        return self._id
-
-    def activate(self):
-        """Activate the current texture."""
-        gl.glBindTexture(gl.GL_TEXTURE_2D, self._id)
-
-    def deactivate(self):
-        """Deactivate the current texture."""
-        gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
 
 
 def initialize(window_context):
@@ -154,13 +62,9 @@ def initialize(window_context):
     global vertex_buffer
     global element_buffer
     global default_shader
-    global screen_shader
-
-    global fbo_support
 
     context = window_context
     gl_version = context.get_info().get_version()[:3]
-    fbo_support = support.has_fbo(context)
 
     gl.glEnable(gl.GL_DEPTH_TEST)
     gl.glDepthFunc(gl.GL_LEQUAL)
