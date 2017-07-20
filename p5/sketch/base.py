@@ -66,6 +66,12 @@ window = pyglet.window.Window(
 
 window.set_minimum_size(100, 100)
 
+# DO NOT REMOVE THIS
+#
+# We tried removing this line and things broke badly on Mac machines.
+# We still don't know why. Let's just keep this here for now.
+_ = pyglet.clock.ClockDisplay()
+
 def _dummy_handler(*args, **kwargs):
     return pyglet.event.EVENT_HANDLED
 
