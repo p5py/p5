@@ -26,17 +26,28 @@ _buffer_type_map = {
 }
 
 _dtype_map = {
-    'float': gl.GLfloat,
-    'uint': gl.GLuint
+    'float': (gl.GLfloat, gl.GL_FLOAT),
+    'uint': (gl.GLuint, gl.GL_UNSIGNED_INT)
+}
+
+_mode_map = {
+    'POINTS': gl.GL_POINTS,
+    'LINE_STRIP': gl.GL_LINE_STRIP,
+    'LINE_LOOP': gl.GL_LINE_LOOP,
+    'TRIANGLES': gl.GL_TRIANGLES,
 }
 
 class VertexBuffer:
     """Encapsulates an OpenGL VertexBuffer.
     """
     def __init__(self, dtype, buffer_type='data'):
+        self.buffer_type = buffer_type
         self._type = _buffer_type_map[buffer_type]
+
+        self.data_type = dtype
+        self._dtype, self._dtype_const = _dtype_map[dtype]
+
         self._data = None
-        self._dtype = _dtype_map[dtype]
 
         self._id = gl.Gluint()
         gl.glGenBuffers(1, ct.pointer(self._id))
@@ -53,12 +64,8 @@ class VertexBuffer:
     def data(self, value):
         value_typed = (self._dtype * len(value))(*value)
         self.activate()
-        gl.glBufferData(
-            self._type,
-            ct.sizeof(value_typed),
-            value_typed,
-            gl.GL_STATIC_DRAW
-        )
+        gl.glBufferData(self._type, ct.sizeof(value_typed),
+                        value_typed, gl.GL_STATIC_DRAW)
         self.deactivate()
         self._data = value
 
@@ -71,6 +78,13 @@ class VertexBuffer:
         """Deactivate the current buffer.
         """
         gl.glBindBuffer(self._type, 0)
+
+    def draw_buffer(self, mode):
+        draw_mode = _mode_map[mode]
+        self.activate()
+        if self.buffer_type == 'elem':
+            gl.glDrawElements(draw_mode, len(self.data), self._dtype_const, 0)
+        self.deactivate()
 
     def __del__(self):
         """Delete the current buffer."""
