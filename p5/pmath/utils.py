@@ -42,7 +42,7 @@ __all__ = [
     'ceil', 'floor', 'exp', 'log', 'sqrt',
 
     # MATH FUNCTIONS DEFINED HERE
-    'constrain', 'lerp', 'remap', 'normalize', 'dist', 'magnitude',
+    'constrain', 'lerp', 'remap', 'normalize', 'dist', 'magnitude', 'sq', 'pow'
 ]
 
 Point = namedtuple('Point', ['x', 'y', 'z'])
@@ -147,3 +147,30 @@ def dist(point_1, point_2):
     p1 = Point(*point_1)
     p2 = Point(*point_2)
     return magnitude(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z)
+
+def pow(base, exponent):
+    """Raise a number to a power.
+
+    :param base: the number to be raised to a power.
+    :type base: float
+
+    :pararm exponent: the power to be raised to
+    :type exponent: float
+
+    :returns: :math:`{base}^{exponent}`
+    :rtype: float
+
+    """
+    return base ** exponent
+
+def sq(number):
+    """Square a number.
+
+    :param number: The number to be squared.
+    :type number: float
+
+    :returns: The square of the number.
+    :rtype: float
+
+    """
+    return number ** 2
