@@ -295,39 +295,3 @@ def render(shape):
         else:
             gl.glDrawElements(gl.GL_LINE_LOOP, num_edges, gl.GL_UNSIGNED_INT, 0)
         gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
-
-
-def test_render():
-    """Render the renderer's default test drawing."""
-    global background_color
-    global fill_color
-
-    class Triangle:
-        def __init__(self):
-            self.faces = [(0, 1, 2)]
-            self.kind = 'POLY'
-            self.vertices = [
-                (450, 150, 0),
-                (600, 450, 0),
-                (750, 150, 0)
-            ]
-
-    class Square:
-        def __init__(self):
-            self.faces = [(0, 1, 2), (2, 3, 0)]
-            self.kind = 'POLY'
-            self.vertices = [
-                (50, 150, 0),
-                (50, 450, 0),
-                (350, 450, 0),
-                (350, 150, 0)
-            ]
-
-    background_color = (1.0, 1.0, 1.0, 1.0)
-    clear()
-
-    fill_color = (0.8, 0.8, 0.4, 1.0)
-    render(Triangle())
-
-    fill_color = (0.4, 0.4, 0.8, 1.0)
-    render(Square())

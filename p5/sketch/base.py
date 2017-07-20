@@ -27,7 +27,7 @@ import pyglet
 from ..opengl import renderer
 
 __all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
-           'title', 'no_cursor', 'cursor', 'test_run', 'exit']
+           'title', 'no_cursor', 'cursor', 'exit']
 
 builtins.width = 800
 builtins.height = 600
@@ -312,12 +312,3 @@ def artist(f):
         renderer.render(shape)
         return shape
     return decorated
-
-def test_run():
-    initialize()
-    def tester(dt):
-        renderer.pre_render()
-        renderer.test_render()
-        renderer.post_render()
-    pyglet.clock.schedule(tester)
-    pyglet.app.run()
