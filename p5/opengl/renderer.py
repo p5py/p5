@@ -23,11 +23,9 @@ import math
 
 from pyglet import gl
 
-from . import support
 from ..tmp import Matrix4
 from .shader import Shader
 from .shader import vertex_default, fragment_default
-from .shader import screen_texture_vert, screen_texture_frag
 
 default_shader = None
 
@@ -59,8 +57,6 @@ def initialize(window_context):
 
     """
     global context
-    global vertex_buffer
-    global element_buffer
     global default_shader
 
     context = window_context
@@ -68,13 +64,6 @@ def initialize(window_context):
 
     gl.glEnable(gl.GL_DEPTH_TEST)
     gl.glDepthFunc(gl.GL_LEQUAL)
-
-    screen_shader = Shader(screen_texture_vert, screen_texture_frag, gl_version)
-    screen_shader.activate()
-    screen_shader.add_uniform('texMap', 'int')
-    screen_shader.add_attribute('position', '2f')
-    screen_shader.add_attribute('tex_coord', '2f')
-    screen_shader.deactivate()
 
     default_shader = Shader(vertex_default, fragment_default, gl_version)
 
