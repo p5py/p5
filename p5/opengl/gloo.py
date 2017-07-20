@@ -42,6 +42,10 @@ class VertexBuffer:
         gl.glGenBuffers(1, ct.pointer(self._id))
 
     @property
+    def id(self):
+        return self._id
+
+    @property
     def data(self):
         return self._data
 
