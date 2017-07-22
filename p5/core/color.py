@@ -17,6 +17,8 @@
 #
 
 import colorsys
+
+from ..pmath import lerp
 from ..sketch import renderer
 
 __all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
@@ -76,6 +78,24 @@ class Color:
         self._saturation = s
         self._brightness = b
         self._recompute_norm()
+
+    def lerp(self, target, amount):
+        """Linearly interpolate one color to another by the given amount.
+
+        :param target: The target color to lerp to.
+        :type target: Color
+
+        :param amount: The amount by which the color should be lerped
+            (should be a float between 0 and 1).
+        :type amount: float
+
+        :returns: A new color lerped between the current color and the
+            other color.
+        :rtype: Color
+
+        """
+        lerped = (lerp(s, t, amount) for s, t in zip(self.rgba, target.rgba))
+        return Color(*lerped, color_mode='RGB')
 
     @property
     def normalized(self):
