@@ -114,12 +114,12 @@ class Color:
         - gray = ..., alpha = ...
         - r = ..., g = ..., b = ...,
         - red = ..., green = ..., blue = ...,
-        - h = ..., s = ..., v = ...,
-        - hue = ..., saturation = ..., value = ...,
+        - h = ..., s = ..., b = ...,
+        - hue = ..., saturation = ..., brightness = ...,
         - r = ..., g = ..., b = ..., a = ...
         - red = ..., green = ..., blue = ..., alpha = ...
-        - h = ..., s = ..., v = ..., a = ...
-        - hue = ..., saturation = ..., value = ..., alpha = ...
+        - h = ..., s = ..., b = ..., a = ...
+        - hue = ..., saturation = ..., brightness = ..., alpha = ...
 
         :param args: The positional arguments that define the color.
         :type args: tuple
@@ -127,7 +127,7 @@ class Color:
         :param kwargs: The keyword arguments that define the color.
         :type kwargs: dict
 
-        :returns: The color parsed as r, g, b, a values.
+        :returns: The color parsed as red, green, blue, alpha values.
         :rtype: tuple
 
         """
@@ -145,24 +145,19 @@ class Color:
         elif len(args) == 2:
             gray, alpha = args
             red, green, blue =  gray, gray, gray
-        elif len(args) == 3:
-            alpha = 255
-            if color_mode.startswith('RGB'):
-                red, green, blue = args
-            elif color_mode.startswith('HSV'):
-                red, green, blue = to_rgb(*args)
-            else:
-                raise ValueError("Invalid color mode {}".format(color_mode))
-        elif len(args) == 4:
-            if color_mode.startswith('RGB'):
-                red, green, blue, alpha = args
-            elif color_mode.startswith('HSV'):
-                hue, saturation, value, alpha = args
-                red, green, blue = to_rgb(hue, saturation, value)
-            else:
-                raise ValueError("Invalid color mode {}".format(color_mode))
+        elif (len(args) == 3) and color_mode.startswith('RGB'):
+            red, green, blue = args
+        elif (len(args) == 3) and color_mode.startswith('HSB'):
+            hue, saturation, brightness = args
+            red, green, blue = to_rgb(hue, saturation, brightness)
+        elif (len(args) == 4) and color_mode.startswith('RGB'):
+            red, green, blue, alpha = args
+        elif (len(args) == 4) and color_mode.startswith('HSB'):
+            hue, saturation, value, alpha = args
+            red, green, blue = to_rgb(hue, saturation, value)
         elif 'gray' in kwargs:
-            red, green, blue = kwargs['gray'], kwargs['gray'], kwargs['gray']
+            gray = kwargs['gray']
+            red, green, blue = gray, gray, gray
         elif all(param in kwargs for param in ['red', 'green', 'blue']):
             red = kwargs['red']
             green = kwargs['green']
@@ -171,11 +166,16 @@ class Color:
             red = kwargs['r']
             green = kwargs['g']
             blue = kwargs['b']
-        elif all(param in kwargs for param in ['hue', 'saturation', 'value']):
-            h, s, v = kwargs['hue'], kwargs['saturation'], kwargs['value']
-            red, green, blue = to_rgb(h, s, v)
-        elif all(param in kwargs for param in ['h', 's', 'v']):
-            red, green, blue = to_rgb(kwargs['h'], kwargs['s'], kwargs['v'])
+        elif all(param in kwargs for param in ['hue', 'saturation', 'brightness']):
+            hue = kwargs['hue']
+            saturation = kwargs['saturation']
+            brightness = kwargs['brightness']
+            red, green, blue = to_rgb(hue, saturation, brightness)
+        elif all(param in kwargs for param in ['h', 's', 'b']):
+            hue = kwargs['h']
+            saturation = kwargs['s']
+            brightness = kwargs['b']
+            red, green, blue = to_rgb(hue, saturation, brightness)
         else:
             raise ValueError("Failed to parse color.")
         return red, green, blue, alpha
