@@ -215,6 +215,8 @@ def render(shape):
             edge_buffer = VertexBuffer('uint', buffer_type='elem')
             edge_buffer.data = flatten(tessellated_shape.edges)
         else:
+            edge_buffer = VertexBuffer('uint', buffer_type='elem')
+            edge_buffer.data = flatten(tessellated_shape.edges)
             face_buffer = VertexBuffer('uint', buffer_type='elem')
             face_buffer.data = flatten(tessellated_shape.faces)
 
