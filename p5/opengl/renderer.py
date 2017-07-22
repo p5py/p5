@@ -39,6 +39,8 @@ viewport = None
 
 background_color = (0.8, 0.8, 0.8, 1.0)
 fill_color = (1.0, 1.0, 1.0, 1.0)
+tint_color = (1.0, 1.0, 1.0, 1.0)
+tint_enabled = True
 stroke_color = (0, 0, 0, 1.0)
 fill_enabled = True
 stroke_enabled = True

@@ -442,7 +442,31 @@ def stroke(*color_args, **color_kwargs):
 def no_stroke():
     """Disable drawing the stroke around shapes."""
     renderer.stroke_enabled = False
-    
+
+def tint(*color_args, **color_kwargs):
+    """Set the tint color for the sketch.
+
+    :param color_args: positional arguments to be parsed as a color.
+    :type color_args: tuple
+
+    :param color_kwargs: keyword arguments to be parsed as a color.
+    :type color_kwargs: dict
+
+    :note: Both color_args and color_kwargs are directly sent to
+        Color.parse_color
+
+    :returns: The tint color.
+    :rtype: Color
+    """
+    tint_color = Color(*color_args, **color_kwargs)
+    renderer.tint_enabled = True
+    renderer.tint_color = tint_color
+    return tint_color
+
+def no_tint():
+    """Disable tinting of images."""
+    renderer.tint_enabled = False
+
 def background(*color_args, **color_kwargs):
     """Set the background color for the renderer.
 
