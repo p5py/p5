@@ -16,11 +16,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import builtins
 import colorsys
+
+from .primitives import rect
+from .structure import push_style
+from .transforms import push_matrix
 
 from ..pmath import lerp
 from ..sketch import renderer
-
 __all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
             'stroke', 'no_stroke', ]
 
@@ -426,8 +430,13 @@ def background(*color_args, **color_kwargs):
     :note: Both color_args and color_kwargs are directly sent to
         Color.parse_color
     """
-    renderer.background_color = Color(*color_args, **color_kwargs).normalized
-    renderer.clear()
+    with push_style():
+        background_color = Color(*color_args, **color_kwargs, color_mode='RGB')
+        fill(background_color)
+        no_stroke()
+        with push_matrix():
+            rect((0, 0), builtins.width, builtins.height, mode='CORNER')
+    renderer.background_color = background_color.normalized
 
 def color_mode(mode):
     """Set the color mode of the renderer.
