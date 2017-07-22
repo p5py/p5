@@ -48,16 +48,39 @@ class Color:
             r, g, b, a = args[0].rgba
         else:
             r, g, b, a = self.parse_color(*args, color_mode=color_mode, **kwargs)
-        self._r = r
-        self._g = g
-        self._b = b
-        self._a = a
-        self._normalized_values = (r/255, g/255, b/255, a/255)
+        self._red = r
+        self._green = g
+        self._blue = b
+        self._alpha = a
+        self._normalized = (r/255, g/255, b/255, a/255)
+
+        self._recompute_hsb()
+        self._recompute_norm()
+
+    def _recompute_rgb(self):
+        """Recompute the RGB values from HSB values."""
+        r, g, b = to_rgb(self._hue, self._saturation, self._brightness)
+        self._red = r
+        self._greeen = g
+        self._blue = b
+        self._recompute_norm()
+
+    def _recompute_norm(self):
+        """Recompute the normalized color from RGB values"""
+        self._normalized = (self._red / 255, self._green / 255,
+                            self._blue / 255, self._alpha / 255)
+
+    def _recompute_hsb(self):
+        """Recompute the HSB values from the RGB values."""
+        h, s, b = to_hsb(self._red, self._green, self._blue)
+        self._hue = h
+        self._saturation = s
+        self._brightness = b
 
     @property
     def normalized(self):
-        """Normalized RGB color values"""
-        return tuple(self._normalized_values)
+        """Normalized RGBA color values"""
+        return tuple(self._normalized)
 
     @property
     def rgb(self):
@@ -65,7 +88,7 @@ class Color:
         :returns: Color components in RGB.
         :rtype: tuple
         """
-        return (self._r, self._g, self._b)
+        return (self._red, self._green, self._blue)
 
     @property
     def rgba(self):
@@ -73,7 +96,7 @@ class Color:
         :returns: Color components in RGBA.
         :rtype: tuple
         """
-        return (self._r, self._g, self._b, self._a)
+        return (self._red, self._green, self._blue, self._alpha)
 
     @property
     def hsb(self):
@@ -81,7 +104,7 @@ class Color:
         :returns: Color components in HSB.
         :rtype: tuple
         """
-        return to_hsb(self._r, self._g, self._b)
+        return (self._hue, self._saturation, self._brightness)
 
     @property
     def hsba(self):
@@ -89,8 +112,7 @@ class Color:
         :returns: Color components in HSBA.
         :rtype: tuple
         """
-        h, s, v = self.hsv
-        return (h, s, v, self._a)
+        return (self._hue, self._saturation, self._brightness, self._alpha)
 
     @property
     def hex(self):
