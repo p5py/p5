@@ -55,7 +55,11 @@ class Color:
         self._normalized = (r/255, g/255, b/255, a/255)
 
         self._recompute_hsb()
-        self._recompute_norm()
+
+    def _recompute_norm(self):
+        """Recompute the normalized color from RGB values"""
+        self._normalized = (self._red / 255, self._green / 255,
+                            self._blue / 255, self._alpha / 255)
 
     def _recompute_rgb(self):
         """Recompute the RGB values from HSB values."""
@@ -65,22 +69,28 @@ class Color:
         self._blue = b
         self._recompute_norm()
 
-    def _recompute_norm(self):
-        """Recompute the normalized color from RGB values"""
-        self._normalized = (self._red / 255, self._green / 255,
-                            self._blue / 255, self._alpha / 255)
-
     def _recompute_hsb(self):
         """Recompute the HSB values from the RGB values."""
         h, s, b = to_hsb(self._red, self._green, self._blue)
         self._hue = h
         self._saturation = s
         self._brightness = b
+        self._recompute_norm()
 
     @property
     def normalized(self):
         """Normalized RGBA color values"""
         return tuple(self._normalized)
+
+    @property
+    def alpha(self):
+        """The alpha value for the color."""
+        return self._alpha
+
+    @alpha.setter
+    def alpha(self, value):
+        self._alpha = value
+        self._recompute_norm()
 
     @property
     def rgb(self):
@@ -99,6 +109,36 @@ class Color:
         return (self._red, self._green, self._blue, self._alpha)
 
     @property
+    def red(self):
+        """The red component of the color"""
+        return self._red
+
+    @red.setter
+    def red(self, value):
+        self._red = value
+        self._recompute_hsb()
+
+    @property
+    def green(self):
+        """The green component of the color"""
+        return self._green
+
+    @green.setter
+    def green(self, value):
+        self._green = value
+        self._recompute_hsb()
+
+    @property
+    def blue(self):
+        """The blue component of the color"""
+        return self._blue
+
+    @blue.setter
+    def blue(self, value):
+        self._blue = value
+        self._recompute_hsb()
+
+    @property
     def hsb(self):
         """
         :returns: Color components in HSB.
@@ -113,6 +153,65 @@ class Color:
         :rtype: tuple
         """
         return (self._hue, self._saturation, self._brightness, self._alpha)
+
+    @property
+    def hue(self):
+        """The hue component of the color"""
+        return self._hue
+
+    @hue.setter
+    def hue(self, value):
+        self._hue = value
+        self._recompute_rgb()
+
+    @property
+    def saturation(self):
+        """The saturation component of the color"""
+        return self._saturation
+
+    @saturation.setter
+    def saturation(self, value):
+        self._saturation = value
+        self._recompute_rgb()
+
+    @property
+    def brightness(self):
+        """The brightness component of the color"""
+        return self._brightness
+
+    @brightness.setter
+    def brightness(self, value):
+        self._brightness = value
+        self._recompute_rgb()
+
+    # ...and some convenient aliases
+    r = red
+    g = green
+    h = hue
+    s = saturation
+    value = brightness
+    v = value
+
+    # `b` is tricky. depending on the current color code, this could
+    # either be the brightness value or the blue value.
+    @property
+    def b(self):
+        """The blue or the brightness value (depending on the color mode)."""
+        if _color_mode == 'RGB':
+            return self.blue
+        elif _color_mode == 'HSB':
+            return self.brightness
+        else:
+            raise ValueError("Unknown color mode {}".format(_color_mode))
+
+    @b.setter
+    def b(self, value):
+        if _color_mode == 'RGB':
+            self.blue = value
+        elif _color_mode == 'HSB':
+            self.brightness = value
+        else:
+            raise ValueError("Unknown color mode {}".format(_color_mode))
 
     @property
     def hex(self):
