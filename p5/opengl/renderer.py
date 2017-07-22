@@ -110,18 +110,19 @@ def reset_view():
     gl.glViewport(*viewport)
 
     cz = (builtins.height / 2) / math.tan(math.radians(30))
-    projection = Matrix4.new_perspective(
+    projection_matrix = Matrix4.new_perspective(
         math.radians(60),
         builtins.width / builtins.height,
         0.1 * cz,
         10 * cz
     )
-    view = Matrix4().translate(-builtins.width/2, builtins.height/2, -cz)
-    view.scale(1, -1, 1)
+
+    modelview_matrix = Matrix4()
+    modelview_matrix.translate(-builtins.width/2, builtins.height/2, -cz)
+    modelview_matrix.scale(1, -1, 1)
 
     transform_matrix = Matrix4()
-    modelview_matrix = view
-    projection_matrix =  projection
+
     default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
