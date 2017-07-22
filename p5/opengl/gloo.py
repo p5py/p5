@@ -49,7 +49,7 @@ class VertexBuffer:
 
         self._data = None
 
-        self._id = gl.Gluint()
+        self._id = gl.GLuint()
         gl.glGenBuffers(1, ct.pointer(self._id))
 
     @property
@@ -79,14 +79,16 @@ class VertexBuffer:
         """
         gl.glBindBuffer(self._type, 0)
 
-    def draw_buffer(self, mode):
+    def draw(self, mode):
         draw_mode = _mode_map[mode]
         self.activate()
         if self.buffer_type == 'elem':
             gl.glDrawElements(draw_mode, len(self.data), self._dtype_const, 0)
+        else:
+            raise ValueError("cannot draw a data buffer.")
         self.deactivate()
 
-    def __del__(self):
+    def delete(self):
         """Delete the current buffer."""
         gl.glDeleteBuffers(1, self._id)
 
