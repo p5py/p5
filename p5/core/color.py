@@ -111,24 +111,39 @@ class Color:
 
         """
 
-        # FORMULA:
-        # https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
-        # REFERENCE: https://www.w3.org/Graphics/Color/sRGB
-        linear_rgb = []
-        for c in self._normalized[:3]:
-            if c <= 0.04045:
-                lvalue =  c / 12.92
-            else:
-                lvalue = ((c + 0.055) / 1.055) ** 2.4
-            linear_rgb.append(lvalue)
+        # # FORMULA:
+        # # https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
+        # #
+        # # REFERENCE:
+        # # https://www.w3.org/Graphics/Color/sRGB
+        # #
+        # # SAMPLE IMPLEMENTATION:
+        # # https://stackoverflow.com/questions/15686277/convert-rgb-to-grayscale-in-c#15686412
+        # linear_rgb = []
+        # for c in self._normalized[:3]:
+        #     if c <= 0.04045:
+        #         lvalue =  c / 12.92
+        #     else:
+        #         lvalue = ((c + 0.055) / 1.055) ** 2.4
+        #     linear_rgb.append(lvalue)
 
-        coeffs = (0.2126, 0.7152, 0.0722)
-        gray =  sum(l*c for l, c in zip(coeffs, linear_rgb))
+        # coeffs = (0.2126, 0.7152, 0.0722)
+        # gray =  sum(l*c for l, c in zip(coeffs, linear_rgb))
 
-        if (gray <= 0.0031308):
-            return 12.92 * gray * 255
-        else:
-            return (1.055 * (gray ** 1/2.4) - 0.055) * 255
+        # if (gray <= 0.0031308):
+        #     return 12.92 * gray * 255
+        # else:
+        #     return (1.055 * (gray ** 1/2.4) - 0.055) * 255
+
+        # Faster than the coloremetric algo. GIMP uses something similar.
+        #
+        # REFERENCES:
+        #
+        # - "Converting Color Images to B&W"
+        #   <https://www.gimp.org/tutorials/Color2BW/>
+        # - "Luma Coding in Video Systems" from "Grayscale"
+        #   <https://en.wikipedia.org/wiki/Grayscale#Luma_coding_in_video_systems>
+        return 0.299 * self._red + 0.587 * self._green + 0.144 * self._blue
 
     @gray.setter
     def gray(self, value):
