@@ -83,6 +83,36 @@ class Color:
         return tuple(self._normalized)
 
     @property
+    def gray(self):
+        """The gray-scale value of the color.
+
+        Performs a luminance preservation of the current color to
+        grayscale.
+
+        """
+
+        # FORMULA:
+        # https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
+        # REFERENCE: https://www.w3.org/Graphics/Color/sRGB
+        linear_rgb = []
+        for c in self._normalized[:3]:
+            if c <= 0.0405:
+                lvalue =  c / 12.92
+            else:
+                lvalue = ((c + 0.055) / 1.055) ** 2.4
+            linear_rgb.append(lvalue)
+
+        coeffs = (0.2126, 0.7152, 0.0722)
+        return 255 * sum(l*c for l, c in zip(coeffs, linear_rgb))
+
+    @gray.setter
+    def gray(self, value):
+        self._red = value
+        self._green = value
+        self._blue = value
+        self._recompute_hsb()
+
+    @property
     def alpha(self):
         """The alpha value for the color."""
         return self._alpha
