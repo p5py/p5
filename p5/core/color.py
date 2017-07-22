@@ -43,7 +43,8 @@ class Color:
     def __init__(self, *args, color_mode=None, **kwargs):
         if color_mode is None:
             color_mode = _color_mode
-        if (len(args) == 1) and (args[0] is Color):
+
+        if (len(args) == 1) and isinstance(args[0], Color):
             r, g, b, a = args[0].rgba
         else:
             r, g, b, a = self.parse_color(*args, color_mode=color_mode, **kwargs)
