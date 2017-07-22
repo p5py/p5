@@ -92,6 +92,45 @@ class VertexBuffer:
         """Delete the current buffer."""
         gl.glDeleteBuffers(1, self._id)
 
+class Texture:
+    def __init__(self, width, height):
+        self._id = gl.GLuint()
+        glGenTextures(1, ct.pointer(self._id))
+        self.width = width
+        self.height = height
+        self._data = None
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width,
+                        self.height, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, value)
+        self._data = value
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S,
+                           gl.GL_CLAMP_TO_EDGE)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
+                           gl.GL_CLAMP_TO_EDGE)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
+                           gl.GL_LINEAR)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
+                           gl.GL_LINEAR)
+
+    def activate(self):
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self._id)
+
+    def deactivate(self):
+        gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
+
+    def delete(self):
+        gl.glDeleteTextures(1, ct.pointer(self._id))
+
 class FrameBuffer:
     """Encapsulates an OpenGL FrameBuffer."""
     def __init__(self):
