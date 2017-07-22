@@ -18,6 +18,7 @@
 
 import builtins
 import colorsys
+import math
 
 from .primitives import rect
 from .structure import push_style
@@ -100,6 +101,12 @@ class Color:
         """
         lerped = (lerp(s, t, amount) for s, t in zip(self.rgba, target.rgba))
         return Color(*lerped, color_mode='RGB')
+
+    def __repr__(self):
+        fvalues = self._red, self._green, self._blue
+        return "Color( red={}, green={}, blue={} )".format(*fvalues)
+
+    __str__ = __repr__
 
     @property
     def normalized(self):
