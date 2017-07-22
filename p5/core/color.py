@@ -407,9 +407,14 @@ def fill(*color_args, **color_kwargs):
     :note: Both color_args and color_kwargs are directly sent to
         Color.parse_color
 
+    :returns: The fill color.
+    :rtype: Color
+
     """
+    fill_color = Color(*color_args, **color_kwargs)
     renderer.fill_enabled = True
-    renderer.fill_color = Color(*color_args, **color_kwargs).normalized
+    renderer.fill_color = fill_color.normalized
+    return fill_color
 
 def no_fill():
     """Disable filling geometry."""
@@ -426,9 +431,13 @@ def stroke(*color_args, **color_kwargs):
 
     :note: Both color_args and color_kwargs are directly sent to
         Color.parse_color
+
+    :returns: The stroke color.
+    :rtype: Color
     """
+    stroke_color = Color(*color_args, **color_kwargs)
     renderer.stroke_enabled = True
-    renderer.stroke_color = Color(*color_args, **color_kwargs).normalized
+    renderer.stroke_color = stroke_color.normalized
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""
@@ -445,6 +454,9 @@ def background(*color_args, **color_kwargs):
 
     :note: Both color_args and color_kwargs are directly sent to
         Color.parse_color
+
+    :returns: The background color.
+    :rtype: Color
     """
     with push_style():
         background_color = Color(*color_args, **color_kwargs, color_mode='RGB')
@@ -453,6 +465,7 @@ def background(*color_args, **color_kwargs):
         with push_matrix():
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
     renderer.background_color = background_color.normalized
+    return background_color
 
 def color_mode(mode):
     """Set the color mode of the renderer.
