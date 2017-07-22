@@ -24,19 +24,19 @@ __all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
 
 _color_mode = 'RGB'
 
-def to_rgb(h, s, v):
-    r, g, b = colorsys.hsv_to_rgb(h/255, s/255, v/255)
-    r *= 255
-    g *= 255
-    b *= 255
-    return r, g, b
+def to_rgb(h, s, b):
+    red, green, blue = colorsys.hsv_to_rgb(h/255, s/255, b/255)
+    red *= 255
+    green *= 255
+    blue *= 255
+    return red, green, blue
 
-def to_hsv(r, g, b):
-    h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
-    h *= 255
-    s *= 255
-    v *= 255
-    return h, s, v
+def to_hsb(r, g, b):
+    hue, saturation, brightness = colorsys.rgb_to_hsv(r/255, g/255, b/255)
+    hue *= 255
+    saturation *= 255
+    brightness *= 255
+    return hue, saturation, brightness
 
 class Color:
     """Represents a color."""
@@ -76,17 +76,17 @@ class Color:
         return (self._r, self._g, self._b, self._a)
 
     @property
-    def hsv(self):
+    def hsb(self):
         """
-        :returns: Color components in HSV.
+        :returns: Color components in HSB.
         :rtype: tuple
         """
-        return to_hsv(self._r, self._g, self._b)
+        return to_hsb(self._r, self._g, self._b)
 
     @property
-    def hsva(self):
+    def hsba(self):
         """
-        :returns: Color components in HSVA.
+        :returns: Color components in HSBA.
         :rtype: tuple
         """
         h, s, v = self.hsv
