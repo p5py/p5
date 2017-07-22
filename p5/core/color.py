@@ -106,7 +106,7 @@ class Color:
     def gray(self):
         """The gray-scale value of the color.
 
-        Performs a luminance preservation of the current color to
+        Performs a luminance conversion of the current color to
         grayscale.
 
         """
@@ -116,14 +116,19 @@ class Color:
         # REFERENCE: https://www.w3.org/Graphics/Color/sRGB
         linear_rgb = []
         for c in self._normalized[:3]:
-            if c <= 0.0405:
+            if c <= 0.04045:
                 lvalue =  c / 12.92
             else:
                 lvalue = ((c + 0.055) / 1.055) ** 2.4
             linear_rgb.append(lvalue)
 
         coeffs = (0.2126, 0.7152, 0.0722)
-        return 255 * sum(l*c for l, c in zip(coeffs, linear_rgb))
+        gray =  sum(l*c for l, c in zip(coeffs, linear_rgb))
+
+        if (gray <= 0.0031308):
+            return 12.92 * gray * 255
+        else:
+            return (1.055 * (gray ** 1/2.4) - 0.055) * 255
 
     @gray.setter
     def gray(self, value):
