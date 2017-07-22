@@ -108,6 +108,14 @@ class Color:
 
     __str__ = __repr__
 
+    def __eq__(self, other):
+        return all(math.isclose(sc, oc)
+                   for sc, oc in zip(self.normalized, other.normalized))
+
+    def __neq__(self, other):
+        return not all(math.isclose(sc, oc)
+                       for sc, oc in zip(self.normalized, other.normalized))
+
     @property
     def normalized(self):
         """Normalized RGBA color values"""
@@ -385,6 +393,7 @@ class Color:
         else:
             raise ValueError("Failed to parse color.")
         return red, green, blue, alpha
+
 
 def fill(*color_args, **color_kwargs):
     """Set the fill color of the shapes.
