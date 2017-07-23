@@ -49,6 +49,13 @@ context = None
 
 geometry_cache = {}
 
+def add_common_uniforms(shader):
+    """Add a default set of uniforms to the shader.
+    """
+    shader.add_uniform('fill_color', 'vec4')
+    shader.add_uniform('projection', 'mat4')
+    shader.add_uniform('modelview', 'mat4')
+    shader.add_uniform('transform', 'mat4')
 
 def initialize(window_context):
     """Initialize the OpenGL renderer.
@@ -73,11 +80,7 @@ def initialize(window_context):
 
     default_shader.activate()
 
-    default_shader.add_uniform('fill_color', 'vec4')
-    default_shader.add_uniform('projection', 'mat4')
-    default_shader.add_uniform('modelview', 'mat4')
-    default_shader.add_uniform('transform', 'mat4')
-
+    add_common_uniforms(default_shader)
     default_shader.add_attribute('position', '3f')
 
     reset_view()
