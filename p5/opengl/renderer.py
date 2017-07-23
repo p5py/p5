@@ -28,8 +28,10 @@ from ..tmp import Matrix4
 from .gloo import VertexBuffer
 from .shader import Shader
 from .shader import vertex_default, fragment_default
+from .shader import texture_vertex_default, texture_fragment_default
 
 default_shader = None
+texture_shader = None
 
 transform_matrix = Matrix4()
 modelview_matrix = Matrix4()
@@ -52,7 +54,6 @@ geometry_cache = {}
 def add_common_uniforms(shader):
     """Add a default set of uniforms to the shader.
     """
-    shader.add_uniform('fill_color', 'vec4')
     shader.add_uniform('projection', 'mat4')
     shader.add_uniform('modelview', 'mat4')
     shader.add_uniform('transform', 'mat4')
@@ -69,6 +70,7 @@ def initialize(window_context):
     """
     global context
     global default_shader
+    global texture_shader
 
     context = window_context
     gl_version = context.get_info().get_version()[:3]
@@ -77,10 +79,18 @@ def initialize(window_context):
     gl.glDepthFunc(gl.GL_LEQUAL)
 
     default_shader = Shader(vertex_default, fragment_default, gl_version)
+    texture_shader = Shader(texture_vertex_default,
+                            texture_fragment_default, gl_version)
+
+    texture_shader.activate()
+    add_common_uniforms(texture_shader)
+    texture_shader.add_uniform('texture', 'int')
+    texture_shader.add_attribute('position', '3f')
+    texture_shader.add_attribute('texcoord', '2f')
 
     default_shader.activate()
-
     add_common_uniforms(default_shader)
+    default_shader.add_uniform('fill_color', 'vec4')
     default_shader.add_attribute('position', '3f')
 
     reset_view()
@@ -128,6 +138,12 @@ def reset_view():
 
     transform_matrix = Matrix4()
 
+    texture_shader.activate()
+    texture_shader.update_uniform('transform', transform_matrix)
+    texture_shader.update_uniform('modelview', modelview_matrix)
+    texture_shader.update_uniform('projection', projection_matrix)
+
+    default_shader.activate()
     default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
@@ -146,7 +162,6 @@ def pre_render():
     gl.glViewport(*viewport)
 
     default_shader.activate()
-
     default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)

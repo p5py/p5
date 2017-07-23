@@ -55,12 +55,40 @@ void main()
 }
 """
 
+texture_vertex_default = """
+attribute vec3 position;
+attribute vec2 texcoord;
+
+uniform mat4 transform;
+uniform mat4 modelview;
+uniform mat4 projection;
+
+varying vec4 vertex_texcoord;
+
+void main()
+{
+    gl_Position = projection * modelview * transform * vec4(position, 1.0);
+    vertex_texcoord = vec4(texcoord, 1.0, 1.0);
+}
+"""
+
 fragment_default = """
 uniform vec4 fill_color;
 
 void main()
 {
     gl_FragColor = fill_color;
+}
+"""
+
+texture_fragment_default = """
+uniform sampler2D texture;
+
+varying vec4 vertex_texcoord;
+
+void main()
+{
+    gl_FragColor = texture2D(texture, vertex_texcoord.st);
 }
 """
 
