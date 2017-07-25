@@ -40,7 +40,7 @@ _mode_map = {
 class VertexBuffer:
     """Encapsulates an OpenGL VertexBuffer.
     """
-    def __init__(self, dtype, buffer_type='data'):
+    def __init__(self, dtype, data=None, buffer_type='data'):
         self.buffer_type = buffer_type
         self._type = _buffer_type_map[buffer_type]
 
@@ -51,6 +51,9 @@ class VertexBuffer:
 
         self._id = gl.GLuint()
         gl.glGenBuffers(1, ct.pointer(self._id))
+
+        if data is not None:
+            self.data = data
 
     @property
     def id(self):
