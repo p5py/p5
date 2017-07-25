@@ -83,6 +83,13 @@ class VertexBuffer:
         """
         gl.glBindBuffer(self._type, 0)
 
+    @staticmethod
+    def deactivate_all():
+        """Deactivate all buffers.
+        """
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
+
     def draw(self, mode):
         draw_mode = _mode_map[mode]
         self.activate()
