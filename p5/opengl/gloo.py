@@ -35,6 +35,7 @@ _mode_map = {
     'LINE_STRIP': gl.GL_LINE_STRIP,
     'LINE_LOOP': gl.GL_LINE_LOOP,
     'TRIANGLES': gl.GL_TRIANGLES,
+    'TRIANGLE_FAN': gl.GL_TRIANGLE_FAN,
 }
 
 class VertexBuffer:
