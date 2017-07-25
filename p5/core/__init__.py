@@ -20,3 +20,4 @@ from .structure import *
 from .color import *
 from .primitives import *
 from .transforms import *
+from .image import *
