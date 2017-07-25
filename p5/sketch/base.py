@@ -23,6 +23,7 @@ import builtins
 from functools import wraps
 
 import pyglet
+pyglet.options["shadow_window"] = False
 
 from ..opengl import renderer
 
