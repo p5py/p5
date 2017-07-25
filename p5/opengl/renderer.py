@@ -246,7 +246,7 @@ def render(shape):
         edge_buffer.draw('LINE_STRIP')
     else:
         default_shader.update_uniform('fill_color', fill_color)
-        face_buffer.draw('TRIANGLES')
+        face_buffer.draw('TRIANGLE_FAN')
         if stroke_enabled:
             default_shader.update_uniform('fill_color', stroke_color)
             edge_buffer.draw('LINE_LOOP')
