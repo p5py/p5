@@ -20,6 +20,7 @@ import builtins
 from collections import namedtuple
 import math
 
+from .transforms import _screen_coordinates
 from .. import sketch
 from ..pmath import curves
 
@@ -31,18 +32,60 @@ _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
 _shape_mode = 'CORNER'
 
-AnchorPoint = namedtuple('ANCHOR', ['x', 'y', 'z'])
+# We use these different point "types" to help tessellat different shapes.
+#
+# - Point :: Is a "normal" point and doesn't need tessellation.
+#
+# - BezierPoint :: Represents a control point of a bezier curve. Other
+#   points around a bezier curve are tessellated using the bezier
+#   curve algorithm used in bezier_point.
+#
+# - CurvePoint :: Represents a control point for a curve. Other points
+#   around this are tessellated using the Catmull-Rom spline algorithm
+#   used in the curve_point function.
+#
 BezierPoint = namedtuple('BEZIER', ['x', 'y', 'z'])
-CurvePoint = namedtuple('CURVE', ['x', 'y', 'z'])
-Point = namedtuple('DEFAULT', ['x', 'y', 'z'])
-
-AnchorPoint.__new__.__defaults__ = (None, None, 0)
 BezierPoint.__new__.__defaults__ = (None, None, 0)
+
+CurvePoint = namedtuple('CURVE', ['x', 'y', 'z'])
 CurvePoint.__new__.__defaults__ = (None, None, 0)
+
+Point = namedtuple('DEFAULT', ['x', 'y', 'z'])
 Point.__new__.__defaults__ = (None, None, 0)
 
-def get_point_type(point):
+def point_type(point):
+    """Return the point type for the given point.
+
+    :param point:
+    :type point: namedtuple
+
+    :return: The type (name) of the given point.
+    :rtype: str
+    """
     return type(point).__name__
+
+# We use these in ellipse tessellation. The algorithm is similar to
+# the one used in Processing and the we compute the number of
+# subdivisions per ellipse using the following formula:
+#
+#    min(M, max(N, (TWO_PI * size / F)))
+#
+# Where,
+#
+# - size :: is the measure of the dimensions of the circle when
+#   projected in screen coordiantes.
+#
+# - F :: sets the minimum number of subdivisions. A smaller `F` would
+#   produce more detailed circles (== POINT_ACCURACY_FACTOR)
+#
+# - N :: Minimum point accuracy (== MIN_POINT_ACCURACY)
+#
+# - M :: Maximum point accuracy (== MAX_POINT_ACCURACY)
+#
+MIN_POINT_ACCURACY = 20
+MAX_POINT_ACCURACY = 200
+POINT_ACCURACY_FACTOR = 10
+
 
 class Shape:
     """Represents a Shape in p5py.
@@ -104,7 +147,7 @@ class Shape:
     def tessellate(self):
         """Generate actual vertex data from limited number of parameters.
         """
-        psig = ''.join(get_point_type(v)[0] for v in self._raw_vertices)
+        psig = ''.join(point_type(v)[0] for v in self._raw_vertices)
         if all(pi == 'D' for pi in psig):
             # the path is already tessellated. Nothing to be done.
             self._vertices = self._raw_vertices
@@ -127,7 +170,7 @@ class Shape:
 
     def _compute_hash_string(self):
         vert_str = [
-            '{}x{:.3f}y{:.3f}z{:.3f}'.format(get_point_type(p)[:2], p.x, p.y, p.z)
+            '{}x{:.3f}y{:.3f}z{:.3f}'.format(point_type(p)[:2], p.x, p.y, p.z)
             for p in self._raw_vertices
         ]
         # a additionally, we need to store information about the
