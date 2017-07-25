@@ -21,6 +21,7 @@ from contextlib import contextmanager
 import math
 
 from ..sketch import renderer
+from ..pmath import Vector
 from ..tmp.euclid import Matrix4
 from ..tmp.euclid import Vector3
 
@@ -161,6 +162,25 @@ def shear_y(theta):
     shear_mat = Matrix4()
     shear_mat.e = math.tan(theta)
     renderer.transform_matrix = renderer.transform_matrix * shear_mat
+
+def _screen_coordinates(x, y, z=0):
+    """Return the screen coordinates for the given point.
+
+    :param x: x coordinates of the input point.
+    :type x: float
+
+    :param y: y coordinates of the input point.
+    :type y: float
+
+    :param z: z coordinates of the input point (defaults to 0).
+    :type z: float
+
+    :returns: a vector with the transformed x, y, z coordinates.
+    :rtype: Vector
+
+    """
+    p = renderer.transform_matrix * Vector3(x, y, z)
+    return Vector(p.x, p.y, p.z)
 
 def camera():
     raise NotImplementedError
