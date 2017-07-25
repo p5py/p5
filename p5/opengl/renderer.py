@@ -164,6 +164,12 @@ def pre_render():
     clear()
     gl.glViewport(*viewport)
 
+    texture_shader.activate()
+    texture_shader.update_uniform('transform', transform_matrix)
+    texture_shader.update_uniform('modelview', modelview_matrix)
+    texture_shader.update_uniform('projection', projection_matrix)
+    texture_shader.deactivate()
+
     default_shader.activate()
     default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
