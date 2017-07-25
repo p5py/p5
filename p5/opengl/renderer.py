@@ -255,4 +255,4 @@ def render(shape):
         if stroke_enabled:
             default_shader.update_uniform('fill_color', stroke_color)
             edge_buffer.draw('LINE_LOOP')
-    default_shader.activate()
+    default_shader.deactivate()
