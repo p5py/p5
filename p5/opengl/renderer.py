@@ -75,6 +75,9 @@ def initialize(window_context):
     context = window_context
     gl_version = context.get_info().get_version()[:3]
 
+    gl.glEnable(gl.GL_BLEND)
+    gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+
     gl.glEnable(gl.GL_DEPTH_TEST)
     gl.glDepthFunc(gl.GL_LEQUAL)
 
