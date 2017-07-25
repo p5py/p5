@@ -216,6 +216,10 @@ def exit(*args, **kwargs):
     pyglet.app.exit()
     builtins.exit(*args, **kwargs)
 
+@window.event
+def on_draw():
+    pass
+
 def update(dt):
     global handler_queue
     global redraw
