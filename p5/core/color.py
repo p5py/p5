@@ -27,7 +27,7 @@ from .transforms import push_matrix
 from ..pmath import lerp
 from ..sketch import renderer
 __all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
-            'stroke', 'no_stroke', ]
+            'stroke', 'no_stroke', 'tint', 'no_tint' ]
 
 _color_mode = 'RGB'
 
@@ -460,7 +460,7 @@ def tint(*color_args, **color_kwargs):
     """
     tint_color = Color(*color_args, **color_kwargs)
     renderer.tint_enabled = True
-    renderer.tint_color = tint_color
+    renderer.tint_color = tint_color.normalized
     return tint_color
 
 def no_tint():
