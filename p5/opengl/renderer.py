@@ -165,6 +165,7 @@ def pre_render():
     default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
+    default_shader.deactivate()
 
 def post_render():
     """Cleanup things after a draw call.
@@ -173,7 +174,7 @@ def post_render():
     last draw call.
 
     """
-    default_shader.deactivate()
+    VertexBuffer.deactivate_all()
 
 def flatten(vertex_list):
     """Flatten a vertex list
@@ -197,6 +198,7 @@ def render(shape):
     :param shape: The shape to be rendered.
     :type shape: Shape
     """
+    default_shader.activate()
     default_shader.update_uniform('transform', transform_matrix)
 
     shape_hash = hash(shape)
@@ -250,3 +252,4 @@ def render(shape):
         if stroke_enabled:
             default_shader.update_uniform('fill_color', stroke_color)
             edge_buffer.draw('LINE_LOOP')
+    default_shader.activate()
