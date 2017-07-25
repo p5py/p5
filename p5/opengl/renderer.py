@@ -57,6 +57,7 @@ def add_common_uniforms(shader):
     shader.add_uniform('projection', 'mat4')
     shader.add_uniform('modelview', 'mat4')
     shader.add_uniform('transform', 'mat4')
+    shader.add_uniform('fill_color', 'vec4')
 
 def initialize(window_context):
     """Initialize the OpenGL renderer.
@@ -93,7 +94,6 @@ def initialize(window_context):
 
     default_shader.activate()
     add_common_uniforms(default_shader)
-    default_shader.add_uniform('fill_color', 'vec4')
     default_shader.add_attribute('position', '3f')
 
     reset_view()
