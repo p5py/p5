@@ -23,7 +23,7 @@ from functools import wraps
 import math
 
 from .utils import Point
-from ..tmp import Matrix4
+from .matrix import Matrix4
 
 __all__ = [
     # BEZIER METHODS

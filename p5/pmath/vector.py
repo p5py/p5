@@ -22,6 +22,11 @@ import random
 from .utils import dist
 from .utils import lerp
 
+from ..tmp.euclid import Vector2
+from ..tmp.euclid import Vector3
+
+__all__ = ['Vector', 'Vector2', 'Vector3']
+
 class Vector:
     """Describes a vector in two or three dimensional space.
 

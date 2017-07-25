@@ -16,6 +16,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from ..tmp.euclid import Matrix3
+from ..tmp.euclid import Matrix4
+
+__all__ = ['Matrix4', 'Matrix3']
+
 class Matrix:
     """Represents a 4x4 matrix."""
     def __init__(self, *v):

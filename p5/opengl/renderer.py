@@ -23,7 +23,7 @@ import math
 
 from pyglet import gl
 
-from ..tmp import Matrix4
+from ..pmath import Matrix4
 
 from .gloo import VertexBuffer
 from .shader import Shader

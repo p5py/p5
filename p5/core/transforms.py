@@ -21,9 +21,9 @@ from contextlib import contextmanager
 import math
 
 from ..sketch import renderer
+from ..pmath import Matrix4
 from ..pmath import Vector
-from ..tmp.euclid import Matrix4
-from ..tmp.euclid import Vector3
+from ..pmath import Vector3
 
 __all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
            'rotate_x', 'rotate_y', 'rotate_z', 'scale', 'shear_x',
