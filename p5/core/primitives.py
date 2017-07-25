@@ -19,6 +19,9 @@
 import builtins
 from collections import namedtuple
 import math
+from math import sin
+from math import cos
+from math import radians
 
 from .transforms import _screen_coordinates
 from .. import sketch
@@ -68,7 +71,7 @@ def point_type(point):
 # the one used in Processing and the we compute the number of
 # subdivisions per ellipse using the following formula:
 #
-#    min(M, max(N, (TWO_PI * size / F)))
+#    min(M, max(N, (2 * pi * size / F)))
 #
 # Where,
 #
@@ -85,6 +88,13 @@ def point_type(point):
 MIN_POINT_ACCURACY = 20
 MAX_POINT_ACCURACY = 200
 POINT_ACCURACY_FACTOR = 10
+
+# Precomputed sin-cos table to be used during ellipse tessillation.
+SINCOS_PRECISION = 0.5
+SINCOS = [
+    (sin(radians(d * SINCOS_PRECISION)), cos(radians(d * SINCOS_PRECISION)))
+    for d in range(int(360 / SINCOS_PRECISION))
+]
 
 
 class Shape:
@@ -196,26 +206,45 @@ class Ellipse(Shape):
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
 
-    def tessellate(self, resolution=0.1):
+    def tessellate(self):
         """Generate vertex and face data using radii.
+        # """
+        c1 = Point(self.center.x - self.radius.x, self.center.y - self.radius.y)
+        s1 = _screen_coordinates(*c1)
 
-        :param resolution: Determines the number of vertices per angle
-            (in degrees) to produce
-        :type resolution: int
+        c2 = Point(self.center.x -+ self.radius.x, self.center.y + self.radius.y)
+        s2 = _screen_coordinates(*c2)
 
-        """
-        self._vertices = [
-            (
-                self.center.x +
-                self.radius.x *
-                math.cos(math.radians(angle / resolution)),
+        size_acc = (s1.dist(s2) * math.pi * 2) / POINT_ACCURACY_FACTOR
 
-                self.center.y +
-                self.radius.y *
-                math.sin(math.radians(angle / resolution)),
+        acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
+        inc = int(len(SINCOS) / acc)
 
+        self._vertices = []
+        self.vertices.append((
+            self.center.x,
+            self.center.y,
+            self.center.z
+        ))
+        for i in range(0, len(SINCOS), inc):
+            pt = (
+                self.center.x + SINCOS[i][1] * self.radius.x,
+                self.center.y + SINCOS[i][0] * self.radius.y,
                 self.center.z
-            ) for angle in range(int(360 * resolution))
+            )
+            self._vertices.append(pt)
+
+        self._vertices.append((
+            self.center.x + SINCOS[0][1] * self.radius.x,
+            self.center.y + SINCOS[0][0] * self.radius.y,
+            self.center.z
+        ))
+
+    def compute_edges(self):
+        """Compute the edges for this shape."""
+        self._edges = [
+            (k, k+1)
+            for k in range(1, len(self.vertices) - 1)
         ]
 
     def __hash__(self):
