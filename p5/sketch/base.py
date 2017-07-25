@@ -227,12 +227,13 @@ def update(dt):
     if not setup_done:
         setup()
         setup_done = True
-    if looping or redraw:
-        draw()
-        redraw = False
-    for function, event in handler_queue:
-        function(event)
-    handler_queue = []
+    else:
+        if looping or redraw:
+            draw()
+            redraw = False
+        for function, event in handler_queue:
+            function(event)
+        handler_queue = []
     renderer.post_render()
 
 def initialize(*args, **kwargs):
