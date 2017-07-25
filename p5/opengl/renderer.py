@@ -202,24 +202,27 @@ def render(shape):
     shape_hash = hash(shape)
 
     if shape_hash not in geometry_cache:
-        vertex_buffer = VertexBuffer('float')
-        vertex_buffer.data = flatten(shape.vertices)
+        vertex_buffer = VertexBuffer('float', data=flatten(shape.vertices))
 
         point_buffer = None
         edge_buffer = None
         face_buffer = None
 
         if shape.kind == 'POINT':
-            point_buffer = VertexBuffer('uint', buffer_type='elem')
-            point_buffer.data = list(range(len(vertex_buffer.data)))
+            point_buffer = VertexBuffer('uint',
+                                        data=list(range(len(vertex_buffer.data))),
+                                        buffer_type='elem')
         elif shape.kind == 'PATH':
-            edge_buffer = VertexBuffer('uint', buffer_type='elem')
-            edge_buffer.data = flatten(shape.edges)
+            edge_buffer = VertexBuffer('uint',
+                                       data=flatten(shape.edges),
+                                       buffer_type='elem')
         else:
-            edge_buffer = VertexBuffer('uint', buffer_type='elem')
-            edge_buffer.data = flatten(shape.edges)
-            face_buffer = VertexBuffer('uint', buffer_type='elem')
-            face_buffer.data = flatten(shape.faces)
+            edge_buffer = VertexBuffer('uint',
+                                       data=flatten(shape.edges),
+                                       buffer_type='elem')
+            face_buffer = VertexBuffer('uint',
+                                       data=flatten(shape.faces),
+                                       buffer_type='elem')
 
         geometry_cache[shape_hash] = {
             'vertex_buffer': vertex_buffer,
