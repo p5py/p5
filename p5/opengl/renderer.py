@@ -191,24 +191,6 @@ def flatten(vertex_list):
     """
     return [vi for vertex in vertex_list for vi in vertex]
 
-def tessellate(shape):
-    """Generate vertices from Shape data.
-
-    :param shape: The input shape.
-    :type shape: Shape
-
-    :returns: The tesselated shape
-    :rtype: Shape
-
-    """
-    if shape.vertices is None:
-        shape.tessellate()
-    if shape.kind in ['POLY', 'ELLIPSE', 'PATH']:
-       shape.compute_edges()
-    if shape.kind is not 'PATH':
-       shape.compute_faces()
-    return shape
-
 def render(shape):
     """Use the renderer to render a Shape.
 
@@ -220,10 +202,8 @@ def render(shape):
     shape_hash = hash(shape)
 
     if shape_hash not in geometry_cache:
-        tessellated_shape = tessellate(shape)
-
         vertex_buffer = VertexBuffer('float')
-        vertex_buffer.data = flatten(tessellated_shape.vertices)
+        vertex_buffer.data = flatten(shape.vertices)
 
         point_buffer = None
         edge_buffer = None
@@ -234,12 +214,12 @@ def render(shape):
             point_buffer.data = list(range(len(vertex_buffer.data)))
         elif shape.kind == 'PATH':
             edge_buffer = VertexBuffer('uint', buffer_type='elem')
-            edge_buffer.data = flatten(tessellated_shape.edges)
+            edge_buffer.data = flatten(shape.edges)
         else:
             edge_buffer = VertexBuffer('uint', buffer_type='elem')
-            edge_buffer.data = flatten(tessellated_shape.edges)
+            edge_buffer.data = flatten(shape.edges)
             face_buffer = VertexBuffer('uint', buffer_type='elem')
-            face_buffer.data = flatten(tessellated_shape.faces)
+            face_buffer.data = flatten(shape.faces)
 
         geometry_cache[shape_hash] = {
             'vertex_buffer': vertex_buffer,

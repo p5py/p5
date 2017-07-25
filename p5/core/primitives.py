@@ -62,28 +62,44 @@ class Shape:
 
     def __init__(self, vertices, kind='POLY', edges=None, faces=None):
         self.kind = kind
-        self.edges = edges
-        self.faces = faces
-        self.vertices = None
+        self._vertices = None
+        self._edges = edges
+        self._faces = faces
 
         self._raw_vertices = vertices
         self._hash_string = self._compute_hash_string()
 
+    @property
+    def vertices(self):
+        if self._vertices is None:
+            self.tessellate()
+        return self._vertices
+
+    @property
+    def edges(self):
+        if self._edges is None:
+            self.compute_edges()
+        return self._edges
+
+    @property
+    def faces(self):
+        if self._faces is None:
+            self.compute_faces()
+        return self._faces
+
     def compute_faces(self):
         """Compute the faces for this shape."""
-        if self.faces is None:
-            self.faces = [
-                (0, k, k + 1)
-                for k in range(1, len(self.vertices) - 1)
-            ]
+        self._faces = [
+            (0, k, k + 1)
+            for k in range(1, len(self.vertices) - 1)
+        ]
 
     def compute_edges(self):
         """Compute the edges for this shape."""
-        if self.edges is None:
-            self.edges = [
-                (k, k+1)
-                for k in range(len(self.vertices) - 1)
-            ]
+        self._edges = [
+            (k, k+1)
+            for k in range(len(self.vertices) - 1)
+        ]
 
     def tessellate(self):
         """Generate actual vertex data from limited number of parameters.
@@ -91,21 +107,21 @@ class Shape:
         psig = ''.join(get_point_type(v)[0] for v in self._raw_vertices)
         if all(pi == 'D' for pi in psig):
             # the path is already tessellated. Nothing to be done.
-            self.vertices = self._raw_vertices
+            self._vertices = self._raw_vertices
         elif psig == 'DBBD':
-            self.vertices = []
+            self._vertices = []
             steps = curves.bezier_resolution
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.bezier_point(*self._raw_vertices, t)
-                self.vertices.append(p)
+                self._vertices.append(p)
         elif psig == 'DCCD':
-            self.vertices = []
+            self._vertices = []
             steps = curves.curve_resolution
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.curve_point(*self._raw_vertices, t)
-                self.vertices.append(p)
+                self._vertices.append(p)
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
@@ -117,8 +133,8 @@ class Shape:
         # a additionally, we need to store information about the
         # current curve resolutions
         meta_data = '/{}/{}/{}/'.format(curves.bezier_resolution,
-                                     curves.curve_resolution,
-                                     curves.curve_tightness_amount)
+                                        curves.curve_resolution,
+                                        curves.curve_tightness_amount)
         return '{}{}:{}'.format(meta_data, self.kind, ''.join(vert_str))
 
     def __hash__(self):
@@ -130,9 +146,9 @@ class Ellipse(Shape):
     def __init__(self, center, x_radius, y_radius):
         self.kind = 'ELLIPSE'
 
-        self.vertices = None
-        self.faces = None
-        self.edges = None
+        self._vertices = None
+        self._faces = None
+        self._edges = None
 
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
@@ -145,7 +161,7 @@ class Ellipse(Shape):
         :type resolution: int
 
         """
-        self.vertices = [
+        self._vertices = [
             (
                 self.center.x +
                 self.radius.x *
