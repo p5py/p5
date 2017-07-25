@@ -198,7 +198,7 @@ def point(x, y, z=0):
     :rtype: Shape
 
     """
-    return Shape([Point(x, y, z)], faces=[(0,)], edges=[(0,)], kind='POINT')
+    return Shape([Point(x, y, z)], kind='POINT')
 
 @sketch.artist
 def line(p1, p2):
