@@ -22,7 +22,7 @@ from ..sketch import renderer
 __all__ = ['Image']
 
 class Image:
-    def __init__(file_name):
+    def __init__(self, file_name):
         self._file_name = file_name
         self._has_loaded = False
 
