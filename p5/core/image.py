@@ -25,6 +25,7 @@ class Image:
     def __init__(self, file_name):
         self._file_name = file_name
         self._has_loaded = False
+        self._load()
 
     @property
     def width(self):
