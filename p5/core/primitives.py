@@ -26,6 +26,7 @@ from math import radians
 from .transforms import _screen_coordinates
 from .. import sketch
 from ..pmath import curves
+from ..pmath import remap
 
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
@@ -118,6 +119,7 @@ class Shape:
         self._vertices = None
         self._edges = edges
         self._faces = faces
+        self._texcoords = None
 
         self._raw_vertices = vertices
         self._hash_string = self._compute_hash_string()
@@ -140,6 +142,12 @@ class Shape:
             self.compute_faces()
         return self._faces
 
+    @property
+    def texcoords(self):
+        if self._texcoords is not None:
+            self.compute_texcoords()
+        return self._texcoords
+
     def compute_faces(self):
         """Compute the faces for this shape."""
         self._faces = [
@@ -152,6 +160,19 @@ class Shape:
         self._edges = [
             (k, k+1)
             for k in range(len(self.vertices) - 1)
+        ]
+
+    def compute_texcoords(self):
+        """Compute the texture coordinates for the current shape."""
+        xs = [v[0] for v in self.vertices]
+        ys = [v[1] for v in self.vertices]
+
+        rangex = (min(xs), max(xs))
+        rangey = (min(ys), max(ys))
+
+        self._texcoords = [
+            (remap(x, rangex (0, 1)), remap(y, rangey, (0, 1)))
+            for x, y, z in self.vertices
         ]
 
     def tessellate(self):
