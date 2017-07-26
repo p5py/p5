@@ -144,7 +144,7 @@ class Shape:
 
     @property
     def texcoords(self):
-        if self._texcoords is not None:
+        if self._texcoords is None:
             self.compute_texcoords()
         return self._texcoords
 
@@ -171,7 +171,7 @@ class Shape:
         rangey = (min(ys), max(ys))
 
         self._texcoords = [
-            (remap(x, rangex (0, 1)), remap(y, rangey, (0, 1)))
+            (remap(x, rangex, (0, 1)), remap(y, rangey, (0, 1)))
             for x, y, z in self.vertices
         ]
 
