@@ -261,16 +261,18 @@ def render(shape):
 
     default_shader.update_attribute('position', vertex_buffer.id)
 
-    if shape.kind == 'POINT' and stroke_enabled:
+    if stroke_enabled:
         default_shader.update_uniform('fill_color', stroke_color)
-        point_buffer.draw('POINTS')
-    elif shape.kind == 'PATH' and stroke_enabled:
-        default_shader.update_uniform('fill_color', stroke_color)
-        edge_buffer.draw('LINE_STRIP')
-    else:
-        default_shader.update_uniform('fill_color', fill_color)
-        face_buffer.draw('TRIANGLE_FAN')
-        if stroke_enabled:
-            default_shader.update_uniform('fill_color', stroke_color)
+        if shape.kind == 'POINT':
+            point_buffer.draw('POINTS')
+        elif shape.kind == 'PATH':
+            edge_buffer.draw('LINE_STRIP')
+        else:
             edge_buffer.draw('LINE_LOOP')
+
+    if shape.kind not in ['PATH', 'POINT']:
+        if fill_enabled:
+            default_shader.update_uniform('fill_color', fill_color)
+            face_buffer.draw('TRIANGLE_FAN')
+
     default_shader.deactivate()
