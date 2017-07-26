@@ -26,6 +26,7 @@ from pyglet import gl
 from ..pmath import Matrix4
 
 from .gloo import VertexBuffer
+from .gloo import Texture
 from .shader import Shader
 from .shader import vertex_default, fragment_default
 from .shader import texture_vertex_default, texture_fragment_default
@@ -68,8 +69,18 @@ def add_common_uniforms(shader):
 def add_texture(image):
     """Add the given image as a texture to the renderer.
     """
+    global fill_image
     global fill_image_enabled
     fill_image_enabled = True
+    image_hash = hash(image)
+    if image_hash not in texture_cache:
+        tex = Texture(image.width, image.height)
+        tex.data = bytes(image)
+        texture_cache[image_hash] = tex
+    else:
+        tex = texture_cache[image_hash]
+
+    fill_image = tex
 
 def initialize(window_context):
     """Initialize the OpenGL renderer.
@@ -119,10 +130,13 @@ def cleanup():
 
     """
     default_shader.delete()
+    texture_shader.delete()
     for shape_hash, shape_buffers in geometry_cache.items():
         shape_buffers['vertex_buffer'].delete()
         shape_buffers['edge_buffer'].delete()
         shape_buffers['face_buffer'].delete()
+    for texture_hash, texture in texture_cache:
+        texture.delete()
 
 def clear():
     """Clear the renderer background."""
@@ -219,13 +233,18 @@ def render(shape):
     :param shape: The shape to be rendered.
     :type shape: Shape
     """
-    default_shader.activate()
-    default_shader.update_uniform('transform', transform_matrix)
+    if fill_image_enabled:
+        active_shader = texture_shader
+    else:
+        active_shader = default_shader
+    active_shader.activate()
+    active_shader.update_uniform('transform', transform_matrix)
 
     shape_hash = hash(shape)
 
     if shape_hash not in geometry_cache:
         vertex_buffer = VertexBuffer('float', data=flatten(shape.vertices))
+        texcoords_buffer = VertexBuffer('float', data=flatten(shape.texcoords))
 
         point_buffer = None
         edge_buffer = None
@@ -249,20 +268,26 @@ def render(shape):
 
         geometry_cache[shape_hash] = {
             'vertex_buffer': vertex_buffer,
+            'texcoords_buffer': texcoords_buffer,
             'point_buffer': point_buffer,
             'edge_buffer': edge_buffer,
             'face_buffer': face_buffer,
         }
     else:
         vertex_buffer = geometry_cache[shape_hash]['vertex_buffer']
+        texcoords_buffer = geometry_cache[shape_hash]['texcoords_buffer']
         point_buffer = geometry_cache[shape_hash]['point_buffer']
         edge_buffer = geometry_cache[shape_hash]['edge_buffer']
         face_buffer = geometry_cache[shape_hash]['face_buffer']
 
-    default_shader.update_attribute('position', vertex_buffer.id)
+    if fill_image_enabled:
+        fill_image.activate()
+        active_shader.update_attribute('texcoord', texcoords_buffer.id)
 
-    if stroke_enabled:
-        default_shader.update_uniform('fill_color', stroke_color)
+    active_shader.update_attribute('position', vertex_buffer.id)
+
+    if stroke_enabled and (not fill_image_enabled):
+        active_shader.update_uniform('fill_color', stroke_color)
         if shape.kind == 'POINT':
             point_buffer.draw('POINTS')
         elif shape.kind == 'PATH':
@@ -271,8 +296,14 @@ def render(shape):
             edge_buffer.draw('LINE_LOOP')
 
     if shape.kind not in ['PATH', 'POINT']:
-        if fill_enabled:
-            default_shader.update_uniform('fill_color', fill_color)
+        if fill_image_enabled:
+            if tint_enabled:
+                active_shader.update_uniform('fill_color', tint_color)
+            else:
+                active_shader.update_uniform('fill_color', (1, 1, 1, 1))
+            face_buffer.draw('TRIANGLE_FAN')
+        elif fill_enabled:
+            active_shader.update_uniform('fill_color', fill_color)
             face_buffer.draw('TRIANGLE_FAN')
 
-    default_shader.deactivate()
+    active_shader.deactivate()

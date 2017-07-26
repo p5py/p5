@@ -419,11 +419,12 @@ def fill(*fill_args, **fill_kwargs):
         fill_image = fill_args[0]
         renderer.add_texture(fill_image)
         renderer.fill_enabled = False
-        raise NotImplementedError("WIP")
+        renderer.fill_image_enabled = True
         return fill_image
     else:
         fill_color = Color(*fill_args, **fill_kwargs)
         renderer.fill_enabled = True
+        renderer.fill_image_enabled = False
         renderer.fill_color = fill_color.normalized
         return fill_color
 
