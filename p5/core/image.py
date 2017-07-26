@@ -81,6 +81,9 @@ class Image:
     def __setitem__(self, key, value):
         raise NotImplementedError()
 
+    def __hash__(self):
+        return hash(self._file_name)
+
     def __bytes__(self):
         if not self._has_loaded:
             self._load()
