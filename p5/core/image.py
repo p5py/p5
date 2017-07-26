@@ -42,6 +42,9 @@ class Image:
     def pixels(self):
         raise NotImplementedError()
 
+    def _load(self):
+        self._load_local()
+
     def _load_local(self):
         image = pyglet.image.load(self._file_name)
         width = image.width
