@@ -170,10 +170,13 @@ class Shape:
         rangex = (min(xs), max(xs))
         rangey = (min(ys), max(ys))
 
-        self._texcoords = [
-            (remap(x, rangex, (0, 1)), remap(y, rangey, (0, 1)))
-            for x, y, z in self.vertices
-        ]
+        if (rangex[0] - rangex[1] == 0) or (rangey[0] - rangey[1] == 0):
+            self._texcoords = ((0.5, 0.5) for v in self.vertices)
+        else:
+            self._texcoords = [
+                (remap(x, rangex, (0, 1)), remap(y, rangey, (0, 1)))
+                for x, y, z in self.vertices
+            ]
 
     def tessellate(self):
         """Generate actual vertex data from limited number of parameters.
