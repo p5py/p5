@@ -218,12 +218,7 @@ class Shape:
 
 class Ellipse(Shape):
     def __init__(self, center, x_radius, y_radius):
-        self.kind = 'ELLIPSE'
-
-        self._vertices = None
-        self._faces = None
-        self._edges = None
-
+        super().__init__([], 'ELLIPSE')
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
 
