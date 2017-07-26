@@ -23,9 +23,11 @@ import math
 from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
+from .image import Image
 
 from ..pmath import lerp
 from ..sketch import renderer
+
 __all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
             'stroke', 'no_stroke', 'tint', 'no_tint' ]
 
@@ -395,26 +397,35 @@ class Color:
         return red, green, blue, alpha
 
 
-def fill(*color_args, **color_kwargs):
+def fill(*fill_args, **fill_kwargs):
     """Set the fill color of the shapes.
 
-    :param color_args: positional arguments to be parsed as a color.
-    :type color_args: tuple
+    :param fill_args: positional arguments to be parsed as a color or image..
+    :type fill_args: tuple
 
-    :param color_kwargs: keyword arguments to be parsed as a color.
-    :type color_kwargs: dict
+    :param fill_kwargs: keyword arguments to be parsed as a color.
+    :type fill_kwargs: dict
 
-    :note: Both color_args and color_kwargs are directly sent to
-        Color.parse_color
+    :note: Both fill_args and fill_kwargs are directly sent to
+        Color.parse_color when they describe a color. If fill_args
+        just contains a single image, the image is used and no parsing
+        is done.
 
-    :returns: The fill color.
-    :rtype: Color
+    :returns: The fill color or the image.
+    :rtype: Color or Image
 
     """
-    fill_color = Color(*color_args, **color_kwargs)
-    renderer.fill_enabled = True
-    renderer.fill_color = fill_color.normalized
-    return fill_color
+    if len(fill_args) == 1 and type(fill_args[0]) == Image:
+        fill_image = fill_args[0]
+        renderer.add_texture(fill_image)
+        renderer.fill_enabled = False
+        raise NotImplementedError("WIP")
+        return fill_image
+    else:
+        fill_color = Color(*fill_args, **fill_kwargs)
+        renderer.fill_enabled = True
+        renderer.fill_color = fill_color.normalized
+        return fill_color
 
 def no_fill():
     """Disable filling geometry."""

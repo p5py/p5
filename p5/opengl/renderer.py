@@ -40,16 +40,22 @@ projection_matrix = Matrix4()
 viewport = None
 
 background_color = (0.8, 0.8, 0.8, 1.0)
+
 fill_color = (1.0, 1.0, 1.0, 1.0)
+fill_image = None
+fill_enabled = True
+fill_image_enabled = False
+
 tint_color = (1.0, 1.0, 1.0, 1.0)
 tint_enabled = True
+
 stroke_color = (0, 0, 0, 1.0)
-fill_enabled = True
 stroke_enabled = True
 
 context = None
 
 geometry_cache = {}
+texture_cache = {}
 
 def add_common_uniforms(shader):
     """Add a default set of uniforms to the shader.
@@ -58,6 +64,12 @@ def add_common_uniforms(shader):
     shader.add_uniform('modelview', 'mat4')
     shader.add_uniform('transform', 'mat4')
     shader.add_uniform('fill_color', 'vec4')
+
+def add_texture(image):
+    """Add the given image as a texture to the renderer.
+    """
+    global fill_image_enabled
+    fill_image_enabled = True
 
 def initialize(window_context):
     """Initialize the OpenGL renderer.
