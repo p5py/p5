@@ -106,7 +106,7 @@ class VertexBuffer:
 class Texture:
     def __init__(self, width, height):
         self._id = gl.GLuint()
-        glGenTextures(1, ct.pointer(self._id))
+        gl.glGenTextures(1, ct.pointer(self._id))
         self.width = width
         self.height = height
         self._data = None
@@ -121,6 +121,7 @@ class Texture:
 
     @data.setter
     def data(self, value):
+        self.activate()
         gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width,
                         self.height, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, value)
         self._data = value
@@ -132,6 +133,7 @@ class Texture:
                            gl.GL_LINEAR)
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
                            gl.GL_LINEAR)
+        self.deactivate()
 
     def activate(self):
         gl.glBindTexture(gl.GL_TEXTURE_2D, self._id)
