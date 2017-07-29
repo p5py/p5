@@ -146,6 +146,22 @@ class Texture:
     def delete(self):
         gl.glDeleteTextures(1, ct.pointer(self._id))
 
+class DummyFrameBuffer:
+    """A dummy FrameBuffer.
+
+    For machines where we don't have actual FrameBuffer support.
+    """
+    def __init__(self, *args, **kwargs):
+        pass
+    def activate(self, *args, **kwargs):
+        pass
+    def deactivate(self, *args, **kwargs):
+        pass
+    def attach_texture(self, *args, **kwargs):
+        pass
+    def delete(self, *args, **kwargs):
+        pass
+
 class FrameBuffer:
     """Encapsulates an OpenGL FrameBuffer."""
     def __init__(self):
