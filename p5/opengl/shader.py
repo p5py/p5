@@ -23,6 +23,8 @@ import re
 
 from pyglet import gl
 
+from .gloo import GLObject
+
 debug = True
 
 # A mapping from OpenGL versions to the corresponding GLSL version.
@@ -163,7 +165,7 @@ attribute_dtype_map = {
 }
 
 
-class Shader:
+class Shader(GLObject):
     """Encapsulates a GLSL shader program.
 
     Every shader requires the vertex and fragment sources during
@@ -187,7 +189,7 @@ class Shader:
     """
 
     def __init__(self, vertex, fragment, version=None):
-        self._pid = gl.glCreateProgram()
+        self._id = gl.glCreateProgram()
 
         self._vertex_source = preprocess_shader(vertex, 'vert', version)
         self._fragment_source = preprocess_shader(fragment, 'frag', version)
@@ -195,10 +197,10 @@ class Shader:
         self.compile_vertex_shader()
         self.compile_fragment_shader()
 
-        gl.glAttachShader(self._pid, self._vid)
-        gl.glAttachShader(self._pid, self._fid)
+        gl.glAttachShader(self._id, self._vid)
+        gl.glAttachShader(self._id, self._fid)
 
-        gl.glLinkProgram(self._pid)
+        gl.glLinkProgram(self._id)
 
         self._uniforms = {}
         self._attributes = {}
@@ -266,7 +268,7 @@ class Shader:
 
         """
         ufunc = uniform_function_map[dtype]
-        loc = gl.glGetUniformLocation(self._pid, uname.encode())
+        loc = gl.glGetUniformLocation(self._id, uname.encode())
         self._uniforms[uname] = Uniform(uname, loc, ufunc)
 
     def update_uniform(self, uname, data):
@@ -314,7 +316,7 @@ class Shader:
         size = int(data_format[0])
         dtype = attribute_dtype_map[data_format[1:]]
         norm = gl.GL_TRUE if normalize else gl.GL_FALSE
-        loc = gl.glGetAttribLocation(self._pid, name.encode('utf-8'))
+        loc = gl.glGetAttribLocation(self._id, name.encode('utf-8'))
         self._attributes[name] = Attribute(name, loc, size, dtype,
                                            norm, stride, offset)
 
@@ -338,7 +340,7 @@ class Shader:
 
     def activate(self):
         """Activate the current shader."""
-        gl.glUseProgram(self._pid)
+        gl.glUseProgram(self._id)
 
     def deactivate(self):
         """Deactivate the current shader"""
@@ -346,12 +348,12 @@ class Shader:
 
     def delete(self):
         """Delete the current shader."""
-        gl.glDeleteProgram(self._pid)
+        gl.glDeleteProgram(self._id)
         gl.glDeleteShader(self._fid)
         gl.glDeleteShader(self._vid)
 
     def __repr__(self):
-        return "{}( pid={} )".format(self.__class__.__name__, self._pid)
+        return "{}( pid={} )".format(self.__class__.__name__, self._id)
 
     __str__ = __repr__
 

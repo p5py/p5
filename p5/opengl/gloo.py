@@ -17,8 +17,10 @@
 #
 """Provides an Object Oriented interface to OpenGL."""
 
-from pyglet import gl
+from abc import ABCMeta, abstractmethod
 import ctypes as ct
+
+from pyglet import gl
 
 _buffer_type_map = {
     'data': gl.GL_ARRAY_BUFFER,
@@ -38,7 +40,28 @@ _mode_map = {
     'TRIANGLE_FAN': gl.GL_TRIANGLE_FAN,
 }
 
-class VertexBuffer:
+class GLObject(metaclass=ABCMeta):
+    """An abstract class for GL objects."""
+    @abstractmethod
+    def activate(self):
+        """Activate the object."""
+        pass
+
+    @abstractmethod
+    def deactivate(self):
+        """Deactivate the object."""
+        pass
+
+    @abstractmethod
+    def delete(self):
+        """Delete the object."""
+        pass
+
+    @property
+    def id(self):
+        return self._id
+
+class VertexBuffer(GLObject):
     """Encapsulates an OpenGL VertexBuffer.
     """
     def __init__(self, dtype, data=None, buffer_type='data'):
@@ -55,10 +78,6 @@ class VertexBuffer:
 
         if data is not None:
             self.data = data
-
-    @property
-    def id(self):
-        return self._id
 
     @property
     def data(self):
@@ -103,17 +122,13 @@ class VertexBuffer:
         """Delete the current buffer."""
         gl.glDeleteBuffers(1, self._id)
 
-class Texture:
+class Texture(GLObject):
     def __init__(self, width, height):
         self._id = gl.GLuint()
         gl.glGenTextures(1, ct.pointer(self._id))
         self.width = width
         self.height = height
         self._data = None
-
-    @property
-    def id(self):
-        return self._id
 
     @property
     def data(self):
@@ -163,7 +178,7 @@ class DummyFrameBuffer:
     def delete(self, *args, **kwargs):
         pass
 
-class FrameBuffer:
+class FrameBuffer(GLObject):
     """Encapsulates an OpenGL FrameBuffer."""
     def __init__(self):
         self._id = Gluint()
