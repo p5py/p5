@@ -123,12 +123,21 @@ class VertexBuffer(GLObject):
         gl.glDeleteBuffers(1, self._id)
 
 class Texture(GLObject):
-    def __init__(self, width, height):
+    def __init__(self, width, height, reset=False):
         self._id = gl.GLuint()
         gl.glGenTextures(1, ct.pointer(self._id))
+
         self.width = width
         self.height = height
         self._data = None
+
+        if reset:
+            self.reset()
+
+    def reset(self):
+        """Reset all the data present in the texture."""
+        blank = (gl.GLubyte * (self.width * self.height * 3))()
+        self.data = blank
 
     @property
     def data(self):
