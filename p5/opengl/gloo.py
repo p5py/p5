@@ -207,6 +207,7 @@ class FrameBuffer(GLObject):
 
     def attach_texture(self, texture):
         self.activate()
+        texture.activate()
         gl.glFramebufferTexture2DEXT(gl.GL_FRAMEBUFFER_EXT,
                                      gl.GL_COLOR_ATTACHMENT0_EXT,
                                      gl.GL_TEXTURE_2D, texture.id, 0)
