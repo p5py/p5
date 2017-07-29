@@ -134,6 +134,7 @@ class Texture:
         self.activate()
         gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width,
                         self.height, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, value)
+        self._set_texture_parameters()
         self._data = value
         self.deactivate()
 
