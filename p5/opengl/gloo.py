@@ -119,12 +119,7 @@ class Texture:
     def data(self):
         return self._data
 
-    @data.setter
-    def data(self, value):
-        self.activate()
-        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width,
-                        self.height, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, value)
-        self._data = value
+    def _set_texture_parameters(self):
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S,
                            gl.GL_CLAMP_TO_EDGE)
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T,
@@ -133,6 +128,13 @@ class Texture:
                            gl.GL_LINEAR)
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER,
                            gl.GL_LINEAR)
+
+    @data.setter
+    def data(self, value):
+        self.activate()
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, self.width,
+                        self.height, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, value)
+        self._data = value
         self.deactivate()
 
     def activate(self):
