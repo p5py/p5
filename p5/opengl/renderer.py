@@ -27,6 +27,10 @@ from ..pmath import Matrix4
 
 from .gloo import VertexBuffer
 from .gloo import Texture
+from .gloo import DummyFrameBuffer, FrameBuffer
+
+from .support import has_fbo
+
 from .shader import Shader
 from .shader import vertex_default, fragment_default
 from .shader import texture_vertex_default, texture_fragment_default
@@ -57,6 +61,10 @@ context = None
 
 geometry_cache = {}
 texture_cache = {}
+
+frame_buffer = None
+front_frame_tex = None
+back_frame_tex = None
 
 def add_common_uniforms(shader):
     """Add a default set of uniforms to the shader.
@@ -95,9 +103,15 @@ def initialize(window_context):
     global context
     global default_shader
     global texture_shader
+    global frame_buffer
 
     context = window_context
     gl_version = context.get_info().get_version()[:3]
+
+    if has_fbo(context):
+        frame_buffer = FrameBuffer()
+    else:
+        frame_buffer = DummyFrameBuffer()
 
     gl.glEnable(gl.GL_BLEND)
     gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
@@ -150,6 +164,9 @@ def reset_view():
     global projection_matrix
     global viewport
 
+    global front_frame_tex
+    global back_frame_tex
+
     viewport = (0, 0, builtins.width, builtins.height)
     gl.glViewport(*viewport)
 
@@ -177,6 +194,10 @@ def reset_view():
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
 
+    if not builtins.frame_count > 0:
+        front_frame_tex = Texture(builtins.width, builtins.height, reset=True)
+        back_frame_tex = Texture(builtins.width, builtins.height, reset=True)
+
 def pre_render():
     """Initialize things for a draw call.
 
@@ -189,6 +210,36 @@ def pre_render():
 
     clear()
     gl.glViewport(*viewport)
+
+    # FRAME BUFFER IMPLEMENTATION
+    #
+    # 1. Activate the frame buffer.
+    #
+    #    frame_buffer.activate()
+    #
+    # 2. In the main draw loop, we will render to the back buffer and
+    #    then blit it on the screen at the end of the draw loop. So,
+    #    attach the back buffer texture to the frame buffer to render
+    #    everything to it.
+    #
+    #    frame_buffer.attach_texture(back_frame_tex)
+    #
+    # 3. Turn on blending as it gets disabled at the end of the draw
+    #    loop.
+    #
+    #    gl.glEnable(gl.GL_BLEND)
+    #    gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+    #
+    # 4. If this is the first frame of the sketch, we don't have an
+    #    old buffer yet, so we just clear the screen. If we are not on
+    #    the first frame, we need to render the contents of the last
+    #    draw loop (stored in the front frame texture.)
+    #
+    #    if builtins.frame_count == 0:
+    #        gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+    #    else:
+    #        # draw front texture
+    #
 
     texture_shader.activate()
     texture_shader.update_uniform('transform', transform_matrix)
@@ -210,6 +261,26 @@ def post_render():
 
     """
     VertexBuffer.deactivate_all()
+
+    # FRAME BUFFER IMPLEMENTATION
+    #
+    # 1. We need to stop rendering to the framebuffer; deactivate the
+    #    frame buffer.
+    #
+    #    frame_buffer.deactivate()
+    #
+    # 2. clear the screen (depth buffer, color buffer, everything.)
+    #
+    #    gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    #
+    # 3. We need to draw the frame_buffer without blending; disable blending.
+    #
+    #    gl.glDisable(gl.GL_BLEND)
+    #
+    # 4. draw the back texture
+    #
+    # 5. swap the front and the back textures.
+    #    front_frame_tex, back_frame_tex = back_frame_tex, front_frame_tex
 
 def flatten(vertex_list):
     """Flatten a vertex list
