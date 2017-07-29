@@ -168,6 +168,7 @@ class DummyFrameBuffer:
     For machines where we don't have actual FrameBuffer support.
     """
     def __init__(self, *args, **kwargs):
+        self._id = 0
         pass
     def activate(self, *args, **kwargs):
         pass
@@ -181,8 +182,8 @@ class DummyFrameBuffer:
 class FrameBuffer(GLObject):
     """Encapsulates an OpenGL FrameBuffer."""
     def __init__(self):
-        self._id = Gluint()
-        gl.glGenFramebuffersEXT(1, pointer(self._id))
+        self._id = gl.GLuint()
+        gl.glGenFramebuffersEXT(1, ct.pointer(self._id))
 
         self._check_completion_status()
 
@@ -213,7 +214,4 @@ class FrameBuffer(GLObject):
 
     def delete(self):
         """Delete the current frame buffer."""
-        gl.glDeleteFramebuffersEXT(self._id)
-
-    def __del__(self):
-        self.delete()
+        gl.glDeleteFramebuffersEXT(1, self._id)
