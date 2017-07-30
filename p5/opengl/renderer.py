@@ -27,7 +27,7 @@ from ..pmath import Matrix4
 
 from .gloo import VertexBuffer
 from .gloo import Texture
-from .gloo import DummyFrameBuffer, FrameBuffer
+from .gloo import FrameBuffer
 
 from .support import has_fbo
 
@@ -62,6 +62,7 @@ context = None
 geometry_cache = {}
 texture_cache = {}
 
+frame_buffer_support = False
 frame_buffer = None
 front_frame_tex = None
 back_frame_tex = None
@@ -104,14 +105,14 @@ def initialize(window_context):
     global default_shader
     global texture_shader
     global frame_buffer
+    global frame_buffer_support
 
     context = window_context
     gl_version = context.get_info().get_version()[:3]
 
-    if has_fbo(context):
+    frame_buffer_support = has_fbo(context)
+    if frame_buffer_support:
         frame_buffer = FrameBuffer()
-    else:
-        frame_buffer = DummyFrameBuffer()
 
     gl.glEnable(gl.GL_BLEND)
     gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
@@ -194,7 +195,7 @@ def reset_view():
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
 
-    if not builtins.frame_count > 0:
+    if not builtins.frame_count > 0 and frame_buffer_support:
         front_frame_tex = Texture(builtins.width, builtins.height, reset=True)
         back_frame_tex = Texture(builtins.width, builtins.height, reset=True)
 
