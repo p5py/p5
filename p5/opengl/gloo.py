@@ -196,7 +196,7 @@ class FrameBuffer(GLObject):
 
     def deactivate(self):
         """Deactivate the current framebuffer."""
-        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, self._id)
+        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, 0)
 
     def attach_texture(self, texture):
         self.activate()
