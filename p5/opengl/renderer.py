@@ -46,19 +46,26 @@ from ..pmath import Matrix4
 ##   state variables.
 ##
 
+## Renderer Globals: USEFUL CONSTANTS
+COLOR_WHITE = (1, 1, 1, 1)
+COLOR_BLACK = (0, 0, 0, 1)
+COLOR_DEFAULT_BG = (0.8, 0.8, 0.8, 1.0)
+
+MATRIX_IDENTITY = Matrix4()
+
 ## Renderer Globals: STYLE/MATERIAL PROPERTIES
 ##
-background_color = (0.8, 0.8, 0.8, 1.0)
+background_color = COLOR_DEFAULT_BG
 
-fill_color = (1.0, 1.0, 1.0, 1.0)
+fill_color = COLOR_WHITE
 fill_image = None
 fill_enabled = True
 fill_image_enabled = False
 
-tint_color = (1.0, 1.0, 1.0, 1.0)
+tint_color = COLOR_WHITE
 tint_enabled = True
 
-stroke_color = (0, 0, 0, 1.0)
+stroke_color = COLOR_BLACK
 stroke_enabled = True
 
 ## Renderer Globals
@@ -126,8 +133,8 @@ def draw_frame_texture(texture):
     """Draw the given texture to the frame.
     """
     texture_shader.activate()
-    texture_shader.update_uniform('transform', Matrix4())
-    texture_shader.update_uniform('fill_color', (1, 1, 1, 1))
+    texture_shader.update_uniform('transform', MATRIX_IDENTITY)
+    texture_shader.update_uniform('fill_color', COLOR_WHITE)
     texture.activate()
     texture_shader.update_attribute('texcoord', frame_texcoords.id)
     texture_shader.update_attribute('position', frame_vertices.id)
@@ -282,6 +289,9 @@ def cleanup():
     for texture_hash, texture in texture_cache:
         texture.delete()
     if frame_buffer_support:
+        frame_vertices.delete()
+        frame_texcoords.delete()
+        frame_elements.delete()
         frame_buffer.delete()
 
 
@@ -392,6 +402,7 @@ def render(shape):
         active_shader = texture_shader
     else:
         active_shader = default_shader
+
     active_shader.activate()
     active_shader.update_uniform('transform', transform_matrix)
 
@@ -455,7 +466,7 @@ def render(shape):
             if tint_enabled:
                 active_shader.update_uniform('fill_color', tint_color)
             else:
-                active_shader.update_uniform('fill_color', (1, 1, 1, 1))
+                active_shader.update_uniform('fill_color', COLOR_WHITE)
             face_buffer.draw('TRIANGLE_FAN')
         elif fill_enabled:
             active_shader.update_uniform('fill_color', fill_color)
