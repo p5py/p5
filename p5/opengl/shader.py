@@ -143,6 +143,9 @@ Attribute = namedtuple('Attribute', ['name', 'loc', 'size',
 
 # functions to set data to uniforms. All of them take *ONLY* two
 # params: the uniform location and the data to be set.
+def _uvec3(uniform, data):
+    gl.glUniform3f(uniform, *data)
+
 def _uvec4(uniform, data):
     gl.glUniform4f(uniform, *data)
 
@@ -154,6 +157,7 @@ def _uint(uniform, data):
     gl.glUniform1i(uniform, data)
 
 uniform_function_map = {
+    'vec3': _uvec3,
     'vec4': _uvec4,
     'mat4': _umat4,
     'int': _uint,
