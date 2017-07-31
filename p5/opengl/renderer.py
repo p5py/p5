@@ -259,9 +259,10 @@ def pre_render():
     default_shader.deactivate()
 
     if frame_buffer_support:
-        # 3. Turn on blending as it gets disabled at the end of the draw
-        #    loop.
+        # 1. Turn on blending and depth test as they get disabled at
+        #    the end of the draw loop.
         #
+        gl.glEnable(gl.GL_DEPTH_TEST)
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
 
@@ -272,7 +273,7 @@ def pre_render():
         #
         frame_buffer.attach_texture(back_frame_tex)
 
-        # 1. Activate the frame buffer.
+        # 3. Activate the frame buffer.
         #
         frame_buffer.activate()
 
