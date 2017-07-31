@@ -17,13 +17,12 @@
 #
 """The OpenGL renderer for p5."""
 
-from ctypes import *
 import builtins
+import ctypes as ct
 import math
 
 from pyglet import gl
 
-from ..pmath import Matrix4
 from .gloo import (
     VertexBuffer,
     Texture,
@@ -35,6 +34,7 @@ from .shader import (
     texture_vertex_default, texture_fragment_default
 )
 from .support import has_fbo
+from ..pmath import Matrix4
 
 
 ##
