@@ -281,10 +281,10 @@ def pre_render():
         #    the first frame, we need to render the contents of the last
         #    draw loop (stored in the front frame texture.)
         #
-        # if not builtins.frame_count > 0:
-        #     clear()
-        # else:
-        draw_frame_texture(front_frame_tex)
+        if not builtins.frame_count > 0:
+            clear()
+        else:
+            draw_frame_texture(front_frame_tex)
     else:
         clear()
 
