@@ -92,16 +92,6 @@ def draw():
     code inside is continuously executed until the program is stopped
     (using `exit()`) or `no_loop()` is called.
 
-    :note:
-
-        The screen is cleared *before* each call to draw(). This means
-        that any figures drawn on one iteration of draw() will be
-        cleared on the next. For now, use `background()` to make sure
-        your sketch clears to the correct background color.
-
-        This (screen clear prior to draw) isn't the desired behavior
-        and will be fixed in a future release.
-
     """
     pass
 
