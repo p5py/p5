@@ -24,26 +24,30 @@ import math
 from pyglet import gl
 
 from ..pmath import Matrix4
-
-from .gloo import VertexBuffer
-from .gloo import Texture
-from .gloo import FrameBuffer
-
+from .gloo import (
+    VertexBuffer,
+    Texture,
+    FrameBuffer,
+)
+from .shader import (
+    Shader,
+    vertex_default, fragment_default,
+    texture_vertex_default, texture_fragment_default
+)
 from .support import has_fbo
 
-from .shader import Shader
-from .shader import vertex_default, fragment_default
-from .shader import texture_vertex_default, texture_fragment_default
 
-default_shader = None
-texture_shader = None
+##
+## Renderer globals.
+##
+## TODO (2017-08-01 abhikpal):
+##
+## - Higher level objects *SHOULD NOT* have direct access to internal
+##   state variables.
+##
 
-transform_matrix = Matrix4()
-modelview_matrix = Matrix4()
-projection_matrix = Matrix4()
-
-viewport = None
-
+## Renderer Globals: STYLE/MATERIAL PROPERTIES
+##
 background_color = (0.8, 0.8, 0.8, 1.0)
 
 fill_color = (1.0, 1.0, 1.0, 1.0)
@@ -57,11 +61,27 @@ tint_enabled = True
 stroke_color = (0, 0, 0, 1.0)
 stroke_enabled = True
 
+## Renderer Globals
+## VIEW MATRICES, ETC
+##
+viewport = None
+
+transform_matrix = Matrix4()
+modelview_matrix = Matrix4()
+projection_matrix = Matrix4()
+
+## Renderer Globals: OPEN GL SPECIFIC
+##
 context = None
+
+default_shader = None
+texture_shader = None
 
 geometry_cache = {}
 texture_cache = {}
 
+## Renderer Globals: FRAME BUFFERS
+##
 frame_buffer_support = False
 frame_buffer = None
 
@@ -72,6 +92,12 @@ frame_vertices = None
 frame_texcoords = None
 frame_elements = None
 
+
+## RENDERER UTILITY FUNCTIONS
+##
+## Mostly for internal user. Ideally, higher level components *SHOULD
+## NOT* need these.
+##
 def add_common_uniforms(shader):
     """Add a default set of uniforms to the shader.
     """
@@ -95,6 +121,42 @@ def add_texture(image):
         tex = texture_cache[image_hash]
 
     fill_image = tex
+
+def draw_frame_texture(texture):
+    """Draw the given texture to the frame.
+    """
+    texture_shader.activate()
+    texture_shader.update_uniform('transform', Matrix4())
+    texture_shader.update_uniform('fill_color', (1, 1, 1, 1))
+    texture.activate()
+    texture_shader.update_attribute('texcoord', frame_texcoords.id)
+    texture_shader.update_attribute('position', frame_vertices.id)
+    frame_vertices.activate()
+    frame_elements.draw('TRIANGLES')
+
+def flatten(vertex_list):
+    """Flatten a vertex list
+
+    An unflattened list of vertices is a list of tuples [(x1, y2, z1),
+    (x2, y2, z2), ...] where as a list of flattened vertices doesn't
+    have any tuples [x1, y1, z2, x2, y2, z2, ...]
+
+    :param vertex_list: list of vertices to be flattened.
+    :type vertex_list: list of 3-tuples
+
+    :returns: a flattened vertex_list
+    :rtype: list
+
+    """
+    return [vi for vertex in vertex_list for vi in vertex]
+
+
+## RENDERER SETUP FUNCTIONS.
+##
+## These don't handle shape rendering directly and are used for setup
+## tasks like initialization, cleanup before exiting, resetting views,
+## clearing the screen, etc.
+##
 
 def initialize(window_context):
     """Initialize the OpenGL renderer.
@@ -140,24 +202,6 @@ def initialize(window_context):
     default_shader.add_attribute('position', '3f')
 
     reset_view()
-
-def cleanup():
-    """Run the clean-up routine for the renderer.
-
-    This method is called when all drawing has been completed and the
-    program is about to exit.
-
-    """
-    default_shader.delete()
-    texture_shader.delete()
-    for shape_hash, shape_buffers in geometry_cache.items():
-        shape_buffers['vertex_buffer'].delete()
-        shape_buffers['edge_buffer'].delete()
-        shape_buffers['face_buffer'].delete()
-    for texture_hash, texture in texture_cache:
-        texture.delete()
-    if frame_buffer_support:
-        frame_buffer.delete()
 
 def clear():
     """Clear the renderer background."""
@@ -222,17 +266,34 @@ def reset_view():
                                       data=[0, 1, 2, 0, 2, 3],
                                       buffer_type='elem')
 
-def draw_frame_texture(texture):
-    """Draw the given texture to the frame.
+def cleanup():
+    """Run the clean-up routine for the renderer.
+
+    This method is called when all drawing has been completed and the
+    program is about to exit.
+
     """
-    texture_shader.activate()
-    texture_shader.update_uniform('transform', Matrix4())
-    texture_shader.update_uniform('fill_color', (1, 1, 1, 1))
-    texture.activate()
-    texture_shader.update_attribute('texcoord', frame_texcoords.id)
-    texture_shader.update_attribute('position', frame_vertices.id)
-    frame_vertices.activate()
-    frame_elements.draw('TRIANGLES')
+    default_shader.delete()
+    texture_shader.delete()
+    for shape_hash, shape_buffers in geometry_cache.items():
+        shape_buffers['vertex_buffer'].delete()
+        shape_buffers['edge_buffer'].delete()
+        shape_buffers['face_buffer'].delete()
+    for texture_hash, texture in texture_cache:
+        texture.delete()
+    if frame_buffer_support:
+        frame_buffer.delete()
+
+
+## RENDERING FUNTIONS + HELPERS
+##
+## These are responsible for actually rendring things to the screen.
+## For some draw call the methods should be called as follows:
+##
+##    pre_render()
+##    # multiple calls to render()
+##    post_render()
+##
 
 def pre_render():
     """Initialize things for a draw call.
@@ -320,22 +381,6 @@ def post_render():
         # 5. swap the front and the back textures.
         front_frame_tex, back_frame_tex = back_frame_tex, front_frame_tex
     VertexBuffer.deactivate_all()
-
-def flatten(vertex_list):
-    """Flatten a vertex list
-
-    An unflattened list of vertices is a list of tuples [(x1, y2, z1),
-    (x2, y2, z2), ...] where as a list of flattened vertices doesn't
-    have any tuples [x1, y1, z2, x2, y2, z2, ...]
-
-    :param vertex_list: list of vertices to be flattened.
-    :type vertex_list: list of 3-tuples
-
-    :returns: a flattened vertex_list
-    :rtype: list
-
-    """
-    return [vi for vertex in vertex_list for vi in vertex]
 
 def render(shape):
     """Use the renderer to render a Shape.
