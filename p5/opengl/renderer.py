@@ -452,15 +452,6 @@ def render(shape):
 
     active_shader.update_attribute('position', vertex_buffer.id)
 
-    if stroke_enabled and (not fill_image_enabled):
-        active_shader.update_uniform('fill_color', stroke_color)
-        if shape.kind == 'POINT':
-            point_buffer.draw('POINTS')
-        elif shape.kind == 'PATH':
-            edge_buffer.draw('LINE_STRIP')
-        else:
-            edge_buffer.draw('LINE_LOOP')
-
     if shape.kind not in ['PATH', 'POINT']:
         if fill_image_enabled:
             if tint_enabled:
@@ -471,5 +462,14 @@ def render(shape):
         elif fill_enabled:
             active_shader.update_uniform('fill_color', fill_color)
             face_buffer.draw('TRIANGLE_FAN')
+
+    if stroke_enabled and (not fill_image_enabled):
+        active_shader.update_uniform('fill_color', stroke_color)
+        if shape.kind == 'POINT':
+            point_buffer.draw('POINTS')
+        elif shape.kind == 'PATH':
+            edge_buffer.draw('LINE_STRIP')
+        else:
+            edge_buffer.draw('LINE_LOOP')
 
     active_shader.deactivate()
