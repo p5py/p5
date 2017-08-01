@@ -28,7 +28,7 @@ pyglet.options["shadow_window"] = False
 from ..opengl import renderer
 
 __all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
-           'title', 'no_cursor', 'cursor', 'exit']
+           'title', 'no_cursor', 'cursor', 'exit', 'set_frame_rate']
 
 builtins.width = 200
 builtins.height = 200
@@ -84,6 +84,7 @@ looping = True
 redraw = False
 setup_done = False
 target_frame_rate = 60.0
+time_since_last_frame = 0.0
 
 def draw():
     """Continuously execute code defined inside.
@@ -214,26 +215,36 @@ def update(dt):
     global handler_queue
     global redraw
     global setup_done
+    global time_since_last_frame
 
-    builtins.frame_count += 1
     builtins.frame_rate = int(1 / (dt + 0.0001))
+    time_since_last_frame += dt
+    correct_frame_rate = time_since_last_frame > (1.0 / target_frame_rate)
 
     renderer.pre_render()
     if not setup_done:
+        builtins.frame_count += 1
         setup()
         setup_done = True
-    else:
+    elif correct_frame_rate or builtins.frame_count == 0:
         if looping or redraw:
+            builtins.frame_count += 1
             draw()
             redraw = False
         for function, event in handler_queue:
             function(event)
         handler_queue = []
+        time_since_last_frame = 0
+
     renderer.post_render()
 
 def initialize(*args, **kwargs):
     renderer.initialize(window.context)
     window.set_visible()
+
+def set_frame_rate(fm):
+    global target_frame_rate
+    target_frame_rate = max(1, int(fm))
 
 def fix_handler_interface(func):
     """Make sure that `func` takes at least one argument as input.
