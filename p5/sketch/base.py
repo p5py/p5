@@ -160,7 +160,7 @@ def title(new_title):
 
     """
     builtins.title = new_title
-    window.set_caption("{} - p5".format(new_title))
+    window.set_caption(str(new_title))
 
 def no_cursor():
     """Hide the mouse cursor.
