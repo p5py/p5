@@ -84,6 +84,7 @@ looping = True
 redraw = False
 setup_done = False
 target_frame_rate = 60.0
+frame_rate_avg = [target_frame_rate] * 5
 time_since_last_frame = 0.0
 
 def draw():
@@ -227,6 +228,12 @@ def update(dt):
         setup()
         setup_done = True
     elif correct_frame_rate or builtins.frame_count == 0:
+        frame_rate_avg.append(1 / (time_since_last_frame + 0.001))
+        frame_rate_avg.pop(0)
+
+        fr = sum(frame_rate_avg)/len(frame_rate_avg)
+        builtins.frame_rate = round(fr, 3)
+
         if looping or redraw:
             builtins.frame_count += 1
             draw()
