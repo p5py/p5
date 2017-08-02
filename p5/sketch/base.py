@@ -30,8 +30,8 @@ from ..opengl import renderer
 __all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
            'title', 'no_cursor', 'cursor', 'exit', 'set_frame_rate']
 
-builtins.width = 200
-builtins.height = 200
+builtins.width = 360
+builtins.height = 360
 builtins.title = "p5"
 builtins.frame_count = -1
 builtins.frame_rate = 30
