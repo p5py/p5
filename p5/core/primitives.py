@@ -559,7 +559,9 @@ def ellipse(coordinate, *args, mode=None):
         center = Point(corner.x + xrad, corner.y + yrad, corner.z)
     elif mode == 'CENTER':
         center = Point(*coordinate)
-        xrad, yrad = args
+        width, height = args
+        xrad = width/2
+        yrad = height/2
     elif mode == 'RADIUS':
         center = Point(*coordinate)
         xrad, yrad = args
