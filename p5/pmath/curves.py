@@ -57,7 +57,7 @@ def bezier_detail(detail_value):
     :type detail_value: int
     """
     global bezier_resolution
-    bezier_resolution = detail_value
+    bezier_resolution = max(1, detail_value)
 
 @typecast_arguments_as_points
 def bezier_point(start, control_1, control_2, stop, parameter):
