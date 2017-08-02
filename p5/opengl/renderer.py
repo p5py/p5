@@ -406,9 +406,10 @@ def render(shape):
     active_shader.activate()
     active_shader.update_uniform('transform', transform_matrix)
 
-    shape_hash = hash(shape)
+    # shape_hash = hash(shape)
 
-    if shape_hash not in geometry_cache:
+    # if shape_hash not in geometry_cache:
+    if True:
         vertex_buffer = VertexBuffer('float', data=flatten(shape.vertices))
         texcoords_buffer = VertexBuffer('float', data=flatten(shape.texcoords))
 
@@ -432,19 +433,19 @@ def render(shape):
                                        data=flatten(shape.faces),
                                        buffer_type='elem')
 
-        geometry_cache[shape_hash] = {
-            'vertex_buffer': vertex_buffer,
-            'texcoords_buffer': texcoords_buffer,
-            'point_buffer': point_buffer,
-            'edge_buffer': edge_buffer,
-            'face_buffer': face_buffer,
-        }
-    else:
-        vertex_buffer = geometry_cache[shape_hash]['vertex_buffer']
-        texcoords_buffer = geometry_cache[shape_hash]['texcoords_buffer']
-        point_buffer = geometry_cache[shape_hash]['point_buffer']
-        edge_buffer = geometry_cache[shape_hash]['edge_buffer']
-        face_buffer = geometry_cache[shape_hash]['face_buffer']
+    #     geometry_cache[shape_hash] = {
+    #         'vertex_buffer': vertex_buffer,
+    #         'texcoords_buffer': texcoords_buffer,
+    #         'point_buffer': point_buffer,
+    #         'edge_buffer': edge_buffer,
+    #         'face_buffer': face_buffer,
+    #     }
+    # else:
+    #     vertex_buffer = geometry_cache[shape_hash]['vertex_buffer']
+    #     texcoords_buffer = geometry_cache[shape_hash]['texcoords_buffer']
+    #     point_buffer = geometry_cache[shape_hash]['point_buffer']
+    #     edge_buffer = geometry_cache[shape_hash]['edge_buffer']
+    #     face_buffer = geometry_cache[shape_hash]['face_buffer']
 
     if fill_image_enabled:
         fill_image.activate()
@@ -471,5 +472,13 @@ def render(shape):
             edge_buffer.draw('LINE_STRIP')
         else:
             edge_buffer.draw('LINE_LOOP')
+
+    buffers = [vertex_buffer, texcoords_buffer, point_buffer,
+               edge_buffer, face_buffer]
+
+    for b in buffers:
+        if not (b is None):
+            b.delete()
+            del b
 
     active_shader.deactivate()
