@@ -60,8 +60,10 @@ HALF_TAU = math.pi
 # cosine values.
 SINCOS_PRECISION = 0.5
 SINCOS_LENGTH = int(360 / SINCOS_PRECISION)
-PRE_COS = [ cos(radians(d * SINCOS_PRECISION)) for d in range(SINCOS_LENGTH) ]
-PRE_SIN = [ sin(radians(d * SINCOS_PRECISION)) for d in range(SINCOS_LENGTH) ]
+
+PRE_SIN = [ sin(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH) ]
+PRE_COS = [ cos(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH) ]
+
 SINCOS = list(zip(PRE_SIN, PRE_COS))
 
 
