@@ -18,8 +18,65 @@
 
 import random
 
-__all__ = ['noise', 'noise_detail', 'noise_seed', 'random_uniform',
-           'random_gaussian', 'random_seed']
+from .utils import constrain
+from .utils import SINCOS_LENGTH
+from .utils import PRE_COS
+
+__all__ = [
+    # PERLIN NOISE FUNCTIONS
+    'noise', 'noise_detail', 'noise_seed',
+
+    # RANDOM NUMBER GENERATION
+    'random_uniform', 'random_gaussian', 'random_seed'
+]
+
+# Most of the perlin noise code is based on the original Processing
+# implementation of the noise function. toxi (+ other folks) put a
+# bunch of comments on the Processing version, and I've added them
+# here too for context.
+#
+# All commets that were ported from Processing are prefixed with
+# "#P:"
+#
+#         --- abhikpal (2017-08-04)
+
+#P: PERLIN NOISE
+#P:
+#P: [toxi 040903]
+#P: octaves and amplitude amount per octave are now user controlled via
+#P: the noiseDetail() function.
+#P:
+#P: [toxi 030902]
+#P: cleaned up code and now using bagel's cosine table to speed up
+#P:
+#P: [toxi 030901]
+#P: implementation by the german demo group farbrausch as used in their
+#P: demo "art": http://www.farb-rausch.de/fr010src.zip
+
+#P: Default to medium smooth
+PERLIN_OCTAVES = 4
+
+#P: 50% redution per octave
+PERLIN_FALLOFF = 0.5
+
+PERLIN_YWRAPB = 4
+PERLIN_YWRAP = 1 << PERLIN_YWRAPB
+PERLIN_ZWRAPB = 8
+PERLIN_ZWRAP = 1 << PERLIN_ZWRAPB
+PERLIN_SIZE = 4095
+
+#P: [toxi 031112]
+#P: new vars needed due to recent change of cos table in PGraphics
+PERLIN_COS_TABLE = PRE_COS
+PERLIN_TWO_PI = SINCOS_LENGTH
+PERLIN_PI = PERLIN_TWO_PI
+PERLIN_PI >>= 1
+
+#P: [toxi 031112]
+#P: noise broke due to recent change of cos table in PGraphics
+#P: this will take care of it
+PERLIN = [random.random() for _ in range(PERLIN_SIZE + 1)]
+
 
 def noise(x, y=0, z=0):
     """Return perlin noise value at the given location.
@@ -37,7 +94,77 @@ def noise(x, y=0, z=0):
     :rtype: float
 
     """
-    raise NotImplementedError()
+    # TODO (abhikpal, 2017-08-04)
+    #
+    # REFACTOR THIS MESS.
+
+    #P: [toxi 031112]
+    #P: now adjusts to the size of the cosLUT used via
+    #P: the new variables, defined above
+    def noise_fsc(i):
+        #P: using bagel's cosine table instead
+        return 0.5 * (1 - PERLIN_COS_TABLE[int(i * PERLIN_PI) % PERLIN_TWO_PI])
+
+    x = (-1 * x) if x < 0 else x
+    xi = int(x)
+    xf = x - xi
+
+    y = (-1 * y) if y < 0 else y
+    yi = int(y)
+    yf = y - yi
+
+    z = (-1 * z) if z < 0 else z
+    zi = int(z)
+    zf = z - zi
+
+    r = 0
+    ampl = 0.5
+
+    for i in range(PERLIN_OCTAVES):
+        rxf = noise_fsc(xf)
+        ryf = noise_fsc(yf)
+
+        of = int(xi + (yi << PERLIN_YWRAPB) + (zi << PERLIN_ZWRAPB))
+        n1 = PERLIN[of % PERLIN_SIZE]
+        n1 += rxf * (PERLIN[(of + 1) % PERLIN_SIZE] - n1)
+        n2 = PERLIN[(of + PERLIN_YWRAP) % PERLIN_SIZE]
+        n2 += rxf * (PERLIN[(of + PERLIN_YWRAP + 1) & PERLIN_SIZE] - n2)
+        n1 += ryf * (n2 - n1)
+
+        of += PERLIN_ZWRAP
+        n2 = PERLIN[of & PERLIN_SIZE]
+        n2 += rxf * (PERLIN[(of + 1) % PERLIN_SIZE] - n2)
+        n3 = PERLIN[(of + PERLIN_YWRAP) % PERLIN_SIZE]
+        n3 += rxf * (PERLIN[(of + PERLIN_YWRAP + 1) % PERLIN_SIZE] - n3)
+
+        n2 += ryf * (n3 - n2)
+        n1 += noise_fsc(zf) * (n2 - n1)
+
+        r += n1 * ampl
+        ampl *= PERLIN_FALLOFF
+
+        xi *= 2
+        xf *= 2
+
+        yi *= 2
+        yf *= 2
+
+        zi *= 2
+        zf *= 2
+
+        if xf >= 1:
+            xi = xi + 1
+            xf = xf - 1
+
+        if yf >= 1:
+            yi = yi + 1
+            yf = yf - 1
+
+        if zf >= 1:
+            zi = zi + 1
+            zf = zf - 1
+
+    return r
 
 def noise_detail(octaves=4, falloff=0.5):
     """Adjust the level of noise detail produced by noise().
@@ -53,7 +180,12 @@ def noise_detail(octaves=4, falloff=0.5):
         :code:`noise()` will return values greater than 1.0.
 
     """
-    raise NotImplementedError()
+    global PERLIN_OCTAVES
+    global PERLIN_FALLOFF
+
+    if ocatves > 0:
+        PERLIN_OCTAVES = octaves
+    PERLIN_FALLOFF = constain(falloff, 0, 1)
 
 def noise_seed(seed):
     """Set the seed value for :code:`noise()`
@@ -67,7 +199,9 @@ def noise_seed(seed):
     :type seed: int
 
     """
-    raise NotImplementedError()
+    global PERLIN
+    random_seed(seed)
+    PERLIN = [random.random() for _ in range(PERLIN_SIZE + 1)]
 
 def random_uniform(high=1, low=0):
     """Return a uniformly sampled random number.
