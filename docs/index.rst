@@ -52,8 +52,8 @@ guide. The API reference also notes differences from the Processing
 API.
 
 p5 is free and open source software and has been `released under the
-GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE.rst>`_.
-All development work happens on the `Github repository
+GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE>`_. All
+development work happens on the `Github repository
 <https://github.com/p5py/p5/>`_. If you would like to report a bug,
 request additional features, or would like to help out in general,
 please take a look at the `CONTRIBUTING
