@@ -44,12 +44,17 @@ The p5 documentation is organized into the following sections:
 - The :doc:`Reference <reference/index>` provides a detailed overview
   of the complete p5 API.
 
-Before you begin make sure you go through the :doc:`Quickstart
-<quickstart>` and :doc:`Installation <install>` pages to get started.
-If have programmed in Processing before, you should also take a look
-at the :doc:`p5 for Processing users <guides/for-processing-users>`
-guide. The API reference also notes differences from the Processing
-API.
+In addition to this documentation, we've also written and ported many
+Processing examples and reference sketches to p5. Visit the `examples
+repository <https://github.com/p5py/p5-examples>`_ or `download a zip
+<https://github.com/p5py/p5-examples/archive/master.zip>`_ with all
+the examples.
+
+Before you begin make sure you go through the :doc:`Installation
+<install>` pages to get started. If have programmed in Processing
+before, you should also take a look at the :doc:`p5 for Processing
+users <guides/for-processing-users>` guide. The API reference also
+notes differences from the Processing API.
 
 p5 is free and open source software and has been `released under the
 GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE>`_. All
