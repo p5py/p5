@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the p5 docs!
-=======================
+Welcome to the p5 documentation!
+================================
 
 .. image:: https://img.shields.io/github/release/p5py/p5.svg
    :target: https://github.com/p5py/p5
@@ -14,7 +14,7 @@ Welcome to the p5 docs!
 
 .. image:: https://img.shields.io/github/stars/p5py/p5.svg?style=social&label=Star
    :target: https://github.com/p5py/p5
-            
+
 ..
    .. image:: https://img.shields.io/pypi/wheel/p5.svg
       :target: https://pypi.python.org/pypi/p5
@@ -24,9 +24,9 @@ Welcome to the p5 docs!
       :target: https://pypi.python.org/pypi/p5
 
 p5 provides high level drawing functionality to help you quickly
-create simulations and interactive art using Python. p5 combines the
-core ideas of `Processing <https://processing.org/>`_ — i.e., learning
-to code in a visual context — with Python's readibilty to make
+create simulations and interactive art using Python. It combines the
+core ideas of `Processing <https://processing.org/>`_ — learning to
+code in a visual context — with Python's readability to make
 programming more accessible to beginners, educators, and artists.
 
 The p5 documentation is organized into the following sections:
@@ -37,20 +37,26 @@ The p5 documentation is organized into the following sections:
   worked with Processing and/or p5.
 
 - :doc:`Guides <guides/index>` provide background information on p5
-  concepts and discuss topics at a high level. The guides **do not**
-  have step-by-step instructions and assume a basic understanding of
-  p5.
+  concepts and discuss topics at a high level. Unlike tutorials, the
+  guides do not have step-by-step instructions and assume a basic
+  understanding of p5 and/or Processing.
 
 - The :doc:`Reference <reference/index>` provides a detailed overview
   of the complete p5 API.
 
-Make sure to read through the :doc:`Quickstart <quickstart>` and
-:doc:`Installation <install>` pages to get started. If have programmed
-in Processing before, you should also take a look at the :doc:`p5 for
-Processing users <guides/for-processing-users>` guide.
+Before you begin make sure you go through the :doc:`Quickstart
+<quickstart>` and :doc:`Installation <install>` pages to get started.
+If have programmed in Processing before, you should also take a look
+at the :doc:`p5 for Processing users <guides/for-processing-users>`
+guide. The API reference also notes differences from the Processing
+API.
 
-If you would like to report a bug, request additional features, or
-would like to help out, please take a look at the `CONTRIBUTING
+p5 is free and open source software and has been `released under the
+GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE.rst>`_.
+All development work happens on the `Github repository
+<https://github.com/p5py/p5/>`_. If you would like to report a bug,
+request additional features, or would like to help out in general,
+please take a look at the `CONTRIBUTING
 <https://github.com/p5py/p5/blob/master/CONTRIBUTING.rst>`_ file on
 the `project repository on Github <https://github.com/p5py/p5/>`_.
 
@@ -63,4 +69,3 @@ the `project repository on Github <https://github.com/p5py/p5/>`_.
    tutorials/*
    guides/*
    reference/*
-
