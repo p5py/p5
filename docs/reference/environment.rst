@@ -42,6 +42,11 @@ program is active and will accept mouse or keyboard input, this
 variable is `True` and `False` otherwise.
 
 
+set_frame_rate()
+================
+
+.. autofunction:: set_frame_rate
+
 frame_count
 ===========
 

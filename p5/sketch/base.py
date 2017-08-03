@@ -249,10 +249,6 @@ def initialize(*args, **kwargs):
     renderer.initialize(window.context)
     window.set_visible()
 
-def set_frame_rate(fm):
-    global target_frame_rate
-    target_frame_rate = max(1, int(fm))
-
 def fix_handler_interface(func):
     """Make sure that `func` takes at least one argument as input.
 
@@ -268,6 +264,17 @@ def fix_handler_interface(func):
         return fixed_func
     else:
         return func
+
+def set_frame_rate(new_target_frame_rate):
+    """Set the frame rate of the sketch.
+
+    :param new_target_frame_rate: The new target frame rate for the
+         sketch.
+    :type new_target_frame_rate: int :math:`\geq 1`
+
+    """
+    global target_frame_rate
+    target_frame_rate = max(1, int(new_target_frame_rate))
 
 def run(setup_func=None, draw_func=None):
     """Run a sketch.
