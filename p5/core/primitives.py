@@ -27,6 +27,8 @@ from .transforms import _screen_coordinates
 from .. import sketch
 from ..pmath import curves
 from ..pmath import remap
+from ..pmath.utils import SINCOS
+from ..pmath.utils import SINCOS_PRECISION
 
 __all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
@@ -89,14 +91,6 @@ def point_type(point):
 MIN_POINT_ACCURACY = 20
 MAX_POINT_ACCURACY = 200
 POINT_ACCURACY_FACTOR = 10
-
-# Precomputed sin-cos table to be used during ellipse tessillation.
-SINCOS_PRECISION = 0.5
-SINCOS = [
-    (sin(radians(d * SINCOS_PRECISION)), cos(radians(d * SINCOS_PRECISION)))
-    for d in range(int(360 / SINCOS_PRECISION))
-]
-
 
 class Shape:
     """Represents a Shape in p5py.

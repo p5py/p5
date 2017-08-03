@@ -56,6 +56,15 @@ QUARTER_PI = math.pi / 4.0
 TAU = 2 * math.pi
 HALF_TAU = math.pi
 
+# We will be using these a lot, just precompute a whole lot of sin and
+# cosine values.
+SINCOS_PRECISION = 0.5
+SINCOS_LENGTH = int(360 / SINCOS_PRECISION)
+PRE_COS = [ cos(radians(d * SINCOS_PRECISION)) for d in range(SINCOS_LENGTH) ]
+PRE_SIN = [ sin(radians(d * SINCOS_PRECISION)) for d in range(SINCOS_LENGTH) ]
+SINCOS = list(zip(PRE_SIN, PRE_COS))
+
+
 def constrain(amount, low, high):
     """Constrain the given value in the specified range.
 
