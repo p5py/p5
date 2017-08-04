@@ -187,9 +187,9 @@ def noise_detail(octaves=4, falloff=0.5):
     global PERLIN_OCTAVES
     global PERLIN_FALLOFF
 
-    if ocatves > 0:
+    if octaves > 0:
         PERLIN_OCTAVES = octaves
-    PERLIN_FALLOFF = constain(falloff, 0, 1)
+    PERLIN_FALLOFF = constrain(falloff, 0, 1)
 
 def noise_seed(seed):
     """Set the seed value for :code:`noise()`
