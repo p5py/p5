@@ -72,11 +72,7 @@ PERLIN_TWO_PI = SINCOS_LENGTH
 PERLIN_PI = PERLIN_TWO_PI
 PERLIN_PI >>= 1
 
-#P: [toxi 031112]
-#P: noise broke due to recent change of cos table in PGraphics
-#P: this will take care of it
-PERLIN = [random.random() for _ in range(PERLIN_SIZE + 1)]
-
+PERLIN = None
 
 def noise(x, y=0, z=0):
     """Return perlin noise value at the given location.
@@ -98,12 +94,20 @@ def noise(x, y=0, z=0):
     #
     # REFACTOR THIS MESS.
 
+    global PERLIN
+
     #P: [toxi 031112]
     #P: now adjusts to the size of the cosLUT used via
     #P: the new variables, defined above
     def noise_fsc(i):
         #P: using bagel's cosine table instead
         return 0.5 * (1 - PERLIN_COS_TABLE[int(i * PERLIN_PI) % PERLIN_TWO_PI])
+
+    #P: [toxi 031112]
+    #P: noise broke due to recent change of cos table in PGraphics
+    #P: this will take care of it
+    if PERLIN is None:
+        PERLIN = [random.random() for _ in range(PERLIN_SIZE + 1)]
 
     x = (-1 * x) if x < 0 else x
     xi = int(x)
@@ -201,7 +205,7 @@ def noise_seed(seed):
     """
     global PERLIN
     random_seed(seed)
-    PERLIN = [random.random() for _ in range(PERLIN_SIZE + 1)]
+    PERLIN = None
 
 def random_uniform(high=1, low=0):
     """Return a uniformly sampled random number.
