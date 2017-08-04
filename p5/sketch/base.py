@@ -57,7 +57,8 @@ window = pyglet.window.Window(
     resizable=False,
     visible=False,
     vsync=False,
-    config=config
+    config=config,
+    style='dialog',
 )
 
 window.set_minimum_size(100, 100)
