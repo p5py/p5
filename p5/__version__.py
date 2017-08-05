@@ -16,14 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .sketch import *
-from .core import *
-from .pmath import *
-
-from .__version__ import __title__
-from .__version__ import __description__
-from .__version__ import __url__
-from .__version__ import __version__
-from .__version__ import __author__
-from .__version__ import __license__
-from .__version__ import __copyright__
+__title__ = 'p5'
+__description__ = 'Creative coding in Python'
+__url__ = 'https://p5py.github.io'
+__version__ = '0.3.0a1'
+__author__ = 'Abhik Pal'
+__license__ = ' GNU GPLv3'
+__copyright__ = 'Copyright (C) 2017 Abhik Pal'
