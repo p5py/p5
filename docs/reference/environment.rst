@@ -41,12 +41,6 @@ Global boolean that confirms if the sketch is "focused" i.e., if the
 program is active and will accept mouse or keyboard input, this
 variable is `True` and `False` otherwise.
 
-
-set_frame_rate()
-================
-
-.. autofunction:: set_frame_rate
-
 frame_count
 ===========
 
@@ -59,4 +53,7 @@ frame_rate
 ==========
 
 Global integer variable that keeps track of the current frame rate of
-the sketch.
+the sketch. The frame rate can only be set when the sketch is run by
+passing in the optional :code:`frame_rate` keyword argument to the
+:code:`run()` function. See the :code:`run()` function's reference
+page for details.

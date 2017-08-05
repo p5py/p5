@@ -28,7 +28,7 @@ pyglet.options["shadow_window"] = False
 from ..opengl import renderer
 
 __all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
-           'title', 'no_cursor', 'cursor', 'exit', 'set_frame_rate']
+           'title', 'no_cursor', 'cursor', 'exit',]
 
 builtins.width = 360
 builtins.height = 360
@@ -84,9 +84,6 @@ handler_queue = []
 looping = True
 redraw = False
 setup_done = False
-target_frame_rate = 60.0
-frame_rate_avg = [target_frame_rate] * 5
-time_since_last_frame = 0.0
 
 def draw():
     """Continuously execute code defined inside.
@@ -217,33 +214,21 @@ def update(dt):
     global handler_queue
     global redraw
     global setup_done
-    global time_since_last_frame
 
-    builtins.frame_rate = int(1 / (dt + 0.0001))
-    time_since_last_frame += dt
-    correct_frame_rate = time_since_last_frame > (1.0 / target_frame_rate)
+    builtins.frame_rate = pyglet.clock.get_fps()
 
     renderer.pre_render()
-    if not setup_done:
+    if looping or redraw:
         builtins.frame_count += 1
-        setup()
-        setup_done = True
-    elif correct_frame_rate or builtins.frame_count == 0:
-        frame_rate_avg.append(1 / (time_since_last_frame + 0.001))
-        frame_rate_avg.pop(0)
-
-        fr = sum(frame_rate_avg)/len(frame_rate_avg)
-        builtins.frame_rate = round(fr, 3)
-
-        if looping or redraw:
-            builtins.frame_count += 1
+        if not setup_done:
+            setup()
+            setup_done = True
+        else:
             draw()
             redraw = False
-        for function, event in handler_queue:
-            function(event)
-        handler_queue = []
-        time_since_last_frame = 0
-
+    for function, event in handler_queue:
+        function(event)
+    handler_queue = []
     renderer.post_render()
 
 def initialize(*args, **kwargs):
@@ -266,42 +251,34 @@ def fix_handler_interface(func):
     else:
         return func
 
-def set_frame_rate(new_target_frame_rate):
-    """Set the frame rate of the sketch.
-
-    :param new_target_frame_rate: The new target frame rate for the
-         sketch.
-    :type new_target_frame_rate: int :math:`\geq 1`
-
-    """
-    global target_frame_rate
-    target_frame_rate = max(1, int(new_target_frame_rate))
-
-def run(setup_func=None, draw_func=None):
+def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     """Run a sketch.
 
-    if no `setup_func` and `draw_func` are specified, p5 automatically
+    if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
     "finds" the user-defined setup and draw functions.
 
-    :param setup_func: The setup function of the sketch (None by
+    :param sketch_setup: The setup function of the sketch (None by
          default.)
-    :type setup_func: function
+    :type sketch_setup: function
 
-    :param draw_func: The draw function of the sketch (None by
+    :param sketch_draw: The draw function of the sketch (None by
         default.)
-    :type draw_func: function
+    :type sketch_draw: function
+
+    :param frame_rate: The target frame rate for the sketch.
+    :type frame_rate: int :math:`\geq 1`
 
     """
     global draw
     global setup
 
-    if setup_func is not None:
-        setup = setup_func
+    if sketch_setup is not None:
+        setup = sketch_setup
     elif hasattr(__main__, 'setup'):
         setup = __main__.setup
 
-    if draw_func is not None:
-        draw = draw_func
+    if sketch_draw is not None:
+        draw = sketch_draw
     elif hasattr(__main__, 'draw'):
         draw = __main__.draw
 
@@ -311,7 +288,7 @@ def run(setup_func=None, draw_func=None):
             handlers[handler] = fix_handler_interface(handler_func)
 
     initialize()
-    pyglet.clock.schedule_interval(update, 1/(target_frame_rate + 1))
+    pyglet.clock.schedule_interval(update, 1 / max(frame_rate, 1))
     pyglet.app.run()
 
 def artist(f):
