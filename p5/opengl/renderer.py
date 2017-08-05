@@ -159,6 +159,30 @@ def flatten(vertex_list):
     """
     return [vi for vertex in vertex_list for vi in vertex]
 
+def transform_points(points):
+    """Transform the given list of points using the transformation matrix.
+
+    :param points: List of points to be transformed.
+    :type points: a list of 3-tuples
+
+    :returns: a numpy array with the transformed points.
+    :rtype: np.ndarray
+
+    """
+    # The Matrix4 internally stores data in the following format:
+    #
+    # a b c d
+    # e f g h
+    # i j k l
+    # m n o p
+    #
+    transform = np.array([
+        [transform_matrix.a, transform_matrix.b, transform_matrix.c],
+        [transform_matrix.e, transform_matrix.f, transform_matrix.g],
+        [transform_matrix.i, transform_matrix.j, transform_matrix.k]
+    ])
+    points = np.array(points, dtype=np.float32)
+    return points.dot(transform)
 
 ## RENDERER SETUP FUNCTIONS.
 ##
@@ -417,7 +441,7 @@ def render(shape):
     active_shader.activate()
     active_shader.update_uniform('transform', transform_matrix)
 
-    vertices = np.array(flatten(shape.vertices), dtype=np.float32)
+    vertices = transform_points(shape.vertices).flatten()
     vertex_buffer = VertexBuffer('float', data=vertices)
 
     texcoords = np.array(flatten(shape.texcoords), dtype=np.float32)
