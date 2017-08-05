@@ -215,7 +215,7 @@ def update(dt):
     global redraw
     global setup_done
 
-    builtins.frame_rate = pyglet.clock.get_fps()
+    builtins.frame_rate = 1 / max(dt, 0.00001)
 
     renderer.pre_render()
     if looping or redraw:
