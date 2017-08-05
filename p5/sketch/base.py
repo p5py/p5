@@ -217,19 +217,18 @@ def update(dt):
 
     builtins.frame_rate = 1 / max(dt, 0.00001)
 
-    renderer.pre_render()
-    if looping or redraw:
-        builtins.frame_count += 1
-        if not setup_done:
-            setup()
-            setup_done = True
-        else:
-            draw()
-            redraw = False
-    for function, event in handler_queue:
-        function(event)
-    handler_queue = []
-    renderer.post_render()
+    with renderer.draw_loop():
+        if looping or redraw:
+            builtins.frame_count += 1
+            if not setup_done:
+                setup()
+                setup_done = True
+            else:
+                draw()
+                redraw = False
+        for function, event in handler_queue:
+            function(event)
+        handler_queue = []
 
 def initialize(*args, **kwargs):
     renderer.initialize(window.context)

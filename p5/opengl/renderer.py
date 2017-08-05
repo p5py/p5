@@ -19,6 +19,7 @@
 
 import builtins
 import ctypes as ct
+from contextlib import contextmanager
 import math
 
 from pyglet import gl
@@ -300,10 +301,19 @@ def cleanup():
 ## These are responsible for actually rendring things to the screen.
 ## For some draw call the methods should be called as follows:
 ##
-##    pre_render()
-##    # multiple calls to render()
-##    post_render()
+##    with draw_loop():
+##        # multiple calls to render()
 ##
+
+@contextmanager
+def draw_loop():
+    """The main draw loop context manager.
+    """
+    pre_render()
+    try:
+        yield
+    finally:
+        post_render()
 
 def pre_render():
     """Initialize things for a draw call.
