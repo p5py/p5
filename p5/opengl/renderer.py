@@ -112,7 +112,6 @@ def add_common_uniforms(shader):
     """
     shader.add_uniform('projection', 'mat4')
     shader.add_uniform('modelview', 'mat4')
-    shader.add_uniform('transform', 'mat4')
     shader.add_uniform('fill_color', 'vec4')
 
 def add_texture(image):
@@ -135,7 +134,6 @@ def draw_frame_texture(texture):
     """Draw the given texture to the frame.
     """
     texture_shader.activate()
-    texture_shader.update_uniform('transform', MATRIX_IDENTITY)
     texture_shader.update_uniform('fill_color', COLOR_WHITE)
     texture.activate()
     texture_shader.update_attribute('texcoord', frame_texcoords.id)
@@ -273,12 +271,10 @@ def reset_view():
     transform_matrix = Matrix4()
 
     texture_shader.activate()
-    texture_shader.update_uniform('transform', transform_matrix)
     texture_shader.update_uniform('modelview', modelview_matrix)
     texture_shader.update_uniform('projection', projection_matrix)
 
     default_shader.activate()
-    default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
 
@@ -353,13 +349,11 @@ def pre_render():
     gl.glViewport(*viewport)
 
     texture_shader.activate()
-    texture_shader.update_uniform('transform', transform_matrix)
     texture_shader.update_uniform('modelview', modelview_matrix)
     texture_shader.update_uniform('projection', projection_matrix)
     texture_shader.deactivate()
 
     default_shader.activate()
-    default_shader.update_uniform('transform', transform_matrix)
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
     default_shader.deactivate()
@@ -439,7 +433,6 @@ def render(shape):
         active_shader = default_shader
 
     active_shader.activate()
-    active_shader.update_uniform('transform', transform_matrix)
 
     vertices = transform_points(shape.vertices).flatten()
     vertex_buffer = VertexBuffer('float', data=vertices)

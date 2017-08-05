@@ -47,13 +47,12 @@ precision mediump int;
 vertex_default = """
 attribute vec3 position;
 
-uniform mat4 transform;
 uniform mat4 modelview;
 uniform mat4 projection;
 
 void main()
 {
-    gl_Position = projection * modelview * transform * vec4(position, 1.0);
+    gl_Position = projection * modelview * vec4(position, 1.0);
 }
 """
 
@@ -61,7 +60,6 @@ texture_vertex_default = """
 attribute vec3 position;
 attribute vec2 texcoord;
 
-uniform mat4 transform;
 uniform mat4 modelview;
 uniform mat4 projection;
 
@@ -69,7 +67,7 @@ varying vec4 vertex_texcoord;
 
 void main()
 {
-    gl_Position = projection * modelview * transform * vec4(position, 1.0);
+    gl_Position = projection * modelview * vec4(position, 1.0);
     vertex_texcoord = vec4(texcoord, 1.0, 1.0);
 }
 """
@@ -117,8 +115,8 @@ void main() {
 }
 """
 screen_texture_frag = SHADER_PREPROCESSOR + screen_texture_frag
-
 # A named tuple that descibes a shader uniform.
+
 #
 # - name: name of the shader uniform.
 # - uid: uniform id, location of the uniform.
