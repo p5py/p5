@@ -175,12 +175,15 @@ def transform_points(points):
     # m n o p
     #
     transform = np.array([
-        [transform_matrix.a, transform_matrix.b, transform_matrix.c],
-        [transform_matrix.e, transform_matrix.f, transform_matrix.g],
-        [transform_matrix.i, transform_matrix.j, transform_matrix.k]
+        [transform_matrix.a, transform_matrix.b, transform_matrix.c, transform_matrix.d],
+        [transform_matrix.e, transform_matrix.f, transform_matrix.g, transform_matrix.h],
+        [transform_matrix.i, transform_matrix.j, transform_matrix.k, transform_matrix.l],
+        [transform_matrix.m, transform_matrix.n, transform_matrix.o, transform_matrix.p]
     ])
-    points = np.array(points, dtype=np.float32)
-    return points.dot(transform)
+    points = np.hstack((np.array(points, dtype=np.float32),
+                        np.array([[1]] * len(points)))).dot(transform.T)
+
+    return points[:, :3]
 
 ## RENDERER SETUP FUNCTIONS.
 ##
