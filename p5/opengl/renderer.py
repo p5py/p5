@@ -22,6 +22,7 @@ import ctypes as ct
 from contextlib import contextmanager
 import math
 
+import numpy as np
 from pyglet import gl
 
 from .gloo import (
@@ -416,46 +417,35 @@ def render(shape):
     active_shader.activate()
     active_shader.update_uniform('transform', transform_matrix)
 
-    # shape_hash = hash(shape)
+    vertices = np.array(flatten(shape.vertices), dtype=np.float32)
+    vertex_buffer = VertexBuffer('float', data=vertices)
 
-    # if shape_hash not in geometry_cache:
-    if True:
-        vertex_buffer = VertexBuffer('float', data=flatten(shape.vertices))
-        texcoords_buffer = VertexBuffer('float', data=flatten(shape.texcoords))
+    texcoords = np.array(flatten(shape.texcoords), dtype=np.float32)
+    texcoords_buffer = VertexBuffer('float', data=texcoords)
 
-        point_buffer = None
-        edge_buffer = None
-        face_buffer = None
+    point_buffer = None
+    edge_buffer = None
+    face_buffer = None
 
-        if shape.kind == 'POINT':
-            point_buffer = VertexBuffer('uint',
-                                        data=list(range(len(vertex_buffer.data))),
-                                        buffer_type='elem')
-        elif shape.kind == 'PATH':
-            edge_buffer = VertexBuffer('uint',
-                                       data=flatten(shape.edges),
-                                       buffer_type='elem')
-        else:
-            edge_buffer = VertexBuffer('uint',
-                                       data=flatten(shape.edges),
-                                       buffer_type='elem')
-            face_buffer = VertexBuffer('uint',
-                                       data=flatten(shape.faces),
-                                       buffer_type='elem')
-
-    #     geometry_cache[shape_hash] = {
-    #         'vertex_buffer': vertex_buffer,
-    #         'texcoords_buffer': texcoords_buffer,
-    #         'point_buffer': point_buffer,
-    #         'edge_buffer': edge_buffer,
-    #         'face_buffer': face_buffer,
-    #     }
-    # else:
-    #     vertex_buffer = geometry_cache[shape_hash]['vertex_buffer']
-    #     texcoords_buffer = geometry_cache[shape_hash]['texcoords_buffer']
-    #     point_buffer = geometry_cache[shape_hash]['point_buffer']
-    #     edge_buffer = geometry_cache[shape_hash]['edge_buffer']
-    #     face_buffer = geometry_cache[shape_hash]['face_buffer']
+    if shape.kind == 'POINT':
+        points = np.array(list(range(len(vertex_buffer.data))), dtype=np.uint32)
+        point_buffer = VertexBuffer('uint',
+                                    data=points,
+                                    buffer_type='elem')
+    elif shape.kind == 'PATH':
+        edges = np.array(shapes.edges, dtype=np.uint32)
+        edge_buffer = VertexBuffer('uint',
+                                   data=flatten(shape.edges),
+                                   buffer_type='elem')
+    else:
+        edges = np.array(flatten(shape.edges), dtype=np.uint32)
+        edge_buffer = VertexBuffer('uint',
+                                   data=edges,
+                                   buffer_type='elem')
+        faces = np.array(flatten(shape.faces), dtype=np.uint32)
+        face_buffer = VertexBuffer('uint',
+                                   data=faces,
+                                   buffer_type='elem')
 
     if fill_image_enabled:
         fill_image.activate()
