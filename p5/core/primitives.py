@@ -108,7 +108,8 @@ class Shape:
 
     """
 
-    def __init__(self, vertices, kind='POLY', edges=None, faces=None):
+    def __init__(self, vertices, kind='POLY', edges=None, faces=None,
+                 visible=True):
         self.kind = kind
         self._vertices = None
         self._edges = edges
@@ -117,6 +118,19 @@ class Shape:
 
         self._raw_vertices = vertices
         self._hash_string = self._compute_hash_string()
+
+        self.visible = visible
+
+    @property
+    def visible(self):
+        return self._visible
+
+    @visible.setter
+    def visible(self, is_visible):
+        self._visible = is_visible
+        if is_visible:
+            # Shape, show thyself.
+            sketch.draw_shape(self)
 
     @property
     def vertices(self):
@@ -215,9 +229,9 @@ class Shape:
 
 class Ellipse(Shape):
     def __init__(self, center, x_radius, y_radius):
-        super().__init__([], 'ELLIPSE')
         self.center = Point(*center)
         self.radius = Point(x_radius, y_radius)
+        super().__init__([], 'ELLIPSE')
 
     def tessellate(self):
         """Generate vertex and face data using radii.
@@ -266,7 +280,6 @@ class Ellipse(Shape):
         hash_str = '{}:{}-{}'.format(self.kind, center_str, rad_str)
         return hash(hash_str)
 
-@sketch.artist
 def point(x, y, z=0):
     """Returns a point.
 
@@ -285,7 +298,6 @@ def point(x, y, z=0):
     """
     return Shape([Point(x, y, z)], kind='POINT')
 
-@sketch.artist
 def line(p1, p2):
     """Returns a line.
 
@@ -305,7 +317,6 @@ def line(p1, p2):
     ]
     return Shape(path, kind='PATH')
 
-@sketch.artist
 def bezier(start, control_point_1, control_point_2, stop):
     """Return a bezier path defined by two control points.
 
@@ -335,7 +346,6 @@ def bezier(start, control_point_1, control_point_2, stop):
     ]
     return Shape(path, kind='PATH')
 
-@sketch.artist
 def curve(point_1, point_2, point_3, point_4):
     """Return a Catmull-Rom curve defined by four points.
 
@@ -363,11 +373,9 @@ def curve(point_1, point_2, point_3, point_4):
     ]
     return Shape(path, kind='PATH')
 
-@sketch.artist
 def arc(*args):
     raise NotImplementedError
 
-@sketch.artist
 def triangle(p1, p2, p3):
     """Return a triangle.
 
@@ -386,7 +394,6 @@ def triangle(p1, p2, p3):
     vertices = [Point(*p1), Point(*p2), Point(*p3)]
     return Shape(vertices)
 
-@sketch.artist
 def quad(p1, p2, p3, p4):
     """Return a quad.
 
@@ -514,7 +521,6 @@ def rect_mode(mode='CORNER'):
     global _rect_mode
     _rect_mode = mode
 
-@sketch.artist
 def ellipse(coordinate, *args, mode=None):
     """Return a ellipse.
 

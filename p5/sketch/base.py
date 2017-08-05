@@ -290,18 +290,16 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     pyglet.clock.schedule_interval(update, 1 / max(frame_rate, 1))
     pyglet.app.run()
 
-def artist(f):
-    # a decorator that will wrap around the the "artists" in the
-    # sketch -- these are functions that draw stuff on the screen like
-    # rect(), line(), etc.
+
+def draw_shape(shape):
+    """Handle the lower level stuff associated with drawing a shape.
+
+    :param shape: The shape to be drawn.
+    :type shape: Shape
+
+    """
+    # TODO (abhikpal 2017-08-05)
     #
-    #    @artist
-    #    def rect(*args, **kwargs):
-    #        # code that creates a rectangular Shape object and
-    #        # returns it.
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        shape = f(*args, **kwargs)
-        renderer.render(shape)
-        return shape
-    return decorated
+    # Add a check that insures that we don't call the renderer
+    # directly while drawing a shape.
+    renderer.render(shape)
