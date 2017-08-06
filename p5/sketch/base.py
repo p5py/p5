@@ -222,6 +222,8 @@ def update(dt):
             if not setup_done:
                 setup()
                 setup_done = True
+                if not window.visible:
+                    window.set_visible(True)
             else:
                 draw()
                 redraw = False
@@ -282,7 +284,6 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
             handlers[handler] = fix_handler_interface(handler_func)
 
     renderer.initialize(window.context)
-    window.set_visible()
     pyglet.clock.schedule_interval(update, 1 / max(frame_rate, 1))
     pyglet.app.run()
 
