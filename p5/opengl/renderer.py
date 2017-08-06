@@ -194,10 +194,12 @@ def initialize(window_context):
 
     reset_view()
 
-def clear():
+def clear(color=True, depth=True):
     """Clear the renderer background."""
     gl.glClearColor(*background_color)
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+    color_bit = gl.GL_COLOR_BUFFER_BIT if color else 0
+    depth_bit = gl.GL_DEPTH_BUFFER_BIT if depth else 0
+    gl.glClear(color_bit | depth_bit)
 
 def reset_view():
     """Reset the view of the renderer."""
