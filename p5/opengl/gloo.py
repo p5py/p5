@@ -88,7 +88,7 @@ class VertexBuffer(GLObject):
         value_typed = (self._dtype * len(value))(*value)
         self.activate()
         gl.glBufferData(self._type, ct.sizeof(value_typed),
-                        value_typed, gl.GL_STATIC_DRAW)
+                        value_typed, gl.GL_DYNAMIC_DRAW)
         self.deactivate()
         self._data = value
 
