@@ -229,10 +229,6 @@ def update(dt):
             function(event)
         handler_queue = []
 
-def initialize(*args, **kwargs):
-    renderer.initialize(window.context)
-    window.set_visible()
-
 def fix_handler_interface(func):
     """Make sure that `func` takes at least one argument as input.
 
@@ -285,7 +281,8 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
             handler_func = getattr(__main__, handler)
             handlers[handler] = fix_handler_interface(handler_func)
 
-    initialize()
+    renderer.initialize(window.context)
+    window.set_visible()
     pyglet.clock.schedule_interval(update, 1 / max(frame_rate, 1))
     pyglet.app.run()
 
