@@ -34,15 +34,6 @@ GLSL_VERSIONS = {'2.0': 110, '2.1': 120, '3.0': 130, '3.1': 140,
                   '3.2': 150, '3.3': 330, '4.0': 400, '4.1': 410,
                   '4.2': 420, '4.3': 430, '4.4': 440, '4.5': 450, }
 
-# shader preprocessor directive for GLES
-SHADER_PREPROCESSOR = """
-#ifdef GL_ES
-precision mediump float;
-precision mediump int;
-#endif
-"""
-
-
 # Default vertex and fragment shaders.
 vertex_default = """
 attribute vec3 position;
@@ -100,28 +91,6 @@ void main()
 }
 """
 
-# Shader sources to draw framebuffers textues.
-screen_texture_vert = """
-attribute vec2 position;
-attribute vec2 tex_coord;
-
-varying vec2 vert_tex_coord;
-
-void main() {
-    gl_Position = vec4(position, 0, 1);
-    vert_tex_coord = tex_coord;
-}
-"""
-
-screen_texture_frag = """
-uniform sampler2D texMap;
-varying vec2 vert_tex_coord;
-
-void main() {
-    gl_FragColor = texture2D(texMap, vert_tex_coord.st);
-}
-"""
-screen_texture_frag = SHADER_PREPROCESSOR + screen_texture_frag
 # A named tuple that descibes a shader uniform.
 
 #
