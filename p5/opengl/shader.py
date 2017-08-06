@@ -46,6 +46,9 @@ precision mediump int;
 # Default vertex and fragment shaders.
 vertex_default = """
 attribute vec3 position;
+attribute vec4 color;
+
+varying vec4 frag_color;
 
 uniform mat4 modelview;
 uniform mat4 projection;
@@ -53,43 +56,47 @@ uniform mat4 projection;
 void main()
 {
     gl_Position = projection * modelview * vec4(position, 1.0);
+    frag_color = color;
 }
 """
 
 texture_vertex_default = """
 attribute vec3 position;
 attribute vec2 texcoord;
+attribute vec4 color;
 
 uniform mat4 modelview;
 uniform mat4 projection;
 
 varying vec4 vertex_texcoord;
+varying vec4 frag_color;
 
 void main()
 {
     gl_Position = projection * modelview * vec4(position, 1.0);
     vertex_texcoord = vec4(texcoord, 1.0, 1.0);
+    frag_color = color;
 }
 """
 
 fragment_default = """
-uniform vec4 fill_color;
+varying vec4 frag_color;
 
 void main()
 {
-    gl_FragColor = fill_color;
+    gl_FragColor = frag_color;
 }
 """
 
 texture_fragment_default = """
-uniform vec4 fill_color;
 uniform sampler2D texture;
 
 varying vec4 vertex_texcoord;
+varying vec4 frag_color;
 
 void main()
 {
-    gl_FragColor = texture2D(texture, vertex_texcoord.st) * fill_color;
+    gl_FragColor = texture2D(texture, vertex_texcoord.st) * frag_color;
 }
 """
 

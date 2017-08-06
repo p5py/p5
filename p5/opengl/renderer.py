@@ -99,6 +99,7 @@ back_frame_tex = None
 
 frame_vertices = None
 frame_texcoords = None
+frame_colors = None
 frame_elements = None
 
 
@@ -112,7 +113,6 @@ def add_common_uniforms(shader):
     """
     shader.add_uniform('projection', 'mat4')
     shader.add_uniform('modelview', 'mat4')
-    shader.add_uniform('fill_color', 'vec4')
 
 def add_texture(image):
     """Add the given image as a texture to the renderer.
@@ -134,9 +134,9 @@ def draw_frame_texture(texture):
     """Draw the given texture to the frame.
     """
     texture_shader.activate()
-    texture_shader.update_uniform('fill_color', COLOR_WHITE)
     texture.activate()
     texture_shader.update_attribute('texcoord', frame_texcoords.id)
+    texture_shader.update_attribute('color', frame_colors.id)
     texture_shader.update_attribute('position', frame_vertices.id)
     frame_vertices.activate()
     frame_elements.draw('TRIANGLES')
@@ -218,10 +218,12 @@ def initialize(window_context):
     texture_shader.add_uniform('texture', 'int')
     texture_shader.add_attribute('position', '3f')
     texture_shader.add_attribute('texcoord', '2f')
+    texture_shader.add_attribute('color', '4f')
 
     default_shader.activate()
     add_common_uniforms(default_shader)
     default_shader.add_attribute('position', '3f')
+    default_shader.add_attribute('color', '4f')
 
     reset_view()
 
@@ -242,6 +244,7 @@ def reset_view():
 
     global frame_vertices
     global frame_texcoords
+    global frame_colors
     global frame_elements
 
     viewport = (0, 0, builtins.width, builtins.height)
@@ -282,6 +285,8 @@ def reset_view():
                                              1, 1,
                                              1, 0,
                                              0, 0])
+        frame_colors = VertexBuffer('float',
+                                    data=np.array(COLOR_WHITE * 4, dtype=np.float32))
         frame_elements = VertexBuffer('uint',
                                       data=[0, 1, 2, 0, 2, 3],
                                       buffer_type='elem')
@@ -304,6 +309,7 @@ def cleanup():
     if frame_buffer_support:
         frame_vertices.delete()
         frame_texcoords.delete()
+        frame_colors.delete()
         frame_elements.delete()
         frame_buffer.delete()
 
@@ -425,8 +431,12 @@ def render(shape):
 
     active_shader.activate()
 
+    color_buffer = VertexBuffer('float')
+    color_size = len(shape.vertices)
+
     vertices = transform_points(shape.vertices).flatten()
     vertex_buffer = VertexBuffer('float', data=vertices)
+
 
     texcoords = np.array(flatten(shape.texcoords), dtype=np.float32)
     texcoords_buffer = VertexBuffer('float', data=texcoords)
@@ -464,16 +474,22 @@ def render(shape):
     if shape.kind not in ['PATH', 'POINT']:
         if fill_image_enabled:
             if tint_enabled:
-                active_shader.update_uniform('fill_color', tint_color)
+                color_buffer.data = np.array(tint_color * color_size,
+                                             dtype=np.float32)
             else:
-                active_shader.update_uniform('fill_color', COLOR_WHITE)
+                color_buffer.data = np.array(COLOR_WHITE * color_size,
+                                             dtype=np.float32)
+            active_shader.update_attribute('color', color_buffer.id)
             face_buffer.draw('TRIANGLE_FAN')
         elif fill_enabled:
-            active_shader.update_uniform('fill_color', fill_color)
+            color_buffer.data = np.array(fill_color * color_size,
+                                         dtype=np.float32)
+            active_shader.update_attribute('color', color_buffer.id)
             face_buffer.draw('TRIANGLE_FAN')
 
     if stroke_enabled and (not fill_image_enabled):
-        active_shader.update_uniform('fill_color', stroke_color)
+        color_buffer.data = np.array(stroke_color * color_size, dtype=np.float32)
+        active_shader.update_attribute('color', color_buffer.id)
         if shape.kind == 'POINT':
             point_buffer.draw('POINTS')
         elif shape.kind == 'PATH':
@@ -481,8 +497,8 @@ def render(shape):
         else:
             edge_buffer.draw('LINE_LOOP')
 
-    buffers = [vertex_buffer, texcoords_buffer, point_buffer,
-               edge_buffer, face_buffer]
+    buffers = [color_buffer, vertex_buffer, texcoords_buffer,
+               point_buffer, edge_buffer, face_buffer]
 
     for b in buffers:
         if not (b is None):
