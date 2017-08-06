@@ -329,7 +329,7 @@ def render(shape):
                                     data=points,
                                     buffer_type='elem')
     elif shape.kind == 'PATH':
-        edges = np.array(shapes.edges, dtype=np.uint32)
+        edges = np.array(shape.edges, dtype=np.uint32)
         edge_buffer = VertexBuffer('uint',
                                    data=flatten(shape.edges),
                                    buffer_type='elem')
