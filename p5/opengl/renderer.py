@@ -86,7 +86,6 @@ context = None
 default_shader = None
 texture_shader = None
 
-geometry_cache = {}
 texture_cache = {}
 
 ## Renderer Globals: FRAME BUFFERS
@@ -300,10 +299,6 @@ def cleanup():
     """
     default_shader.delete()
     texture_shader.delete()
-    for shape_hash, shape_buffers in geometry_cache.items():
-        shape_buffers['vertex_buffer'].delete()
-        shape_buffers['edge_buffer'].delete()
-        shape_buffers['face_buffer'].delete()
     for texture_hash, texture in texture_cache:
         texture.delete()
     if frame_buffer_support:
