@@ -167,21 +167,9 @@ def transform_points(points):
     :rtype: np.ndarray
 
     """
-    # The Matrix4 internally stores data in the following format:
-    #
-    # a b c d
-    # e f g h
-    # i j k l
-    # m n o p
-    #
-    transform = np.array([
-        [transform_matrix.a, transform_matrix.b, transform_matrix.c, transform_matrix.d],
-        [transform_matrix.e, transform_matrix.f, transform_matrix.g, transform_matrix.h],
-        [transform_matrix.i, transform_matrix.j, transform_matrix.k, transform_matrix.l],
-        [transform_matrix.m, transform_matrix.n, transform_matrix.o, transform_matrix.p]
-    ])
+    transform = np.array(transform_matrix[:]).reshape((4, 4))
     points = np.hstack((np.array(points, dtype=np.float32),
-                        np.array([[1]] * len(points)))).dot(transform.T)
+                        np.array([[1]] * len(points)))).dot(transform)
 
     return points[:, :3]
 
