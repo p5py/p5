@@ -87,6 +87,8 @@ class Point:
         """
         return np.sum((self._array - other._array) ** 2)
 
+    dist = distance
+
     def lerp(self, other, amount):
         """Linearly interpolate from one point to another.
 
