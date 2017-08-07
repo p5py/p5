@@ -18,7 +18,7 @@
 
 import random
 
-from .utils import constrain
+from ..pmath import constrain
 from .utils import SINCOS_LENGTH
 from .utils import PRE_COS
 

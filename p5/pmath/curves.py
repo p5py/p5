@@ -22,8 +22,8 @@
 from functools import wraps
 import math
 
-from .utils import Point
-from .matrix import Matrix4
+from ..pmath import Point
+from ..pmath import Matrix4
 
 __all__ = [
     # BEZIER METHODS
