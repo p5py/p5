@@ -16,18 +16,222 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import math
-import random
+import numpy as np
 
-from .utils import dist
-from .utils import lerp
+__all__ = ['Vector', 'Point']
 
-from ..tmp.euclid import Vector2
-from ..tmp.euclid import Vector3
+# Floating point precision for vectors.
+EPSILON = 1e-8
 
-__all__ = ['Vector', 'Vector2', 'Vector3']
 
-class Vector:
+class Point:
+    """Describes a point in two or three dimensional space.
+
+    :param x: The x-component of the point
+    :type x: numeric
+
+    :param y: The y-component of the point
+    :type y: numeric
+
+    :param z: The z-component of the point (o by default)
+    :type z: numeric
+
+    :param label: An optional label for the point.
+    :type label: str
+
+    """
+    def __init__(self, x, y, z=0, label=None):
+        self._x = x
+        self._y = y
+        self._z = z
+        self.label = label
+        self._array = np.array([x, y, z])
+
+    @property
+    def x(self):
+        """The x-component of the point."""
+        return self._array[0]
+
+    @x.setter
+    def x(self, value):
+        self._x = value
+        self._array[0] = value
+
+    @property
+    def y(self):
+        """The y-component of the point."""
+        return self._array[1]
+
+    @y.setter
+    def y(self, value):
+        self._y = value
+        self._array[1] = value
+
+    @property
+    def z(self):
+        """The z-component of the point."""
+        return self._array[2]
+
+    @z.setter
+    def z(self, value):
+        self._z = value
+        self._array[2] = value
+
+    def distance(self, other):
+        """Return the distance between two points.
+
+        :returns: The distance between the current point and the given
+            point.
+        :rtype: float
+
+        """
+        return np.sum((self._array - other._array) ** 2)
+
+    def lerp(self, other, amount):
+        """Linearly interpolate from one point to another.
+
+        :param other: Point to be interpolate to.
+
+        :param amount: Amount by which to interpolate.
+        :type amount: float
+
+        :returns: Vector obtained by linearly interpolating this
+            vector to the other vector by the given amount.
+
+        """
+        x, y, z = self._array + amount * (other._array - self._array)
+        return self.__class__(x, y, z)
+
+    def __add__(self, other):
+        """Add the location of one point to that of another.
+
+        Examples::
+
+            >>> p = Vector(2, 3, 6)
+            >>> q = Vector(3, 4, 5)
+            >>> p + q
+            Vector(5.00, 7.00, 11.00)
+
+        :param other:
+
+        :returns: The point obtained by adding the corresponding
+            components of the two vectors.
+
+        """
+        x, y, z = self._array + other._array
+        return self.__class__(x, y, z)
+
+    def __sub__(self, other):
+        """Subtract the location of one point from that of another.
+
+        Examples::
+
+            >>> p = Vector(2, 3, 6)
+            >>> q = Vector(3, 4, 5)
+            >>> p - q
+            Vector(-1.00, -1.00, 1.00)
+
+        :param other:
+        :returns: The vector obtained by subtracteing  the corresponding
+            components of the vector from those of another.
+
+        """
+        x, y, z = self._array - other._array
+        return self.__class__(x, y, z)
+
+    def __mul__(self, k):
+        """Multiply the point by a scalar.
+
+        Examples::
+
+            >>> p = Vector(2, 3, 6)
+            >>> p * 2
+            Vector(4.00, 6.00, 12.00)
+
+            >>> 2 * p
+            Vector(4.00, 6.00, 12.00)
+
+            >>> p * p
+            Traceback (most recent call last):
+                ...
+            TypeError: Can't multiply/divide a point by a non-numeric.
+
+            >>> p = Vector(2, 3, 6)
+            >>> -p
+            Vector(-2.00, -3.00, -6.00)
+
+            >>> p = Vector(2, 3, 6)
+            >>> p / 2
+            Vector(1.00, 1.50, 3.00)
+
+        :param k:
+        :type k: int, float
+        :returns: The vector obtained by multiplying each component of
+            `self` by k.
+
+        :raises TypeError: When `k` is non-numeric.
+
+        """
+        if isinstance(k, int) or isinstance(k, float):
+            x, y, z = k * self._array
+            return self.__class__(x, y, z)
+        raise TypeError("Can't multiply/divide a point by a non-numeric.")
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __neg__(self):
+        """Negate the vector."""
+        return (-1) * self
+
+    def __truediv__(self, other):
+        """Divide the vector by a scalar."""
+        return (1  / other) * self
+
+    def copy(self):
+        """Return a copy of the current point.
+
+        :returns: A copy of the current point.
+        :rtype: Vector
+
+        """
+        x, y, z = self._array
+        return self.__class__(x, y, z, label=self.label)
+
+    def __setitem__(self, key, value):
+        self._array[key] = value
+
+    def __getitem__(self, key):
+        return self._array[key]
+
+    def __iter__(self):
+        """Return the components of the vector as an iterator.
+
+        Examples::
+
+            >>> p = Vector(2, 3, 4)
+            >>> print([ c for c in p])
+            [2, 3, 4]
+
+        """
+        for k in self._array:
+            yield k
+
+    def __eq__(self, other):
+        return np.all(np.absolute(self - other) < EPSILON)
+
+    def __neq__(self, other):
+        return not np.all(np.absolute(self - other) < EPSILON)
+
+    def __repr__(self):
+        class_name = self.__class__.__name__
+        fvalues = (class_name, self.x, self.y, self.z)
+        return "{}({:.2f}, {:.2f}, {:.2f})".format(*fvalues)
+
+    __str__ = __repr__
+
+
+class Vector(Point):
     """Describes a vector in two or three dimensional space.
 
     A Vector -- specifically an Euclidean (or geometric) vector -- in
@@ -57,17 +261,48 @@ class Vector:
     """
 
     def __init__(self, x, y, z=0):
-        #: The x-component of the vector.
-        self.x = x
+        super().__init__(x, y, z)
 
-        #: The y-component of the vector.
-        self.y = y
+    def cross(self, other):
+        """Return the cross product of the two vectors.
 
-        #: The z-component of the vector.
-        #:
-        #: This attribute is only required for three dimensional
-        #: vectors. Defaults to 0.
-        self.z = z
+        Examples::
+
+            >>> i = Vector(1, 0, 0)
+            >>> j = Vector(0, 1, 0)
+            >>> i.cross(j)
+            Vector(0.00, 0.00, 1.00)
+
+        :param other:
+        :type other: Vector
+        :returns: The vector perpendicular to both `self` and `other`
+            i.e., the vector obtained by taking the cross product of
+            `self` and `other`.
+        :rtype: Vector
+
+        """
+        x, y, z = np.cross(self._array, other._array)
+        return self.__class__(x, y, z)
+
+    def dot(self, other):
+        """Compute the dot product of two vectors.
+
+        Examples::
+
+            >>> p = Vector(2, 3, 6)
+            >>> q = Vector(3, 4, 5)
+            >>> p.dot(q)
+            48
+            >>> p @ q
+            48
+
+        :param other:
+        :type other: Vector
+        :returns: The dot product of the two vectors.
+        :rtype: int or float
+
+        """
+        return np.dot(self._array, other._array)
 
     @property
     def angle(self):
@@ -112,7 +347,7 @@ class Vector:
         """
         if self.z != 0:
             raise ValueError("Can't compute the angle for a 3D vector.")
-        return math.atan2(self.y, self.x)
+        return np.arctan2(self.y, self.x)
 
     @angle.setter
     def angle(self, theta):
@@ -120,13 +355,13 @@ class Vector:
 
     def rotate(self, theta):
         """Rotates the vector by an angle.
-        
+
         :param theta: Angle (in radians).
         :type theta: float or int
 
         """
-        x = self.x * math.cos(theta) - self.y * math.sin(theta)
-        y = self.x * math.sin(theta) + self.y * math.cos(theta)
+        x = self.x * np.cos(theta) - self.y * np.sin(theta)
+        y = self.x * np.sin(theta) + self.y * np.cos(theta)
         self.x = x
         self.y = y
 
@@ -148,41 +383,7 @@ class Vector:
         :rtype: float
 
         """
-        return math.acos( (self @ other) / (self.magnitude * other.magnitude))
-
-    def lerp(self, other, amount):
-        """Linearly interpolate the vector to another vector.
-
-        :param other: Vector to be interpolate to.
-        :type other: Vector
-
-        :param amount: Amount by which to interpolate.
-        :type amount: float
-
-        :returns: Vector obtained by linearly interpolating this
-            vector to the other vector by the given amount.
-        :rtype: Vector.
-
-        """
-        components = (lerp(si, oi, amount) for si, oi in zip(self, other))
-        return Vector(*components)
-
-    def distance(self, other):
-        """Return the distance between two points (tips of the vectors).
-
-        :param other:
-        :type other: Vector
-
-        :returns: The distance between the current vector's tip and
-            the other vector's tip.
-        :rtype: float
-
-        """
-        sc = (si for si in self)
-        oc = (oi for oi in other)
-        return dist(sc, oc)
-
-    dist = distance
+        return np.arccos( (self @ other) / (self.magnitude * other.magnitude))
 
     @property
     def magnitude(self):
@@ -206,23 +407,21 @@ class Vector:
             Vector(0.29, 0.43, 0.86)
 
         """
-        return math.sqrt(self.dot(self))
+        return np.sqrt(self @ self)
 
     @magnitude.setter
     def magnitude(self, new_magnitude):
         current_magnitude = self.magnitude
-        self.x = (self.x / current_magnitude) * new_magnitude
-        self.y = (self.y / current_magnitude) * new_magnitude
-        self.z = (self.z / current_magnitude) * new_magnitude
+        self._array = new_magnitude * self._array / current_magnitude
 
     @property
     def magnitude_sq(self):
         """The squared magnitude of the vector."""
-        return self.dot(self)
+        return self @ self
 
     @magnitude_sq.setter
     def magnitude_sq(self, new_magnitude_sq):
-        self.magnitude = math.sqrt(new_magnitude_sq)
+        self.magnitude = np.sqrt(new_magnitude_sq)
 
     def __abs__(self):
         """Return the magnitude of the vector."""
@@ -255,166 +454,8 @@ class Vector:
         elif magnitude > upper_limit:
             self.magnitude = upper_limit
 
-    def __add__(self, other):
-        """Add two vectors.
-
-        Examples::
-
-            >>> p = Vector(2, 3, 6)
-            >>> q = Vector(3, 4, 5)
-            >>> p + q
-            Vector(5.00, 7.00, 11.00)
-
-        :param other:
-        :type other: Vector
-        :returns: The vector obtained by adding the corresponding
-            components of the two vectors.
-        :rtype: Vector
-
-        """
-        return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
-
-    def __sub__(self, other):
-        """Subtract one vector from another.
-
-        Examples::
-
-            >>> p = Vector(2, 3, 6)
-            >>> q = Vector(3, 4, 5)
-            >>> p - q
-            Vector(-1.00, -1.00, 1.00)
-
-        :param other:
-        :type other: Vector
-        :returns: The vector obtained by subtracteing  the corresponding
-            components of the vector from those of another.
-        :rtype: Vector
-
-        """
-        return Vector(self.x - other.x, self.y - other.y, self.z - other.z)
-
-    def __mul__(self, k):
-        """Multiply the vector by a scalar.
-
-        Examples::
-
-            >>> p = Vector(2, 3, 6)
-            >>> p * 2
-            Vector(4.00, 6.00, 12.00)
-
-            >>> 2 * p
-            Vector(4.00, 6.00, 12.00)
-
-            >>> p * p
-            Traceback (most recent call last):
-                ...
-            TypeError: Can't multiply/divide a vector by a non-numeric.
-
-            >>> p = Vector(2, 3, 6)
-            >>> -p
-            Vector(-2.00, -3.00, -6.00)
-
-            >>> p = Vector(2, 3, 6)
-            >>> p / 2
-            Vector(1.00, 1.50, 3.00)
-
-        :param k:
-        :type k: int, float
-        :returns: The vector obtained by multiplying each component of
-            `self` by k.
-        :rtype: Vector
-        :raises TypeError: When `k` is non-numeric.
-
-        """
-        if isinstance(k, int) or isinstance(k, float):
-            return Vector(self.x * k, self.y * k, self.z * k)
-        raise TypeError("Can't multiply/divide a vector by a non-numeric.")
-
-    def __rmul__(self, other):
-        return self * other
-
-    def __neg__(self):
-        """Negate the vector."""
-        return -1 * self
-
-    def __truediv__(self, other):
-        """Divide the vector by a scalar."""
-        return self * (1 / other)
-
-    def cross(self, other):
-        """Return the cross product of the two vectors.
-
-        Examples::
-
-            >>> i = Vector(1, 0, 0)
-            >>> j = Vector(0, 1, 0)
-            >>> i.cross(j)
-            Vector(0.00, 0.00, 1.00)
-
-        :param other:
-        :type other: Vector
-        :returns: The vector perpendicular to both `self` and `other`
-            i.e., the vector obtained by taking the cross product of
-            `self` and `other`.
-        :rtype: Vector
-
-        """
-        return Vector(self.y * other.z - self.z * other.y,
-                      self.z * other.x - self.x * other.z,
-                      self.x * other.y - self.y * other.x)
-
-    def dot(self, other):
-        """Compute the dot product of two vectors.
-
-        Examples::
-
-            >>> p = Vector(2, 3, 6)
-            >>> q = Vector(3, 4, 5)
-            >>> p.dot(q)
-            48
-            >>> p @ q
-            48
-
-        :param other:
-        :type other: Vector
-        :returns: The dot product of the two vectors.
-        :rtype: int or float
-
-        """
-        return sum(sc*oc for sc, oc in zip(self, other))
-
     def __matmul__(self, other):
         return self.dot(other)
-
-    def copy(self):
-        """Return a copy of the vector.
-
-        :returns: A copy of the current vector.
-        :rtype: Vector
-
-        """
-        components = (si for si in self)
-        return Vector(*components)
-
-    def __iter__(self):
-        """Return the components of the vector as an iterator.
-
-        Examples::
-
-            >>> p = Vector(2, 3, 4)
-            >>> print([ c for c in p])
-            [2, 3, 4]
-
-        """
-        yield self.x
-        yield self.y
-        yield self.z
-
-    def __eq__(self, other):
-        return all(math.isclose(si, oi) for si, oi in zip(self, other))
-
-    def __neq__(self, other):
-        return not all(math.isclose(si, oi) for si, oi in zip(self, other))
 
     @classmethod
     def from_angle(cls, angle):
@@ -432,8 +473,7 @@ class Vector:
     def random_2D(cls):
         """Return a random 2D unit vector.
         """
-        x = random.random()
-        y = random.random()
+        x, y = np.random.random(2)
         vec = cls(x, y)
         vec.normalize()
         return vec
@@ -442,14 +482,7 @@ class Vector:
     def random_3D(cls):
         """Return a new random 3D unit vector.
         """
-        x = random.random()
-        y = random.random()
-        z = random.random()
+        x, y, z = np.random.random(3)
         vec = cls(x, y, z)
         vec.normalize()
         return vec
-
-    def __repr__(self):
-        return "Vector({:.2f}, {:.2f}, {:.2f})".format(self.x, self.y, self.z)
-
-    __str__ = __repr__
