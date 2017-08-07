@@ -25,14 +25,10 @@ import math
 import numpy as np
 from pyglet import gl
 
-from .gloo import (
-    VertexBuffer,
-    Texture,
-)
-from .shader import (
-    Shader,
-    vertex_default, fragment_default,
-)
+from .gloo import VertexBuffer
+from .shader import Shader
+from .shader import vertex_default, fragment_default
+
 from .support import has_fbo
 from ..pmath import Matrix4
 
