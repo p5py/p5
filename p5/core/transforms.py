@@ -23,7 +23,8 @@ import math
 from ..sketch import renderer
 from ..pmath import Matrix4
 from ..pmath import Vector
-from ..pmath import Vector3
+
+from ..tmp.euclid import Vector3
 
 __all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
            'rotate_x', 'rotate_y', 'rotate_z', 'scale', 'shear_x',
@@ -75,7 +76,7 @@ def rotate(theta, axis=Vector3(0, 0, 1)):
     :type axis: Vector3
     """
     renderer.transform_matrix.rotate_axis(theta, axis)
-    
+
 def rotate_x(theta):
     """Rotate the view along the x axis.
 
