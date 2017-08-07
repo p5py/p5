@@ -170,6 +170,8 @@ class Shape:
             (k, k+1)
             for k in range(len(self.vertices) - 1)
         ]
+        # connect the last vertex to the first vertex
+        self._edges.append((len(self.vertices) - 1, 0))
 
     def compute_texcoords(self):
         """Compute the texture coordinates for the current shape."""
@@ -258,6 +260,7 @@ class Ellipse(Shape):
             (k, k+1)
             for k in range(1, len(self.vertices) - 1)
         ]
+        self._edges.append((len(self.vertices) - 1, 1))
 
 
 def point(x, y, z=0):

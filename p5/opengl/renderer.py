@@ -294,17 +294,15 @@ def render(shape):
         color_buffer.data = np.array(fill_color * color_size,
                                      dtype=np.float32)
         active_shader.update_attribute('color', color_buffer.id)
-        face_buffer.draw('TRIANGLE_FAN')
+        face_buffer.draw('TRIANGLES')
 
     if stroke_enabled:
         color_buffer.data = np.array(stroke_color * color_size, dtype=np.float32)
         active_shader.update_attribute('color', color_buffer.id)
         if shape.kind == 'POINT':
             point_buffer.draw('POINTS')
-        elif shape.kind == 'PATH':
-            edge_buffer.draw('LINE_STRIP')
         else:
-            edge_buffer.draw('LINE_LOOP')
+            edge_buffer.draw('LINE_STRIP')
 
     buffers = [color_buffer, vertex_buffer, texcoords_buffer,
                point_buffer, edge_buffer, face_buffer]
