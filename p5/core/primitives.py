@@ -23,6 +23,8 @@ from math import sin
 from math import cos
 from math import radians
 
+import numpy as np
+
 from .transforms import _screen_coordinates
 from .. import sketch
 
@@ -195,7 +197,9 @@ class Shape:
         psig = ''.join(point_type(v)[0] for v in self._raw_vertices)
         if all(pi == 'D' for pi in psig):
             # the path is already tessellated. Nothing to be done.
-            self._vertices = self._raw_vertices
+            self._vertices = np.vstack((
+                v._array for v in self._raw_vertices
+            ))
         elif psig == 'DBBD':
             self._vertices = []
             steps = curves.bezier_resolution
@@ -215,43 +219,33 @@ class Shape:
 
 
 class Ellipse(Shape):
-    def __init__(self, center, x_radius, y_radius):
-        self.center = Point(*center)
-        self.radius = Point(x_radius, y_radius)
+    def __init__(self, center, dim):
+        self.center = center if type(center) == Point else Point(*center)
+        self.radius = dim if type(dim) == Point else Point(*dim)
         super().__init__([], 'ELLIPSE')
 
     def tessellate(self):
         """Generate vertex and face data using radii.
         # """
-        c1 = Point(self.center.x - self.radius.x, self.center.y - self.radius.y)
+        c1 = self.center - self.radius
         s1 = _screen_coordinates(*c1)
 
-        c2 = Point(self.center.x -+ self.radius.x, self.center.y + self.radius.y)
+        c2 = self.center + self.radius
         s2 = _screen_coordinates(*c2)
 
-        size_acc = (s1.dist(s2) * math.pi * 2) / POINT_ACCURACY_FACTOR
+        size_acc = (s1.distance(s2) * math.pi * 2) / POINT_ACCURACY_FACTOR
 
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)
 
-        self._vertices = []
-        self.vertices.append(Point(
-            self.center.x,
-            self.center.y,
-            self.center.z
-        ))
-        for i in range(0, len(SINCOS), inc):
-            pt = Point(
-                self.center.x + SINCOS[i][1] * self.radius.x,
-                self.center.y + SINCOS[i][0] * self.radius.y,
-                self.center.z
-            )
-            self._vertices.append(pt)
+        xs = self.center.x + np.cos(np.linspace(0, np.pi * 2, acc)) * self.radius.x
+        ys = self.center.y + np.sin(np.linspace(0, np.pi * 2, acc)) * self.radius.y
+        zs = np.array([self.center.z] * acc)
 
-        self._vertices.append(Point(
-            self.center.x + SINCOS[0][1] * self.radius.x,
-            self.center.y + SINCOS[0][0] * self.radius.y,
-            self.center.z
+        self._vertices = np.vstack((
+            self.center._array,
+            np.vstack((xs, ys, zs)).transpose(),
+            np.array([xs[0], ys[0], zs[0]])
         ))
 
     def compute_edges(self):
@@ -536,28 +530,23 @@ def ellipse(coordinate, *args, mode=None):
 
     if mode == 'CORNER':
         corner = Point(*coordinate)
-        width, height = args
-        xrad = width/2
-        yrad = height/2
-        center = Point(corner.x + xrad, corner.y + yrad, corner.z)
+        dim = Point(*args)
+        center = corner + (dim / 2)
     elif mode == 'CENTER':
         center = Point(*coordinate)
-        width, height = args
-        xrad = width/2
-        yrad = height/2
+        dim = Point(*args) / 2
     elif mode == 'RADIUS':
         center = Point(*coordinate)
-        xrad, yrad = args
+        dim = Point(*args)
     elif mode == 'CORNERS':
         corner = Point(*coordinate)
         corner_2, = args
         corner_2 = Point(*corner_2)
-        xrad = (corner_2.x - corner.x)/2
-        yrad = (corner_2.y - corner.y)/2
-        center = Point(corner.x + xrad, corner.y + yrad, corner.z)
+        dim = (corner_2 - corner) / 2
+        center = corner + dim
     else:
         raise ValueError("Unknown ellipse mode {}".format(mode))
-    return Ellipse(center, xrad, yrad)
+    return Ellipse(center, dim)
 
 def circle(coordinate, radius, mode=None):
     """Return a circle.
