@@ -25,6 +25,8 @@ from math import radians
 
 from .transforms import _screen_coordinates
 from .. import sketch
+
+from ..pmath import Point
 from ..pmath import curves
 from ..pmath import remap
 from ..pmath.utils import SINCOS
@@ -50,14 +52,14 @@ _shape_mode = 'CORNER'
 #   around this are tessellated using the Catmull-Rom spline algorithm
 #   used in the curve_point function.
 #
-BezierPoint = namedtuple('BEZIER', ['x', 'y', 'z'])
-BezierPoint.__new__.__defaults__ = (None, None, 0)
 
-CurvePoint = namedtuple('CURVE', ['x', 'y', 'z'])
-CurvePoint.__new__.__defaults__ = (None, None, 0)
+class BezierPoint(Point):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, label='BEZIER', **kwargs)
 
-Point = namedtuple('DEFAULT', ['x', 'y', 'z'])
-Point.__new__.__defaults__ = (None, None, 0)
+class CurvePoint(Point):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, label='CURVE', **kwargs)
 
 def point_type(point):
     """Return the point type for the given point.
@@ -68,7 +70,9 @@ def point_type(point):
     :return: The type (name) of the given point.
     :rtype: str
     """
-    return type(point).__name__
+    if point.label is None:
+        return 'DEFAULT'
+    return point.label
 
 # We use these in ellipse tessellation. The algorithm is similar to
 # the one used in Processing and the we compute the number of
@@ -248,20 +252,20 @@ class Ellipse(Shape):
         inc = int(len(SINCOS) / acc)
 
         self._vertices = []
-        self.vertices.append((
+        self.vertices.append(Point(
             self.center.x,
             self.center.y,
             self.center.z
         ))
         for i in range(0, len(SINCOS), inc):
-            pt = (
+            pt = Point(
                 self.center.x + SINCOS[i][1] * self.radius.x,
                 self.center.y + SINCOS[i][0] * self.radius.y,
                 self.center.z
             )
             self._vertices.append(pt)
 
-        self._vertices.append((
+        self._vertices.append(Point(
             self.center.x + SINCOS[0][1] * self.radius.x,
             self.center.y + SINCOS[0][0] * self.radius.y,
             self.center.z

@@ -112,7 +112,7 @@ def transform_points(points):
 
     """
     transform = np.array(transform_matrix[:]).reshape((4, 4))
-    points = np.hstack((np.array(points, dtype=np.float32),
+    points = np.hstack((np.array([p._array for p in points], dtype=np.float32),
                         np.array([[1]] * len(points)))).dot(transform)
 
     return points[:, :3]
