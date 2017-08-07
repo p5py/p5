@@ -32,7 +32,6 @@ from .gloo import (
 from .shader import (
     Shader,
     vertex_default, fragment_default,
-    texture_vertex_default, texture_fragment_default
 )
 from .support import has_fbo
 from ..pmath import Matrix4
@@ -59,12 +58,7 @@ MATRIX_IDENTITY = Matrix4()
 background_color = COLOR_DEFAULT_BG
 
 fill_color = COLOR_WHITE
-fill_image = None
 fill_enabled = True
-fill_image_enabled = False
-
-tint_color = COLOR_WHITE
-tint_enabled = True
 
 stroke_color = COLOR_BLACK
 stroke_enabled = True
@@ -83,10 +77,6 @@ projection_matrix = Matrix4()
 context = None
 
 default_shader = None
-texture_shader = None
-
-texture_cache = {}
-
 
 ## RENDERER UTILITY FUNCTIONS
 ##
@@ -98,22 +88,6 @@ def add_common_uniforms(shader):
     """
     shader.add_uniform('projection', 'mat4')
     shader.add_uniform('modelview', 'mat4')
-
-def add_texture(image):
-    """Add the given image as a texture to the renderer.
-    """
-    global fill_image
-    global fill_image_enabled
-    fill_image_enabled = True
-    image_hash = hash(image)
-    if image_hash not in texture_cache:
-        tex = Texture(image.width, image.height)
-        tex.data = bytes(image)
-        texture_cache[image_hash] = tex
-    else:
-        tex = texture_cache[image_hash]
-
-    fill_image = tex
 
 def flatten(vertex_list):
     """Flatten a vertex list
@@ -177,15 +151,6 @@ def initialize(window_context):
     gl.glDepthFunc(gl.GL_LEQUAL)
 
     default_shader = Shader(vertex_default, fragment_default, gl_version)
-    texture_shader = Shader(texture_vertex_default,
-                            texture_fragment_default, gl_version)
-
-    texture_shader.activate()
-    add_common_uniforms(texture_shader)
-    texture_shader.add_uniform('texture', 'int')
-    texture_shader.add_attribute('position', '3f')
-    texture_shader.add_attribute('texcoord', '2f')
-    texture_shader.add_attribute('color', '4f')
 
     default_shader.activate()
     add_common_uniforms(default_shader)
@@ -225,10 +190,6 @@ def reset_view():
 
     transform_matrix = Matrix4()
 
-    texture_shader.activate()
-    texture_shader.update_uniform('modelview', modelview_matrix)
-    texture_shader.update_uniform('projection', projection_matrix)
-
     default_shader.activate()
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
@@ -242,9 +203,6 @@ def cleanup():
     """
     default_shader.delete()
     texture_shader.delete()
-    for texture_hash, texture in texture_cache:
-        texture.delete()
-
 
 ## RENDERING FUNTIONS + HELPERS
 ##
@@ -277,11 +235,6 @@ def pre_render():
 
     gl.glViewport(*viewport)
 
-    texture_shader.activate()
-    texture_shader.update_uniform('modelview', modelview_matrix)
-    texture_shader.update_uniform('projection', projection_matrix)
-    texture_shader.deactivate()
-
     default_shader.activate()
     default_shader.update_uniform('modelview', modelview_matrix)
     default_shader.update_uniform('projection', projection_matrix)
@@ -302,10 +255,7 @@ def render(shape):
     :param shape: The shape to be rendered.
     :type shape: Shape
     """
-    if fill_image_enabled:
-        active_shader = texture_shader
-    else:
-        active_shader = default_shader
+    active_shader = default_shader
 
     active_shader.activate()
 
@@ -314,7 +264,6 @@ def render(shape):
 
     vertices = transform_points(shape.vertices).flatten()
     vertex_buffer = VertexBuffer('float', data=vertices)
-
 
     texcoords = np.array(flatten(shape.texcoords), dtype=np.float32)
     texcoords_buffer = VertexBuffer('float', data=texcoords)
@@ -343,29 +292,15 @@ def render(shape):
                                    data=faces,
                                    buffer_type='elem')
 
-    if fill_image_enabled:
-        fill_image.activate()
-        active_shader.update_attribute('texcoord', texcoords_buffer.id)
-
     active_shader.update_attribute('position', vertex_buffer.id)
 
-    if shape.kind not in ['PATH', 'POINT']:
-        if fill_image_enabled:
-            if tint_enabled:
-                color_buffer.data = np.array(tint_color * color_size,
-                                             dtype=np.float32)
-            else:
-                color_buffer.data = np.array(COLOR_WHITE * color_size,
-                                             dtype=np.float32)
-            active_shader.update_attribute('color', color_buffer.id)
-            face_buffer.draw('TRIANGLE_FAN')
-        elif fill_enabled:
-            color_buffer.data = np.array(fill_color * color_size,
-                                         dtype=np.float32)
-            active_shader.update_attribute('color', color_buffer.id)
-            face_buffer.draw('TRIANGLE_FAN')
+    if shape.kind not in ['PATH', 'POINT'] and fill_enabled:
+        color_buffer.data = np.array(fill_color * color_size,
+                                     dtype=np.float32)
+        active_shader.update_attribute('color', color_buffer.id)
+        face_buffer.draw('TRIANGLE_FAN')
 
-    if stroke_enabled and (not fill_image_enabled):
+    if stroke_enabled:
         color_buffer.data = np.array(stroke_color * color_size, dtype=np.float32)
         active_shader.update_attribute('color', color_buffer.id)
         if shape.kind == 'POINT':

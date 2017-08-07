@@ -23,7 +23,6 @@ import math
 from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
-from .image import Image
 
 from ..pmath import lerp
 from ..sketch import renderer
@@ -311,7 +310,7 @@ class Color:
         :rtype: str
         """
         raise NotImplementedError()
-    
+
     @staticmethod
     def parse_color(*args, color_mode='RGB', **kwargs):
         """Parses a color from a range of different input formats.
@@ -400,33 +399,28 @@ class Color:
 def fill(*fill_args, **fill_kwargs):
     """Set the fill color of the shapes.
 
-    :param fill_args: positional arguments to be parsed as a color or image..
+    :param fill_args: positional arguments to be parsed as a color.
     :type fill_args: tuple
 
     :param fill_kwargs: keyword arguments to be parsed as a color.
     :type fill_kwargs: dict
 
-    :note: Both fill_args and fill_kwargs are directly sent to
-        Color.parse_color when they describe a color. If fill_args
-        just contains a single image, the image is used and no parsing
-        is done.
-
-    :returns: The fill color or the image.
-    :rtype: Color or Image
+    :returns: The fill color.
+    :rtype: Color
 
     """
-    if len(fill_args) == 1 and type(fill_args[0]) == Image:
-        fill_image = fill_args[0]
-        renderer.add_texture(fill_image)
-        renderer.fill_enabled = False
-        renderer.fill_image_enabled = True
-        return fill_image
-    else:
-        fill_color = Color(*fill_args, **fill_kwargs)
-        renderer.fill_enabled = True
-        renderer.fill_image_enabled = False
-        renderer.fill_color = fill_color.normalized
-        return fill_color
+    # if len(fill_args) == 1 and type(fill_args[0]) == Image:
+    #     fill_image = fill_args[0]
+    #     renderer.add_texture(fill_image)
+    #     renderer.fill_enabled = False
+    #     renderer.fill_image_enabled = True
+    #     return fill_image
+    # else:
+    fill_color = Color(*fill_args, **fill_kwargs)
+    renderer.fill_enabled = True
+    renderer.fill_image_enabled = False
+    renderer.fill_color = fill_color.normalized
+    return fill_color
 
 def no_fill():
     """Disable filling geometry."""
@@ -470,14 +464,16 @@ def tint(*color_args, **color_kwargs):
     :returns: The tint color.
     :rtype: Color
     """
-    tint_color = Color(*color_args, **color_kwargs)
-    renderer.tint_enabled = True
-    renderer.tint_color = tint_color.normalized
-    return tint_color
+    # tint_color = Color(*color_args, **color_kwargs)
+    # renderer.tint_enabled = True
+    # renderer.tint_color = tint_color.normalized
+    # return tint_color
+    raise NotImplementedError("Renderer doesn't support textures.")
 
 def no_tint():
     """Disable tinting of images."""
-    renderer.tint_enabled = False
+    # renderer.tint_enabled = False
+    raise NotImplementedError("Renderer doesn't support textures.")
 
 def background(*color_args, **color_kwargs):
     """Set the background color for the renderer.
@@ -505,7 +501,7 @@ def background(*color_args, **color_kwargs):
 
 def color_mode(mode):
     """Set the color mode of the renderer.
-    
+
     :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
         or Hue/Saturation/Brightness
     :type mode: str
