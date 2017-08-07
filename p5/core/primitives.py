@@ -119,10 +119,7 @@ class Shape:
         self._edges = edges
         self._faces = faces
         self._texcoords = None
-
         self._raw_vertices = vertices
-        self._hash_string = self._compute_hash_string()
-
         self.visible = visible
 
     @property
@@ -214,22 +211,6 @@ class Shape:
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
-    def _compute_hash_string(self):
-        vert_str = [
-            '{}x{:.3f}y{:.3f}z{:.3f}'.format(point_type(p)[:2], p.x, p.y, p.z)
-            for p in self._raw_vertices
-        ]
-        # a additionally, we need to store information about the
-        # current curve resolutions
-        meta_data = '/{}/{}/{}/'.format(curves.bezier_resolution,
-                                        curves.curve_resolution,
-                                        curves.curve_tightness_amount)
-        return '{}{}:{}'.format(meta_data, self.kind, ''.join(vert_str))
-
-    def __hash__(self):
-        if self._hash_string is not None:
-            return hash(self._hash_string)
-        return hash(str(self.__dict__))
 
 class Ellipse(Shape):
     def __init__(self, center, x_radius, y_radius):
@@ -278,11 +259,6 @@ class Ellipse(Shape):
             for k in range(1, len(self.vertices) - 1)
         ]
 
-    def __hash__(self):
-        center_str = 'x{:.3f}y{:.3f}z{:.3f}'.format(*self.center)
-        rad_str = '{}x{}'.format(self.radius.x, self.radius.y)
-        hash_str = '{}:{}-{}'.format(self.kind, center_str, rad_str)
-        return hash(hash_str)
 
 def point(x, y, z=0):
     """Returns a point.
