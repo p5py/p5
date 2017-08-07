@@ -27,6 +27,8 @@ from math import degrees, radians
 from math import sin, cos, tan
 from math import asin, acos, atan, atan2
 
+import numpy as np
+
 __all__ = [
     # TRIG FUNCTIONS
     'sin', 'cos', 'tan', 'degrees', 'radians',
@@ -42,11 +44,10 @@ __all__ = [
     'ceil', 'floor', 'exp', 'log', 'sqrt',
 
     # MATH FUNCTIONS DEFINED HERE
-    'constrain', 'lerp', 'remap', 'normalize', 'dist', 'magnitude', 'sq', 'pow'
-]
 
-Point = namedtuple('Point', ['x', 'y', 'z'])
-Point.__new__.__defaults__ = (0, 0, 0)
+    'constrain', 'lerp', 'remap', 'normalize', 'distance', 'dist',
+    'magnitude', 'mag', 'square', 'sq',
+]
 
 TWO_PI = 2 * math.pi
 PI = math.pi
@@ -70,6 +71,23 @@ SINCOS = list(zip(PRE_SIN, PRE_COS))
 def constrain(amount, low, high):
     """Constrain the given value in the specified range.
 
+    Examples ::
+
+        >>> constrain(8, 1, 5)
+        5
+
+        >>> constrain(5, 1, 5)
+        5
+
+        >>> constrain(3, 1, 5)
+        3
+
+        >>> constrain(1, 1, 5)
+        1
+
+        >>> constrain(-3, 1, 5)
+        1
+
     :param amount: The the value to be contrained.
 
     :param low: The lower constain.
@@ -87,8 +105,22 @@ def constrain(amount, low, high):
 def lerp(start, stop, amount):
     """Linearly interpolate the start value to the stop value.
 
+    Examples ::
+
+        >>> lerp(0, 10, 0.0)
+        0.0
+
+        >>> lerp(0, 10, 0.5)
+        5.0
+
+        >>> lerp(0, 10, 0.8)
+        8.0
+
+        >>> lerp(0, 10, 1.0)
+        10.0
+
     :param start: The start value
-    
+
     :param stop: The stop value
 
     :param amount: The amount by which to interpolate. (:math:`0 \leq
@@ -100,6 +132,20 @@ def lerp(start, stop, amount):
 
 def remap(value, source_range, target_range):
     """Remap a value from the source range to the target range.
+
+    Examples ::
+
+         >>> remap(50, (0, 100), (0, 10))
+         5.0
+
+         >>> remap(5, (0, 10), (0, 100))
+         50.0
+
+         >>> remap(5, (0, 10), (10, 20))
+         15.0
+
+         >>> remap(15, (10, 20), (0, 10))
+         5.0
 
     :param value: The value to be remapped.
 
@@ -119,6 +165,20 @@ def remap(value, source_range, target_range):
 def normalize(value, low, high):
     """Normalize the given value to the specified range.
 
+    Examples ::
+
+        >>> normalize(10, 0, 100)
+        0.1
+
+        >>> normalize(0.3, 0, 1)
+        0.3
+
+        >>> normalize(100, 0, 100)
+        1.0
+
+        >>> normalize(1, 1, 15)
+        0.0
+
     :param value:
     :type value: float
 
@@ -133,6 +193,17 @@ def normalize(value, low, high):
 def magnitude(x, y, z=0):
     """Return the magnitude of the given vector.
 
+    Examples ::
+
+        >>> magnitude(3, 4)
+        5.0
+
+        >>> magnitude(2, 3, 6)
+        7.0
+
+        >>> magnitude(0, 0, 0)
+        0.0
+
     :param x: The x-component of the vector.
     :type x: float
 
@@ -142,11 +213,25 @@ def magnitude(x, y, z=0):
     :param z: The z-component of the vector (defaults to 0).
     :type z: float
 
-    """
-    return math.sqrt((x ** 2) + (y ** 2) + (z ** 2))
+    :returns: The magnitude of the vector.
+    :rtype: float
 
-def dist(point_1, point_2):
+    """
+    return np.sqrt(np.sum(np.array([x, y, z]) ** 2))
+
+def distance(point_1, point_2):
     """Return the distance between two points.
+
+    Examples ::
+
+        >>> distance((0, 0, 0), (2, 3, 6))
+        7.0
+
+        >>> distance((2, 3, 6), (2, 3, 6))
+        0.0
+
+        >>> distance((6, 6, 6), (2, 3, 6))
+        5.0
 
     :param point_1:
     :type point_1: tuple
@@ -154,28 +239,28 @@ def dist(point_1, point_2):
     :param point_2:
     :type point_2: tuple
 
-    """
-    p1 = Point(*point_1)
-    p2 = Point(*point_2)
-    return magnitude(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z)
-
-def pow(base, exponent):
-    """Raise a number to a power.
-
-    :param base: the number to be raised to a power.
-    :type base: float
-
-    :pararm exponent: the power to be raised to
-    :type exponent: float
-
-    :returns: :math:`{base}^{exponent}`
+    :returns: The distance between two points
     :rtype: float
 
     """
-    return base ** exponent
+    p1 = np.array(point_1)
+    p2 = np.array(point_2)
+    return np.sqrt(np.sum((p1 - p2) ** 2))
 
-def sq(number):
+def square(number):
     """Square a number.
+
+    Examples ::
+
+        >>> square(-25)
+        625
+
+        >>> square(0)
+        0
+
+        >>> square(13)
+        169
+
 
     :param number: The number to be squared.
     :type number: float
@@ -185,3 +270,9 @@ def sq(number):
 
     """
     return number ** 2
+
+
+# Helpful aliases
+sq = square
+dist = distance
+mag = magnitude
