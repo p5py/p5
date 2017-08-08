@@ -42,39 +42,11 @@ _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
 _shape_mode = 'CORNER'
 
-# We use these different point "types" to help tessellat different shapes.
-#
-# - Point :: Is a "normal" point and doesn't need tessellation.
-#
-# - BezierPoint :: Represents a control point of a bezier curve. Other
-#   points around a bezier curve are tessellated using the bezier
-#   curve algorithm used in bezier_point.
-#
-# - CurvePoint :: Represents a control point for a curve. Other points
-#   around this are tessellated using the Catmull-Rom spline algorithm
-#   used in the curve_point function.
-#
+BezierPoint = namedtuple('Bezier', Point._fields)
+BezierPoint.__new__.__defaults__ = (None, None, 0, 'B')
 
-class BezierPoint(Point):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, label='BEZIER', **kwargs)
-
-class CurvePoint(Point):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, label='CURVE', **kwargs)
-
-def point_type(point):
-    """Return the point type for the given point.
-
-    :param point:
-    :type point: namedtuple
-
-    :return: The type (name) of the given point.
-    :rtype: str
-    """
-    if point.label is None:
-        return 'DEFAULT'
-    return point.label
+CurvePoint = namedtuple('Curve', Point._fields)
+CurvePoint.__new__.__defaults__ = (None, None, 0, 'C')
 
 # We use these in ellipse tessellation. The algorithm is similar to
 # the one used in Processing and the we compute the number of
@@ -117,11 +89,11 @@ class Shape:
     def __init__(self, vertices, kind='POLY', edges=None, faces=None,
                  visible=True):
         self.kind = kind
+        self._raw_vertices = vertices
         self._vertices = None
         self._edges = edges
         self._faces = faces
         self._texcoords = None
-        self._raw_vertices = vertices
         self.visible = visible
 
     @property
@@ -194,43 +166,46 @@ class Shape:
     def tessellate(self):
         """Generate actual vertex data from limited number of parameters.
         """
-        psig = ''.join(point_type(v)[0] for v in self._raw_vertices)
-        if all(pi == 'D' for pi in psig):
+        psig = ''.join((v.flag if not v.flag is None else 'D')
+                       for v in self._raw_vertices)
+        if 'D' in set(psig) and len(set(psig)) == 1:
             # the path is already tessellated. Nothing to be done.
-            self._vertices = np.vstack((
-                v._array for v in self._raw_vertices
-            ))
+            self._vertices = np.array(
+                [v[:3] for v in self._raw_vertices]
+            )
         elif psig == 'DBBD':
-            self._vertices = []
+            vertices = []
             steps = curves.bezier_resolution
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.bezier_point(*self._raw_vertices, t)
-                self._vertices.append(p)
+                vertices.append(p)
+            self._vertices = np.array(vertices)
         elif psig == 'DCCD':
-            self._vertices = []
+            vertices = []
             steps = curves.curve_resolution
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.curve_point(*self._raw_vertices, t)
-                self._vertices.append(p)
+                vertices.append(p)
+            self._vertices = np.array(vertices)
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
 
 class Ellipse(Shape):
     def __init__(self, center, dim):
-        self.center = center if type(center) == Point else Point(*center)
-        self.radius = dim if type(dim) == Point else Point(*dim)
+        self.center = Point(*center)
+        self.radius =  Point(*dim)
         super().__init__([], 'ELLIPSE')
 
     def tessellate(self):
         """Generate vertex and face data using radii.
         # """
-        c1 = self.center - self.radius
+        c1 = self.center.x - self.radius.x, self.center.y - self.radius.y
         s1 = _screen_coordinates(*c1)
 
-        c2 = self.center + self.radius
+        c2 = self.center.x + self.radius.x, self.center.y + self.radius.y,
         s2 = _screen_coordinates(*c2)
 
         size_acc = (s1.distance(s2) * math.pi * 2) / POINT_ACCURACY_FACTOR
@@ -238,15 +213,13 @@ class Ellipse(Shape):
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)
 
-        xs = self.center.x + np.cos(np.linspace(0, np.pi * 2, acc)) * self.radius.x
-        ys = self.center.y + np.sin(np.linspace(0, np.pi * 2, acc)) * self.radius.y
-        zs = np.array([self.center.z] * acc)
-
-        self._vertices = np.vstack((
-            self.center._array,
-            np.vstack((xs, ys, zs)).transpose(),
-            np.array([xs[0], ys[0], zs[0]])
-        ))
+        vertices = [self.center[:3]]
+        vertices.extend(
+            [(self.center.x + self.radius.x * cs,
+              self.center.y + self.radius.y * sn,
+              self.center.z) for sn, cs in SINCOS][0:-1:inc])
+        vertices.append(vertices[1])
+        self._vertices = np.array(vertices)
 
     def compute_edges(self):
         """Compute the edges for this shape."""
@@ -255,7 +228,6 @@ class Ellipse(Shape):
             for k in range(1, len(self.vertices) - 1)
         ]
         self._edges.append((len(self.vertices) - 1, 1))
-
 
 def point(x, y, z=0):
     """Returns a point.
@@ -531,10 +503,10 @@ def ellipse(coordinate, *args, mode=None):
     if mode == 'CORNER':
         corner = Point(*coordinate)
         dim = Point(*args)
-        center = corner + (dim / 2)
+        center = (corner.x + (dim.x / 2), corner.y + (dim.y / 2), corner.z)
     elif mode == 'CENTER':
         center = Point(*coordinate)
-        dim = Point(*args) / 2
+        dim = Point(args[0] / 2, args[1] / 2)
     elif mode == 'RADIUS':
         center = Point(*coordinate)
         dim = Point(*args)
@@ -542,8 +514,8 @@ def ellipse(coordinate, *args, mode=None):
         corner = Point(*coordinate)
         corner_2, = args
         corner_2 = Point(*corner_2)
-        dim = (corner_2 - corner) / 2
-        center = corner + dim
+        dim = Point((corner_2.x - corner.x) / 2, (corner_2.y - corner.y) / 2)
+        center = (corner.x + dim.x, corner.y + dim.y)
     else:
         raise ValueError("Unknown ellipse mode {}".format(mode))
     return Ellipse(center, dim)
