@@ -16,6 +16,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .shader import *
 from .renderer import *
 from .support import *

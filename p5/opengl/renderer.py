@@ -18,18 +18,18 @@
 """The OpenGL renderer for p5."""
 
 import builtins
-import ctypes as ct
 from contextlib import contextmanager
 import math
 
 import numpy as np
-from pyglet import gl
 
+from . import gl
+from .gloo import IndexBuffer
+from .gloo import Program
 from .gloo import VertexBuffer
-from .shader import Shader
 from .shader import vertex_default, fragment_default
-
 from .support import has_fbo
+
 from ..pmath import Matrix4
 
 
@@ -79,11 +79,6 @@ default_shader = None
 ## Mostly for internal user. Ideally, higher level components *SHOULD
 ## NOT* need these.
 ##
-def add_common_uniforms(shader):
-    """Add a default set of uniforms to the shader.
-    """
-    shader.add_uniform('projection', 'mat4')
-    shader.add_uniform('modelview', 'mat4')
 
 def flatten(vertex_list):
     """Flatten a vertex list
@@ -112,8 +107,9 @@ def transform_points(points):
 
     """
     transform = np.array(transform_matrix[:]).reshape((4, 4))
-    points = np.hstack((np.array(points, dtype=np.float32),
-                        np.array([[1]] * len(points)))).dot(transform)
+    points = np.hstack((points,
+                         np.array([[1]] * len(points)))).dot(transform)
+    # assert False
 
     return points[:, :3]
 
@@ -136,7 +132,7 @@ def initialize(window_context):
     """
     global context
     global default_shader
-    global texture_shader
+
     context = window_context
     gl_version = context.get_info().get_version()[:3]
 
@@ -146,13 +142,7 @@ def initialize(window_context):
     gl.glEnable(gl.GL_DEPTH_TEST)
     gl.glDepthFunc(gl.GL_LEQUAL)
 
-    default_shader = Shader(vertex_default, fragment_default, gl_version)
-
-    default_shader.activate()
-    add_common_uniforms(default_shader)
-    default_shader.add_attribute('position', '3f')
-    default_shader.add_attribute('color', '4f')
-
+    default_shader = Program(vertex_default, fragment_default)
     reset_view()
 
 def clear(color=True, depth=True):
@@ -186,9 +176,8 @@ def reset_view():
 
     transform_matrix = Matrix4()
 
-    default_shader.activate()
-    default_shader.update_uniform('modelview', modelview_matrix)
-    default_shader.update_uniform('projection', projection_matrix)
+    default_shader['modelview'] = modelview_matrix[:]
+    default_shader['projection'] = projection_matrix[:]
 
 def cleanup():
     """Run the clean-up routine for the renderer.
@@ -197,8 +186,9 @@ def cleanup():
     program is about to exit.
 
     """
-    default_shader.delete()
-    texture_shader.delete()
+    # default_shader.delete()
+    # texture_shader.delete()
+    pass
 
 ## RENDERING FUNTIONS + HELPERS
 ##
@@ -231,10 +221,6 @@ def pre_render():
 
     gl.glViewport(*viewport)
 
-    default_shader.activate()
-    default_shader.update_uniform('modelview', modelview_matrix)
-    default_shader.update_uniform('projection', projection_matrix)
-    default_shader.deactivate()
 
 def post_render():
     """Cleanup things after a draw call.
@@ -243,7 +229,7 @@ def post_render():
     last draw call.
 
     """
-    VertexBuffer.deactivate_all()
+    pass
 
 def render(shape):
     """Use the renderer to render a Shape.
@@ -251,65 +237,32 @@ def render(shape):
     :param shape: The shape to be rendered.
     :type shape: Shape
     """
-    active_shader = default_shader
 
-    active_shader.activate()
+    transformed_vertices = transform_points(shape.vertices)
+    num_vertices = len(shape.vertices)
 
-    color_buffer = VertexBuffer('float')
-    color_size = len(shape.vertices)
-
-    vertices = transform_points(shape.vertices).flatten()
-    vertex_buffer = VertexBuffer('float', data=vertices)
-
-    texcoords = np.array(flatten(shape.texcoords), dtype=np.float32)
-    texcoords_buffer = VertexBuffer('float', data=texcoords)
-
-    point_buffer = None
-    edge_buffer = None
-    face_buffer = None
-
-    if shape.kind == 'POINT':
-        points = np.array(list(range(len(vertex_buffer.data))), dtype=np.uint32)
-        point_buffer = VertexBuffer('uint',
-                                    data=points,
-                                    buffer_type='elem')
-    elif shape.kind == 'PATH':
-        edges = np.array(shape.edges, dtype=np.uint32)
-        edge_buffer = VertexBuffer('uint',
-                                   data=flatten(shape.edges),
-                                   buffer_type='elem')
-    else:
-        edges = np.array(flatten(shape.edges), dtype=np.uint32)
-        edge_buffer = VertexBuffer('uint',
-                                   data=edges,
-                                   buffer_type='elem')
-        faces = np.array(flatten(shape.faces), dtype=np.uint32)
-        face_buffer = VertexBuffer('uint',
-                                   data=faces,
-                                   buffer_type='elem')
-
-    active_shader.update_attribute('position', vertex_buffer.id)
-
-    if shape.kind not in ['PATH', 'POINT'] and fill_enabled:
-        color_buffer.data = np.array(fill_color * color_size,
-                                     dtype=np.float32)
-        active_shader.update_attribute('color', color_buffer.id)
-        face_buffer.draw('TRIANGLES')
+    data = np.zeros(num_vertices,
+                       dtype=[("position", np.float32, 3),
+                              ("color", np.float32, 4)])
+    data['position'] = transformed_vertices
 
     if stroke_enabled:
-        color_buffer.data = np.array(stroke_color * color_size, dtype=np.float32)
-        active_shader.update_attribute('color', color_buffer.id)
         if shape.kind == 'POINT':
-            point_buffer.draw('POINTS')
+            draw_type = gl.GL_POINTS
+            I = np.array(list(range(len(shape.vertices))),
+                         dtype=np.uint32).view(IndexBuffer)
         else:
-            edge_buffer.draw('LINE_STRIP')
+            draw_type = gl.GL_LINE_STRIP
+            I = np.array(flatten(shape.edges), dtype=np.uint32).view(IndexBuffer)
 
-    buffers = [color_buffer, vertex_buffer, texcoords_buffer,
-               point_buffer, edge_buffer, face_buffer]
+        data['color'] = np.array([stroke_color] * num_vertices)
+        V = data.view(VertexBuffer)
+        default_shader.bind(V)
+        default_shader.draw(draw_type, indices=I)
 
-    for b in buffers:
-        if not (b is None):
-            b.delete()
-            del b
-
-    active_shader.deactivate()
+    if fill_enabled and not (shape.kind in ['POINT', 'PATH']):
+        data['color'] = np.array([fill_color] * num_vertices)
+        V = data.view(VertexBuffer)
+        I = np.array(flatten(shape.faces), dtype=np.uint32).view(IndexBuffer)
+        default_shader.bind(V)
+        default_shader.draw(gl.GL_TRIANGLES, indices=I)
