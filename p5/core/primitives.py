@@ -179,7 +179,7 @@ class Shape:
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.bezier_point(*self._raw_vertices, t)
-                vertices.append(p)
+                vertices.append(p[:3])
             self._vertices = np.array(vertices)
         elif psig == 'DCCD':
             vertices = []
@@ -187,7 +187,7 @@ class Shape:
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.curve_point(*self._raw_vertices, t)
-                vertices.append(p)
+                vertices.append(p[:3])
             self._vertices = np.array(vertices)
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
