@@ -145,7 +145,8 @@ class Shape:
             for k in range(len(self.vertices) - 1)
         ]
         # connect the last vertex to the first vertex
-        self._edges.append((len(self.vertices) - 1, 0))
+        if not self.kind is 'PATH':
+            self._edges.append((len(self.vertices) - 1, 0))
 
     def compute_texcoords(self):
         """Compute the texture coordinates for the current shape."""
