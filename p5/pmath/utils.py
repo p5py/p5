@@ -46,7 +46,7 @@ __all__ = [
     # MATH FUNCTIONS DEFINED HERE
 
     'constrain', 'lerp', 'remap', 'normalize', 'distance', 'dist',
-    'magnitude', 'mag', 'square', 'sq',
+    'magnitude', 'mag', 'sq',
 ]
 
 TWO_PI = 2 * math.pi
@@ -247,7 +247,7 @@ def distance(point_1, point_2):
     p2 = np.array(point_2)
     return np.sqrt(np.sum((p1 - p2) ** 2))
 
-def square(number):
+def sq(number):
     """Square a number.
 
     Examples ::
@@ -273,6 +273,5 @@ def square(number):
 
 
 # Helpful aliases
-sq = square
 dist = distance
 mag = magnitude
