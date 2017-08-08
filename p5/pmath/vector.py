@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from collections import namedtuple
 import numpy as np
 
 __all__ = ['Vector', 'Point']
@@ -23,28 +24,41 @@ __all__ = ['Vector', 'Point']
 # Floating point precision for vectors.
 EPSILON = 1e-8
 
+Point = namedtuple('Point', ['x', 'y', 'z', 'flag'])
+Point.__new__.__defaults__ = (None, None, 0, None)
 
-class Point:
-    """Describes a point in two or three dimensional space.
+class Vector(Point):
+    """Describes a vector in two or three dimensional space.
 
-    :param x: The x-component of the point
-    :type x: numeric
+    A Vector -- specifically an Euclidean (or geometric) vector -- in
+    two or three dimensional space is a geometric entity that has some
+    magnitude (or length) and a direction.
 
-    :param y: The y-component of the point
-    :type y: numeric
+    Examples::
 
-    :param z: The z-component of the point (o by default)
-    :type z: numeric
+        >>> vec_2d = Vector(3, 4)
+        >>> vec_2d
+        Vector(3.00, 4.00, 0.00)
 
-    :param label: An optional label for the point.
-    :type label: str
+        >>> vec_3d = Vector(2, 3, 4)
+        >>> vec_3d
+        Vector(2.00, 3.00, 4.00)
+
+    :param x: The x-component of the vector.
+    :type x: int or float
+
+    :param y: The y-component of the vector.
+    :type y: int or float
+
+    :param z: The z-component of the vector (0 by default; only
+        required for 3D vectors; )
+    :type z: int or float
 
     """
-    def __init__(self, x, y, z=0, label=None):
+    def __init__(self, x, y, z=0):
         self._x = x
         self._y = y
         self._z = z
-        self.label = label
         self._array = np.array([x, y, z])
 
     @property
@@ -189,81 +203,6 @@ class Point:
     def __truediv__(self, other):
         """Divide the vector by a scalar."""
         return (1  / other) * self
-
-    def copy(self):
-        """Return a copy of the current point.
-
-        :returns: A copy of the current point.
-        :rtype: Vector
-
-        """
-        x, y, z = self._array
-        return self.__class__(x, y, z, label=self.label)
-
-    def __setitem__(self, key, value):
-        self._array[key] = value
-
-    def __getitem__(self, key):
-        return self._array[key]
-
-    def __iter__(self):
-        """Return the components of the vector as an iterator.
-
-        Examples::
-
-            >>> p = Vector(2, 3, 4)
-            >>> print([ c for c in p])
-            [2, 3, 4]
-
-        """
-        for k in self._array:
-            yield k
-
-    def __eq__(self, other):
-        return np.all(np.absolute(self - other) < EPSILON)
-
-    def __neq__(self, other):
-        return not np.all(np.absolute(self - other) < EPSILON)
-
-    def __repr__(self):
-        class_name = self.__class__.__name__
-        fvalues = (class_name, self.x, self.y, self.z)
-        return "{}({:.2f}, {:.2f}, {:.2f})".format(*fvalues)
-
-    __str__ = __repr__
-
-
-class Vector(Point):
-    """Describes a vector in two or three dimensional space.
-
-    A Vector -- specifically an Euclidean (or geometric) vector -- in
-    two or three dimensional space is a geometric entity that has some
-    magnitude (or length) and a direction.
-
-    Examples::
-
-        >>> vec_2d = Vector(3, 4)
-        >>> vec_2d
-        Vector(3.00, 4.00, 0.00)
-
-        >>> vec_3d = Vector(2, 3, 4)
-        >>> vec_3d
-        Vector(2.00, 3.00, 4.00)
-
-    :param x: The x-component of the vector.
-    :type x: int or float
-
-    :param y: The y-component of the vector.
-    :type y: int or float
-
-    :param z: The z-component of the vector (0 by default; only
-        required for 3D vectors; )
-    :type z: int or float
-
-    """
-
-    def __init__(self, x, y, z=0):
-        super().__init__(x, y, z)
 
     def cross(self, other):
         """Return the cross product of the two vectors.
@@ -488,3 +427,46 @@ class Vector(Point):
         vec = cls(x, y, z)
         vec.normalize()
         return vec
+
+
+    def copy(self):
+        """Return a copy of the current point.
+
+        :returns: A copy of the current point.
+        :rtype: Vector
+
+        """
+        x, y, z = self._array
+        return self.__class__(x, y, z)
+
+    def __setitem__(self, key, value):
+        self._array[key] = value
+
+    def __getitem__(self, key):
+        return self._array[key]
+
+    def __iter__(self):
+        """Return the components of the vector as an iterator.
+
+        Examples::
+
+            >>> p = Vector(2, 3, 4)
+            >>> print([ c for c in p])
+            [2, 3, 4]
+
+        """
+        for k in self._array:
+            yield k
+
+    def __eq__(self, other):
+        return np.all(np.absolute(self - other) < EPSILON)
+
+    def __neq__(self, other):
+        return not np.all(np.absolute(self - other) < EPSILON)
+
+    def __repr__(self):
+        class_name = self.__class__.__name__
+        fvalues = (class_name, self.x, self.y, self.z)
+        return "{}({:.2f}, {:.2f}, {:.2f})".format(*fvalues)
+
+    __str__ = __repr__
