@@ -101,14 +101,23 @@ def rotation_matrix(axis, angle):
     :rtype: np.ndarray
 
     """
-    l, m, n = axis
-    cl, cm, cn = (1 - np.cos(angle)) * axis
+    x, y, z = _normalize(axis)
+    s = np.sin(angle)
+    c = np.cos(angle)
+    c1 = 1 - c
+
     rotation = np.identity(4)
-    rotation[:3, :3] = np.array(
-        lc * axis + [np.cos(angle), (-n) * np.cos(angle), m * np.sin(angle)],
-        mc * axis + [n * np.sin(angle), np.cos(angle), (-l) * np.sin(angle)],
-        nc * axis + [(-m) * np.sin(angle), l * np.sin(angle), np.cos(angle)]
-    )
+
+    rotation[0, 0] = x * x * c1 + c
+    rotation[0, 1] = x * y * c1 - z * s
+    rotation[0, 2] = x * z * c1 + y * s
+    rotation[1, 0] = y * x * c1 + z * s
+    rotation[1, 1] = y * y * c1 + c
+    rotation[1, 2] = y * z * c1 - x * s
+    rotation[2, 0] = x * z * c1 - y * s
+    rotation[2, 1] = y * z * c1 + x * s
+    rotation[2, 2] = z * z * c1 + c
+
     return rotation
 
 def euler_rotation_matrix(heading, attitude, bank):

@@ -24,6 +24,7 @@ import numpy as np
 
 from ..sketch import renderer
 from ..pmath import Vector
+from ..pmath import matrix
 
 __all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
            'rotate_x', 'rotate_y', 'rotate_z', 'scale', 'shear_x',
@@ -84,7 +85,7 @@ def rotate(theta, axis=np.array([0, 0, 1])):
 
    """
     axis = np.array(axis[:])
-    tmat = matrix.rotation_matrix(theta, axis)
+    tmat = matrix.rotation_matrix(axis, theta)
     renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
     return tmat
 
