@@ -104,7 +104,7 @@ def transform_points(points):
 
     """
     points = np.hstack((points,
-                        np.array([[1]] * len(points)))).dot(transform_matrix)
+                        np.array([[1]] * len(points)))).dot(transform_matrix.T)
     return points[:, :3]
 
 ## RENDERER SETUP FUNCTIONS.
@@ -169,8 +169,8 @@ def reset_view():
 
     transform_matrix = np.identity(4)
 
-    default_shader['modelview'] = modelview_matrix.flatten()
-    default_shader['projection'] = projection_matrix.flatten()
+    default_shader['modelview'] = modelview_matrix.T.flatten()
+    default_shader['projection'] = projection_matrix.T.flatten()
 
 def cleanup():
     """Run the clean-up routine for the renderer.
