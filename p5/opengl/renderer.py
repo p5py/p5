@@ -30,8 +30,7 @@ from .gloo import VertexBuffer
 from .shader import vertex_default, fragment_default
 from .support import has_fbo
 
-from ..pmath import Matrix4
-
+from ..pmath import matrix
 
 ##
 ## Renderer globals.
@@ -46,8 +45,6 @@ from ..pmath import Matrix4
 COLOR_WHITE = (1, 1, 1, 1)
 COLOR_BLACK = (0, 0, 0, 1)
 COLOR_DEFAULT_BG = (0.8, 0.8, 0.8, 1.0)
-
-MATRIX_IDENTITY = Matrix4()
 
 ## Renderer Globals: STYLE/MATERIAL PROPERTIES
 ##
@@ -64,9 +61,9 @@ stroke_enabled = True
 ##
 viewport = None
 
-transform_matrix = Matrix4()
-modelview_matrix = Matrix4()
-projection_matrix = Matrix4()
+transform_matrix = np.identity(4)
+modelview_matrix = np.identity(4)
+projection_matrix = np.identity(4)
 
 ## Renderer Globals: OPEN GL SPECIFIC
 ##
@@ -106,11 +103,8 @@ def transform_points(points):
     :rtype: np.ndarray
 
     """
-    transform = np.array(transform_matrix[:]).reshape((4, 4))
     points = np.hstack((points,
-                         np.array([[1]] * len(points)))).dot(transform)
-    # assert False
-
+                        np.array([[1]] * len(points)))).dot(transform_matrix)
     return points[:, :3]
 
 ## RENDERER SETUP FUNCTIONS.
@@ -163,21 +157,20 @@ def reset_view():
     gl.glViewport(*viewport)
 
     cz = (builtins.height / 2) / math.tan(math.radians(30))
-    projection_matrix = Matrix4.new_perspective(
+    projection_matrix = matrix.perspective_matrix(
         math.radians(60),
         builtins.width / builtins.height,
         0.1 * cz,
         10 * cz
     )
 
-    modelview_matrix = Matrix4()
-    modelview_matrix.translate(-builtins.width/2, builtins.height/2, -cz)
-    modelview_matrix.scale(1, -1, 1)
+    modelview_matrix = matrix.translation_matrix(-builtins.width / 2, builtins.height / 2, -cz)
+    modelview_matrix = modelview_matrix.dot(matrix.scale_transform(1, -1, 1))
 
-    transform_matrix = Matrix4()
+    transform_matrix = np.identity(4)
 
-    default_shader['modelview'] = modelview_matrix[:]
-    default_shader['projection'] = projection_matrix[:]
+    default_shader['modelview'] = modelview_matrix.flatten()
+    default_shader['projection'] = projection_matrix.flatten()
 
 def cleanup():
     """Run the clean-up routine for the renderer.
@@ -217,9 +210,8 @@ def pre_render():
 
     """
     global transform_matrix
-    transform_matrix = Matrix4()
-
     gl.glViewport(*viewport)
+    transform_matrix = np.identity(4)
 
 
 def post_render():

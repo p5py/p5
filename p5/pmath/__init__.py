@@ -18,6 +18,6 @@
 
 from .utils import *
 from .vector import *
-from .matrix import *
 from .rand import *
 from .curves import *
+from . import matrix

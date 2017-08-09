@@ -25,7 +25,6 @@ from math import radians
 
 import numpy as np
 
-from .transforms import _screen_coordinates
 from .. import sketch
 
 from ..pmath import Point
@@ -203,13 +202,13 @@ class Ellipse(Shape):
     def tessellate(self):
         """Generate vertex and face data using radii.
         # """
-        c1 = self.center.x - self.radius.x, self.center.y - self.radius.y
-        s1 = _screen_coordinates(*c1)
+        c1 = self.center.x - self.radius.x, self.center.y - self.radius.y, 0, 1
+        s1 = sketch.renderer.transform_matrix.dot(np.array(c1))
 
-        c2 = self.center.x + self.radius.x, self.center.y + self.radius.y,
-        s2 = _screen_coordinates(*c2)
+        c2 = self.center.x + self.radius.x, self.center.y + self.radius.y, 0, 1
+        s2 = sketch.renderer.transform_matrix.dot(np.array(c2))
 
-        size_acc = (s1.distance(s2) * math.pi * 2) / POINT_ACCURACY_FACTOR
+        size_acc = (np.sqrt((s2 - s1) @ (s2 - s1)) * math.pi * 2) / POINT_ACCURACY_FACTOR
 
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)

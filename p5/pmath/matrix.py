@@ -15,79 +15,191 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+import math
 
-from ..tmp.euclid import Matrix3
-from ..tmp.euclid import Matrix4
+import numpy as np
 
-__all__ = ['Matrix4', 'Matrix3']
+def _magnitude(arr):
+    """Return the madnitude of the given array.
 
-class Matrix:
-    """Represents a 4x4 matrix."""
-    def __init__(self, *v):
-        self.values = v
-        self._inverse = None
+    :param arr: Input array.
+    :type arr: np.ndarray
 
-    @property
-    def values(self):
-        return tuple(self._values)
+    :returns: The magnitude of the input array.
+    :rtype: float
+    """
+    return np.sqrt(arr.dot(arr))
 
-    @values.setter
-    def values(self, v):
-        if len(v) == 0:
-            self._values = [
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]            
-        elif len(values) == 6:
-            self._values = [
-                v[0], v[1], v[2],   0,
-                v[3], v[4], v[5],   0,
-                   0,    0,    1,   0,
-                   0,    0,    0,   1
-            ]
-        elif len(values) == 9:
-            self._values = [
-                v[0], v[1], v[2],   0,
-                v[3], v[4], v[5],   0,
-                v[6], v[7], v[8],   0,
-                   0,    0,    0,   1
-            ]
-        elif len(values) == 16:
-            self._values = list(v)
-        else:
-            raise ArithmeticError("Couldn't set Matrix values."
-                                  "Wrong number of arguments.")
+def _normalize(arry):
+    """Return the normalized version of the given array.
 
-        self._inverse = None
+    :param arry: Input array to be normalized.
+    :type arry: np.ndarray
 
-    def reset(self):
-        self.values = []
+    :returns: Normalized version of the input array.
+    :rtype: np.ndarray
 
-    @staticmethod
-    def identity():
-        return Matrix()
+    """
+    mag = _magnitude(arry)
+    return arry / mag
 
-    def __add__(self, other):
-        computed = [ sum(c) for c in zip(self.values, other.values) ]
-        return Matrix(*computed)
+def scale_transform(x, y, z):
+    """Return a scale transformation matrix.
 
-    def __mult__(self, other):
-        computed = [ si*oi for si, oi in zip(self.values, other.values) ]
-        return Matrix(*computed)
-        
-    def __getitem__(self, idx):
-        return self._values[4*idx[0] + idx[1]]
+    :param x: Scale factor in the x direction.
+    :type x: numeric
 
-    def __setitem__(self, idx, val):
-        self._values[4*idx[0] + idx[1]] = val
+    :param y: Scale factor in the y direction.
+    :type y: numeric
 
-    def __repr__(self):
-        return "Matrix(\n[" + \
-               " ]\n[".join(["".join(" {}".format(i)
-                                     for i in self._values[k:k+4])
-                             for k in range(4)]) + \
-                " ]\n)"
+    :param z: Scale factor in the z direction.
+    :type z: numeric (defaults to 1)
 
-    __str__ = __repr__
+    :returns: A scale transformation matrix.
+    :rtype: np.ndarray
+
+    """
+    scale_matrix = np.identity(4)
+    scale_matrix[0, 0] = x
+    scale_matrix[1, 1] = y
+    scale_matrix[2, 2] = z
+    return scale_matrix
+
+def translation_matrix(x, y, z):
+   """Return a new translation matrix.
+
+   :param x: translation in the x-direction.
+   :type x: numeric
+
+   :param y: translation in the y-direction.
+   :type y: numeric
+
+   :param z: translation in the z-direction.
+   :type z: numeric (defaults to 0)
+
+   :returns: A transform matrix with the given translation applied to
+       it
+   :rtype: np.ndarray
+
+   """
+   translate_matrix = np.identity(4)
+   translate_matrix[0, -1] = x
+   translate_matrix[1, -1] = y
+   translate_matrix[2, -1] = z
+   return translate_matrix
+
+def rotation_matrix(axis, angle):
+    """Return a roation matrix with the given angle and rotation.
+
+    :param axis: The axis along which the matrix should be rotated.
+    :type axis: np.ndarray
+
+    :param angle: Angle by which to rotate (in radians).
+    :type angle: float
+
+    :returns: A rotation matrix along the given axis and angle.
+    :rtype: np.ndarray
+
+    """
+    l, m, n = axis
+    cl, cm, cn = (1 - np.cos(angle)) * axis
+    rotation = np.identity(4)
+    rotation[:3, :3] = np.array(
+        lc * axis + [np.cos(angle), (-n) * np.cos(angle), m * np.sin(angle)],
+        mc * axis + [n * np.sin(angle), np.cos(angle), (-l) * np.sin(angle)],
+        nc * axis + [(-m) * np.sin(angle), l * np.sin(angle), np.cos(angle)]
+    )
+    return rotation
+
+def euler_rotation_matrix(heading, attitude, bank):
+    """
+
+    :returns: A rotation matrix based on the given parameters.
+    :rtype: np.ndarray
+    """
+    pass
+
+def triple_axis_rotation_matrix(x, y, z):
+    """Return a rotation matrix based on three axes.
+
+    :param x: x-axis for the rotation matrix.
+    :type x: np.ndarray
+
+    :param y: y-axis for the rotation matrix.
+    :type y: np.ndarray
+
+    :param z: z-axis for the rotation matrix.
+    :type z: np.ndarray
+
+    :returns: A rotation matrix based on the given parameters.
+    :rtype: np.ndarray
+    """
+    rotation_matrix = np.identity(4)
+    rotation_matrix[0, :3] = x
+    rotation_matrix[1, :3] = y
+    rotation_matrix[2, :3] = z
+    return rotation_matrix
+
+def look_at(eye, at, up):
+    """Return a new 'look-at' matrix.
+
+    :param eye: Location of the 'eye'
+    :type eye: np.ndarray
+
+    :param at: The point being looked at.
+    :type at: np.ndarray
+
+    :param up: Vector specifying the up-direction.
+    :type up: np.ndarray
+
+    :returns: A new look at matrix.
+    :rtype: np.ndarray
+    """
+    z = _normalize(eye - at)
+    x = _normalize(up.cross(z))
+    y = z.cross(x)
+
+    mat = triple_axis_rotation_matrix(x, y, z)
+    mat.transpose()
+
+    m[0, 3] = (-1) * x.dot(eye)
+    m[1, 3] = (-1) * y.dot(eye)
+    m[2, 3] = (-1) * z.dot(eye)
+
+    return m
+
+def perspective_matrix(field_of_view, aspect_ratio, near_plane, far_plane):
+    """Return a perspective matrix.
+
+    :param field_of_view: The field_of_view to use.
+    :type field_of_view: float
+
+    :param aspect_ratio: The aspect ratio of the projection.
+    :type aspect_ratio: float
+
+    :param near_plane: Location of the near plane of the projection.
+    :type near_plane: float
+
+    :param far_plane: Location of the far plane of the projection.
+    :type far_plane: float
+
+    :returns: A new perspective matrix.
+    :rtype: np.ndarray
+
+    :raises AssertionError: When the near plane is zero or the near
+         plane is the same as the far plane.
+
+    """
+    assert not math.isclose(near_plane, 0), \
+        "Near plane cannot be at zero."
+    assert not math.isclose(near_plane, far_plane), \
+        "Near plane and far plane can't be same"
+    f = 1 / math.tan(field_of_view / 2)
+    mat = np.identity(4)
+    mat[0, 0] = f / aspect_ratio
+    mat[1, 1] =  f
+    mat[2, 2] = (far_plane + near_plane) / (near_plane - far_plane)
+    mat[2, 3] = 2 * far_plane * near_plane / (near_plane - far_plane)
+    mat[3, 2] = -1
+    mat[3, 3] = 0
+    return mat

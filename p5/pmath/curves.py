@@ -23,7 +23,6 @@ from functools import wraps
 import math
 
 from ..pmath import Point
-from ..pmath import Matrix4
 
 __all__ = [
     # BEZIER METHODS
@@ -35,8 +34,6 @@ __all__ = [
 
 curve_resolution = 20
 curve_tightness_amount = 0
-curve_basis_matrix = None
-curve_draw_matrix = None
 
 bezier_resolution = 20
 
@@ -131,28 +128,8 @@ def bezier_tangent(start, control_1, control_2, stop, parameter):
     return Point(x, y)
 
 def _reinit_curve_matrices():
-    global curve_basis_matrix
-    global curve_draw_matrix
-
-    s = curve_tightness_amount
-    curve_basis_matrix = Matrix4()
-    curve_basis_matrix[:] = [
-        0.5*(s - 1),  0.5*(s + 3), -0.5*(s + 3), 0.5*(1 - s),
-        1 - s,       -0.5*(s + 5), s + 2,        0.5*(s - 1),
-        0.5*(s - 1),  0,           0.5*(1 - s),  0,
-        0,            1,           0,            0,
-    ]
-
-    # curve_draw_matrix = Matrix4()
-    # f = 1 / curve_resolution
-    # curve_draw_matrix[:] = [
-    #     0,        0,        0,  1,
-    #     f**3,     f**2,     f,  0,
-    #     6*(f**3), 2*(f**2), 0,  0,
-    #     6*(f**3), 0,        0,  0
-    # ]
-    #
-    # curve_draw_matrix = curve_draw_matrix * curve_basis_matrix
+    # TODO: Add basis matrices for faster tessellation.
+    pass
 
 def curve_detail(detail_value):
     """Change the resolution used to draw bezier curves.

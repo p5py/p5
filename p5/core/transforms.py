@@ -20,11 +20,10 @@ import builtins
 from contextlib import contextmanager
 import math
 
-from ..sketch import renderer
-from ..pmath import Matrix4
-from ..pmath import Vector
+import numpy as np
 
-from ..tmp.euclid import Vector3
+from ..sketch import renderer
+from ..pmath import Vector
 
 __all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
            'rotate_x', 'rotate_y', 'rotate_z', 'scale', 'shear_x',
@@ -63,43 +62,67 @@ def translate(x, y, z=0):
         screen.
     :type z: int
 
-    """
-    renderer.transform_matrix.translate(x, y, z)
+    :returns: The translation matrix applied to the transform matrix.
+    :rtype: np.ndarray
 
-def rotate(theta, axis=Vector3(0, 0, 1)):
+    """
+    tmat = matrix.translation_matrix(x, y, z)
+    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    return tmat
+
+def rotate(theta, axis=np.array([0, 0, 1])):
     """Rotate the display by the given angle along the given axis.
 
     :param theta: The angle by which to rotate (in radians)
     :type theta: float
 
     :param axis: The axis along which to rotate (defaults to the z-axis)
-    :type axis: Vector3
-    """
-    renderer.transform_matrix.rotate_axis(theta, axis)
+    :type axis: np.ndarray or list
+
+    :returns: The rotation matrix used to apply the transformation.
+    :rtype: np.ndarray
+
+   """
+    axis = np.array(axis[:])
+    tmat = matrix.rotation_matrix(theta, axis)
+    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    return tmat
 
 def rotate_x(theta):
     """Rotate the view along the x axis.
 
     :param theta: angle by which to rotate (in radians)
     :type theta: float
+
+    :returns: The rotation matrix used to apply the transformation.
+    :rtype: np.ndarray
+
     """
-    renderer.transform_matrix.rotatex(theta)
+    rotate(theta, axis=np.array([1, 0, 0]))
 
 def rotate_y(theta):
     """Rotate the view along the y axis.
 
     :param theta: angle by which to rotate (in radians)
     :type theta: float
-    """
-    renderer.transform_matrix.rotatey(theta)
+
+    :returns: The rotation matrix used to apply the transformation.
+    :rtype: np.ndarray
+
+   """
+    rotate(theta, axis=np.array([0, 1, 0]))
 
 def rotate_z(theta):
     """Rotate the view along the z axis.
 
     :param theta: angle by which to rotate (in radians)
     :type theta: float
-    """
-    renderer.transform_matrix.rotatez(theta)
+
+    :returns: The rotation matrix used to apply the transformation.
+    :rtype: np.ndarray
+
+   """
+    rotate(theta, axis=np.array([0, 0, 1]))
 
 def scale(sx, sy=None, sz=None):
     """Scale the display by the given factor.
@@ -112,76 +135,67 @@ def scale(sx, sy=None, sz=None):
 
     :param sz: scale factor along the z-axis (defaults to None)
     :type sz: float
+
+    :returns: The transformation matrix used to appy the transformation.
+    :rtype: np.ndarray
     """
     if (not sy) and (not sz):
         sy = sx
         sz = sx
     elif not sz:
         sz = 1
-    renderer.transform_matrix.scale(sx, sy, sz)
+    tmat = matrix.scale_matrix(sx, sy, sz)
+    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    return tmat
 
 def apply_matrix(transform_matrix):
-    """Use the given matrix as the sketch's transform matrix.
+    """Apply the given matrix to the sketch's transform matrix..
 
     :param transform_matrix: The new transform matrix.
-    :type transform_matrix: Matrix4
+    :type transform_matrix: np.ndarray (or a 4×4 list)
     """
-    renderer.transform_matrix = transform_matrix
+    tmatrix = np.array(transform_matrix)
+    renderer.transform_matrix = renderer.transform_matrix.dot(tmatrix)
 
 def reset_matrix():
     """Reset the current transform matrix.
     """
-    renderer.transform_matrix = Matrix4()
+    renderer.transform_matrix = np.identity(4)
 
 def print_matrix():
     """Print the transform matrix being used by the sketch.
     """
     print(renderer.transform_matrix)
 
-# Matrix structure:
-#     a b c d
-#     e f g h
-#     i j k l
-#     m n o p
-
 def shear_x(theta):
     """Shear display along the x-axis.
 
     :param theta: angle to shear by (in radians)
     :type theta: float
+
+    :returns: The shear matrix used to apply the tranformation.
+    :rtype: np.ndarray
+
     """
-    shear_mat = Matrix4()
-    shear_mat.b = math.tan(theta)
-    renderer.transform_matrix = renderer.transform_matrix * shear_mat
+    shear_mat = np.identity(4)
+    shear_mat[0, 1] = np.tan(theta)
+    renderer.transform_matrix = renderer.transform_matrix.dot(shear_mat)
+    return shear_mat
 
 def shear_y(theta):
     """Shear display along the y-axis.
 
     :param theta: angle to shear by (in radians)
     :type theta: float
-    """
-    shear_mat = Matrix4()
-    shear_mat.e = math.tan(theta)
-    renderer.transform_matrix = renderer.transform_matrix * shear_mat
 
-def _screen_coordinates(x, y, z=0):
-    """Return the screen coordinates for the given point.
-
-    :param x: x coordinates of the input point.
-    :type x: float
-
-    :param y: y coordinates of the input point.
-    :type y: float
-
-    :param z: z coordinates of the input point (defaults to 0).
-    :type z: float
-
-    :returns: a vector with the transformed x, y, z coordinates.
-    :rtype: Vector
+    :returns: The shear matrix used to apply the transformation.
+    :rtype: np.ndarray
 
     """
-    p = renderer.transform_matrix * Vector3(x, y, z)
-    return Vector(p.x, p.y, p.z)
+    shear_mat = np.identity(4)
+    shear_mat[1, 0] = np.tan(theta)
+    renderer.transform_matrix = renderer.transform_matrix.dot(shear_mat)
+    return shear_mat
 
 def camera():
     raise NotImplementedError
