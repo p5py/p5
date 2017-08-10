@@ -90,6 +90,7 @@ class Shape:
         self.kind = kind
         self._raw_vertices = vertices
         self._vertices = None
+        self._transformed_vertices = None
         self._edges = edges
         self._faces = faces
         self._texcoords = None
@@ -129,6 +130,33 @@ class Shape:
         if self._texcoords is None:
             self.compute_texcoords()
         return self._texcoords
+
+    @property
+    def transformed_vertices(self):
+        """The transformed vertices of the shape (when available)
+
+        :note: This returns the un-transformed shape vertices when the
+            shape hasn't been transformed.
+
+        """
+        if not self._transformed_vertices is None:
+            return self._transformed_vertices
+        return self.vertices
+
+    @property
+    def has_been_transformed(self):
+        """Whether the shape has been transformed by a matrix."""
+        return self._transformed_vertices is None
+
+    def transform(self, matrix):
+        """Use the given matrix to transform the shape's vertices
+
+        :param matix: The transform matrix to use while transforming
+            shape.
+        :type matrix: np.ndarray
+
+        """
+        self._transformed_vertices = self._vertices.dot(matrix.T)
 
     def compute_faces(self):
         """Compute the faces for this shape."""
