@@ -217,7 +217,7 @@ class Ellipse(Shape):
         vertices.extend(
             [(self.center.x + self.radius.x * cs,
               self.center.y + self.radius.y * sn,
-              self.center.z) for sn, cs in SINCOS][0:-1:inc])
+              self.center.z) for sn, cs in SINCOS][0:len(SINCOS):inc])
         vertices.append(vertices[1])
         self._vertices = np.array(vertices)
 
