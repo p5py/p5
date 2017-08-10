@@ -21,6 +21,7 @@
 import __main__
 import builtins
 from functools import wraps
+import time
 
 import pyglet
 pyglet.options["shadow_window"] = False
@@ -35,6 +36,7 @@ builtins.height = 360
 builtins.title = "p5"
 builtins.frame_count = -1
 builtins.frame_rate = 30
+last_recorded_time = time.time()
 
 builtins.pixel_width = 1
 builtins.pixel_height = 1
@@ -213,12 +215,14 @@ def update(dt):
     global handler_queue
     global redraw
     global setup_done
-
-    builtins.frame_rate = 1 / max(dt, 0.00001)
+    global last_recorded_time
 
     with renderer.draw_loop():
         if looping or redraw:
             builtins.frame_count += 1
+            now = time.time()
+            builtins.frame_rate = 1 / (now - last_recorded_time)
+            last_recorded_time = now
             if not setup_done:
                 setup()
                 setup_done = True
