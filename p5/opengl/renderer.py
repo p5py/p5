@@ -238,6 +238,13 @@ def render(shape):
                               ("color", np.float32, 4)])
     data['position'] = transformed_vertices
 
+    if fill_enabled and not (shape.kind in ['POINT', 'PATH']):
+        data['color'] = np.array([fill_color] * num_vertices)
+        V = data.view(VertexBuffer)
+        I = np.array(shape.faces, dtype=np.uint32).ravel().view(IndexBuffer)
+        default_shader.bind(V)
+        default_shader.draw(gl.GL_TRIANGLES, indices=I)
+
     if stroke_enabled:
         if shape.kind == 'POINT':
             draw_type = gl.GL_POINTS
@@ -252,9 +259,3 @@ def render(shape):
         default_shader.bind(V)
         default_shader.draw(draw_type, indices=I)
 
-    if fill_enabled and not (shape.kind in ['POINT', 'PATH']):
-        data['color'] = np.array([fill_color] * num_vertices)
-        V = data.view(VertexBuffer)
-        I = np.array(flatten(shape.faces), dtype=np.uint32).view(IndexBuffer)
-        default_shader.bind(V)
-        default_shader.draw(gl.GL_TRIANGLES, indices=I)
