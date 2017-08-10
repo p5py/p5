@@ -259,3 +259,5 @@ def render(shape):
         default_shader.bind(V)
         default_shader.draw(draw_type, indices=I)
 
+    V.delete()
+    I.delete()
