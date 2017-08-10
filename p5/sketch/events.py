@@ -379,5 +379,4 @@ def on_exit():
 @window.event
 def on_resize(width, height):
     renderer.reset_view()
-    renderer.pre_render()
     renderer.clear()

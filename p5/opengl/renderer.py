@@ -207,20 +207,15 @@ def pre_render():
     The pre_render is the first thing that is called when we want to
     refresh/redraw the contents of the screen on each draw call.
 
+@contextmanager
+def draw_loop():
+    """The main draw loop context manager.
     """
     global transform_matrix
     gl.glViewport(*viewport)
     transform_matrix = np.identity(4)
 
-
-def post_render():
-    """Cleanup things after a draw call.
-
-    The post_render is called once all the rendering is done for the
-    last draw call.
-
-    """
-    pass
+    yield
 
 def render(shape):
     """Use the renderer to render a Shape.
