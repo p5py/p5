@@ -156,7 +156,7 @@ class Shape:
         :type matrix: np.ndarray
 
         """
-        self._transformed_vertices = self._vertices.dot(matrix.T)
+        self._transformed_vertices = self.vertices.dot(matrix.T)
 
     def compute_faces(self):
         """Compute the faces for this shape."""
