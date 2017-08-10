@@ -459,10 +459,14 @@ class Vector(Point):
             yield k
 
     def __eq__(self, other):
-        return np.all(np.absolute(self - other) < EPSILON)
+        if hasattr(other, '_array') and self._array.shape == other._array.shape:
+            return np.all(np.absolute(self._array - other._array) < EPSILON)
+        return False
 
     def __neq__(self, other):
-        return not np.all(np.absolute(self - other) < EPSILON)
+        if hasattr(other, '_array') and self._array.shape == other._array.shape:
+            return not np.all(np.absolute(self._array - other._array) < EPSILON)
+        return True
 
     def __repr__(self):
         class_name = self.__class__.__name__
