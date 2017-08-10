@@ -71,6 +71,11 @@ context = None
 
 default_shader = None
 
+## Renderer Globals: RENDERING
+poly_draw_queue = []
+line_draw_queue = []
+point_draw_queue = []
+
 ## RENDERER UTILITY FUNCTIONS
 ##
 ## Mostly for internal user. Ideally, higher level components *SHOULD
@@ -191,21 +196,25 @@ def cleanup():
 ##        # multiple calls to render()
 ##
 
-@contextmanager
-def draw_loop():
-    """The main draw loop context manager.
+def flush_geometry():
+    """Flush all the shape geometry from the draw queue to the GPU.
     """
-    pre_render()
-    try:
-        yield
-    finally:
-        post_render()
-
-def pre_render():
-    """Initialize things for a draw call.
-
-    The pre_render is the first thing that is called when we want to
-    refresh/redraw the contents of the screen on each draw call.
+    ## RETAINED MODE RENDERING.
+    #
+    # 1. Get the maximum number of vertices persent in the shapes in
+    # the draw queue.
+    #
+    # 2. Create empty buffers based on the number of vertices.
+    #
+    # 3. Loop through all the shapes in the geometry queue adding it's
+    # information to the buffer.
+    #
+    # 4. Bind the buffer to the shader.
+    #
+    # 5. Draw the shape using the proper shape type.
+    #
+    # 6. Empty the draw queue.
+    pass
 
 @contextmanager
 def draw_loop():
@@ -217,12 +226,21 @@ def draw_loop():
 
     yield
 
+    flush_geometry()
+
 def render(shape):
     """Use the renderer to render a Shape.
 
     :param shape: The shape to be rendered.
     :type shape: Shape
     """
+
+    ## RETAINED MODE RENDERING
+    #
+    # 1. Transform the shape using the current transform matrix.
+    #
+    # 2. Depending on the current property add the shape and the color
+    # to the correct draw queue
 
     transformed_vertices = transform_points(shape.vertices)
     num_vertices = len(shape.vertices)
