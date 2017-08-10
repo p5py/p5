@@ -199,22 +199,75 @@ def cleanup():
 def flush_geometry():
     """Flush all the shape geometry from the draw queue to the GPU.
     """
+    global poly_draw_queue
+    global line_draw_queue
+    global point_draw_queue
+
     ## RETAINED MODE RENDERING.
     #
-    # 1. Get the maximum number of vertices persent in the shapes in
-    # the draw queue.
-    #
-    # 2. Create empty buffers based on the number of vertices.
-    #
-    # 3. Loop through all the shapes in the geometry queue adding it's
-    # information to the buffer.
-    #
-    # 4. Bind the buffer to the shader.
-    #
-    # 5. Draw the shape using the proper shape type.
-    #
+    draw_names = ['poly', 'line', 'point']
+    draw_types = [gl.GL_TRIANGLES, gl.GL_LINES, gl.GL_POINTS]
+    draw_queues = [poly_draw_queue, line_draw_queue, point_draw_queue]
+
+    for draw_type, draw_queue, name in zip(draw_types, draw_queues, draw_names):
+        # 1. Get the maximum number of vertices persent in the shapes
+        # in the draw queue.
+        #
+        if len(draw_queue) == 0:
+            continue
+
+        num_vertices = sum([len(shape.vertices) for shape, _ in draw_queue])
+
+        # 2. Create empty buffers based on the number of vertices.
+        #
+        data = np.zeros(num_vertices,
+                        dtype=[('position', np.float32, 3),
+                               ('color', np.float32, 4)])
+
+        # 3. Loop through all the shapes in the geometry queue adding
+        # it's information to the buffer.
+        #
+        sidx = 0
+        draw_indices = []
+        for shape, color in draw_queue:
+            num_shape_verts = len(shape.vertices)
+
+            data['position'][sidx:(sidx + num_shape_verts),] = \
+                shape.transformed_vertices[:, :3]
+
+            color_array = np.array([color] * num_shape_verts)
+            data['color'][sidx:sidx + num_shape_verts, :] = color_array
+
+            if name == 'point':
+                idx = np.arange(0, num_shape_verts, dtype=np.uint32)
+            elif name == 'line':
+                idx = np.array(shape.edges, dtype=np.uint32).ravel()
+            else:
+                idx = np.array(shape.faces, dtype=np.uint32).ravel()
+
+            draw_indices.append(sidx + idx)
+
+            sidx += num_shape_verts
+
+        V = data.view(VertexBuffer)
+        I = np.hstack(draw_indices).view(IndexBuffer)
+
+        # 4. Bind the buffer to the shader.
+        #
+        default_shader.bind(V)
+
+        # 5. Draw the shape using the proper shape type and get rid of
+        # the buffers.
+        #
+        default_shader.draw(draw_type, indices=I)
+
+        V.delete()
+        I.delete()
+
     # 6. Empty the draw queue.
-    pass
+    poly_draw_queue = []
+    line_draw_queue = []
+    point_draw_queue = []
 
 @contextmanager
 def draw_loop():
@@ -234,42 +287,24 @@ def render(shape):
     :param shape: The shape to be rendered.
     :type shape: Shape
     """
+    global poly_draw_queue
+    global line_draw_queue
+    global point_draw_queue
 
     ## RETAINED MODE RENDERING
     #
     # 1. Transform the shape using the current transform matrix.
     #
+    shape.transform(transform_matrix)
+
     # 2. Depending on the current property add the shape and the color
     # to the correct draw queue
-
-    transformed_vertices = transform_points(shape.vertices)
-    num_vertices = len(shape.vertices)
-
-    data = np.zeros(num_vertices,
-                       dtype=[("position", np.float32, 3),
-                              ("color", np.float32, 4)])
-    data['position'] = transformed_vertices
-
-    if fill_enabled and not (shape.kind in ['POINT', 'PATH']):
-        data['color'] = np.array([fill_color] * num_vertices)
-        V = data.view(VertexBuffer)
-        I = np.array(shape.faces, dtype=np.uint32).ravel().view(IndexBuffer)
-        default_shader.bind(V)
-        default_shader.draw(gl.GL_TRIANGLES, indices=I)
+    #
+    if fill_enabled and shape.kind not in ['POINT', 'PATH']:
+        poly_draw_queue.append((shape, fill_color))
 
     if stroke_enabled:
         if shape.kind == 'POINT':
-            draw_type = gl.GL_POINTS
-            I = np.array(list(range(len(shape.vertices))),
-                         dtype=np.uint32).view(IndexBuffer)
+            point_draw_queue.append((shape, stroke_color))
         else:
-            draw_type = gl.GL_LINE_STRIP
-            I = np.array(flatten(shape.edges), dtype=np.uint32).view(IndexBuffer)
-
-        data['color'] = np.array([stroke_color] * num_vertices)
-        V = data.view(VertexBuffer)
-        default_shader.bind(V)
-        default_shader.draw(draw_type, indices=I)
-
-    V.delete()
-    I.delete()
+            line_draw_queue.append((shape, stroke_color))
