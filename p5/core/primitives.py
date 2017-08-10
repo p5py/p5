@@ -171,7 +171,7 @@ class Shape:
         if 'D' in set(psig) and len(set(psig)) == 1:
             # the path is already tessellated. Nothing to be done.
             self._vertices = np.array(
-                [v[:3] for v in self._raw_vertices]
+                [(*v[:3], 1) for v in self._raw_vertices]
             )
         elif psig == 'DBBD':
             vertices = []
@@ -179,7 +179,7 @@ class Shape:
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.bezier_point(*self._raw_vertices, t)
-                vertices.append(p[:3])
+                vertices.append(*p[:3], 1)
             self._vertices = np.array(vertices)
         elif psig == 'DCCD':
             vertices = []
@@ -187,7 +187,7 @@ class Shape:
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.curve_point(*self._raw_vertices, t)
-                vertices.append(p[:3])
+                vertices.append(*p[:3], 1)
             self._vertices = np.array(vertices)
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
@@ -213,11 +213,12 @@ class Ellipse(Shape):
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)
 
-        vertices = [self.center[:3]]
+        vertices = [(*self.center[:3], 1)]
         vertices.extend(
             [(self.center.x + self.radius.x * cs,
               self.center.y + self.radius.y * sn,
-              self.center.z) for sn, cs in SINCOS][0:len(SINCOS):inc])
+              self.center.z, 1)
+             for sn, cs in SINCOS][0:len(SINCOS):inc])
         vertices.append(vertices[1])
         self._vertices = np.array(vertices)
 

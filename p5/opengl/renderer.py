@@ -103,8 +103,7 @@ def transform_points(points):
     :rtype: np.ndarray
 
     """
-    points = np.hstack((points,
-                        np.array([[1]] * len(points)))).dot(transform_matrix.T)
+    points = points.dot(transform_matrix.T)
     return points[:, :3]
 
 ## RENDERER SETUP FUNCTIONS.
