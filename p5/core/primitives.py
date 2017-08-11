@@ -242,11 +242,13 @@ class Ellipse(Shape):
         inc = int(len(SINCOS) / acc)
 
         vertices = [(*self.center[:3], 1)]
-        vertices.extend(
-            [(self.center.x + self.radius.x * cs,
-              self.center.y + self.radius.y * sn,
-              self.center.z, 1)
-             for sn, cs in SINCOS][0:len(SINCOS):inc])
+        for i in range(0, len(SINCOS), inc):
+            vertices.append((
+                self.center.x + self.radius.x * SINCOS[i][1],
+                self.center.y + self.radius.y * SINCOS[i][0],
+                self.center.z,
+                1
+            ))
         vertices.append(vertices[1])
         self._vertices = np.array(vertices)
 
