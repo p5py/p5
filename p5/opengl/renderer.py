@@ -140,6 +140,8 @@ def initialize(window_context):
     gl.glEnable(gl.GL_DEPTH_TEST)
     gl.glDepthFunc(gl.GL_LEQUAL)
 
+    gl.glEnable(gl.GL_MULTISAMPLE)
+
     default_shader = Program(vertex_default, fragment_default)
     reset_view()
 
