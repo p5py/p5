@@ -56,10 +56,7 @@ class Vector(Point):
 
     """
     def __init__(self, x, y, z=0):
-        self._x = x
-        self._y = y
-        self._z = z
-        self._array = np.array([x, y, z])
+        self._array = np.array([x, y, z], dtype=np.float32)
 
     @property
     def x(self):
@@ -68,7 +65,6 @@ class Vector(Point):
 
     @x.setter
     def x(self, value):
-        self._x = value
         self._array[0] = value
 
     @property
@@ -78,7 +74,6 @@ class Vector(Point):
 
     @y.setter
     def y(self, value):
-        self._y = value
         self._array[1] = value
 
     @property
@@ -88,7 +83,6 @@ class Vector(Point):
 
     @z.setter
     def z(self, value):
-        self._z = value
         self._array[2] = value
 
     def distance(self, other):
