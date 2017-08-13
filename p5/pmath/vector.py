@@ -202,7 +202,7 @@ class Vector(Point):
 
     def __truediv__(self, other):
         """Divide the vector by a scalar."""
-        return (1  / other) * self
+        return self * (1 / other)
 
     def cross(self, other):
         """Return the cross product of the two vectors.
