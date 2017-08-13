@@ -145,7 +145,7 @@ def scale(sx, sy=None, sz=None):
         sz = sx
     elif not sz:
         sz = 1
-    tmat = matrix.scale_matrix(sx, sy, sz)
+    tmat = matrix.scale_transform(sx, sy, sz)
     renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
     return tmat
 
