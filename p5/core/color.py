@@ -20,16 +20,23 @@ import builtins
 import colorsys
 import math
 
-from . import attribs
-from .primitives import rect
-from .structure import push_style
-from .transforms import push_matrix
-
 from ..pmath import lerp
-from ..sketch import renderer
 
-__all__ = [ 'Color', 'background', 'fill', 'no_fill',
-            'stroke', 'no_stroke', 'tint', 'no_tint' ]
+__all__ = ['color_mode', 'Color']
+
+color_parse_mode = 'RGB'
+color_range = (255, 255, 255, 255)
+
+def color_mode(mode):
+    """Set the color mode of the renderer.
+
+    :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
+        or Hue/Saturation/Brightness
+    :type mode: str
+
+    """
+    global color_parse_mode
+    color_parse_mode = mode
 
 def to_rgb(h, s, b):
     red, green, blue = colorsys.hsv_to_rgb(h/255, s/255, b/255)
@@ -49,12 +56,12 @@ class Color:
     """Represents a color."""
     def __init__(self, *args, color_mode=None, **kwargs):
         if color_mode is None:
-            color_mode = attribs.color_parse_mode
+            color_mode = color_parse_mode
 
         if (len(args) == 1) and isinstance(args[0], Color):
             r, g, b, a = args[0].rgba
         else:
-            r, g, b, a = self.parse_color(*args, color_mode=color_mode, **kwargs)
+            r, g, b, a = parse_color(*args, color_mode=color_mode, **kwargs)
         self._red = r
         self._green = g
         self._blue = b
@@ -286,21 +293,21 @@ class Color:
     @property
     def b(self):
         """The blue or the brightness value (depending on the color mode)."""
-        if _attribs.color_parse_mode== 'RGB':
+        if color_parse_mode== 'RGB':
             return self.blue
-        elif _attribs.color_parse_mode== 'HSB':
+        elif color_parse_mode== 'HSB':
             return self.brightness
         else:
-            raise ValueError("Unknown color mode {}".format(attribs.color_parse_mode))
+            raise ValueError("Unknown color mode {}".format(color_parse_mode))
 
     @b.setter
     def b(self, value):
-        if attribs.color_parse_mode== 'RGB':
+        if color_parse_mode== 'RGB':
             self.blue = value
-        elif attribs.color_parse_mode== 'HSB':
+        elif color_parse_mode== 'HSB':
             self.brightness = value
         else:
-            raise ValueError("Unknown color mode {}".format(attribs.color_parse_mode))
+            raise ValueError("Unknown color mode {}".format(color_parse_mode))
 
     @property
     def hex(self):
@@ -394,106 +401,3 @@ class Color:
             raise ValueError("Failed to parse color.")
         return red, green, blue, alpha
 
-
-def fill(*fill_args, **fill_kwargs):
-    """Set the fill color of the shapes.
-
-    :param fill_args: positional arguments to be parsed as a color.
-    :type fill_args: tuple
-
-    :param fill_kwargs: keyword arguments to be parsed as a color.
-    :type fill_kwargs: dict
-
-    :returns: The fill color.
-    :rtype: Color
-
-    """
-    # if len(fill_args) == 1 and type(fill_args[0]) == Image:
-    #     fill_image = fill_args[0]
-    #     renderer.add_texture(fill_image)
-    #     renderer.fill_enabled = False
-    #     renderer.fill_image_enabled = True
-    #     return fill_image
-    # else:
-    fill_color = Color(*fill_args, **fill_kwargs)
-    renderer.fill_enabled = True
-    renderer.fill_image_enabled = False
-    renderer.fill_color = fill_color.normalized
-    return fill_color
-
-def no_fill():
-    """Disable filling geometry."""
-    renderer.fill_enabled = False
-
-def stroke(*color_args, **color_kwargs):
-    """Set the color used to draw lines around shapes
-
-    :param color_args: positional arguments to be parsed as a color.
-    :type color_args: tuple
-
-    :param color_kwargs: keyword arguments to be parsed as a color.
-    :type color_kwargs: dict
-
-    :note: Both color_args and color_kwargs are directly sent to
-        Color.parse_color
-
-    :returns: The stroke color.
-    :rtype: Color
-    """
-    stroke_color = Color(*color_args, **color_kwargs)
-    renderer.stroke_enabled = True
-    renderer.stroke_color = stroke_color.normalized
-
-def no_stroke():
-    """Disable drawing the stroke around shapes."""
-    renderer.stroke_enabled = False
-
-def tint(*color_args, **color_kwargs):
-    """Set the tint color for the sketch.
-
-    :param color_args: positional arguments to be parsed as a color.
-    :type color_args: tuple
-
-    :param color_kwargs: keyword arguments to be parsed as a color.
-    :type color_kwargs: dict
-
-    :note: Both color_args and color_kwargs are directly sent to
-        Color.parse_color
-
-    :returns: The tint color.
-    :rtype: Color
-    """
-    # tint_color = Color(*color_args, **color_kwargs)
-    # renderer.tint_enabled = True
-    # renderer.tint_color = tint_color.normalized
-    # return tint_color
-    raise NotImplementedError("Renderer doesn't support textures.")
-
-def no_tint():
-    """Disable tinting of images."""
-    # renderer.tint_enabled = False
-    raise NotImplementedError("Renderer doesn't support textures.")
-
-def background(*color_args, **color_kwargs):
-    """Set the background color for the renderer.
-
-    :param color_args: positional arguments to be parsed as a color.
-    :type color_args: tuple
-
-    :param color_kwargs: keyword arguments to be parsed as a color.
-    :type color_kwargs: dict
-
-    :note: Both color_args and color_kwargs are directly sent to
-        Color.parse_color
-
-    :returns: The background color.
-    :rtype: Color
-    """
-    with push_style():
-        background_color = Color(*color_args, **color_kwargs, color_mode='RGB')
-        fill(background_color)
-        no_stroke()
-        with push_matrix():
-            rect((0, 0), builtins.width, builtins.height, mode='CORNER')
-    renderer.background_color = background_color.normalized
-    return background_color

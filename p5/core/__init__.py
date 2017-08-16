@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from .attribs import *
 from .structure import *
-from .color import *
 from .primitives import *
 from .transforms import *
+from .color import *
 from .image import *
+from .attribs import *

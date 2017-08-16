@@ -15,19 +15,104 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+import builtins
 
-__all__ = ['color_mode']
+rom ..sketch import renderer
+from .color import Color
+from .primitives import rect
+from .structure import push_style
+from .transforms import push_matrix
 
-color_parse_mode = 'RGB'
-color_range = (255, 255, 255, 255)
+__all__ = [ 'background', 'fill', 'no_fill',
+            'stroke', 'no_stroke', 'tint', 'no_tint' ]
 
-def color_mode(mode):
-    """Set the color mode of the renderer.
+def fill(*fill_args, **fill_kwargs):
+    """Set the fill color of the shapes.
 
-    :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
-        or Hue/Saturation/Brightness
-    :type mode: str
+    :param fill_args: positional arguments to be parsed as a color.
+    :type fill_args: tuple
+
+    :param fill_kwargs: keyword arguments to be parsed as a color.
+    :type fill_kwargs: dict
+
+    :returns: The fill color.
+    :rtype: Color
 
     """
-    global color_parse_mode
-    color_parse_mode = mode
+    fill_color = Color(*fill_args, **fill_kwargs)
+    renderer.fill_enabled = True
+    renderer.fill_image_enabled = False
+    renderer.fill_color = fill_color.normalized
+    return fill_color
+
+def no_fill():
+    """Disable filling geometry."""
+    renderer.fill_enabled = False
+
+def stroke(*color_args, **color_kwargs):
+    """Set the color used to draw lines around shapes
+
+    :param color_args: positional arguments to be parsed as a color.
+    :type color_args: tuple
+
+    :param color_kwargs: keyword arguments to be parsed as a color.
+    :type color_kwargs: dict
+
+    :note: Both color_args and color_kwargs are directly sent to
+        Color.parse_color
+
+    :returns: The stroke color.
+    :rtype: Color
+    """
+    stroke_color = Color(*color_args, **color_kwargs)
+    renderer.stroke_enabled = True
+    renderer.stroke_color = stroke_color.normalized
+
+def no_stroke():
+    """Disable drawing the stroke around shapes."""
+    renderer.stroke_enabled = False
+
+def tint(*color_args, **color_kwargs):
+    """Set the tint color for the sketch.
+
+    :param color_args: positional arguments to be parsed as a color.
+    :type color_args: tuple
+
+    :param color_kwargs: keyword arguments to be parsed as a color.
+    :type color_kwargs: dict
+
+    :note: Both color_args and color_kwargs are directly sent to
+        Color.parse_color
+
+    :returns: The tint color.
+    :rtype: Color
+    """
+    raise NotImplementedError("Renderer doesn't support textures.")
+
+def no_tint():
+    """Disable tinting of images."""
+    raise NotImplementedError("Renderer doesn't support textures.")
+
+def background(*color_args, **color_kwargs):
+    """Set the background color for the renderer.
+
+    :param color_args: positional arguments to be parsed as a color.
+    :type color_args: tuple
+
+    :param color_kwargs: keyword arguments to be parsed as a color.
+    :type color_kwargs: dict
+
+    :note: Both color_args and color_kwargs are directly sent to
+        Color.parse_color
+
+    :returns: The background color.
+    :rtype: Color
+    """
+    with push_style():
+        background_color = Color(*color_args, **color_kwargs, color_mode='RGB')
+        fill(background_color)
+        no_stroke()
+        with push_matrix():
+            rect((0, 0), builtins.width, builtins.height, mode='CORNER')
+    renderer.background_color = background_color.normalized
+    return background_color
