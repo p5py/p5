@@ -347,7 +347,7 @@ class Vector(Point):
     @magnitude.setter
     def magnitude(self, new_magnitude):
         current_magnitude = self.magnitude
-        self._array = new_magnitude * self._array / current_magnitude
+        self._array = (new_magnitude * self._array) / current_magnitude
 
     @property
     def magnitude_sq(self):
