@@ -59,15 +59,14 @@ def push_style():
     prev_ellipse_mode = primitives._ellipse_mode
     prev_rect_mode = primitives._rect_mode
     prev_shape_mode = primitives._shape_mode
-    try:
-        yield
-    finally:
-        renderer.background_color = prev_background_color
-        renderer.fill_color = prev_fill_color
-        renderer.stroke_color = prev_stroke_color
-        renderer.fill_enabled = prev_fill_enabled
-        renderer.stroke_enabled = prev_stroke_enabled
-        primitives._ellipse_mode = prev_ellipse_mode
-        primitives._rect_mode = prev_rect_mode
-        primitives._shape_mode = prev_shape_mode
 
+    yield
+
+    renderer.background_color = prev_background_color
+    renderer.fill_color = prev_fill_color
+    renderer.stroke_color = prev_stroke_color
+    renderer.fill_enabled = prev_fill_enabled
+    renderer.stroke_enabled = prev_stroke_enabled
+    primitives._ellipse_mode = prev_ellipse_mode
+    primitives._rect_mode = prev_rect_mode
+    primitives._shape_mode = prev_shape_mode
