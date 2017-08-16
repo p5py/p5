@@ -20,6 +20,7 @@ import builtins
 import colorsys
 import math
 
+from . import attribs
 from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
@@ -27,10 +28,8 @@ from .transforms import push_matrix
 from ..pmath import lerp
 from ..sketch import renderer
 
-__all__ = [ 'Color', 'background', 'color_mode', 'fill', 'no_fill',
+__all__ = [ 'Color', 'background', 'fill', 'no_fill',
             'stroke', 'no_stroke', 'tint', 'no_tint' ]
-
-_color_mode = 'RGB'
 
 def to_rgb(h, s, b):
     red, green, blue = colorsys.hsv_to_rgb(h/255, s/255, b/255)
@@ -50,7 +49,7 @@ class Color:
     """Represents a color."""
     def __init__(self, *args, color_mode=None, **kwargs):
         if color_mode is None:
-            color_mode = _color_mode
+            color_mode = attribs.color_parse_mode
 
         if (len(args) == 1) and isinstance(args[0], Color):
             r, g, b, a = args[0].rgba
@@ -287,21 +286,21 @@ class Color:
     @property
     def b(self):
         """The blue or the brightness value (depending on the color mode)."""
-        if _color_mode == 'RGB':
+        if _attribs.color_parse_mode== 'RGB':
             return self.blue
-        elif _color_mode == 'HSB':
+        elif _attribs.color_parse_mode== 'HSB':
             return self.brightness
         else:
-            raise ValueError("Unknown color mode {}".format(_color_mode))
+            raise ValueError("Unknown color mode {}".format(attribs.color_parse_mode))
 
     @b.setter
     def b(self, value):
-        if _color_mode == 'RGB':
+        if attribs.color_parse_mode== 'RGB':
             self.blue = value
-        elif _color_mode == 'HSB':
+        elif attribs.color_parse_mode== 'HSB':
             self.brightness = value
         else:
-            raise ValueError("Unknown color mode {}".format(_color_mode))
+            raise ValueError("Unknown color mode {}".format(attribs.color_parse_mode))
 
     @property
     def hex(self):
@@ -498,14 +497,3 @@ def background(*color_args, **color_kwargs):
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
     renderer.background_color = background_color.normalized
     return background_color
-
-def color_mode(mode):
-    """Set the color mode of the renderer.
-
-    :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
-        or Hue/Saturation/Brightness
-    :type mode: str
-
-    """
-    global _color_mode
-    _color_mode = mode

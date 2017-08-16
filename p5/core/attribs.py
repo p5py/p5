@@ -15,9 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from .attribs import *
-from .structure import *
-from .color import *
-from .primitives import *
-from .transforms import *
-from .image import *
+
+__all__ = ['color_mode']
+
+color_parse_mode = 'RGB'
+color_range = (255, 255, 255, 255)
+
+def color_mode(mode):
+    """Set the color mode of the renderer.
+
+    :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
+        or Hue/Saturation/Brightness
+    :type mode: str
+
+    """
+    global color_parse_mode
+    color_parse_mode = mode
