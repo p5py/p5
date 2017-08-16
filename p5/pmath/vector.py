@@ -280,7 +280,7 @@ class Vector(Point):
         :raises ValueError: If the vector is three-dimensional
 
         """
-        if self.z != 0:
+        if np.abs(self.z) > EPSILON:
             raise ValueError("Can't compute the angle for a 3D vector.")
         return np.arctan2(self.y, self.x)
 
