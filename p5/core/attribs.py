@@ -17,7 +17,7 @@
 #
 import builtins
 
-rom ..sketch import renderer
+from ..sketch import renderer
 from .color import Color
 from .primitives import rect
 from .structure import push_style
