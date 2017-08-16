@@ -249,7 +249,7 @@ class Arc(Shape):
         end_index = int((self.stop_angle / (math.pi * 2)) * sclen)
 
         vertices = [(*self.center[:3], 1)]
-        for idx in range(start_index, end_index + 1, inc):
+        for idx in range(start_index, end_index, inc):
             i = idx % sclen
             vertices.append((
                 self.center.x + self.radius.x * SINCOS[i][1],
@@ -257,6 +257,12 @@ class Arc(Shape):
                 self.center.z,
                 1
             ))
+        vertices.append((
+            self.center.x + self.radius.x * SINCOS[end_index % sclen][1],
+            self.center.y + self.radius.y * SINCOS[end_index % sclen][0],
+            self.center.z,
+            1
+        ))
         self._vertices = np.array(vertices)
 
     def compute_edges(self):
