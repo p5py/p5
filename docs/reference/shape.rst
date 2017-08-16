@@ -19,6 +19,24 @@ line()
 .. autofunction:: line
 
 
+ellipse()
+---------
+
+.. autofunction:: ellipse
+
+
+circle()
+--------
+
+.. autofunction:: circle
+
+
+arc()
+-----
+
+.. autofunction:: arc
+
+
 triangle()
 ----------
 

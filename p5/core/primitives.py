@@ -220,6 +220,73 @@ class Shape:
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
+class Arc(Shape):
+    def __init__(self, center, dim, start_angle, stop_angle,
+                 mode='OPEN PIE'):
+        self.center = Point(*center)
+        self.radius = Point(*dim)
+        self.start_angle = start_angle
+        self.stop_angle = stop_angle
+        self.modes = set(mode.split())
+        super().__init__([], 'ARC')
+
+    def tessellate(self):
+        """Generate vertex and face data using radii.
+        # """
+        c1 = self.center.x - self.radius.x, self.center.y - self.radius.y, 0, 1
+        s1 = sketch.renderer.transform_matrix.dot(np.array(c1))
+
+        c2 = self.center.x + self.radius.x, self.center.y + self.radius.y, 0, 1
+        s2 = sketch.renderer.transform_matrix.dot(np.array(c2))
+
+        size_acc = (np.sqrt((s2 - s1) @ (s2 - s1)) * math.pi * 2) / POINT_ACCURACY_FACTOR
+
+        acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
+        inc = int(len(SINCOS) / acc)
+
+        sclen = len(SINCOS)
+        start_index = int((self.start_angle / (math.pi * 2)) * sclen)
+        end_index = int((self.stop_angle / (math.pi * 2)) * sclen)
+
+        vertices = [(*self.center[:3], 1)]
+        for idx in range(start_index, end_index + 1, inc):
+            i = idx % sclen
+            vertices.append((
+                self.center.x + self.radius.x * SINCOS[i][1],
+                self.center.y + self.radius.y * SINCOS[i][0],
+                self.center.z,
+                1
+            ))
+        self._vertices = np.array(vertices)
+
+    def compute_edges(self):
+        """Compute the edges for this shape."""
+        v = len(self.vertices) - 1
+        self._edges = [
+            (k, k+1)
+            for k in range(1, v)
+        ]
+
+        if 'OPEN' in self.modes:
+            return
+        elif 'PIE' in self.modes:
+            self._edges.append((v, 0))
+            self._edges.append((0, 1))
+        elif 'CHORD' in self.modes:
+            self._edges.append((v, 1))
+
+    def compute_faces(self):
+        """Compute the faceds for the Arc.
+        """
+        v = len(self.vertices) - 1
+        self._faces = [
+            (0, k, k + 1) for k in range(1, v)
+        ]
+
+        if 'PIE' in self.modes:
+            return
+        if ('OPEN' in self.modes) or ('CHORD' in self.modes):
+            self._faces.append((0, v, 1))
 
 class Ellipse(Shape):
     def __init__(self, center, dim):
@@ -352,9 +419,6 @@ def curve(point_1, point_2, point_3, point_4):
         Point(*point_4)
     ]
     return Shape(path, kind='PATH')
-
-def arc(*args):
-    raise NotImplementedError
 
 def triangle(p1, p2, p3):
     """Return a triangle.
@@ -500,6 +564,67 @@ def rect_mode(mode='CORNER'):
     """
     global _rect_mode
     _rect_mode = mode
+
+def arc(coordinate, width, height, start_angle, stop_angle,
+        mode='OPEN PIE', ellipse_mode=None):
+    """Return a ellipse.
+
+    :param coordinate: Represents the center of the arc when mode
+        is 'CENTER' (the default) or 'RADIUS', the lower-left corner
+        of the ellipse when mode is 'CORNER'.
+
+    :type coordinate: 3-tuple
+
+    :param width: For ellipse modes 'CORNER' or 'CENTER' this
+        represents the width of the the ellipse of which the arc is a
+        part. Represents the x-radius of the parent ellipse when
+        ellipse mode is 'RADIUS
+
+    :type width: float
+
+    :param height: For ellipse modes 'CORNER' or 'CENTER' this
+        represents the height of the the ellipse of which the arc is a
+        part. Represents the y-radius of the parent ellipse when
+        ellipse mode is 'RADIUS
+
+    :type height: float
+
+    :param mode: The mode used to draw an arc can be some combination
+        of {'OPEN', 'CHORD', 'PIE'} separated by spaces. For instance,
+        'OPEN PIE', etc (defaults to 'OPEN PIE')
+
+    :type mode: str
+
+    :param ellipse_mode: The drawing mode used for the ellipse. Should be one of
+        {'CORNER', 'CENTER', 'RADIUS'} (defaults to the
+        mode being used by the sketch.)
+
+    :type mode: str
+
+    :returns: An arc.
+    :rtype: Arc
+
+    """
+    amode = mode
+
+    if ellipse_mode is None:
+        emode = _ellipse_mode
+    else:
+        emode = ellipse_mode
+
+    if emode == 'CORNER':
+        corner = Point(*coordinate)
+        dim = Point(width, height)
+        center = (corner.x + (dim.x / 2), corner.y + (dim.y / 2), corner.z)
+    elif emode == 'CENTER':
+        center = Point(*coordinate)
+        dim = Point(width / 2, height / 2)
+    elif emode == 'RADIUS':
+        center = Point(*coordinate)
+        dim = Point(width, height)
+    else:
+        raise ValueError("Unknown arc mode {}".format(emode))
+    return Arc(center, dim, start_angle, stop_angle, mode=amode)
 
 def ellipse(coordinate, *args, mode=None):
     """Return a ellipse.
