@@ -288,44 +288,6 @@ class Arc(Shape):
         if ('OPEN' in self.modes) or ('CHORD' in self.modes):
             self._faces.append((0, v, 1))
 
-class Ellipse(Shape):
-    def __init__(self, center, dim):
-        self.center = Point(*center)
-        self.radius =  Point(*dim)
-        super().__init__([], 'ELLIPSE')
-
-    def tessellate(self):
-        """Generate vertex and face data using radii.
-        # """
-        c1 = self.center.x - self.radius.x, self.center.y - self.radius.y, 0, 1
-        s1 = sketch.renderer.transform_matrix.dot(np.array(c1))
-
-        c2 = self.center.x + self.radius.x, self.center.y + self.radius.y, 0, 1
-        s2 = sketch.renderer.transform_matrix.dot(np.array(c2))
-
-        size_acc = (np.sqrt((s2 - s1) @ (s2 - s1)) * math.pi * 2) / POINT_ACCURACY_FACTOR
-
-        acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
-        inc = int(len(SINCOS) / acc)
-
-        vertices = [(*self.center[:3], 1)]
-        for i in range(0, len(SINCOS), inc):
-            vertices.append((
-                self.center.x + self.radius.x * SINCOS[i][1],
-                self.center.y + self.radius.y * SINCOS[i][0],
-                self.center.z,
-                1
-            ))
-        vertices.append(vertices[1])
-        self._vertices = np.array(vertices)
-
-    def compute_edges(self):
-        """Compute the edges for this shape."""
-        self._edges = [
-            (k, k+1)
-            for k in range(1, len(self.vertices) - 1)
-        ]
-        self._edges.append((len(self.vertices) - 1, 1))
 
 def point(x, y, z=0):
     """Returns a point.
@@ -649,32 +611,23 @@ def ellipse(coordinate, *args, mode=None):
 
     :type mode: str
 
-    :returns: An ellipse.
-    :rtype: Ellipse
+    :returns: An ellipse
+    :rtype: Arc
 
     """
     if mode is None:
         mode = _ellipse_mode
 
-    if mode == 'CORNER':
-        corner = Point(*coordinate)
-        dim = Point(*args)
-        center = (corner.x + (dim.x / 2), corner.y + (dim.y / 2), corner.z)
-    elif mode == 'CENTER':
-        center = Point(*coordinate)
-        dim = Point(args[0] / 2, args[1] / 2)
-    elif mode == 'RADIUS':
-        center = Point(*coordinate)
-        dim = Point(*args)
-    elif mode == 'CORNERS':
+    if mode == 'CORNERS':
         corner = Point(*coordinate)
         corner_2, = args
         corner_2 = Point(*corner_2)
-        dim = Point((corner_2.x - corner.x) / 2, (corner_2.y - corner.y) / 2)
-        center = (corner.x + dim.x, corner.y + dim.y)
+        width = corner_2.x - corner.x
+        height = corner_2.y - corner.y
+        mode = 'CORNER'
     else:
-        raise ValueError("Unknown ellipse mode {}".format(mode))
-    return Ellipse(center, dim)
+        width, height = args
+    return arc(coordinate, width, height, 0, math.pi * 2, 'CHORD', mode)
 
 def circle(coordinate, radius, mode=None):
     """Return a circle.
