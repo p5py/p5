@@ -1,4 +1,3 @@
-#
 # Part of p5: A Python package based on Processing
 # Copyright (C) 2017 Abhik Pal
 #
@@ -51,6 +50,89 @@ def to_hsb(r, g, b):
     saturation *= 255
     brightness *= 255
     return hue, saturation, brightness
+
+def parse_color(*args, color_mode='RGB', **kwargs):
+    """Parses a color from a range of different input formats.
+
+    This assumes that the args and kwargs are in the following form:
+
+    - gray
+    - gray, alpha = ...
+    - gray, alpha
+    - r, g, b
+    - h, s, v
+    - r, g, b, a
+    - h, s, v, a
+
+    - gray = ...
+    - gray = ..., alpha = ...
+    - r = ..., g = ..., b = ...,
+    - red = ..., green = ..., blue = ...,
+    - h = ..., s = ..., b = ...,
+    - hue = ..., saturation = ..., brightness = ...,
+    - r = ..., g = ..., b = ..., a = ...
+    - red = ..., green = ..., blue = ..., alpha = ...
+    - h = ..., s = ..., b = ..., a = ...
+    - hue = ..., saturation = ..., brightness = ..., alpha = ...
+
+    :param args: The positional arguments that define the color.
+    :type args: tuple
+
+    :param kwargs: The keyword arguments that define the color.
+    :type kwargs: dict
+
+    :returns: The color parsed as red, green, blue, alpha values.
+    :rtype: tuple
+
+    """
+
+    if 'alpha' in kwargs:
+        alpha = kwargs['alpha']
+    elif 'a' in kwargs:
+        alpha = kwargs['a']
+    else:
+        alpha = 255
+
+    if len(args) == 1:
+        gray = args[0]
+        red, green, blue = gray, gray, gray
+    elif len(args) == 2:
+        gray, alpha = args
+        red, green, blue =  gray, gray, gray
+    elif (len(args) == 3) and color_mode.startswith('RGB'):
+        red, green, blue = args
+    elif (len(args) == 3) and color_mode.startswith('HSB'):
+        hue, saturation, brightness = args
+        red, green, blue = to_rgb(hue, saturation, brightness)
+    elif (len(args) == 4) and color_mode.startswith('RGB'):
+        red, green, blue, alpha = args
+    elif (len(args) == 4) and color_mode.startswith('HSB'):
+        hue, saturation, value, alpha = args
+        red, green, blue = to_rgb(hue, saturation, value)
+    elif 'gray' in kwargs:
+        gray = kwargs['gray']
+        red, green, blue = gray, gray, gray
+    elif all(param in kwargs for param in ['red', 'green', 'blue']):
+        red = kwargs['red']
+        green = kwargs['green']
+        blue = kwargs['blue']
+    elif all(param in kwargs for param in ['r', 'g', 'b']):
+        red = kwargs['r']
+        green = kwargs['g']
+        blue = kwargs['b']
+    elif all(param in kwargs for param in ['hue', 'saturation', 'brightness']):
+        hue = kwargs['hue']
+        saturation = kwargs['saturation']
+        brightness = kwargs['brightness']
+        red, green, blue = to_rgb(hue, saturation, brightness)
+    elif all(param in kwargs for param in ['h', 's', 'b']):
+        hue = kwargs['h']
+        saturation = kwargs['s']
+        brightness = kwargs['b']
+        red, green, blue = to_rgb(hue, saturation, brightness)
+    else:
+        raise ValueError("Failed to parse color.")
+    return red, green, blue, alpha
 
 class Color:
     """Represents a color."""
@@ -136,39 +218,24 @@ class Color:
         grayscale.
 
         """
-
-        # # FORMULA:
-        # # https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
-        # #
-        # # REFERENCE:
-        # # https://www.w3.org/Graphics/Color/sRGB
-        # #
-        # # SAMPLE IMPLEMENTATION:
-        # # https://stackoverflow.com/questions/15686277/convert-rgb-to-grayscale-in-c#15686412
-        # linear_rgb = []
-        # for c in self._normalized[:3]:
-        #     if c <= 0.04045:
-        #         lvalue =  c / 12.92
-        #     else:
-        #         lvalue = ((c + 0.055) / 1.055) ** 2.4
-        #     linear_rgb.append(lvalue)
-
-        # coeffs = (0.2126, 0.7152, 0.0722)
-        # gray =  sum(l*c for l, c in zip(coeffs, linear_rgb))
-
-        # if (gray <= 0.0031308):
-        #     return 12.92 * gray * 255
-        # else:
-        #     return (1.055 * (gray ** 1/2.4) - 0.055) * 255
-
-        # Faster than the coloremetric algo. GIMP uses something similar.
+        # The formula we use to convert to grayscale is approximate
+        # and probably not as accurate as a proper coloremetric
+        # conversion. However, the number of calculations required is
+        # less and GIMP uses something similar so we should be fine.
         #
         # REFERENCES:
         #
         # - "Converting Color Images to B&W"
         #   <https://www.gimp.org/tutorials/Color2BW/>
+        #
         # - "Luma Coding in Video Systems" from "Grayscale"
         #   <https://en.wikipedia.org/wiki/Grayscale#Luma_coding_in_video_systems>
+        #
+        # - Wikipedia : Grayscale
+        #   <https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale>
+        #
+        # - Conversion to grayscale, sample implementation (StackOverflow)
+        # <https://stackoverflow.com/a/15686412>
         return 0.299 * self._red + 0.587 * self._green + 0.144 * self._blue
 
     @gray.setter
@@ -316,88 +383,3 @@ class Color:
         :rtype: str
         """
         raise NotImplementedError()
-
-    @staticmethod
-    def parse_color(*args, color_mode='RGB', **kwargs):
-        """Parses a color from a range of different input formats.
-
-        This assumes that the args and kwargs are in the following form:
-
-        - gray
-        - gray, alpha = ...
-        - gray, alpha
-        - r, g, b
-        - h, s, v
-        - r, g, b, a
-        - h, s, v, a
-
-        - gray = ...
-        - gray = ..., alpha = ...
-        - r = ..., g = ..., b = ...,
-        - red = ..., green = ..., blue = ...,
-        - h = ..., s = ..., b = ...,
-        - hue = ..., saturation = ..., brightness = ...,
-        - r = ..., g = ..., b = ..., a = ...
-        - red = ..., green = ..., blue = ..., alpha = ...
-        - h = ..., s = ..., b = ..., a = ...
-        - hue = ..., saturation = ..., brightness = ..., alpha = ...
-
-        :param args: The positional arguments that define the color.
-        :type args: tuple
-
-        :param kwargs: The keyword arguments that define the color.
-        :type kwargs: dict
-
-        :returns: The color parsed as red, green, blue, alpha values.
-        :rtype: tuple
-
-        """
-
-        if 'alpha' in kwargs:
-            alpha = kwargs['alpha']
-        elif 'a' in kwargs:
-            alpha = kwargs['a']
-        else:
-            alpha = 255
-
-        if len(args) == 1:
-            gray = args[0]
-            red, green, blue = gray, gray, gray
-        elif len(args) == 2:
-            gray, alpha = args
-            red, green, blue =  gray, gray, gray
-        elif (len(args) == 3) and color_mode.startswith('RGB'):
-            red, green, blue = args
-        elif (len(args) == 3) and color_mode.startswith('HSB'):
-            hue, saturation, brightness = args
-            red, green, blue = to_rgb(hue, saturation, brightness)
-        elif (len(args) == 4) and color_mode.startswith('RGB'):
-            red, green, blue, alpha = args
-        elif (len(args) == 4) and color_mode.startswith('HSB'):
-            hue, saturation, value, alpha = args
-            red, green, blue = to_rgb(hue, saturation, value)
-        elif 'gray' in kwargs:
-            gray = kwargs['gray']
-            red, green, blue = gray, gray, gray
-        elif all(param in kwargs for param in ['red', 'green', 'blue']):
-            red = kwargs['red']
-            green = kwargs['green']
-            blue = kwargs['blue']
-        elif all(param in kwargs for param in ['r', 'g', 'b']):
-            red = kwargs['r']
-            green = kwargs['g']
-            blue = kwargs['b']
-        elif all(param in kwargs for param in ['hue', 'saturation', 'brightness']):
-            hue = kwargs['hue']
-            saturation = kwargs['saturation']
-            brightness = kwargs['brightness']
-            red, green, blue = to_rgb(hue, saturation, brightness)
-        elif all(param in kwargs for param in ['h', 's', 'b']):
-            hue = kwargs['h']
-            saturation = kwargs['s']
-            brightness = kwargs['b']
-            red, green, blue = to_rgb(hue, saturation, brightness)
-        else:
-            raise ValueError("Failed to parse color.")
-        return red, green, blue, alpha
-
