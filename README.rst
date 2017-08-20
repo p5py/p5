@@ -56,6 +56,7 @@ Python installed, you can run:
 
 .. code:: bash
 
+   $ pip install numpy
    $ pip install p5 --user
 
 to install p5.
