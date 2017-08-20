@@ -42,7 +42,8 @@ The p5 documentation is organized into the following sections:
   understanding of p5 and/or Processing.
 
 - The :doc:`Reference <reference/index>` provides a detailed overview
-  of the complete p5 API.
+  of the complete p5 api. Code examples accompanying the reference can
+  be found in the `references` directory in the p5 examples.
 
 In addition to this documentation, we've also written and ported many
 Processing examples and reference sketches to p5. Visit the `examples
