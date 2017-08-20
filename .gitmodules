@@ -1,3 +1,0 @@
-[submodule "docs/_static/examples"]
-	path = docs/_static/examples
-	url = git@github.com:p5py/p5-examples.git
