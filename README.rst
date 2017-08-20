@@ -6,110 +6,75 @@
 p5
 ===
 
-p5 is a Python library that provides high level functions to work with
-graphics. p5 combines the core ideas of Processing — learning to code
-in a visual context — with Python's readability to make programming
-more accessible to beginners and artists.
-
-There's a lot of work happening on p5 right now; it is being developed
-by `Abhik Pal <https://github.com/abhikpal>`_ as a `project
-<https://summerofcode.withgoogle.com/projects/#5809403503575040>`_ for
-the `Google Summer of Code 2017
-<https://summerofcode.withgoogle.com/>`_. `Manindra Moharana
-<http://www.mkmoharana.com/>`_ of the `Processing Foundation
-<https://processingfoundation.org/>`_ is mentoring the project.
-
-Documentation for the project is available at `p5.readthedocs.io
-<http://p5.readthedocs.io/>`_ and `p5py.github.io
-<https://p5py.github.io/>`_ has links to other relevant resources.
-
-If you've found a bug in p5, please file it under the `"Issues" tab
-<https://github.com/p5py/p5/issues>`_ for this repository. For now,
-you can also use the issues tab to propose new features. Please read
-the relevant section from the `Contributing <CONTRIBUTING.rst>`_ file
-before opening an issue.
-
+p5 is a Python library that provides high level drawing functionality
+to help you quickly create simulations and interactive art using
+Python. It combines the core ideas of `Processing
+<https://processing.org/>`_ — learning to code in a visual context —
+with Python's readability to make programming more accessible to
+beginners, educators, and artists.
 
 Example
 -------
 
-p5 borrows Processing's metaphor of software "sketches". A typical
-sketch looks like:
+.. image:: docs/_static/readme.gif
+
+p5 programs are called "sketches" and are run as any other Python
+program. The sketch above, for instance, draws a circle at the mouse
+location that gets a random reddish color when the mouse is pressed
+and is white otherwise; the size of the circle is chosen randomly. The
+Python code for the sketch looks like:
 
 .. code:: python
 
-    from p5 import *
+   from p5 import *
 
-    background_color = (0.1, 0.1, 0.1, 1.0)
+   def setup():
+       size(640, 360)
+       no_stroke()
+       background(204)
 
-    def setup():
-        size(800, 600)
-        title("Example Sketch")
-        no_stroke()
+   def draw():
+       if mouse_is_pressed:
+           fill(random_uniform(255), random_uniform(127), random_uniform(51), 127)
+       else:
+           fill(255, 15)
 
-    def draw():
-        scale(2.0)
-        background(*background_color)
+       circle_size = random_uniform(low=10, high=80)
 
-        with push_matrix():
-            translate(160, 150)
+       circle((mouse_x, mouse_y), circle_size)
 
-            fill(1.0, 0.6, 0.0, 1.0)
-            square((-30, -30), 60)
-            square((-30, -50), 20)
+   def key_pressed(event):
+       background(204)
 
-            fill(*background_color)
-            square((-10, -10), 20)
-
-        with push_matrix():
-            translate(240, 170)
-
-            fill(1.0, 0.8, 0.0, 1.0)
-            rect((-30, -50), 60, 100)
-
-            fill(*background_color)
-            rect((-30, -30), 40, 20)
-            rect((-10, 10), 40, 20)
-
-    if __name__ == '__main__':
-        run()
-           
-...and, when run, produces:
-
-.. image:: docs/_static/example_output.png
-   :align: center
-   :alt: Sample sketch output
-
+   run()
 
 Installation
 ------------
 
-p5 requires Python 3. Once you have that installed, you can then run
+p5 requires Python 3 to run. Once you have the correct version of
+Python installed, you can run:
 
 .. code:: bash
 
-   pip install p5
+   $ pip install p5 --user
 
-from the command line. p5 includes a test script and you can run
-
-.. code:: python
-
-   >>> import p5
-   >>> p5.sketch.test_run()
-
-from the interactive prompt to view the test render.
+to install p5.
 
 
 Features Roadmap
 ----------------
 
-For the next couple of months, we plan to focus on the following
-features:
+Our end goal is to create a Processing-like API for Python. However,
+instead of being a strict port of the original Processing API, we will
+also try to extend it and use Python's goodness whenever we can.
+
+For now, though, we plan to focus on the following features:
 
 #. Support most 2D drawing primitives and related utility functions
-   from the Processing API (the `Project Status wiki page
-   <https://github.com/p5py/p5/wiki/Project-Status>`_ for this repo
-   has a proper checklist.)
+   from the Processing API (as of the latest release, this is almost
+   done).
+
+#. Support other parts of the Processing API: images, fonts, etc.
 
 #. Port relevant tutorials and reference material from Processing's
    documentation.
@@ -131,10 +96,9 @@ source projects:
   project. Licensed under LGPL v2.1. See `LICENSES/lgpl-2.1.txt
   <LICENSES/lgpl-2.1.txt>`_ for the full license text.
 
-- Alex Holkner's `pyeuclid
-  <https://code.google.com/archive/p/pyeuclid/>`_. Licensed under LGPL
-  v2.1. See `LICENSES/lgpl-2.1.txt <LICENSES/lgpl-2.1.txt>`_ for the
-  full license text.
+- Code from the `Glumpy <http://glumpy.github.io/>`_ project See
+  `LICENSES/glumpy.txt` for the full license text from the Glumpy
+  project.
 
 All licenses for these external components are available in the
 ``LICENSES`` folder.
