@@ -1,4 +1,4 @@
-.. image :: docs/_static/processing-header-thin.png
+.. image :: https://github.com/p5py/p5/raw/develop/docs/_static/processing-header-thin.png
     :width: 100%
     :align: center
     :alt: ---
@@ -16,7 +16,7 @@ beginners, educators, and artists.
 Example
 -------
 
-.. image:: docs/_static/readme.gif
+.. image:: https://github.com/p5py/p5/blob/develop/docs/_static/readme.gif
 
 p5 programs are called "sketches" and are run as any other Python
 program. The sketch above, for instance, draws a circle at the mouse
@@ -103,7 +103,7 @@ source projects:
 All licenses for these external components are available in the
 ``LICENSES`` folder.
 
-.. image :: docs/_static/processing-header-thin.png
+.. image :: https://github.com/p5py/p5/raw/develop/docs/_static/processing-header-thin.png
     :width: 100%
     :align: center
     :alt: ---
