@@ -31,7 +31,7 @@ setup(
     url=meta_data['__url__'],
     author_email=meta_data['__author_email__'],
     license=meta_data['__license__'],
-    packages=packages,
+    packages=find_packages(),
     package_data={'': ['LICENSE'], },
     package_dir={'p5': 'p5'},
     include_package_data=True,
