@@ -13,15 +13,18 @@ Once you have Python 3 installed, you can proceed to install p5.
 pip install p5
 --------------
 
-To get the latest release from the Python Package Index, run the
-following command in the terminal:
+p5 requires numpy to run, so install that first.
 
 .. code:: bash
 
-   $ pip install p5 --user
+   $ pip install numpy
 
-p5 requires numpy as dependency and pip should try to install it
-automatically. If the numpy installation fails, you might consider
-getting the `Anaconda Python distribution
-<https://www.continuum.io/downloads>`_ and then trying to install
-p5.
+If the numpy installation fails, you might consider getting the
+`Anaconda Python distribution <https://www.continuum.io/downloads>`_
+and then trying to install p5. Once numpy as been successfully
+installed, you can proceed to install p5:
+
+.. code:: bash
+
+   $ pip install numpy --user
+   $ pip install p5 --user
