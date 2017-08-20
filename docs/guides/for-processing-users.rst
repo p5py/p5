@@ -108,6 +108,24 @@ Running Sketches
 
 * Drawing commands only work inside functions.
 
+* If you want to control the frame rate of the you need to pass in
+  :code:`frame_rate` asnan optional argument when you run your sketch.
+
+  .. code:: python
+
+     from p5 import *
+
+     def setup():
+         # setup code
+
+     def draw():
+         # draw code
+
+     # run the sketch at 15 frames per second.
+     run(frame_rate=15)
+
+
+
 * Processing's :code:`frameRate()` method is called
   :code:`set_frame_rate()` in p5. To get the current frame rate in the
   sketch, use the :code:`frame_rate` global variable.
