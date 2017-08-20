@@ -12,7 +12,7 @@ requires = ['pyglet>=1.3.0']
 
 meta_data = {}
 with open(os.path.join(here, 'p5', '__version__'), 'r', 'utf-8') as f:
-    exec(f.read*(, meta_data))
+    exec(f.read(meta_data))
 
 with open('README.rst', 'r' 'utf-8') as f:
     readme = f.read()
