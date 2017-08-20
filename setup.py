@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import sys
 
@@ -8,13 +10,16 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 packages = ['p5']
 
-requires = ['pyglet>=1.3.0']
+requires = [
+    'pyglet',
+    'numpy'
+]
 
 meta_data = {}
 with open(os.path.join(here, 'p5', '__version__.py'), 'r', encoding='utf-8') as f:
     exec(f.read(), meta_data)
 
-with open('README.rst', 'r' encoding='utf-8') as f:
+with open('README.rst', 'r', encoding='utf-8') as f:
     readme = f.read()
 
 setup(
@@ -30,5 +35,7 @@ setup(
     package_data={'': ['LICENSE'], },
     package_dir={'p5': 'p5'},
     include_package_data=True,
+
+    setup_requires=['numpy'],
     install_requires=requires,
 )
