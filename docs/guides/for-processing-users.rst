@@ -287,18 +287,6 @@ Math
 * The mean and standard deviation value can be specified while calling
   :code:`random_gaussian()`
 
-* p5 *does* provide the :code:`pow()` function to raise a value to
-  some exponent. However, use of Python's inbuilt power operator is
-  recommended instead of calling the :code:`pow()` function.
-
-  .. code:: python
-
-     # Bad:
-     cube_of_four = pow(4, 3)
-
-     # Good:
-     cube_of_four = 4 ** 3
-
 * The distance function takes in two tuples as inputs. So, the
   following Processing call:
 
