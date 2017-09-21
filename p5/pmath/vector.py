@@ -408,7 +408,7 @@ class Vector(Point):
     def random_2D(cls):
         """Return a random 2D unit vector.
         """
-        x, y = np.random.random(2)
+        x, y = 2 * (np.random.random(2) - 0.5)
         vec = cls(x, y)
         vec.normalize()
         return vec
