@@ -177,8 +177,8 @@ class MouseEvent(Event):
     """
     def __init__(self, action, x, y, change=(0, 0), scroll=(0, 0),
                  buttons=None, modifiers=0, handler_name=None):
-        self.x = x
-        self.y = builtins.height - y
+        self.x = max(min(builtins.width, x), 0)
+        self.y = max(min(builtins.height, builtins.height - y), 0)
 
         self.position = Position(self.x, self.y)
         self.change = Position(*change)
