@@ -203,8 +203,8 @@ class MouseEvent(Event):
     def _update_globals(self):
         builtins.pmouse_x = builtins.mouse_x
         builtins.pmouse_y = builtins.mouse_y
-        builtins.mouse_x = self.x
-        builtins.mouse_y = self.y
+        builtins.mouse_x = max(self.x, 0)
+        builtins.mouse_y = max(self.y, 0)
         builtins.mouse_button = self.button
         if self.action == 'PRESS':
             builtins.mouse_is_pressed = True
