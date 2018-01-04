@@ -29,13 +29,14 @@ pyglet.options["shadow_window"] = False
 from ..opengl import renderer
 
 __all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
-           'title', 'no_cursor', 'cursor', 'exit',]
+           'vsync', 'title', 'no_cursor', 'cursor', 'exit',]
 
 builtins.width = 360
 builtins.height = 360
 builtins.title = "p5"
 builtins.frame_count = -1
 builtins.frame_rate = 30
+builtins.vsync_setting = True
 last_recorded_time = time.time()
 
 builtins.pixel_width = 1
@@ -58,7 +59,7 @@ window = pyglet.window.Window(
     caption=builtins.title,
     resizable=False,
     visible=False,
-    vsync=False,
+    vsync=builtins.vsync_setting,
     config=config,
 )
 
@@ -152,6 +153,16 @@ def size(width, height):
     builtins.width = int(width)
     builtins.height = int(height)
     window.set_size(width, height)
+
+def vsync(new_setting):
+    """Enable or disable vertical sync control
+
+    :param new_setting: switch for controlling vsync.
+    :type new_setting: bool
+
+    """
+    builtins.vsync_setting = bool(new_setting)
+    window.set_vsync(bool(new_setting))
 
 def title(new_title):
     """Set the title of the p5 window.
