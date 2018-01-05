@@ -75,9 +75,9 @@ class Shape:
     :param kind: The type of this shape. Should be one of {'POLY', ...}
     :type kind: str
 
-    :param vertices: A list of vertices (3-tuples) that make up the
-        shape.
-    :type vertices: list of tuples
+    :param vertices: A list of vertices (Point named-tuples) that make
+        up the shape.
+    :type vertices: list of named-tuples (of type `Point`)
 
     :param edges: A list of indices into the vertices list that
         represent edges. (Defaults to the empty list `[]`)
