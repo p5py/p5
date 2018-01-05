@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017 Abhik Pal
+# Copyright (C) 2017-2018 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,4 +23,4 @@ __version__ = '0.3.0a2'
 __author__ = 'Abhik Pal'
 __author_email__ = 'theabhikpal@gmail.com'
 __license__ = ' GNU GPLv3'
-__copyright__ = 'Copyright (C) 2017 Abhik Pal'
+__copyright__ = 'Copyright (C) 2017-2018 Abhik Pal'
