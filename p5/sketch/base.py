@@ -230,6 +230,8 @@ def update(dt):
                     window.set_visible(True)
             else:
                 draw()
+                if saveframes==True:
+                    pyglet.image.get_buffer_manager().get_color_buffer().save(filename= str(builtins.frame_count) +'.png')
                 redraw = False
         for function, event in handler_queue:
             function(event)
@@ -251,7 +253,7 @@ def fix_handler_interface(func):
     else:
         return func
 
-def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
+def run(sketch_setup=None, sketch_draw=None, frame_rate=60, save = False):
     """Run a sketch.
 
     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
@@ -271,7 +273,8 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     """
     global draw
     global setup
-
+    global saveframes
+    saveframes = save
     if sketch_setup is not None:
         setup = sketch_setup
     elif hasattr(__main__, 'setup'):
