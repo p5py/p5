@@ -26,9 +26,11 @@ import time
 import pyglet
 pyglet.options["shadow_window"] = False
 
+import re
+
 from ..opengl import renderer
 
-__all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
+__all__ = ['setup', 'draw', 'saveFrame', 'run', 'no_loop', 'loop', 'redraw', 'size',
            'title', 'no_cursor', 'cursor', 'exit',]
 
 builtins.width = 360
@@ -44,6 +46,9 @@ builtins.pixel_height = 1
 platform = pyglet.window.get_platform()
 display = platform.get_default_display()
 screen = display.get_default_screen()
+
+saveflag = False
+filename_flag = False
 
 template = pyglet.gl.Config(samples_buffers=1, samples=2)
 try:
@@ -214,6 +219,8 @@ def on_draw():
 def update(dt):
     global handler_queue
     global redraw
+    global saveflag
+    global filename_flag
     global setup_done
     global last_recorded_time
 
@@ -230,6 +237,15 @@ def update(dt):
                     window.set_visible(True)
             else:
                 draw()
+                if saveflag==True:
+                    if filename_flag == True:
+                        regex = re.compile(r'(#)+')
+                        set_fname = lambda x: fname[:regex.search(fname).start()] + \
+                                      str(x).zfill(len(regex.search(fname).group())) + \
+                                      fname[regex.search(fname).end():]
+                    else:
+                        set_fname = lambda x: "screen-" + str(x).zfill(4) + ".tif"
+                    _saveFrame(set_fname(builtins.frame_count))
                 redraw = False
         for function, event in handler_queue:
             function(event)
@@ -271,7 +287,6 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     """
     global draw
     global setup
-
     if sketch_setup is not None:
         setup = sketch_setup
     elif hasattr(__main__, 'setup'):
@@ -304,3 +319,15 @@ def draw_shape(shape):
     # Add a check that insures that we don't call the renderer
     # directly while drawing a shape.
     renderer.render(shape)
+
+def saveFrame(filename = None):
+    global saveflag
+    global filename_flag
+    global fname
+    saveflag = True
+    if filename is not None:
+        filename_flag = True
+        fname = filename
+
+def _saveFrame(fname):
+    pyglet.image.get_buffer_manager().get_color_buffer().save(filename= fname)
