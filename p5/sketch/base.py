@@ -43,7 +43,8 @@ builtins.pixel_height = 1
 
 display = pyglet.canvas.get_display()
 screen = display.get_default_screen()
-config = screen.get_best_config()
+template = pyglet.gl.Config(double_buffer=1, sample_buffers=1)
+config = screen.get_best_config(template)
 
 window = pyglet.window.Window(
     width=builtins.width,
