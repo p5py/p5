@@ -318,7 +318,8 @@ class Vector(Point):
         :rtype: float
 
         """
-        return np.arccos((np.dot(self, other)) / (self.magnitude * other.magnitude))
+        return np.arccos((np.dot(self._array, other._array)) /
+                         (self.magnitude * other.magnitude))
 
     @property
     def magnitude(self):
@@ -342,7 +343,7 @@ class Vector(Point):
             Vector(0.29, 0.43, 0.86)
 
         """
-        return np.sqrt(np.dot(self, self))
+        return np.sqrt(np.dot(self._array, self._array))
 
     @magnitude.setter
     def magnitude(self, new_magnitude):
@@ -352,7 +353,7 @@ class Vector(Point):
     @property
     def magnitude_sq(self):
         """The squared magnitude of the vector."""
-        return np.dot(self, self)
+        return np.dot(self._array, self._array)
 
     @magnitude_sq.setter
     def magnitude_sq(self, new_magnitude_sq):
