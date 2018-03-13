@@ -366,7 +366,7 @@ class Vector(Point):
     def normalize(self):
         """Set the magnitude of the vector to one."""
         if self.magnitude == 0.0:
-            raise ValueError('Cannot normalize vector having magnitude 0')
+            raise ValueError("Vector has magnitude 0; can't normalize.")
         self.magnitude = 1
 
     def limit(self, upper_limit=None, lower_limit=None):
