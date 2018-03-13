@@ -93,7 +93,7 @@ class Vector(Point):
         :rtype: float
 
         """
-        return np.square(np.sum((self._array - other._array) ** 2))
+        return np.sqrt(np.sum((self._array - other._array) ** 2))
 
     dist = distance
 
