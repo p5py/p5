@@ -41,9 +41,9 @@ def typecast_arguments_as_points(func):
     """Typecast all but the last argument of the function as Points."""
     @wraps(func)
     def decorated(*args, **kwargs):
-        parameter = args[-1]
         new_args = [Point(*arg) for arg in args[:-1]]
-        ret_value = func(*new_args, parameter, **kwargs)
+        new_args.append(args[-1])
+        ret_value = func(*new_args, **kwargs)
         return ret_value
     return decorated
 
