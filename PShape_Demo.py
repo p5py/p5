@@ -19,7 +19,7 @@ def draw():
     s.vertex(100, 10)
     s.endShape(CLOSE)
     s.setVertex(2, (100 + (millis()//10)% 500), 100)
-#    s.setVertex(2, random_uniform(100,600), random_uniform(100,600))
+#    s.setVertex(2, random_uniform(100,600), random_uniform(100,300))
 #    s.setVertex(2, mouse_x if mouse_x>100 else 100, mouse_y if mouse_y>100 else 100)
     print(s.getVertex(2))
     s.shape()
