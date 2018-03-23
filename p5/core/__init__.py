@@ -21,3 +21,4 @@ from .transforms import *
 from .color import *
 from .image import *
 from .attribs import *
+from .PShape import *
