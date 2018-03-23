@@ -1,6 +1,7 @@
 #py#
 # Part of p5: A Python package based on Processing
 # Copyright (C) 2017 Abhik Pal
+# Copyright (C) 2018 Aliabbas Merchant
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +51,6 @@ BOX = 41  # primitive
 
 class PShape():
     def __init__(self, vertices, kind='POLY', p=None):
-        # super().__init__(vertices, kind=kind)
         self._stroke = True
         self._stroke_color = (1,1,1)
         self._filled = True
@@ -92,7 +92,6 @@ class PShape():
             if len(args) == 1:
                 if isinstance(args[0], Vector):
                     self._vertices[index] = args[0]  # Vector/point tuple
-                    # self._vertices[index] = Vector(*args)  # Vector/point tuple
             elif len(args) == 2:
                 self._vertices[index] = Vector(*args)  # x, y
             elif len(args) == 3:
@@ -119,12 +118,6 @@ class PShape():
 
     def getVertexCount(self):
         return len(self._vertices)
-
-    # def loadShape(self):
-    #     raise NotImplementedError()
-    #
-    # def attachChild(self):
-    #     raise NotImplementedError()
 
     def __repr__(self):
         return "PShape: type={}".format(self._kind)
