@@ -29,7 +29,7 @@ pyglet.options["shadow_window"] = False
 from ..opengl import renderer
 
 __all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
-           'title', 'no_cursor', 'cursor', 'exit',]
+           'title', 'no_cursor', 'cursor', 'exit','start_time',]
 
 builtins.width = 360
 builtins.height = 360
@@ -37,6 +37,7 @@ builtins.title = "p5"
 builtins.frame_count = -1
 builtins.frame_rate = 30
 last_recorded_time = time.time()
+start_time = None
 
 builtins.pixel_width = 1
 builtins.pixel_height = 1
@@ -289,6 +290,8 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
 
     renderer.initialize(window.context)
     pyglet.clock.schedule_interval(update, 1 / max(frame_rate, 1))
+    global start_time
+    start_time = int(round(time.time()*1000))
     pyglet.app.run()
 
 
