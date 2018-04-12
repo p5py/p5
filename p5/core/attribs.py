@@ -24,7 +24,7 @@ from .structure import push_style
 from .transforms import push_matrix
 
 __all__ = [ 'background', 'fill', 'no_fill',
-            'stroke', 'no_stroke', 'tint', 'no_tint' ]
+            'stroke', 'stroke_weight', 'no_stroke', 'tint', 'no_tint' ]
 
 def fill(*fill_args, **fill_kwargs):
     """Set the fill color of the shapes.
@@ -67,6 +67,9 @@ def stroke(*color_args, **color_kwargs):
     stroke_color = Color(*color_args, **color_kwargs)
     renderer.stroke_enabled = True
     renderer.stroke_color = stroke_color.normalized
+
+def stroke_weight(weight):
+    renderer.stroke_weight = abs(round(weight))
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""
