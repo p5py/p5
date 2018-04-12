@@ -326,11 +326,38 @@ def line(p1, p2):
     :rtype: Shape
 
     """
+    stroke_weight = sketch.renderer.stroke_weight
+    if stroke_weight == 0: return
+
+    if p1[1] == p2[1]:
+        y = p1[1]
+        p1_2 = (p1[0], y+stroke_weight-1)
+        p1 = (p1[0], y-stroke_weight+1)
+        p2_2 = (p2[0], y + stroke_weight - 1)
+        p2 = (p2[0], y - stroke_weight + 1)
+
+    elif p1[0] == p2[0]:
+        x = p1[0]
+        p1_2 = (x + stroke_weight - 1, p1[1])
+        p1 = (x - stroke_weight + 1, p1[1])
+        p2_2 = (x + stroke_weight - 1, p2[1])
+        p2 = (x - stroke_weight + 1, p2[1])
+
+    else:
+        slope = (p2[1]-p1[1])/(p2[0]-p1[0])
+        ang = math.atan(-1/slope)
+
+        p1_2, p1, p2_2, p2 = [(math.ceil(i*stroke_weight*math.cos(ang) + p[0]),
+                               math.ceil(-i*stroke_weight*math.sin(ang) + p[1]))
+                              for i, p in zip((-1,1,-1,1), (p1,p1,p2,p2))]
+
     path = [
         Point(*p1),
+        Point(*p1_2),
+        Point(*p2_2),
         Point(*p2)
     ]
-    return Shape(path, kind='PATH')
+    return Shape(path)
 
 def bezier(start, control_point_1, control_point_2, stop):
     """Return a bezier path defined by two control points.

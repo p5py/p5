@@ -56,6 +56,8 @@ fill_enabled = True
 stroke_color = COLOR_BLACK
 stroke_enabled = True
 
+stroke_weight = 1
+
 ## Renderer Globals
 ## VIEW MATRICES, ETC
 ##
