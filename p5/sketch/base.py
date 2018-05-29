@@ -41,16 +41,10 @@ last_recorded_time = time.time()
 builtins.pixel_width = 1
 builtins.pixel_height = 1
 
-platform = pyglet.window.get_platform()
-display = platform.get_default_display()
+display = pyglet.canvas.get_display()
 screen = display.get_default_screen()
-
-template = pyglet.gl.Config(samples_buffers=1, samples=2)
-try:
-    config = screen.get_best_config(template)
-except pyglet.window.NoSuchConfigException:
-    template = pyglet.gl.Config()
-    config = screen.get_best_config(template)
+template = pyglet.gl.Config(double_buffer=1, sample_buffers=1)
+config = screen.get_best_config(template)
 
 window = pyglet.window.Window(
     width=builtins.width,
@@ -61,6 +55,10 @@ window = pyglet.window.Window(
     vsync=False,
     config=config,
 )
+
+actual_width, actual_height = window.get_viewport_size()
+builtins.pixel_x_density = actual_width / builtins.width
+builtins.pixel_y_density = actual_height / builtins.height
 
 window.set_minimum_size(100, 100)
 

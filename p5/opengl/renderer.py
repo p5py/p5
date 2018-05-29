@@ -159,7 +159,12 @@ def reset_view():
     global projection_matrix
     global viewport
 
-    viewport = (0, 0, builtins.width, builtins.height)
+    viewport = (
+        0,
+        0,
+        int(builtins.width * builtins.pixel_x_density),
+        int(builtins.height * builtins.pixel_y_density)
+    )
     gl.glViewport(*viewport)
 
     cz = (builtins.height / 2) / math.tan(math.radians(30))
