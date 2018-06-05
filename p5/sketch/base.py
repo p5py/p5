@@ -56,11 +56,13 @@ window = pyglet.window.Window(
     config=config,
 )
 
-actual_width, actual_height = window.get_viewport_size()
-builtins.pixel_x_density = actual_width / builtins.width
-builtins.pixel_y_density = actual_height / builtins.height
+def _window_setup():
+    global window
+    actual_width, actual_height = window.get_viewport_size()
+    builtins.pixel_x_density = actual_width / builtins.width
+    builtins.pixel_y_density = actual_height / builtins.height
 
-window.set_minimum_size(100, 100)
+    window.set_minimum_size(100, 100)
 
 # DO NOT REMOVE THIS
 #
@@ -269,6 +271,8 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     """
     global draw
     global setup
+
+    _window_setup()
 
     if sketch_setup is not None:
         setup = sketch_setup
