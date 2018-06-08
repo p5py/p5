@@ -61,7 +61,6 @@ builtins.title = "p5"
 
 builtins.frame_count = -1
 
-builtins.key_is_pressed = False
 
 builtins.focused = False
 
@@ -115,6 +114,11 @@ class Event:
         self._active = active
         self._raw = raw_event
 
+    @property
+    def modifiers(self):
+        return self._modifiers
+
+
     def is_shift_down(self):
         """Was shift held down during the event?
 
@@ -158,9 +162,67 @@ class Event:
     def _update_builtins(self):
         pass
 
+
+class Key:
+    """A higher level abstraction over a single key press.
+
+    :param name: The name of the key; ENTER, BACKSPACE, etc.
+    :type name: str
+
+    :param text: The text associated with the given key. This
+        corresponds to the symbol that will be "typed" by the given
+        key.
+    :type name: str
+
+    """
+    def __init__(self, name, text=''):
+        self.name = name.upper()
+        self.text = text
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return other == self.name or other == self.text
+        return self.name == other.name and self.text == other.text
+
+    def __neq__(self, other):
+        return not (self == other)
+
+    def __str__(self):
+        if self.text.isalnum():
+            return self.text
+        else:
+            return self.name
+
+    def __repr__(self):
+        return "Key({})".format(self.name)
+
+
 class KeyEvent(Event):
+    """Encapsulates information about a key event.
+
+    :param key: The key associated with this event.
+    :type key: str
+
+    :param pressed: Specifies whether the key is held down or not.
+    :type pressed: bool
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self._raw.key is not None:
+            self.key = Key(self._raw.key.name, self._raw.text)
+        else:
+            self.key = Key('UNKNOWN')
+
+    @property
+    def pressed(self):
+        return self._active
+
     def _update_builtins(self):
-        builtins.key_is_pressed = self._active
+        builtins.key_is_pressed = self.pressed
+        builtins.key = self.key if self.pressed else None
+
 
 class MouseButton:
     """A simple class to work with mouse buttons."""
@@ -175,11 +237,15 @@ class MouseButton:
         # +-- NO? Nothing to be done. Let the error bubble up...
         return self._buttons == other._buttons
 
+    def __neq__(self, other):
+        return not (self == other)
+
     def __repr__(self):
         fstr = ', '.join(button_inv_map[bt] for bt in self._buttons)
         return "MouseButton({})".format(fstr)
 
     __str__ = __repr__
+
 
 class MouseEvent(Event):
     """A class that encapsulates information about a mouse event.
