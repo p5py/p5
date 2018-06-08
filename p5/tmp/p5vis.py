@@ -72,6 +72,8 @@ builtins.mouse_button = None
 builtins.mouse_is_pressed = False
 builtins.mouse_is_dragging = False
 
+builtins.key = None
+builtins.key_is_pressed = False
 
 # HELPER FUNCTIONS, ETC ================================================
 
@@ -101,14 +103,21 @@ def _dummy(*args, **kwargs):
     """
     pass
 
-def reset_builtins():
-    builtins.mouse_button = None
-    builtins.mouse_is_pressed = False
-    builtins.mouse_is_dragging = False
 
 # SKETCH EVENTS ========================================================
 
 class Event:
+    """A generic sketch event.
+
+    :param modifers: The set of modifiers held down at the time of the
+        event.
+    :type modifiers: str list
+
+    :param pressed: If the key/button is held down when the event
+        occurs.
+    :type pressed: bool
+
+    """
     def __init__(self, raw_event, active=False):
         self._modifiers = list(map(lambda k: k.name, raw_event.modifiers))
         self._active = active
@@ -118,6 +127,9 @@ class Event:
     def modifiers(self):
         return self._modifiers
 
+    @property
+    def pressed(self):
+        return self._active
 
     def is_shift_down(self):
         """Was shift held down during the event?
@@ -135,8 +147,6 @@ class Event:
         :rtype: bool
 
         """
-        # MOD_ACCEL maps to MOD_COMMAND on Mac and to ctrl on windows
-        # and X-systems.
         return 'Control' in self._modifiers
 
     def is_alt_down(self):
@@ -144,8 +154,6 @@ class Event:
 
         :returns: True if the alt-key was held down.
         :rtype: bool
-
-        :note: This isn't available on a Mac.
 
         """
         return 'Alt' in self._modifiers
@@ -215,10 +223,6 @@ class KeyEvent(Event):
         else:
             self.key = Key('UNKNOWN')
 
-    @property
-    def pressed(self):
-        return self._active
-
     def _update_builtins(self):
         builtins.key_is_pressed = self.pressed
         builtins.key = self.key if self.pressed else None
@@ -276,10 +280,6 @@ class MouseEvent(Event):
     :param button: Button information at the time of the event.
     :type button: MouseButton
 
-    :param modifiers: The modifier keys pressed at the time of the
-        event.
-    :type modifiers: str list
-
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -303,22 +303,22 @@ class MouseEvent(Event):
 
         self.count = self.scroll.y
         self.button = MouseButton(self._raw.buttons)
-        self.modifiers = self._modifiers
 
     def _update_builtins(self):
         builtins.pmouse_x = builtins.mouse_x
         builtins.pmouse_y = builtins.mouse_y
         builtins.mouse_x = self.x
         builtins.mouse_y = self.y
-        builtins.mouse_button = self.button
         builtins.mouse_is_pressed = self._active
         builtins.mouse_is_dragging = (self.change == (0, 0))
+        builtins.mouse_button = self.button if self.pressed else None
 
     def __repr__(self):
-        press = 'pressed' if self._active else 'not-pressed'
+        press = 'pressed' if self.pressed else 'not-pressed'
         return "MouseEvent({} at {})".format(press, self.position)
 
     __str__ = __repr__
+
 
 # MAIN SKETCH CLASS ====================================================
 
@@ -433,7 +433,6 @@ def size(width, height):
     builtins.height = int(height)
     default_sketch.size = (builtins.width, builtins.height)
 
-
 def no_loop():
     """Stop draw() from being continuously called.
 
@@ -498,6 +497,10 @@ def exit(*args, **kwargs):
         `exit()` function.
     """
     default_sketch.show(visible=False)
+
+    # renderer clean-up
+    ...
+
     app.quit()
     builtins.exit(*args, **kwargs)
 
@@ -550,10 +553,6 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
 
     default_sketch.show()
     default_sketch.timer.start()
-
-    ## TEST CODE - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     app.run()
     exit()
