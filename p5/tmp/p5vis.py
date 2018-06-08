@@ -25,6 +25,28 @@ import vispy
 from vispy import app
 from vispy import gloo
 
+from collections import namedtuple
+from enum import IntEnum
+
+class VispyButton(IntEnum):
+    LEFT = 1
+    RIGHT = 2
+    MIDDLE = 3
+
+button_map = {
+    'CENTER': VispyButton.MIDDLE,
+    'MIDDLE': VispyButton.MIDDLE,
+    'LEFT':  VispyButton.LEFT,
+    'RIGHT': VispyButton.RIGHT,
+}
+
+button_inv_map = {
+    VispyButton.LEFT: 'LEFT',
+    VispyButton.RIGHT: 'RIGHT',
+    VispyButton.MIDDLE: 'MIDDLE',
+}
+
+Position = namedtuple('Position', ['x', 'y'])
 vispy.use('PyQt5')
 
 # the global sketch instance.
@@ -39,13 +61,25 @@ builtins.title = "p5"
 
 builtins.frame_count = -1
 
+builtins.key_is_pressed = False
+
+builtins.focused = False
+
+builtins.pmouse_x = 0
+builtins.pmouse_y = 0
+builtins.mouse_x = 0
+builtins.mouse_y = 0
+builtins.mouse_button = None
+builtins.mouse_is_pressed = False
+builtins.mouse_is_dragging = False
+
 
 # HELPER FUNCTIONS, ETC ================================================
 
-handler_names = [ 'key_press', 'key_pressed', 'key_released',
-                  'key_typed', 'mouse_clicked', 'mouse_dragged',
-                  'mouse_moved', 'mouse_pressed', 'mouse_released',
-                  'mouse_wheel',]
+handler_names = [ 'key_pressed', 'key_released', 'key_typed',
+                  'mouse_clicked', 'mouse_double_clicked',
+                  'mouse_dragged', 'mouse_moved',
+                  'mouse_pressed', 'mouse_released', 'mouse_wheel',]
 
 def fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
@@ -68,22 +102,157 @@ def _dummy(*args, **kwargs):
     """
     pass
 
+def reset_builtins():
+    builtins.mouse_button = None
+    builtins.mouse_is_pressed = False
+    builtins.mouse_is_dragging = False
+
 # SKETCH EVENTS ========================================================
 
-class SketchEvent:
-    def __init__(self, raw_event):
-        self.data = raw_event
+class Event:
+    def __init__(self, raw_event, active=False):
+        self._modifiers = list(map(lambda k: k.name, raw_event.modifiers))
+        self._active = active
+        self._raw = raw_event
 
-    def update_builtins(self):
+    def is_shift_down(self):
+        """Was shift held down during the event?
+
+        :returns: True if the shift-key was held down.
+        :rtype: bool
+
+        """
+        return 'Shift' in self._modifiers
+
+    def is_ctrl_down(self):
+        """Was ctrl (command on Mac) held down during the event?
+
+        :returns: True if the ctrl-key was held down.
+        :rtype: bool
+
+        """
+        # MOD_ACCEL maps to MOD_COMMAND on Mac and to ctrl on windows
+        # and X-systems.
+        return 'Control' in self._modifiers
+
+    def is_alt_down(self):
+        """Was alt held down during the event?
+
+        :returns: True if the alt-key was held down.
+        :rtype: bool
+
+        :note: This isn't available on a Mac.
+
+        """
+        return 'Alt' in self._modifiers
+
+    def is_meta_down(self):
+        """Was the meta key (windows/option key) held down?
+
+        :returns: True if the meta-key was held down.
+        :rtype: bool
+
+        """
+        return  'Meta' in self._modifiers
+
+    def _update_builtins(self):
         pass
 
-class SketchKeyEvent(SketchEvent):
-    def __init__(self, raw_event):
-        super().__init__(raw_event)
+class KeyEvent(Event):
+    def _update_builtins(self):
+        builtins.key_is_pressed = self._active
 
-class SketchMouseEvent(SketchEvent):
-    def __init__(self, raw_event):
-        super().__init__(raw_event)
+class MouseButton:
+    """A simple class to work with mouse buttons."""
+    def __init__(self, buttons):
+        self._buttons = buttons
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return button_map.get(other.upper(), -1) in self._buttons
+        # What if the `other` is actually a MouseButton?
+        # +- YES? Compare the _buttons!
+        # +-- NO? Nothing to be done. Let the error bubble up...
+        return self._buttons == other._buttons
+
+    def __repr__(self):
+        fstr = ', '.join(button_inv_map[bt] for bt in self._buttons)
+        return "MouseButton({})".format(fstr)
+
+    __str__ = __repr__
+
+class MouseEvent(Event):
+    """A class that encapsulates information about a mouse event.
+
+    :param x: The x-position of the mouse in the window at the time of
+        the event.
+    :type x: int
+
+    :param y: The y-position of the mouse in the window at the time of
+        the event.
+    :type y: int
+
+    :param position: Position of the mouse in the window at the time
+        of the event.
+    :type position: (int, int)
+
+    :param change: the change in the x and y directions (defaults to
+        (0, 0))
+    :type change: (int, int)
+
+    :param scroll: the scroll amount in the x and y directions
+         (defaults to (0, 0)).
+    :type scroll: (int, int)
+
+    :param count: amount by which the mouse whell was dragged.
+    :type count: int
+
+    :param button: Button information at the time of the event.
+    :type button: MouseButton
+
+    :param modifiers: The modifier keys pressed at the time of the
+        event.
+    :type modifiers: str list
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        x, y = self._raw.pos
+        y = builtins.height - y
+        dx, dy = self._raw.delta
+
+        if (self._raw.press_event != None) and (self._raw.last_event != None):
+            px, py = self._raw.press_event.pos
+            cx, cy = self._raw.last_event.pos
+            self.change = Position(cx - px, cy - py)
+        else:
+            self.change = Position(0, 0)
+
+        self.x = max(min(builtins.width, x), 0)
+        self.y = max(min(builtins.height, builtins.height - y), 0)
+
+        self.position = Position(x, y)
+        self.scroll = Position(int(dx), int(dy))
+
+        self.count = self.scroll.y
+        self.button = MouseButton(self._raw.buttons)
+        self.modifiers = self._modifiers
+
+    def _update_builtins(self):
+        builtins.pmouse_x = builtins.mouse_x
+        builtins.pmouse_y = builtins.mouse_y
+        builtins.mouse_x = self.x
+        builtins.mouse_y = self.y
+        builtins.mouse_button = self.button
+        builtins.mouse_is_pressed = self._active
+        builtins.mouse_is_dragging = (self.change == (0, 0))
+
+    def __repr__(self):
+        press = 'pressed' if self._active else 'not-pressed'
+        return "MouseEvent({} at {})".format(press, self.position)
+
+    __str__ = __repr__
 
 # MAIN SKETCH CLASS ====================================================
 
@@ -120,7 +289,7 @@ class Sketch(app.Canvas):
         # with all the handlers.
         while len(self.handler_queue) != 0:
             function, event = self.handler_queue.pop(0)
-            event.update_builtins()
+            event._update_builtins()
             function(event)
 
     def on_close(self, event):
@@ -135,18 +304,42 @@ class Sketch(app.Canvas):
         # window should be ignored.
         pass
 
-    def _enqueue_event(self, handler_name, raw_event):
-        if handler_name.startswith('key'):
-            event = SketchKeyEvent(raw_event)
-        elif handler_name.startswith('mouse'):
-            raise NotImplementedError
-            event = SketchMouseEvent(raw_event)
-        else:
-            raise NotImplementedError
-            event = SketchEvent(raw_event)
-
-        event.update_builtins()
+    def _enqueue_event(self, handler_name, event):
+        event._update_builtins()
         self.handler_queue.append((self.handlers[handler_name], event))
+
+    def on_key_press(self, event):
+        self._enqueue_event('key_pressed', KeyEvent(event, active=True))
+
+    def on_key_release(self, event):
+        self._enqueue_event('key_released', KeyEvent(event))
+        if not (event.text is ''):
+            self._enqueue_event('key_typed', KeyEvent(event))
+
+    def on_mouse_press(self, event):
+        self._enqueue_event('mouse_pressed', MouseEvent(event, active=True))
+
+    def on_mouse_double_click(self, event):
+        self._enqueue_event('mouse_double_clicked', MouseEvent(event))
+
+    def on_mouse_release(self, event):
+        self._enqueue_event('mouse_released', MouseEvent(event))
+        self._enqueue_event('mouse_clicked', MouseEvent(event))
+
+    def on_mouse_move(self, event):
+        self._enqueue_event('mouse_moved', MouseEvent(event))
+        if builtins.mouse_is_pressed:
+            self._enqueue_event('mouse_dragged', MouseEvent(event))
+
+    def on_mouse_wheel(self, event):
+        self._enqueue_event('mouse_wheel', MouseEvent(event))
+
+    # def on_touch(self, event):
+    #     self._enqueue_event('touch', event)
+
+    # def on_stylus(self, event):
+    #     self._enqueue_event('stylus', event)
+
 
 # USER SPACE FUNCTIONS =================================================
 
