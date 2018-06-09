@@ -18,34 +18,126 @@
 
 import builtins
 from collections import namedtuple
-
-import pyglet
-from pyglet.window import mouse
-from pyglet.window import key
-
-from . import base
-from .base import handlers
-from .base import renderer
-from .base import window
-
-builtins.focused = True
-builtins.mouse_button = None
-builtins.mouse_is_pressed = False
-builtins.mouse_is_dragging = False
-builtins.mouse_x = 0
-builtins.mouse_y = 0
-builtins.pmouse_x = 0
-builtins.pmouse_y = 0
-
-builtins.key = None
-builtins.key_is_pressed = False
+from enum import IntEnum
 
 Position = namedtuple('Position', ['x', 'y'])
 
+handler_names = [ 'key_pressed', 'key_released', 'key_typed',
+                  'mouse_clicked', 'mouse_double_clicked',
+                  'mouse_dragged', 'mouse_moved',
+                  'mouse_pressed', 'mouse_released', 'mouse_wheel',]
+
+
+class VispyButton(IntEnum):
+    LEFT = 1
+    RIGHT = 2
+    MIDDLE = 3
+
+
+class MouseButton:
+    """An abstraction over a set of mouse buttons.
+
+    :param buttons: list of mouse buttons pressed at the same time.
+    :type buttons: str list
+
+    """
+    def __init__(self, buttons):
+        button_names = {
+            VispyButton.LEFT: 'LEFT',
+            VispyButton.RIGHT: 'RIGHT',
+            VispyButton.MIDDLE: 'MIDDLE',
+        }
+
+        self._buttons = buttons
+        self._button_names = [button_names[bt] for bt in self._buttons]
+
+    @property
+    def buttons(self):
+        self._button_names
+
+    def __eq__(self, other):
+        button_map = {
+            'CENTER': VispyButton.MIDDLE,
+            'MIDDLE': VispyButton.MIDDLE,
+            'LEFT':  VispyButton.LEFT,
+            'RIGHT': VispyButton.RIGHT,
+        }
+
+        if isinstance(other, str):
+            return button_map.get(other.upper(), -1) in self._buttons
+        # What if the `other` is actually a MouseButton?
+        # +- YES? Compare the _buttons!
+        # +-- NO? Nothing to be done. Let the error bubble up...
+        return self._buttons == other._buttons
+
+    def __neq__(self, other):
+        return not (self == other)
+
+    def __repr__(self):
+        fstr = ', '.join(self.buttons)
+        return "MouseButton({})".format(fstr)
+
+    __str__ = __repr__
+
+
+class Key:
+    """A higher level abstraction over a single key.
+
+    :param name: The name of the key; ENTER, BACKSPACE, etc.
+    :type name: str
+
+    :param text: The text associated with the given key. This
+        corresponds to the symbol that will be "typed" by the given
+        key.
+    :type name: str
+
+    """
+    def __init__(self, name, text=''):
+        self.name = name.upper()
+        self.text = text
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return other == self.name or other == self.text
+        return self.name == other.name and self.text == other.text
+
+    def __neq__(self, other):
+        return not (self == other)
+
+    def __str__(self):
+        if self.text.isalnum():
+            return self.text
+        else:
+            return self.name
+
+    def __repr__(self):
+        return "Key({})".format(self.name)
+
+
 class Event:
-    def __init__(self, modifiers, handler_name=None):
-        self.modifiers = modifiers
-        self.handler_name = handler_name
+    """A generic sketch event.
+
+    :param modifers: The set of modifiers held down at the time of the
+        event.
+    :type modifiers: str list
+
+    :param pressed: If the key/button is held down when the event
+        occurs.
+    :type pressed: bool
+
+    """
+    def __init__(self, raw_event, active=False):
+        self._modifiers = list(map(lambda k: k.name, raw_event.modifiers))
+        self._active = active
+        self._raw = raw_event
+
+    @property
+    def modifiers(self):
+        return self._modifiers
+
+    @property
+    def pressed(self):
+        return self._active
 
     def is_shift_down(self):
         """Was shift held down during the event?
@@ -54,7 +146,7 @@ class Event:
         :rtype: bool
 
         """
-        return self.modifiers & key.MOD_SHIFT
+        return 'Shift' in self._modifiers
 
     def is_ctrl_down(self):
         """Was ctrl (command on Mac) held down during the event?
@@ -63,9 +155,7 @@ class Event:
         :rtype: bool
 
         """
-        # MOD_ACCEL maps to MOD_COMMAND on Mac and to ctrl on windows
-        # and X-systems.
-        return self.modifiers & key.MOD_ACCEL
+        return 'Control' in self._modifiers
 
     def is_alt_down(self):
         """Was alt held down during the event?
@@ -73,10 +163,8 @@ class Event:
         :returns: True if the alt-key was held down.
         :rtype: bool
 
-        :note: This isn't available on a Mac.
-
         """
-        return self.modifiers & key.MOD_ALT
+        return 'Alt' in self._modifiers
 
     def is_meta_down(self):
         """Was the meta key (windows/option key) held down?
@@ -85,66 +173,37 @@ class Event:
         :rtype: bool
 
         """
-        win_pressed = self.modifiers & key.MOD_WINDOWS
-        option_pressed = self.modifiers & keys.MOD_OPTION
-        return  win_pressed or option_pressed
+        return  'Meta' in self._modifiers
 
-    def _update_globals(self):
-        """Update global variables associated with this event."""
-        raise NotImplementedError("abstract")
+    def _update_builtins(self):
+        pass
 
-    def _add_to_handler_queue(self):
-        """Add the current event to the main handler queue."""
-        if self.handler_name in base.handler_names:
-            base.handler_queue.append((handlers[self.handler_name], self))
 
-    @staticmethod
-    def _generate_hander_name(prefix, action):
-        """Generate a handler name from a prefix and action.
-        """
-        if action.upper().endswith('E'):
-            return "{}_{}d".format(prefix, action.lower())
+class KeyEvent(Event):
+    """Encapsulates information about a key event.
+
+    :param key: The key associated with this event.
+    :type key: str
+
+    :param pressed: Specifies whether the key is held down or not.
+    :type pressed: bool
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self._raw.key is not None:
+            self.key = Key(self._raw.key.name, self._raw.text)
         else:
-            return "{}_{}ed".format(prefix, action.lower())
+            self.key = Key('UNKNOWN')
 
-
-class MouseButton:
-    """A simple class to work with mouse buttons."""
-    def __init__(self, buttons):
-        self._buttons = buttons
-
-    def __eq__(self, other):
-        if isinstance(other, str):
-            button_map = {
-                'CENTER': mouse.MIDDLE,
-                'MIDDLE': mouse.MIDDLE,
-                'LEFT': mouse.LEFT,
-                'RIGHT': mouse.RIGHT,
-            }
-            if other.upper() in button_map:
-                return self._buttons & button_map[other.upper()]
-            else:
-                return False
-        # What if the `other` is actually a MouseButton?
-        # +- YES? Compare the _buttons!
-        # +-- NO? Nothing to be done. Let the error bubble up...
-        return self._buttons == other._buttons
-
-    def __str__(self):
-        return mouse.buttons_string(self._buttons)
-
-    def __repr__(self):
-        fvalues = self._buttons, str(self)
-        return "MouseButton( code={}, buttons={} )".format(*fvalues)
+    def _update_builtins(self):
+        builtins.key_is_pressed = self.pressed
+        builtins.key = self.key if self.pressed else None
 
 
 class MouseEvent(Event):
     """A class that encapsulates information about a mouse event.
-
-    :param action: The action type for the mouse event. One of
-        {'PRESS', 'RELEASE', 'CLICK', 'DRAG', 'MOVE', 'ENTER', 'EXIT',
-        'WHEEL'}
-    :type action: str
 
     :param x: The x-position of the mouse in the window at the time of
         the event.
@@ -154,229 +213,59 @@ class MouseEvent(Event):
         the event.
     :type y: int
 
+    :param position: Position of the mouse in the window at the time
+        of the event.
+    :type position: (int, int)
+
     :param change: the change in the x and y directions (defaults to
         (0, 0))
-    :type change: 2-tuple
+    :type change: (int, int)
 
     :param scroll: the scroll amount in the x and y directions
          (defaults to (0, 0)).
-    :type scroll: 2-tuple
+    :type scroll: (int, int)
 
-    :param buttons: The mouse buttons that were pressed at the time of
-         the event.
-    :type buttons: int
+    :param count: amount by which the mouse whell was dragged.
+    :type count: int
 
-    :param modifiers: The modifier keys pressed at the time of the
-        event.
-    :type modifiers: int
-
-    :param handler_name: The name of the handler to be attached to the
-        current event.
-    :type handler_name: str
+    :param button: Button information at the time of the event.
+    :type button: MouseButton
 
     """
-    def __init__(self, action, x, y, change=(0, 0), scroll=(0, 0),
-                 buttons=None, modifiers=0, handler_name=None):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        x, y = self._raw.pos
+        y = builtins.height - y
+        dx, dy = self._raw.delta
+
+        if (self._raw.press_event != None) and (self._raw.last_event != None):
+            px, py = self._raw.press_event.pos
+            cx, cy = self._raw.last_event.pos
+            self.change = Position(cx - px, cy - py)
+        else:
+            self.change = Position(0, 0)
+
         self.x = max(min(builtins.width, x), 0)
         self.y = max(min(builtins.height, builtins.height - y), 0)
 
-        self.position = Position(self.x, self.y)
-        self.change = Position(*change)
-        self.scroll = Position(*scroll)
+        self.position = Position(x, y)
+        self.scroll = Position(int(dx), int(dy))
 
         self.count = self.scroll.y
-        self.action = action
-        self.modifiers = modifiers
-        if buttons is not None:
-            self.button = MouseButton(buttons)
-        else:
-            self.button = None
+        self.button = MouseButton(self._raw.buttons)
 
-        if handler_name is not None:
-            self.handler_name = handler_name
-        else:
-            self.handler_name = self._generate_hander_name('mouse', action)
-
-        self._update_globals()
-        self._add_to_handler_queue()
-
-    def _update_globals(self):
+    def _update_builtins(self):
         builtins.pmouse_x = builtins.mouse_x
         builtins.pmouse_y = builtins.mouse_y
         builtins.mouse_x = self.x
         builtins.mouse_y = self.y
-        builtins.mouse_button = self.button
-        if self.action == 'PRESS':
-            builtins.mouse_is_pressed = True
-        elif self.action == 'DRAG':
-            builtins.mouse_is_dragging = True
-        elif self.action == 'RELEASE':
-            builtins.mouse_is_pressed = False
-            builtins.mouse_is_dragging = False
+        builtins.mouse_is_pressed = self._active
+        builtins.mouse_is_dragging = (self.change == (0, 0))
+        builtins.mouse_button = self.button if self.pressed else None
 
     def __repr__(self):
-        button_string = 'NO' if self.button is None else str(self.button)
-        fvalues = self.action, self.position, button_string
-        return "MouseEvent( {} at {} with {} button(s) )".format(*fvalues)
+        press = 'pressed' if self.pressed else 'not-pressed'
+        return "MouseEvent({} at {})".format(press, self.position)
 
     __str__ = __repr__
-
-
-class Key:
-    """A higher level abstraction over a single key press.
-
-    :param key_code: The key_code symbol for this key (should be a
-        symbol defined in pyglet.window.key)
-    :type key_code: int
-
-    """
-    def __init__(self, key_code):
-        self._key_code = key_code
-
-    def __eq__(self, other):
-        if isinstance(other, str):
-            # to check if two keys are equal, we get the equivalent
-            # attribute form pyglet.window.key and then compare the
-            # key codes.
-            if hasattr(key, other.upper()):
-                other_key = getattr(key, other.upper())
-                return other_key == self._key_code
-            # the numeric keys in pyglet.window.key are prefixed with
-            # an underscrore. This workaround makes sure that we check
-            # if a numeric key is pressed when the first condition
-            # fails.
-            elif hasattr(key, '_' + other):
-                other_key = get_attr(key, '_' + other)
-                return other_key == self._key_code
-            else:
-                return False
-        # maybe `other` is actually a Key?
-        self._key_code == other._key_code
-
-    def __str__(self):
-        return key.symbol_string(self._key_code)
-
-    def __repr__(self):
-        return "Key( code={}, symbol={} )".format(self._key_code, str(self))
-
-
-class KeyEvent(Event):
-    """Encapsulates information about a key event.
-
-    :param action: The action type for this key event. Should be one
-        of {'PRESS', 'RELEASE', 'TYPE'}
-    :type action: str
-
-    :param key_text: The key-text for this event (defaults to None).
-    :type key_text: str
-
-    :param key_code: The symbol for the key that was pressed (defaults
-        to None). This should be symbol defined in pyglet.window.key
-    :param key_code: int
-
-    :param modifiers: The modifier keys pressed at the time of the
-        event.
-    :type modifiers: int
-
-    :param handler_name: The name of the handler function to be
-        attached to this event (defaults to None). When this is not
-        specified, KeyEvent automatically tried to generate a function
-        name to use using the `action` string.
-    :type handler_name: str
-
-    :raises ValueError: When both key_text and key_code are None
-        during initialization.
-
-    """
-    def __init__(self, action, key_text=None, key_code=None,
-                 modifiers=0, handler_name=None):
-
-        self.action = action
-
-        if key_text is not None:
-            self.key = key_text
-        elif key_code is not None:
-            self.key = Key(key_code)
-        else:
-            raise ValueError('Failed to assign a key to the event!')
-
-        if handler_name is not None:
-            self.handler_name = handler_name
-        else:
-            self.handler_name = self._generate_hander_name('key', action)
-
-        self._update_globals()
-        self._add_to_handler_queue()
-
-    def _update_globals(self):
-        builtins.key = self.key
-        if self.action == 'PRESS':
-            builtins.key_is_pressed = True
-        elif self.action == 'RELEASE':
-            builtins.key_is_pressed = False
-
-    def __repr__(self):
-        return "KeyEvent( {} key {} )".format(self.action, str(self.key))
-
-    __str__ = __repr__
-
-@window.event
-def on_mouse_enter(x, y):
-    event = MouseEvent('ENTER', x, y)
-
-@window.event
-def on_mouse_leave(x, y):
-    event = MouseEvent('EXIT', x, y)
-
-@window.event
-def on_mouse_motion(x, y, dx, dy):
-    event = MouseEvent('MOVE', x, y, change=(dx, dy))
-
-@window.event
-def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
-    event = MouseEvent('DRAG', x, y, change=(dx, dy), buttons=buttons,
-                       modifiers=modifiers, handler_name='mouse_dragged')
-
-@window.event
-def on_mouse_press(x, y, button, modifiers):
-    event = MouseEvent('PRESS', x, y, buttons=button, modifiers=modifiers)
-
-@window.event
-def on_mouse_release(x, y, buttons, modifiers):
-    event = MouseEvent('RELEASE', x, y, buttons=buttons, modifiers=modifiers)
-    event = MouseEvent('CLICK', x, y, buttons=buttons, modifiers=modifiers)
-
-@window.event
-def on_mouse_scroll(x, y, scroll_x, scroll_y):
-    event = MouseEvent('WHEEL', x, y, scroll=(scroll_x, scroll_y),
-                       handler_name='mouse_wheel')
-
-@window.event
-def on_key_press(symbol, modifiers):
-    event = KeyEvent('PRESS', key_code=symbol, modifiers=modifiers)
-
-@window.event
-def on_key_release(symbol, modifiers):
-    event = KeyEvent('RELEASE', key_code=symbol, modifiers=modifiers)
-
-@window.event
-def on_text(text):
-    event = KeyEvent('TYPE', key_text=text)
-
-@window.event
-def on_activate():
-    builtins.focused = True
-
-@window.event
-def on_deactivate():
-    builtins.focused = False
-
-@window.event
-def on_exit():
-    renderer.cleanup()
-    window.close()
-
-@window.event
-def on_resize(width, height):
-    renderer.reset_view()
-    renderer.clear()

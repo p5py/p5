@@ -16,6 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .base import *
+from ._default_sketch import *
+from ._default_sketch import renderer
 from .base import draw_shape
-from .events import *
