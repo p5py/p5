@@ -17,50 +17,43 @@
 #
 """Userspace functions"""
 
-__all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
-           'cursor', 'exit', 'draw', 'setup', 'run']
-
 import __main__
 import builtins
 from functools import wraps
 
 import vispy
-
 from vispy import app
 
 from .base import Sketch
 from .events import handler_names
 from .renderer import initialize_renderer
 
+__all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
+           'cursor', 'exit', 'draw', 'setup', 'run']
 
 default_sketch = None
 
 builtins.width = 800
 builtins.height = 600
-
 builtins.pixel_x_density = 1
 builtins.pixel_y_density = 1
 
 builtins.title = "p5"
-
 builtins.frame_count = -1
 builtins.frame_rate = None
-
 builtins.focused = True
 
 builtins.mouse_button = None
 builtins.mouse_is_pressed = False
 builtins.mouse_is_dragging = False
-
 builtins.mouse_x = 0
 builtins.mouse_y = 0
 builtins.pmouse_x = 0
 builtins.pmouse_y = 0
-
 builtins.key = None
 builtins.key_is_pressed = False
 
-def fix_interface(func):
+def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
 
     :returns: a new function that accepts arguments.
@@ -137,10 +130,13 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     for handler in handler_names:
         if hasattr(__main__, handler):
             hfunc = getattr(__main__, handler)
-            default_sketch.handlers[handler] = fix_interface(hfunc)
+            default_sketch.handlers[handler] = _fix_interface(hfunc)
 
-    builtins.pixel_x_density = default_sketch.pixel_scale
-    builtins.pixel_y_density = default_sketch.pixel_scale
+    physical_width, physical_height = default_sketch.physical_size
+    width, height = default_sketch.size
+
+    builtins.pixel_x_density = physical_width // width
+    builtins.pixel_y_density = physical_height // height
 
     default_sketch.show()
     default_sketch.timer.start()

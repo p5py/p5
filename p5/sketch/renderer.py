@@ -24,11 +24,9 @@ import math
 import numpy as np
 
 from vispy import gloo
+from vispy.gloo import IndexBuffer
 from vispy.gloo import Program
 from vispy.gloo import VertexBuffer
-from vispy.gloo import IndexBuffer
-
-from .shader import vertex_default, fragment_default
 
 from ..pmath import matrix
 
@@ -40,6 +38,35 @@ from ..pmath import matrix
 ## - Higher level objects *SHOULD NOT* have direct access to internal
 ##   state variables.
 ##
+
+## Renderer Globals: DEFAULT SHADERS (SOURCES + PROG)
+##
+VERT_SRC = """
+attribute vec3 position;
+attribute vec4 color;
+
+varying vec4 frag_color;
+
+uniform mat4 modelview;
+uniform mat4 projection;
+
+void main()
+{
+    gl_Position = projection * modelview * vec4(position, 1.0);
+    frag_color = color;
+}
+"""
+
+FRAG_SRC = """
+varying vec4 frag_color;
+
+void main()
+{
+    gl_FragColor = frag_color;
+}
+"""
+
+default_shader = None
 
 ## Renderer Globals: USEFUL CONSTANTS
 COLOR_WHITE = (1, 1, 1, 1)
@@ -60,14 +87,9 @@ stroke_enabled = True
 ## VIEW MATRICES, ETC
 ##
 viewport = None
-
 transform_matrix = np.identity(4)
 modelview_matrix = np.identity(4)
 projection_matrix = np.identity(4)
-
-## Renderer Globals: OPEN GL SPECIFIC
-##
-default_shader = None
 
 ## Renderer Globals: RENDERING
 poly_draw_queue = []
@@ -94,7 +116,11 @@ def flatten(vertex_list):
     :rtype: list
 
     """
-    return [vi for vertex in vertex_list for vi in vertex]
+    flat = []
+    for vertex in vertex_list:
+        for vi in vertex:
+            flat.append(vi)
+    return flat
 
 def transform_points(points):
     """Transform the given list of points using the transformation matrix.
@@ -134,7 +160,7 @@ def initialize_renderer():
     gloo.set_state(depth_test=True)
     gloo.set_state(depth_func='lequal')
 
-    default_shader = Program(vertex_default, fragment_default)
+    default_shader = Program(VERT_SRC, FRAG_SRC)
 
     reset_view()
     clear()
@@ -168,7 +194,9 @@ def reset_view():
         10 * cz
     )
 
-    modelview_matrix = matrix.translation_matrix(-builtins.width / 2, builtins.height / 2, -cz)
+    modelview_matrix = matrix.translation_matrix(-builtins.width / 2, \
+                                                 builtins.height / 2, \
+                                                 -cz)
     modelview_matrix = modelview_matrix.dot(matrix.scale_transform(1, -1, 1))
 
     transform_matrix = np.identity(4)
@@ -185,6 +213,7 @@ def cleanup():
     """
     default_shader.delete()
     texture_shader.delete()
+
 
 ## RENDERING FUNTIONS + HELPERS
 ##
@@ -204,11 +233,11 @@ def flush_geometry():
 
     ## RETAINED MODE RENDERING.
     #
-    draw_names = ['poly', 'line', 'point']
-    draw_types = ['triangles', 'lines', 'points']
-    draw_queues = [poly_draw_queue, line_draw_queue, point_draw_queue]
+    names = ['poly', 'line', 'point']
+    types = ['triangles', 'lines', 'points']
+    queues = [poly_draw_queue, line_draw_queue, point_draw_queue]
 
-    for draw_type, draw_queue, name in zip(draw_types, draw_queues, draw_names):
+    for draw_type, draw_queue, name in zip(types, queues, names):
         # 1. Get the maximum number of vertices persent in the shapes
         # in the draw queue.
         #

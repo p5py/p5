@@ -94,6 +94,7 @@ class Sketch(app.Canvas):
                 function, event = self.handler_queue.pop(0)
                 event._update_builtins()
                 function(event)
+
         self.update()
 
     def on_close(self, event):
@@ -106,42 +107,45 @@ class Sketch(app.Canvas):
         # we want programmers to be able to resize windows (using the
         # size() method), however, all user attempts to resize the
         # window should be ignored.
-
-        # reinit renderer()
         reset_view()
         clear()
-        # clear
-        pass
 
     def _enqueue_event(self, handler_name, event):
         event._update_builtins()
         self.handler_queue.append((self.handlers[handler_name], event))
 
     def on_key_press(self, event):
-        self._enqueue_event('key_pressed', KeyEvent(event, active=True))
+        kev = KeyEvent(event, active=True)
+        self._enqueue_event('key_pressed', kev)
 
     def on_key_release(self, event):
-        self._enqueue_event('key_released', KeyEvent(event))
+        kev = KeyEvent(event)
+        self._enqueue_event('key_released', kev)
         if not (event.text is ''):
-            self._enqueue_event('key_typed', KeyEvent(event))
+            self._enqueue_event('key_typed', kev)
 
     def on_mouse_press(self, event):
-        self._enqueue_event('mouse_pressed', MouseEvent(event, active=True))
+        mev = MouseEvent(event, active=True)
+        self._enqueue_event('mouse_pressed', mev)
 
     def on_mouse_double_click(self, event):
-        self._enqueue_event('mouse_double_clicked', MouseEvent(event))
+        mev = MouseEvent(event)
+        self._enqueue_event('mouse_double_clicked', mev)
 
     def on_mouse_release(self, event):
-        self._enqueue_event('mouse_released', MouseEvent(event))
-        self._enqueue_event('mouse_clicked', MouseEvent(event))
+        mev = MouseEvent(event)
+        self._enqueue_event('mouse_released', mev)
+        self._enqueue_event('mouse_clicked', mev)
 
     def on_mouse_move(self, event):
-        self._enqueue_event('mouse_moved', MouseEvent(event))
+        mev = MouseEvent(event)
+        self._enqueue_event('mouse_moved', mev)
         if builtins.mouse_is_pressed:
-            self._enqueue_event('mouse_dragged', MouseEvent(event))
+            self._enqueue_event('mouse_dragged', mev)
 
     def on_mouse_wheel(self, event):
-        self._enqueue_event('mouse_wheel', MouseEvent(event))
+        mev = MouseEvent(event)
+        self._enqueue_event('mouse_wheel', mev)
 
     # def on_touch(self, event):
     #     self._enqueue_event('touch', event)

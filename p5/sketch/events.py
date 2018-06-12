@@ -62,12 +62,8 @@ class MouseButton:
             'LEFT':  VispyButton.LEFT,
             'RIGHT': VispyButton.RIGHT,
         }
-
         if isinstance(other, str):
             return button_map.get(other.upper(), -1) in self._buttons
-        # What if the `other` is actually a MouseButton?
-        # +- YES? Compare the _buttons!
-        # +-- NO? Nothing to be done. Let the error bubble up...
         return self._buttons == other._buttons
 
     def __neq__(self, other):
