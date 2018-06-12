@@ -139,6 +139,9 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
             hfunc = getattr(__main__, handler)
             default_sketch.handlers[handler] = fix_interface(hfunc)
 
+    builtins.pixel_x_density = default_sketch.pixel_scale
+    builtins.pixel_y_density = default_sketch.pixel_scale
+
     default_sketch.show()
     default_sketch.timer.start()
 
