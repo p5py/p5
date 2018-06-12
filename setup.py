@@ -11,9 +11,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 packages = ['p5']
 
 requires = [
-    'PyOpenGL',
-    'pyglet',
-    'numpy'
+    'vispy',
+    'glfw',
+    'numpy',
 ]
 
 meta_data = {}

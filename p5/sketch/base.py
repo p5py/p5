@@ -24,198 +24,35 @@ import time
 
 import vispy
 from vispy import app
+from vispy import gloo
 
 from .events import KeyEvent
 from .events import MouseEvent
 from .events import handler_names
 
+from .renderer import draw_loop
+from .renderer import initialize_renderer
+from .renderer import clear
+from .renderer import reset_view
+from .renderer import render
 
 def _dummy(*args, **kwargs):
     """Eat all arguments, do nothing.
     """
     pass
 
+def draw_shape(shape):
+    """Handle the lower level stuff associated with drawing a shape.
 
-# import pyglet
-# pyglet.options["shadow_window"] = False
+    :param shape: The shape to be drawn.
+    :type shape: Shape
 
-# __all__ = ['setup', 'draw', 'run', 'no_loop', 'loop', 'redraw', 'size',
-#            'title', 'no_cursor', 'cursor', 'exit',]
-
-# builtins.width = 360
-# builtins.height = 360
-# builtins.title = "p5"
-
-# builtins.frame_count = -1
-# builtins.frame_rate = 30
-
-# last_recorded_time = time.time()
-
-# builtins.pixel_width = 1
-# builtins.pixel_height = 1
-
-# display = pyglet.canvas.get_display()
-# screen = display.get_default_screen()
-# template = pyglet.gl.Config(double_buffer=1, sample_buffers=1)
-# config = screen.get_best_config(template)
-
-# window = pyglet.window.Window(
-#     width=builtins.width,
-#     height=builtins.height,
-#     caption=builtins.title,
-#     resizable=False,
-#     visible=False,
-#     vsync=False,
-#     config=config,
-# )
-
-# def _window_setup():
-#     global window
-#     actual_width, actual_height = window.get_viewport_size()
-#     builtins.pixel_x_density = actual_width / builtins.width
-#     builtins.pixel_y_density = actual_height / builtins.height
-
-#     window.set_minimum_size(100, 100)
-
-# # DO NOT REMOVE THIS
-# #
-# # We tried removing this line and things broke badly on Mac machines.
-# # We still don't know why. Let's just keep this here for now.
-# _ = pyglet.clock.ClockDisplay()
-
-# def _dummy_handler(*args, **kwargs):
-#     return pyglet.event.EVENT_HANDLED
-
-# handler_names = [ 'key_press', 'key_pressed', 'key_released',
-#                   'key_typed', 'mouse_clicked', 'mouse_dragged',
-#                   'mouse_moved', 'mouse_pressed', 'mouse_released',
-#                   'mouse_wheel',]
-
-# handlers =  dict.fromkeys(handler_names, _dummy_handler)
-
-# handler_queue = []
-
-# looping = True
-# redraw = False
-# setup_done = False
-
-# def draw():
-#     """Continuously execute code defined inside.
-
-#     The `draw()` function is called directly after `setup()` and all
-#     code inside is continuously executed until the program is stopped
-#     (using `exit()`) or `no_loop()` is called.
-
-#     """
-#     pass
-
-# def setup():
-#     """Called to setup initial sketch options.
-
-#     The `setup()` function is run once when the program starts and is
-#     used to define initial environment options for the sketch.
-
-#     """
-#     pass
-
-# def update(dt):
-#     global handler_queue
-#     global redraw
-#     global setup_done
-#     global last_recorded_time
-
-#     with renderer.draw_loop():
-#         if looping or redraw:
-#             builtins.frame_count += 1
-#             now = time.time()
-#             builtins.frame_rate = 1 / (now - last_recorded_time)
-#             last_recorded_time = now
-#             if not setup_done:
-#                 setup()
-#                 setup_done = True
-#                 if not window.visible:
-#                     window.set_visible(True)
-#             else:
-#                 draw()
-#                 redraw = False
-#         for function, event in handler_queue:
-#             function(event)
-#         handler_queue = []
-
-# def fix_handler_interface(func):
-#     """Make sure that `func` takes at least one argument as input.
-
-#     :returns: a new function that accepts arguments.
-#     :rtype: func
-#     """
-#     @wraps(func)
-#     def fixed_func(*args, **kwargs):
-#         return_value = func()
-#         return return_value
-
-#     if func.__code__.co_argcount == 0:
-#         return fixed_func
-#     else:
-#         return func
-
-# def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
-#     """Run a sketch.
-
-#     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
-#     "finds" the user-defined setup and draw functions.
-
-#     :param sketch_setup: The setup function of the sketch (None by
-#          default.)
-#     :type sketch_setup: function
-
-#     :param sketch_draw: The draw function of the sketch (None by
-#         default.)
-#     :type sketch_draw: function
-
-#     :param frame_rate: The target frame rate for the sketch.
-#     :type frame_rate: int :math:`\geq 1`
-
-#     """
-#     global draw
-#     global setup
-
-#     _window_setup()
-
-#     if sketch_setup is not None:
-#         setup = sketch_setup
-#     elif hasattr(__main__, 'setup'):
-#         setup = __main__.setup
-
-#     if sketch_draw is not None:
-#         draw = sketch_draw
-#     elif hasattr(__main__, 'draw'):
-#         draw = __main__.draw
-
-#     for handler in handler_names:
-#         if hasattr(__main__, handler):
-#             handler_func = getattr(__main__, handler)
-#             handlers[handler] = fix_handler_interface(handler_func)
-
-#     renderer.initialize(window.context)
-#     pyglet.clock.schedule_interval(update, 1 / max(frame_rate, 1))
-#     pyglet.app.run()
-
-
-# def draw_shape(shape):
-#     """Handle the lower level stuff associated with drawing a shape.
-
-#     :param shape: The shape to be drawn.
-#     :type shape: Shape
-
-#     """
-#     # TODO (abhikpal 2017-08-05)
-#     #
-#     # Add a check that insures that we don't call the renderer
-#     # directly while drawing a shape.
-#     renderer.render(shape)
-
-def draw_shape(*args, **kwargs):
-    pass
+    """
+    # TODO (abhikpal 2017-08-05)
+    #
+    # Add a check that insures that we don't call the renderer
+    # directly while drawing a shape.
+    render(shape)
 
 class Sketch(app.Canvas):
     """The main sketch instance.
@@ -234,27 +71,30 @@ class Sketch(app.Canvas):
         self.handlers = dict.fromkeys(handler_names, _dummy)
         self.handler_queue = []
 
+        initialize_renderer()
+        clear()
+
     def on_timer(self, event):
         self.measure_fps(callback=lambda _: None)
-        if self.looping or self.redraw:
-            builtins.frame_count += 1
-            if not self.setup_done:
-                self.setup_method()
-                self.setup_done = True
-                self.show(visible=True)
-            else:
-                self.draw_method()
-                self.redraw = False
-        self.update()
-
         builtins.frame_rate = round(self.fps, 2)
+        with draw_loop():
+            if self.looping or self.redraw:
+                builtins.frame_count += 1
+                if not self.setup_done:
+                    self.setup_method()
+                    self.setup_done = True
+                    self.show(visible=True)
+                else:
+                    self.draw_method()
+                    self.redraw = False
 
-        # TODO: restore the previous state of builtins after dealing
-        # with all the handlers.
-        while len(self.handler_queue) != 0:
-            function, event = self.handler_queue.pop(0)
-            event._update_builtins()
-            function(event)
+            # TODO: restore the previous state of builtins after dealing
+            # with all the handlers.
+            while len(self.handler_queue) != 0:
+                function, event = self.handler_queue.pop(0)
+                event._update_builtins()
+                function(event)
+        self.update()
 
     def on_close(self, event):
         exit()
@@ -268,6 +108,8 @@ class Sketch(app.Canvas):
         # window should be ignored.
 
         # reinit renderer()
+        reset_view()
+        clear()
         # clear
         pass
 

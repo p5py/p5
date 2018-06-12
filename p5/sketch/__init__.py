@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+import vispy
+vispy.use('glfw')
 
-from ._default_sketch import *
-from ._default_sketch import renderer
+from .userspace import *
 from .base import draw_shape
