@@ -111,6 +111,7 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
         title=builtins.title,
         size=(builtins.width, builtins.height),
         keys='interactive',
+        resizable=False,
     )
 
     if sketch_setup is not None:
