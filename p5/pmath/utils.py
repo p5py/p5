@@ -68,6 +68,9 @@ PRE_COS = [ cos(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH) ]
 SINCOS = list(zip(PRE_SIN, PRE_COS))
 
 
+def _sanitize(point, target_dimension=3):
+    return list(point) + [0] * (target_dimension - len(point))
+
 def constrain(amount, low, high):
     """Constrain the given value in the specified range.
 
@@ -243,8 +246,8 @@ def distance(point_1, point_2):
     :rtype: float
 
     """
-    p1 = np.array(point_1)
-    p2 = np.array(point_2)
+    p1 = np.array(_sanitize(point_1))
+    p2 = np.array(_sanitize(point_2))
     return np.sqrt(np.sum((p1 - p2) ** 2))
 
 def sq(number):
