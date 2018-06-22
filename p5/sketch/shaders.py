@@ -17,7 +17,12 @@
 #
 """Shaders used by the main program"""
 
-VERT_SRC = """
+from collections import namedtuple
+
+ShaderSource = namedtuple('ShaderSource', 'vert frag')
+
+# vertex shader
+default_vertex_source = """
 attribute vec3 position;
 attribute vec4 color;
 
@@ -33,7 +38,7 @@ void main()
 }
 """
 
-FRAG_SRC = """
+default_fragment_source = """
 varying vec4 frag_color;
 
 void main()
@@ -41,3 +46,60 @@ void main()
     gl_FragColor = frag_color;
 }
 """
+
+# texture vertex shader
+texture_vertex_source = """
+attribute vec3 position;
+attribute vec2 texcoord;
+
+uniform mat4 transform;
+uniform mat4 modelview;
+uniform mat4 projection;
+
+varying vec4 vertex_texcoord;
+
+void main()
+{
+    gl_Position = projection * modelview * transform * vec4(position, 1.0);
+    vertex_texcoord = vec4(texcoord, 1.0, 1.0);
+}
+"""
+
+# texture fragment shader
+texture_fragment_source = """
+uniform vec4 fill_color;
+uniform sampler2D texture;
+
+varying vec4 vertex_texcoord;
+
+void main()
+{
+    gl_FragColor = texture2D(texture, vertex_texcoord.st) * fill_color;
+}
+"""
+
+# Shader sources to draw framebuffers textues.
+fbuffer_vertex_source = """
+attribute vec2 position;
+attribute vec2 tex_coord;
+
+varying vec2 vert_tex_coord;
+
+void main() {
+    gl_Position = vec4(position, 0, 1);
+    vert_tex_coord = tex_coord;
+}
+"""
+
+fbuffer_fragment_source = """
+uniform sampler2D texMap;
+varying vec2 vert_tex_coord;
+
+void main() {
+    gl_FragColor = texture2D(texMap, vert_tex_coord.st);
+}
+"""
+
+src_default = ShaderSource(default_vertex_source, default_fragment_source)
+src_texture = ShaderSource(texture_vertex_source, texture_fragment_source)
+src_fbuffer = ShaderSource(fbuffer_vertex_source, fbuffer_fragment_source)

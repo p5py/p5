@@ -29,8 +29,9 @@ from vispy.gloo import Program
 from vispy.gloo import VertexBuffer
 
 from ..pmath import matrix
-from .shaders import VERT_SRC
-from .shaders import FRAG_SRC
+from .shaders import src_default
+from .shaders import src_texture
+from .shaders import src_fbuffer
 
 ##
 ## Renderer globals.
@@ -134,7 +135,7 @@ def initialize_renderer():
     gloo.set_state(depth_test=True)
     gloo.set_state(depth_func='lequal')
 
-    default_shader = Program(VERT_SRC, FRAG_SRC)
+    default_shader = Program(src_default.vert, src_default.frag)
 
     reset_view()
     clear()
