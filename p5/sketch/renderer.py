@@ -29,6 +29,8 @@ from vispy.gloo import Program
 from vispy.gloo import VertexBuffer
 
 from ..pmath import matrix
+from .shaders import VERT_SRC
+from .shaders import FRAG_SRC
 
 ##
 ## Renderer globals.
@@ -38,34 +40,6 @@ from ..pmath import matrix
 ## - Higher level objects *SHOULD NOT* have direct access to internal
 ##   state variables.
 ##
-
-## Renderer Globals: DEFAULT SHADERS (SOURCES + PROG)
-##
-VERT_SRC = """
-attribute vec3 position;
-attribute vec4 color;
-
-varying vec4 frag_color;
-
-uniform mat4 modelview;
-uniform mat4 projection;
-
-void main()
-{
-    gl_Position = projection * modelview * vec4(position, 1.0);
-    frag_color = color;
-}
-"""
-
-FRAG_SRC = """
-varying vec4 frag_color;
-
-void main()
-{
-    gl_FragColor = frag_color;
-}
-"""
-
 default_shader = None
 
 ## Renderer Globals: USEFUL CONSTANTS
