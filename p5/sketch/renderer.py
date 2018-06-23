@@ -44,14 +44,12 @@ from .shaders import src_texture
 ## - Higher level objects *SHOULD NOT* have direct access to internal
 ##   state variables.
 ##
-default_shader = None
-texture_shader = None
+default_prog = None
+fbuffer_prog = None
 
-frame_buffer = None
-frame_front_texture = None
-frame_back_texture = None
-frame_texcoords = None
-frame_elements = None
+fbuffer = None
+fbuffer_tex_front = None
+fbuffer_tex_back = None
 
 ## Renderer Globals: USEFUL CONSTANTS
 COLOR_WHITE = (1, 1, 1, 1)
@@ -81,25 +79,6 @@ poly_draw_queue = []
 line_draw_queue = []
 point_draw_queue = []
 
-## RENDERER UTILITY FUNCTIONS
-##
-## Mostly for internal user. Ideally, higher level components *SHOULD
-## NOT* need these.
-##
-
-def transform_points(points):
-    """Transform the given list of points using the transformation matrix.
-
-    :param points: List of points to be transformed.
-    :type points: a list of 3-tuples
-
-    :returns: a numpy array with the transformed points.
-    :rtype: np.ndarray
-
-    """
-    points = points.dot(transform_matrix.T)
-    return points[:, :3]
-
 ## RENDERER SETUP FUNCTIONS.
 ##
 ## These don't handle shape rendering directly and are used for setup
@@ -107,30 +86,46 @@ def transform_points(points):
 ## clearing the screen, etc.
 ##
 
+def _comm_toggles(state=True):
+    gloo.set_state(blend=state)
+    gloo.set_state(depth_test=state)
+
+    if state:
+        gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
+        gloo.set_state(depth_func='lequal')
+
 def initialize_renderer():
     """Initialize the OpenGL renderer.
 
     For an OpenGL based renderer this sets up the viewport and creates
-    the shader program.
-
-    :param window_context: The OpenGL context associated with this renderer.
-    :type window_context: pyglet.gl.Context
+    the shader programs.
 
     """
-    global default_shader
-    global texture_shader
-    global frame_buffer
+    global fbuffer
+    global fbuffer_prog
+    global default_prog
 
-    gloo.set_state(blend=True)
-    gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
+    fbuffer = FrameBuffer()
 
-    gloo.set_state(depth_test=True)
-    gloo.set_state(depth_func='lequal')
+    vertices = np.array([[-1.0, -1.0],
+                         [+1.0, -1.0],
+                         [-1.0, +1.0],
+                         [+1.0, +1.0]],
+                        np.float32)
+    texcoords = np.array([[0.0, 0.0],
+                          [1.0, 0.0],
+                          [0.0, 1.0],
+                          [1.0, 1.0]],
+                         dtype=np.float32)
 
-    default_shader = Program(src_default.vert, src_default.frag)
-    texture_shader = Program(src_fbuffer.vert, src_fbuffer.frag)
+    fbuf_vertices = VertexBuffer(data=vertices)
+    fbuf_texcoords = VertexBuffer(data=texcoords)
 
-    frame_buffer = FrameBuffer()
+    fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
+    fbuffer_prog['texcoord'] = fbuf_texcoords
+    fbuffer_prog['position'] = fbuf_vertices
+
+    default_prog = Program(src_default.vert, src_default.frag)
 
     reset_view()
 
@@ -141,25 +136,21 @@ def clear(color=True, depth=True):
 
 def reset_view():
     """Reset the view of the renderer."""
+    global viewport
+
     global transform_matrix
     global modelview_matrix
     global projection_matrix
-    global frame_front_texture
-    global frame_back_texture
-    global frame_vertices
-    global frame_texcoords
-    global viewport
 
-    physical_width = int(builtins.width * builtins.pixel_x_density)
-    physical_height = int(builtins.height * builtins.pixel_y_density)
+    global fbuffer_tex_front
+    global fbuffer_tex_back
 
     viewport = (
         0,
         0,
-        physical_width,
-        physical_height,
+        int(builtins.width * builtins.pixel_x_density),
+        int(builtins.height * builtins.pixel_y_density),
     )
-
     gloo.set_viewport(*viewport)
 
     cz = (builtins.height / 2) / math.tan(math.radians(30))
@@ -169,7 +160,6 @@ def reset_view():
         0.1 * cz,
         10 * cz
     )
-
     modelview_matrix = matrix.translation_matrix(-builtins.width / 2, \
                                                  builtins.height / 2, \
                                                  -cz)
@@ -177,27 +167,11 @@ def reset_view():
 
     transform_matrix = np.identity(4)
 
-    default_shader['modelview'] = modelview_matrix.T.flatten()
-    default_shader['projection'] = projection_matrix.T.flatten()
+    default_prog['modelview'] = modelview_matrix.T.flatten()
+    default_prog['projection'] = projection_matrix.T.flatten()
 
-    frame_front_texture = Texture2D((builtins.height, builtins.width, 3))
-    frame_back_texture = Texture2D((builtins.height, builtins.width, 3))
-
-    vertices = np.array([[-1.0, -1.0, 0.0], [+1.0, -1.0, 0.0],
-                         [-1.0, +1.0, 0.0], [+1.0, +1.0, 0.0,]], np.float32)
-    frame_vertices = VertexBuffer(data=vertices)
-
-    texcoords = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
-                         dtype=np.float32)
-    frame_texcoords = VertexBuffer(data=texcoords)
-
-    clear()
-    frame_buffer.color_buffer = frame_front_texture
-    with frame_buffer:
-        clear()
-    frame_buffer.color_buffer = frame_back_texture
-    with frame_buffer:
-        clear()
+    fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
+    fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
 
 def cleanup():
     """Run the clean-up routine for the renderer.
@@ -206,10 +180,9 @@ def cleanup():
     program is about to exit.
 
     """
-    default_shader.delete()
-    texture_shader.delete()
-    frame_buffer.delete()
-
+    default_prog.delete()
+    fbuffer_prog.delete()
+    fbuffer.delete()
 
 ## RENDERING FUNTIONS + HELPERS
 ##
@@ -280,12 +253,12 @@ def flush_geometry():
 
         # 4. Bind the buffer to the shader.
         #
-        default_shader.bind(V)
+        default_prog.bind(V)
 
         # 5. Draw the shape using the proper shape type and get rid of
         # the buffers.
         #
-        default_shader.draw(draw_type, indices=I)
+        default_prog.draw(draw_type, indices=I)
 
         V.delete()
         I.delete()
@@ -300,41 +273,34 @@ def draw_loop():
     """The main draw loop context manager.
     """
     global transform_matrix
-    global frame_front_texture
-    global frame_back_texture
 
-    gloo.set_viewport(*viewport)
+    global fbuffer_tex_front
+    global fbuffer_tex_back
+
     transform_matrix = np.identity(4)
 
-    default_shader['modelview'] = modelview_matrix.T.flatten()
-    default_shader['projection'] = projection_matrix.T.flatten()
+    default_prog['modelview'] = modelview_matrix.T.flatten()
+    default_prog['projection'] = projection_matrix.T.flatten()
 
-    gloo.set_state(depth_test=True)
-    gloo.set_state(blend=True)
-    gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
-    frame_buffer.color_buffer = frame_back_texture
+    fbuffer.color_buffer = fbuffer_tex_back
 
-
-    with frame_buffer:
+    with fbuffer:
         gloo.set_viewport(*viewport)
-        texture_shader['texture'] = frame_front_texture
-        texture_shader['texcoord'] = frame_texcoords
-        texture_shader['position'] = frame_vertices
-        texture_shader.draw('triangle_strip')
+        _comm_toggles()
+        fbuffer_prog['texture'] = fbuffer_tex_front
+        fbuffer_prog.draw('triangle_strip')
 
         yield
 
         flush_geometry()
 
+    gloo.set_viewport(*viewport)
+    _comm_toggles(False)
     clear()
-    gloo.set_state(blend=False)
-    gloo.set_state(depth_test=False)
-    texture_shader['texcoord'] = frame_texcoords
-    texture_shader['position'] = frame_vertices
-    texture_shader['texture'] = frame_back_texture
-    texture_shader.draw('triangle_strip')
-    frame_front_texture, frame_back_texture = \
-        frame_back_texture, frame_front_texture
+    fbuffer_prog['texture'] = fbuffer_tex_back
+    fbuffer_prog.draw('triangle_strip')
+
+    fbuffer_tex_front, fbuffer_tex_back = fbuffer_tex_back, fbuffer_tex_front
 
 
 def render(shape):
