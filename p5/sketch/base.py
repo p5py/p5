@@ -84,6 +84,7 @@ class Sketch(app.Canvas):
                     self.setup_method()
                     self.setup_done = True
                     self.show(visible=True)
+                    self.redraw = True
                 else:
                     self.draw_method()
                     self.redraw = False
