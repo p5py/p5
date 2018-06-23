@@ -87,26 +87,6 @@ point_draw_queue = []
 ## NOT* need these.
 ##
 
-def flatten(vertex_list):
-    """Flatten a vertex list
-
-    An unflattened list of vertices is a list of tuples [(x1, y2, z1),
-    (x2, y2, z2), ...] where as a list of flattened vertices doesn't
-    have any tuples [x1, y1, z2, x2, y2, z2, ...]
-
-    :param vertex_list: list of vertices to be flattened.
-    :type vertex_list: list of 3-tuples
-
-    :returns: a flattened vertex_list
-    :rtype: list
-
-    """
-    flat = []
-    for vertex in vertex_list:
-        for vi in vertex:
-            flat.append(vi)
-    return flat
-
 def transform_points(points):
     """Transform the given list of points using the transformation matrix.
 
