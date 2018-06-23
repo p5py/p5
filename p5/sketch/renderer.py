@@ -27,6 +27,7 @@ from vispy import gloo
 from vispy.gloo import IndexBuffer
 from vispy.gloo import Program
 from vispy.gloo import VertexBuffer
+from vispy.gloo import FrameBuffer
 
 from ..pmath import matrix
 from .shaders import src_default
@@ -42,6 +43,8 @@ from .shaders import src_fbuffer
 ##   state variables.
 ##
 default_shader = None
+
+frame_buffer = None
 
 ## Renderer Globals: USEFUL CONSTANTS
 COLOR_WHITE = (1, 1, 1, 1)
@@ -128,6 +131,7 @@ def initialize_renderer():
 
     """
     global default_shader
+    global frame_buffer
 
     gloo.set_state(blend=True)
     gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
@@ -136,6 +140,7 @@ def initialize_renderer():
     gloo.set_state(depth_func='lequal')
 
     default_shader = Program(src_default.vert, src_default.frag)
+    frame_buffer = FrameBuffer()
 
     reset_view()
     clear()
@@ -188,6 +193,7 @@ def cleanup():
     """
     default_shader.delete()
     texture_shader.delete()
+    frame_buffer.delete()
 
 
 ## RENDERING FUNTIONS + HELPERS
@@ -281,6 +287,9 @@ def draw_loop():
     global transform_matrix
     gloo.set_viewport(*viewport)
     transform_matrix = np.identity(4)
+
+    # with default_frame_buffer:
+    #     ...
 
     yield
 
