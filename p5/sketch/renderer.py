@@ -24,15 +24,17 @@ import math
 import numpy as np
 
 from vispy import gloo
+from vispy.gloo import FrameBuffer
 from vispy.gloo import IndexBuffer
 from vispy.gloo import Program
+from vispy.gloo import RenderBuffer
+from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
-from vispy.gloo import FrameBuffer
 
 from ..pmath import matrix
 from .shaders import src_default
-from .shaders import src_texture
 from .shaders import src_fbuffer
+from .shaders import src_texture
 
 ##
 ## Renderer globals.
@@ -43,8 +45,13 @@ from .shaders import src_fbuffer
 ##   state variables.
 ##
 default_shader = None
+texture_shader = None
 
 frame_buffer = None
+frame_front_texture = None
+frame_back_texture = None
+frame_texcoords = None
+frame_elements = None
 
 ## Renderer Globals: USEFUL CONSTANTS
 COLOR_WHITE = (1, 1, 1, 1)
@@ -131,6 +138,7 @@ def initialize_renderer():
 
     """
     global default_shader
+    global texture_shader
     global frame_buffer
 
     gloo.set_state(blend=True)
@@ -140,10 +148,11 @@ def initialize_renderer():
     gloo.set_state(depth_func='lequal')
 
     default_shader = Program(src_default.vert, src_default.frag)
+    texture_shader = Program(src_fbuffer.vert, src_fbuffer.frag)
+
     frame_buffer = FrameBuffer()
 
     reset_view()
-    clear()
 
 def clear(color=True, depth=True):
     """Clear the renderer background."""
@@ -155,13 +164,20 @@ def reset_view():
     global transform_matrix
     global modelview_matrix
     global projection_matrix
+    global frame_front_texture
+    global frame_back_texture
+    global frame_vertices
+    global frame_texcoords
     global viewport
+
+    physical_width = int(builtins.width * builtins.pixel_x_density)
+    physical_height = int(builtins.height * builtins.pixel_y_density)
 
     viewport = (
         0,
         0,
-        int(builtins.width * builtins.pixel_x_density),
-        int(builtins.height * builtins.pixel_y_density)
+        physical_width,
+        physical_height,
     )
 
     gloo.set_viewport(*viewport)
@@ -183,6 +199,25 @@ def reset_view():
 
     default_shader['modelview'] = modelview_matrix.T.flatten()
     default_shader['projection'] = projection_matrix.T.flatten()
+
+    frame_front_texture = Texture2D((builtins.height, builtins.width, 3))
+    frame_back_texture = Texture2D((builtins.height, builtins.width, 3))
+
+    vertices = np.array([[-1.0, -1.0, 0.0], [+1.0, -1.0, 0.0],
+                         [-1.0, +1.0, 0.0], [+1.0, +1.0, 0.0,]], np.float32)
+    frame_vertices = VertexBuffer(data=vertices)
+
+    texcoords = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+                         dtype=np.float32)
+    frame_texcoords = VertexBuffer(data=texcoords)
+
+    clear()
+    frame_buffer.color_buffer = frame_front_texture
+    with frame_buffer:
+        clear()
+    frame_buffer.color_buffer = frame_back_texture
+    with frame_buffer:
+        clear()
 
 def cleanup():
     """Run the clean-up routine for the renderer.
@@ -285,15 +320,42 @@ def draw_loop():
     """The main draw loop context manager.
     """
     global transform_matrix
+    global frame_front_texture
+    global frame_back_texture
+
     gloo.set_viewport(*viewport)
     transform_matrix = np.identity(4)
 
-    # with default_frame_buffer:
-    #     ...
+    default_shader['modelview'] = modelview_matrix.T.flatten()
+    default_shader['projection'] = projection_matrix.T.flatten()
 
-    yield
+    gloo.set_state(depth_test=True)
+    gloo.set_state(blend=True)
+    gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
+    frame_buffer.color_buffer = frame_back_texture
 
-    flush_geometry()
+
+    with frame_buffer:
+        gloo.set_viewport(*viewport)
+        texture_shader['texture'] = frame_front_texture
+        texture_shader['texcoord'] = frame_texcoords
+        texture_shader['position'] = frame_vertices
+        texture_shader.draw('triangle_strip')
+
+        yield
+
+        flush_geometry()
+
+    clear()
+    gloo.set_state(blend=False)
+    gloo.set_state(depth_test=False)
+    texture_shader['texcoord'] = frame_texcoords
+    texture_shader['position'] = frame_vertices
+    texture_shader['texture'] = frame_back_texture
+    texture_shader.draw('triangle_strip')
+    frame_front_texture, frame_back_texture = \
+        frame_back_texture, frame_front_texture
+
 
 def render(shape):
     """Use the renderer to render a Shape.

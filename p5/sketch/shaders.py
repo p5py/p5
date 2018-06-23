@@ -80,23 +80,23 @@ void main()
 
 # Shader sources to draw framebuffers textues.
 fbuffer_vertex_source = """
-attribute vec2 position;
-attribute vec2 tex_coord;
+attribute vec3 position;
+attribute vec2 texcoord;
 
 varying vec2 vert_tex_coord;
 
 void main() {
-    gl_Position = vec4(position, 0, 1);
-    vert_tex_coord = tex_coord;
+    gl_Position = vec4(position, 1);
+    vert_tex_coord = texcoord;
 }
 """
 
 fbuffer_fragment_source = """
-uniform sampler2D texMap;
+uniform sampler2D texture;
 varying vec2 vert_tex_coord;
 
 void main() {
-    gl_FragColor = texture2D(texMap, vert_tex_coord.st);
+    gl_FragColor = texture2D(texture, vert_tex_coord.st);
 }
 """
 

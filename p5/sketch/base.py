@@ -108,7 +108,8 @@ class Sketch(app.Canvas):
         # size() method), however, all user attempts to resize the
         # window should be ignored.
         reset_view()
-        clear()
+        with draw_loop():
+            clear()
 
     def _enqueue_event(self, handler_name, event):
         event._update_builtins()
