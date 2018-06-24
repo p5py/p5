@@ -232,7 +232,8 @@ class MouseEvent(Event):
         super().__init__(*args, **kwargs)
 
         x, y = self._raw.pos
-        y = builtins.height - y
+        x = max(min(builtins.width, x), 0)
+        y = max(min(builtins.height, builtins.height - y), 0)
         dx, dy = self._raw.delta
 
         if (self._raw.press_event != None) and (self._raw.last_event != None):
