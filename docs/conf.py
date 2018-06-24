@@ -27,24 +27,9 @@ class Mock(MagicMock):
         return MagicMock()
 
 MOCK_MODULES = [
-    'pyglet',
-    'pyglet.app',
-    'pyglet.canvas',
-    'pyglet.clock',
-    'pyglet.event',
-    'pyglet.extlibs',
-    'pyglet.font',
-    'pyglet.gl',
-    'pyglet.graphics',
-    'pyglet.image',
-    'pyglet.info',
-    'pyglet.input',
-    'pyglet.media',
-    'pyglet.resource',
-    'pyglet.sprite',
-    'pyglet.text',
-    'pyglet.window',
-    'p5.opengl.gl'
+    'vispy',
+    'vispy.app',
+    'vispy.gloo'
 ]
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
