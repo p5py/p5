@@ -56,19 +56,43 @@ def draw_shape(shape):
 
 class Sketch(app.Canvas):
     """The main sketch instance.
-    """
-    def __init__(self, *args, **kwargs):
-        app.Canvas.__init__(self, *args, **kwargs)
 
-        self.setup_method = lambda: None
-        self.draw_method = lambda: None
+    :param setup_method: Setup method for the sketch. This is run
+        exactly once for each run of the sketch.
+    :type setup_method: function
+
+    :param draw_method: Draw method for the sketch which keeps running
+        indefinitely.
+    :type draw_method: function
+
+    :param handlers: Dictionary containing the event handlers for the
+        sketch. By default, maps to an empty dict.
+        nothing.
+    :type handlers: { str: function }
+
+    """
+    def __init__(self, setup_method, draw_method,
+                 handlers=dict()):
+        app.Canvas.__init__(
+            self,
+            title=builtins.title,
+            size=(builtins.width, builtins.height),
+            keys='interactive',
+            resizable=False,
+        )
+
+        self.setup_method = setup_method
+        self.draw_method = draw_method
 
         self.looping = True
         self.redraw = False
         self.setup_done = False
         self.timer = app.Timer('auto', connect=self.on_timer)
 
-        self.handlers = dict.fromkeys(handler_names, _dummy)
+        self.handlers = dict()
+        for handler_name in handler_names:
+            self.handlers[handler_name] = handlers.get(handler_name, _dummy)
+
         self.handler_queue = []
 
         initialize_renderer()
@@ -89,8 +113,6 @@ class Sketch(app.Canvas):
                     self.draw_method()
                     self.redraw = False
 
-            # TODO: restore the previous state of builtins after dealing
-            # with all the handlers.
             while len(self.handler_queue) != 0:
                 function, event = self.handler_queue.pop(0)
                 event._update_builtins()
@@ -105,9 +127,6 @@ class Sketch(app.Canvas):
         pass
 
     def on_resize(self, event):
-        # we want programmers to be able to resize windows (using the
-        # size() method), however, all user attempts to resize the
-        # window should be ignored.
         reset_view()
         with draw_loop():
             clear()

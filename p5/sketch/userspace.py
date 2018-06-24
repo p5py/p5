@@ -107,31 +107,29 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
 
     """
     global default_sketch
-    default_sketch = Sketch(
-        title=builtins.title,
-        size=(builtins.width, builtins.height),
-        keys='interactive',
-        resizable=False,
-    )
 
+    # get the user-defined setup(), draw(), and handler functions.
     if sketch_setup is not None:
-        default_sketch.setup_method = sketch_setup
+        setup_method = sketch_setup
     elif hasattr(__main__, 'setup'):
-        default_sketch.setup_method = __main__.setup
+        setup_method = __main__.setup
     else:
-        default_sketch.setup_method = setup
+        setup_method = setup
 
     if sketch_draw is not None:
-        default_sketch.draw_method = sketch_draw
+        draw_method = sketch_draw
     elif hasattr(__main__, 'draw'):
-        default_sketch.draw_method = __main__.draw
+        draw_method = __main__.draw
     else:
-        default_sketch.draw_method = draw
+        draw_method = draw
 
+    handlers = dict()
     for handler in handler_names:
         if hasattr(__main__, handler):
             hfunc = getattr(__main__, handler)
-            default_sketch.handlers[handler] = _fix_interface(hfunc)
+            handlers[handler] = _fix_interface(hfunc)
+
+    default_sketch = Sketch(setup_method, draw_method, handlers)
 
     physical_width, physical_height = default_sketch.physical_size
     width, height = default_sketch.size
