@@ -70,9 +70,12 @@ class Sketch(app.Canvas):
         nothing.
     :type handlers: { str: function }
 
+    :param frame_rate:
+    :type frame_rate: int
+
     """
     def __init__(self, setup_method, draw_method,
-                 handlers=dict()):
+                 handlers=dict(), frame_rate=60):
         app.Canvas.__init__(
             self,
             title=builtins.title,
@@ -87,7 +90,7 @@ class Sketch(app.Canvas):
         self.looping = True
         self.redraw = False
         self.setup_done = False
-        self.timer = app.Timer('auto', connect=self.on_timer)
+        self.timer = app.Timer(1.0 / frame_rate, connect=self.on_timer)
 
         self.handlers = dict()
         for handler_name in handler_names:

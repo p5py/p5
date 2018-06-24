@@ -129,7 +129,7 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
             hfunc = getattr(__main__, handler)
             handlers[handler] = _fix_interface(hfunc)
 
-    default_sketch = Sketch(setup_method, draw_method, handlers)
+    default_sketch = Sketch(setup_method, draw_method, handlers, frame_rate)
 
     physical_width, physical_height = default_sketch.physical_size
     width, height = default_sketch.size
@@ -137,7 +137,6 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     builtins.pixel_x_density = physical_width // width
     builtins.pixel_y_density = physical_height // height
 
-    default_sketch.show()
     default_sketch.timer.start()
 
     app.run()
