@@ -70,6 +70,7 @@ stroke_enabled = True
 ## VIEW MATRICES, ETC
 ##
 viewport = None
+texture_viewport = None
 transform_matrix = np.identity(4)
 modelview_matrix = np.identity(4)
 projection_matrix = np.identity(4)
@@ -137,6 +138,7 @@ def clear(color=True, depth=True):
 def reset_view():
     """Reset the view of the renderer."""
     global viewport
+    global texture_viewport
 
     global transform_matrix
     global modelview_matrix
@@ -150,6 +152,12 @@ def reset_view():
         0,
         int(builtins.width * builtins.pixel_x_density),
         int(builtins.height * builtins.pixel_y_density),
+    )
+    texture_viewport = (
+        0,
+        0,
+        builtins.width,
+        builtins.height,
     )
     gloo.set_viewport(*viewport)
 
@@ -285,7 +293,7 @@ def draw_loop():
     fbuffer.color_buffer = fbuffer_tex_back
 
     with fbuffer:
-        gloo.set_viewport(*viewport)
+        gloo.set_viewport(*texture_viewport)
         _comm_toggles()
         fbuffer_prog['texture'] = fbuffer_tex_front
         fbuffer_prog.draw('triangle_strip')
