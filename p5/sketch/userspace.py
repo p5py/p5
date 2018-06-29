@@ -26,7 +26,6 @@ from vispy import app
 
 from .base import Sketch
 from .events import handler_names
-from .renderer import initialize_renderer
 
 __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
            'cursor', 'exit', 'draw', 'setup', 'run']

@@ -17,7 +17,7 @@
 #
 import builtins
 
-from ..sketch import renderer
+from ..sketch import userspace
 from .color import Color
 from .primitives import rect
 from .structure import push_style
@@ -40,14 +40,14 @@ def fill(*fill_args, **fill_kwargs):
 
     """
     fill_color = Color(*fill_args, **fill_kwargs)
-    renderer.fill_enabled = True
-    renderer.fill_image_enabled = False
-    renderer.fill_color = fill_color.normalized
+    userspace.default_sketch.fill_enabled = True
+    userspace.default_sketch.fill_image_enabled = False
+    userspace.default_sketch.fill_color = fill_color.normalized
     return fill_color
 
 def no_fill():
     """Disable filling geometry."""
-    renderer.fill_enabled = False
+    userspace.default_sketch.fill_enabled = False
 
 def stroke(*color_args, **color_kwargs):
     """Set the color used to draw lines around shapes
@@ -65,12 +65,12 @@ def stroke(*color_args, **color_kwargs):
     :rtype: Color
     """
     stroke_color = Color(*color_args, **color_kwargs)
-    renderer.stroke_enabled = True
-    renderer.stroke_color = stroke_color.normalized
+    userspace.default_sketch.stroke_enabled = True
+    userspace.default_sketch.stroke_color = stroke_color.normalized
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""
-    renderer.stroke_enabled = False
+    userspace.default_sketch.stroke_enabled = False
 
 def tint(*color_args, **color_kwargs):
     """Set the tint color for the sketch.
@@ -87,14 +87,14 @@ def tint(*color_args, **color_kwargs):
     :returns: The tint color.
     :rtype: Color
     """
-    raise NotImplementedError("Renderer doesn't support textures.")
+    raise NotImplementedError("Userspace.Default_Sketch doesn't support textures.")
 
 def no_tint():
     """Disable tinting of images."""
-    raise NotImplementedError("Renderer doesn't support textures.")
+    raise NotImplementedError("Userspace.Default_Sketch doesn't support textures.")
 
 def background(*color_args, **color_kwargs):
-    """Set the background color for the renderer.
+    """Set the background color for the userspace.default_sketch.
 
     :param color_args: positional arguments to be parsed as a color.
     :type color_args: tuple
@@ -114,5 +114,5 @@ def background(*color_args, **color_kwargs):
         no_stroke()
         with push_matrix():
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
-    renderer.background_color = background_color.normalized
+    userspace.default_sketch.background_color = background_color.normalized
     return background_color

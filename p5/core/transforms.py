@@ -22,7 +22,7 @@ import math
 
 import numpy as np
 
-from ..sketch import renderer
+from ..sketch import userspace
 from ..pmath import Vector
 from ..pmath import matrix
 
@@ -33,17 +33,17 @@ __all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
 
 @contextmanager
 def push_matrix():
-    previous_matrix = renderer.transform_matrix.copy()
+    previous_matrix = userspace.default_sketch.transform.copy()
     try:
         yield previous_matrix
     finally:
-        renderer.transform_matrix = previous_matrix
+        userspace.default_sketch.transform = previous_matrix
 
 def reset_transforms():
     """Reset all transformations to their default state.
 
     """
-    renderer.reset_view()
+    userspace.default_sketch.reset()
 
 def translate(x, y, z=0):
     """Translate the display origin to the given location.
@@ -68,7 +68,8 @@ def translate(x, y, z=0):
 
     """
     tmat = matrix.translation_matrix(x, y, z)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    userspace.default_sketch.transform = \
+        userspace.default_sketch.transform.dot(tmat)
     return tmat
 
 def rotate(theta, axis=np.array([0, 0, 1])):
@@ -86,7 +87,8 @@ def rotate(theta, axis=np.array([0, 0, 1])):
    """
     axis = np.array(axis[:])
     tmat = matrix.rotation_matrix(axis, theta)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    userspace.default_sketch.transform = \
+        userspace.default_sketch.transform.dot(tmat)
     return tmat
 
 def rotate_x(theta):
@@ -146,7 +148,7 @@ def scale(sx, sy=None, sz=None):
     elif not sz:
         sz = 1
     tmat = matrix.scale_transform(sx, sy, sz)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    userspace.default_sketch.transform = userspace.default_sketch.transform.dot(tmat)
     return tmat
 
 def apply_matrix(transform_matrix):
@@ -156,17 +158,17 @@ def apply_matrix(transform_matrix):
     :type transform_matrix: np.ndarray (or a 4×4 list)
     """
     tmatrix = np.array(transform_matrix)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmatrix)
+    userspace.default_sketch.transform = userspace.default_sketch.transform.dot(tmatrix)
 
 def reset_matrix():
     """Reset the current transform matrix.
     """
-    renderer.transform_matrix = np.identity(4)
+    userspace.default_sketch.transform = np.identity(4)
 
 def print_matrix():
     """Print the transform matrix being used by the sketch.
     """
-    print(renderer.transform_matrix)
+    print(userspace.default_sketch.transform)
 
 def shear_x(theta):
     """Shear display along the x-axis.
@@ -180,7 +182,7 @@ def shear_x(theta):
     """
     shear_mat = np.identity(4)
     shear_mat[0, 1] = np.tan(theta)
-    renderer.transform_matrix = renderer.transform_matrix.dot(shear_mat)
+    userspace.default_sketch.transform = userspace.default_sketch.transform.dot(shear_mat)
     return shear_mat
 
 def shear_y(theta):
@@ -195,7 +197,7 @@ def shear_y(theta):
     """
     shear_mat = np.identity(4)
     shear_mat[1, 0] = np.tan(theta)
-    renderer.transform_matrix = renderer.transform_matrix.dot(shear_mat)
+    userspace.default_sketch.transform = userspace.default_sketch.transform.dot(shear_mat)
     return shear_mat
 
 def camera():

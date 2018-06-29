@@ -17,7 +17,7 @@
 #
 from contextlib import contextmanager
 
-from ..sketch import renderer
+from ..sketch import userspace
 from . import primitives
 from . import color
 
@@ -52,11 +52,11 @@ def push_style():
     - (*) ambient
 
     """
-    prev_background_color = renderer.background_color
-    prev_fill_color = renderer.fill_color
-    prev_stroke_color = renderer.stroke_color
-    prev_fill_enabled = renderer.fill_enabled
-    prev_stroke_enabled = renderer.stroke_enabled
+    prev_background_color = userspace.default_sketch.background_color
+    prev_fill_color = userspace.default_sketch.fill_color
+    prev_stroke_color = userspace.default_sketch.stroke_color
+    prev_fill_enabled = userspace.default_sketch.fill_enabled
+    prev_stroke_enabled = userspace.default_sketch.stroke_enabled
     prev_ellipse_mode = primitives._ellipse_mode
     prev_rect_mode = primitives._rect_mode
     prev_shape_mode = primitives._shape_mode
@@ -65,11 +65,11 @@ def push_style():
 
     yield
 
-    renderer.background_color = prev_background_color
-    renderer.fill_color = prev_fill_color
-    renderer.stroke_color = prev_stroke_color
-    renderer.fill_enabled = prev_fill_enabled
-    renderer.stroke_enabled = prev_stroke_enabled
+    userspace.default_sketch.background_color = prev_background_color
+    userspace.default_sketch.fill_color = prev_fill_color
+    userspace.default_sketch.stroke_color = prev_stroke_color
+    userspace.default_sketch.fill_enabled = prev_fill_enabled
+    userspace.default_sketch.stroke_enabled = prev_stroke_enabled
     primitives._ellipse_mode = prev_ellipse_mode
     primitives._rect_mode = prev_rect_mode
     primitives._shape_mode = prev_shape_mode

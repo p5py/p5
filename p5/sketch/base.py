@@ -15,11 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-
 """Base module for a sketch."""
 
 import builtins
-from functools import wraps
 import time
 
 import vispy
@@ -29,53 +27,38 @@ from vispy import gloo
 from .events import KeyEvent
 from .events import MouseEvent
 from .events import handler_names
+from .render import Renderer
 
-from .renderer import draw_loop
-from .renderer import initialize_renderer
-from .renderer import clear
-from .renderer import reset_view
-from .renderer import render
+# Instead of exposing the renderer direcly, we set up the
+# sketch a "proxy". Whenever an attribute name occurs in the
+# list below, attribute access is delegated to the renderer.
+_proxy_attribs = [ 'fill_enabled', 'fill_color',
+                         'stroke_enabled', 'stroke_color',
+                         'background_color', 'modelview',
+                         'projection', 'transform', ]
 
-def _dummy(*args, **kwargs):
-    """Eat all arguments, do nothing.
-    """
-    pass
 
-def draw_shape(shape):
-    """Handle the lower level stuff associated with drawing a shape.
-
-    :param shape: The shape to be drawn.
-    :type shape: Shape
-
-    """
-    # TODO (abhikpal 2017-08-05)
-    #
-    # Add a check that insures that we don't call the renderer
-    # directly while drawing a shape.
-    render(shape)
 
 class Sketch(app.Canvas):
     """The main sketch instance.
 
-    :param setup_method: Setup method for the sketch. This is run
+    :param setup: Setup method for the sketch. This is run
         exactly once for each run of the sketch.
-    :type setup_method: function
+    :type setup: function
 
-    :param draw_method: Draw method for the sketch which keeps running
+    :param draw: Draw method for the sketch which keeps running
         indefinitely.
-    :type draw_method: function
+    :type draw: function
 
     :param handlers: Dictionary containing the event handlers for the
-        sketch. By default, maps to an empty dict.
-        nothing.
+        sketch. An empty dict by default.
     :type handlers: { str: function }
 
-    :param frame_rate:
+    :param frame_rate: Frame rate for the sketch.
     :type frame_rate: int
 
     """
-    def __init__(self, setup_method, draw_method,
-                 handlers=dict(), frame_rate=60):
+    def __init__(self, setup, draw, handlers=dict(), frame_rate=60):
         app.Canvas.__init__(
             self,
             title=builtins.title,
@@ -84,27 +67,58 @@ class Sketch(app.Canvas):
             resizable=False,
         )
 
-        self.setup_method = setup_method
-        self.draw_method = draw_method
+        self.setup_method = setup
+        self.draw_method = draw
 
         self.looping = True
         self.redraw = False
         self.setup_done = False
         self.timer = app.Timer(1.0 / frame_rate, connect=self.on_timer)
 
+        def _dummy(*args, **kwargs): pass
         self.handlers = dict()
         for handler_name in handler_names:
             self.handlers[handler_name] = handlers.get(handler_name, _dummy)
 
         self.handler_queue = []
 
-        initialize_renderer()
-        clear()
+        px, py = self.physical_size
+        sx, sy = self.size
+
+        self.renderer = Renderer(self.size, (px // sx, py // sy))
+        self.renderer.clear()
+
+    def __getattr__(self, name):
+        if name in _proxy_attribs:
+            return getattr(self.renderer, name)
+        err = "'{}' object has no attribute '{}'"
+        raise AttributeError(err.format('Foo', name))
+
+    def __setattr__(self, name, value):
+        if name in _proxy_attribs:
+            setattr(self.renderer, name, value)
+        else:
+            super().__setattr__(name, value)
+
+    def __delattr__(self, name):
+        if name in _proxy_attribs:
+            delattr(self.renderer, name)
+        else:
+            super().__delattr__(name)
+
+    def draw_shape(self, shape):
+        """Handle the lower level stuff associated with drawing a shape.
+        
+        :param shape: The shape to be drawn.
+        :type shape: Shape
+
+        """
+        return self.renderer.add_to_queue(shape)
 
     def on_timer(self, event):
         self.measure_fps(callback=lambda _: None)
         builtins.frame_rate = round(self.fps, 2)
-        with draw_loop():
+        with self.renderer:
             if self.looping or self.redraw:
                 builtins.frame_count += 1
                 if not self.setup_done:
@@ -130,9 +144,7 @@ class Sketch(app.Canvas):
         pass
 
     def on_resize(self, event):
-        reset_view()
-        with draw_loop():
-            clear()
+        self.renderer.size = (builtins.width, builtins.height)
 
     def _enqueue_event(self, handler_name, event):
         event._update_builtins()
