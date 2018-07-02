@@ -28,7 +28,7 @@ __all__ = ['color_mode', 'Color']
 color_parse_mode = 'RGB'
 color_range = (255, 255, 255, 255)
 
-def color_mode(mode, max_1=255, max_2=None, max_3=None, max_4=255):
+def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
     """Set the color mode of the renderer.
 
     :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
@@ -43,7 +43,7 @@ def color_mode(mode, max_1=255, max_2=None, max_3=None, max_4=255):
         max_2 = max_1
         max_3 = max_1
 
-    color_range = (max_1, max_2, max_3, max_4)
+    color_range = (max_1, max_2, max_3, max_alpha)
     color_parse_mode = mode
 
 def parse_color(*args, color_mode='RGB', **kwargs):
