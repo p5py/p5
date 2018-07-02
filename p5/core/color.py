@@ -35,6 +35,22 @@ def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
         or Hue/Saturation/Brightness
     :type mode: str
 
+    :param max_1: Maximum value for the first color channel (default:
+        255)
+    :type max_1: int
+
+    :param max_2: Maximum value for the second color channel (default:
+        max_1)
+    :type max_2: int
+
+    :param max_3: Maximum value for the third color channel (default:
+        max_1)
+    :type max_3: int
+
+    :param max_alpha: Maximum valu for the alpha channel (default:
+        255)
+    :type max_alpha: int
+
     """
     global color_parse_mode
     global color_range
