@@ -162,13 +162,13 @@ class Sketch(app.Canvas):
         self._enqueue_event('mouse_clicked', mev)
 
     def on_mouse_move(self, event):
-        mev = MouseEvent(event)
+        mev = MouseEvent(event, active=builtins.mouse_is_pressed)
         self._enqueue_event('mouse_moved', mev)
         if builtins.mouse_is_pressed:
             self._enqueue_event('mouse_dragged', mev)
 
     def on_mouse_wheel(self, event):
-        mev = MouseEvent(event)
+        mev = MouseEvent(event, active=builtins.mouse_is_pressed)
         self._enqueue_event('mouse_wheel', mev)
 
     # def on_touch(self, event):
