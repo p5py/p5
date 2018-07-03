@@ -35,9 +35,9 @@ from ..pmath.utils import SINCOS_PRECISION
 
 from .shape import Shape
 
-__all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
+__all__ = ['point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
-           'rect_mode', 'bezier', 'curve']
+           'rect_mode', 'bezier', 'curve', 'create_shape', 'draw_shape']
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
@@ -533,3 +533,66 @@ def ellipse_mode(mode='CENTER'):
     """
     global _ellipse_mode
     _ellipse_mode = mode
+
+
+def draw_shape(shape, pos=(0, 0, 0)):
+    """Draw the given shape at the specified location.
+
+    :param shape: The shape that needs to be drawn.
+    :type shape: p5.PShape
+
+    :param pos: Position of the shape
+    :type pos: tuple | Vector
+
+    """
+    sketch.draw_pshape(shape)
+
+def create_shape(kind=None, *args, **kwargs):
+    """Create a new PShape
+
+    Note :: A shape created using this function is *not* visible by
+        default. Please make the shape visible by setting the shapes's
+        `visible` attribute to true.
+
+    :param kind: Type of shape. When left unspecified a generic PShape
+        is returned (which can be edited later). Valid values for
+        `kind` are: { 'point', 'line', 'triangle', 'quad', 'rect',
+        'ellipse', 'arc', }
+
+    :type kind: None | str
+
+    :param args: Initial arguments to be passed to the shape creation
+        function (only applied when `kind` is *not* None)
+
+    :param kwargs: Initial keyword arguments to be passed to the shape
+        creation function (only applied when `kind` is *not* None)
+
+    :returns: The requested shape
+    :rtype: p5.PShape
+
+    """
+
+    # TODO: add 'box', 'sphere' support
+    valid_values = { None, 'point', 'line', 'triangle', 'quad',
+                     'rect', 'square', 'ellipse', 'circle', 'arc', }
+
+    # TODO
+    def empty_shape(*args, **kwargs):
+        # return PShape()
+        raise NotImplementedError
+
+    shape_map = {
+        'arc': arc,
+        'circle': circle,
+        'ellipse': ellipse,
+        'line': line,
+        'point': point,
+        'quad': quad,
+        'rect': rect,
+        'square': square,
+        'triangle': triangle,
+        None: empty_shape,
+    }
+
+    # kwargs['visible'] = False
+    return shape_map[kind](*args, **kwargs)

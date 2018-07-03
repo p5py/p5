@@ -20,3 +20,4 @@ vispy.use('glfw')
 
 from .userspace import *
 from .base import draw_shape
+from .base import draw_pshape
