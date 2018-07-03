@@ -22,9 +22,12 @@ import builtins
 from functools import wraps
 import time
 
+import numpy as np
 import vispy
 from vispy import app
 from vispy import gloo
+
+from .. sketch import renderer
 
 from .events import KeyEvent
 from .events import MouseEvent
@@ -34,7 +37,7 @@ from .renderer import draw_loop
 from .renderer import initialize_renderer
 from .renderer import clear
 from .renderer import reset_view
-from .renderer import render
+from .renderer import add_to_draw_queue
 
 def _dummy(*args, **kwargs):
     """Eat all arguments, do nothing.
@@ -48,11 +51,23 @@ def draw_shape(shape):
     :type shape: Shape
 
     """
-    # TODO (abhikpal 2017-08-05)
-    #
-    # Add a check that insures that we don't call the renderer
-    # directly while drawing a shape.
-    render(shape)
+    num_shape_verts = len(shape.vertices)
+
+    if shape.kind.lower() == 'point':
+        idx = np.arange(0, num_shape_verts, dtype=np.uint32)
+    elif shape.kind.lower() == 'line':
+        idx = np.array(shape.edges, dtype=np.uint32).ravel()
+    else:
+        idx = np.array(shape.faces, dtype=np.uint32).ravel()
+
+    shape.transform(renderer.transform_matrix)
+    vertices = shape.transformed_vertices[:, :3]
+
+    add_to_draw_queue(shape.kind.lower(), vertices, shape.edges, shape.faces,
+                      renderer.fill_color, renderer.stroke_color)
+
+def draw_pshape(shape):
+    pass
 
 class Sketch(app.Canvas):
     """The main sketch instance.

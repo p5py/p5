@@ -222,8 +222,8 @@ def flush_geometry():
             continue
 
         num_vertices = 0
-        for shape, _ in draw_queue:
-            num_vertices = num_vertices + len(shape.vertices)
+        for vertices, _, _ in draw_queue:
+            num_vertices = num_vertices + len(vertices)
 
         # 2. Create empty buffers based on the number of vertices.
         #
@@ -236,21 +236,13 @@ def flush_geometry():
         #
         sidx = 0
         draw_indices = []
-        for shape, color in draw_queue:
-            num_shape_verts = len(shape.vertices)
+        for vertices, idx, color in draw_queue:
+            num_shape_verts = len(vertices)
 
-            data['position'][sidx:(sidx + num_shape_verts),] = \
-                shape.transformed_vertices[:, :3]
+            data['position'][sidx:(sidx + num_shape_verts),] = vertices
 
             color_array = np.array([color] * num_shape_verts)
             data['color'][sidx:sidx + num_shape_verts, :] = color_array
-
-            if name == 'point':
-                idx = np.arange(0, num_shape_verts, dtype=np.uint32)
-            elif name == 'line':
-                idx = np.array(shape.edges, dtype=np.uint32).ravel()
-            else:
-                idx = np.array(shape.faces, dtype=np.uint32).ravel()
 
             draw_indices.append(sidx + idx)
 
@@ -310,31 +302,51 @@ def draw_loop():
 
     fbuffer_tex_front, fbuffer_tex_back = fbuffer_tex_back, fbuffer_tex_front
 
+def add_to_draw_queue(stype, vertices, edges, faces, fill=None, stroke=None):
+    """Add the given vertex data to the draw queue.
 
-def render(shape):
-    """Use the renderer to render a Shape.
+    :param stype: type of shape to be added. Should be one of {'poly',
+        'path', 'point'}
+    :type stype: str
 
-    :param shape: The shape to be rendered.
-    :type shape: Shape
+    :param vertices: (N, 3) array containing the vertices to be drawn.
+    :type vertices: np.ndarray
+
+    :param edges: (N, 2) array containing edges as tuples of indices
+        into the vertex array. This can be None when not appropriate
+        (eg. for points)
+    :type edges: None | np.ndarray
+
+    :param faces: (N, 3) array containing faces as tuples of indices
+        into the vertex array. For 'point' and 'path' shapes, this can
+        be None
+    :type faces: np.ndarray
+
+    :param fill: Fill color of the shape as a normalized RGBA tuple.
+        When set to `None` the shape doesn't get a fill (default: None)
+    :type fill: None | tuple
+
+    :param stroke: Stroke color of the shape as a normalized RGBA
+        tuple. When set to `None` the shape doesn't get stroke
+        (default: None)
+    :type stroke: None | tuple
+
     """
     global poly_draw_queue
     global line_draw_queue
     global point_draw_queue
 
-    ## RETAINED MODE RENDERING
-    #
-    # 1. Transform the shape using the current transform matrix.
-    #
-    shape.transform(transform_matrix)
+    fill_shape = fill_enabled and not (fill is None)
+    stroke_shape = stroke_enabled and not (stroke is None)
 
-    # 2. Depending on the current property add the shape and the color
-    # to the correct draw queue
-    #
-    if fill_enabled and shape.kind not in ['POINT', 'PATH']:
-        poly_draw_queue.append((shape, fill_color))
+    if fill_shape and stype not in ['point', 'path']:
+        idx = np.array(faces, dtype=np.uint32).ravel()
+        poly_draw_queue.append((vertices, idx, fill))
 
-    if stroke_enabled:
-        if shape.kind == 'POINT':
-            point_draw_queue.append((shape, stroke_color))
+    if stroke_shape:
+        if stype == 'point':
+            idx = np.arange(0, len(vertices), dtype=np.uint32)
+            point_draw_queue.append((vertices, idx, stroke))
         else:
-            line_draw_queue.append((shape, stroke_color))
+            idx = np.array(edges, dtype=np.uint32).ravel()
+            line_draw_queue.append((vertices, idx, stroke))
