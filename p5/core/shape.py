@@ -330,6 +330,6 @@ class PShape:
         """
         n = len(self._tri.pts)
         vertices = np.hstack([self._tri.pts, np.zeros((n, 1)), np.ones((n, 1))])
-        transformed = np.dot(vertices, matrix)
+        transformed = np.dot(vertices, matrix.T)
         return transformed[:, :3]
 
