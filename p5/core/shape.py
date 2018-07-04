@@ -25,6 +25,7 @@ from math import sin
 from math import cos
 from math import radians
 from contextlib import contextmanager
+from functools import wraps
 
 import numpy as np
 from vispy import geometry
@@ -186,6 +187,17 @@ class Shape:
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
+def _ensure_editable(func):
+    """A decorater that ensures that a shape is in 'edit' mode.
+
+    """
+    @wraps(func)
+    def editable_method(instance, *args, **kwargs):
+        if not instance._in_edit_mode:
+            raise ValueError('{} only works in edit mode'.format(func.__name__))
+        return func(instance, *args, **kwargs)
+    return editable_method
+
 class PShape:
     """Custom shape class for p5.
 
@@ -209,16 +221,22 @@ class PShape:
     :type children: list
 
     """
-    def __init__(self, vertices, fill_color='auto', stroke_color='auto',
+    def __init__(self, vertices=[], fill_color='auto', stroke_color='auto',
                  visible=False, children=[]):
         # basic properties of the shape
-        self._vertices = None
+        self._vertices = np.array([])
         self._edges = None
 
-        # The triangulation used to render the shapes.
-        self._triangulation = None
 
-        self.vertices = vertices
+        # a flag to check if the shape is being edited right now.
+        self._in_edit_mode = False
+        self._vertex_cache = None
+
+        # The triangulation used to render the shapes.
+        self._tri = None
+
+        if len(vertices) > 0:
+            self.vertices = vertices
 
         # TODO: support different vertex types
         self._vertex_types = ['P'] * len(vertices)
@@ -305,9 +323,7 @@ class PShape:
     @vertices.setter
     def vertices(self, new_vertices):
         self._vertices = np.array(new_vertices)
-        self._edges = None
-        self._tri = geometry.Triangulation(self.vertices, self.edges)
-        self._tri.triangulate()
+        self._retriangulate()
 
     @property
     def edges(self):
@@ -316,6 +332,33 @@ class PShape:
             self._edges = np.vstack([np.arange(n),
                                      (np.arange(n) + 1) % n]).transpose()
         return self._edges
+
+    def _retriangulate(self):
+        """Triangulate the shape
+        """
+        self._edges = None
+        self._tri = geometry.Triangulation(self.vertices, self.edges)
+        self._tri.triangulate()
+
+    def _draw_data(self):
+        """Data required to draw the shape.
+
+        :returns: vertices, edges, faces of the current shape.
+        :rtype: tuple
+        """
+        vertices = self._tri.pts
+
+        if isinstance(self._tri.edges, np.ndarray):
+            edges = self._tri.edges
+        else:
+            edges = np.array([])
+
+        if isinstance(self._tri.tris, np.ndarray):
+            faces = self._tri.tris
+        else:
+            faces = np.array([])
+
+        return vertices, edges, faces
 
     def apply_matrix(self, matrix):
         """Transform all points based on the given matrix.
@@ -333,3 +376,56 @@ class PShape:
         transformed = np.dot(vertices, matrix.T)
         return transformed[:, :3]
 
+    @contextmanager
+    def edit(self, reset=True):
+        """Put the shape in edit mode.
+
+        :param reset: Toggles whether the shape should be "reset"
+            during editing. When set to `True` all existing shape
+            vertices are cleared. When set to `False` the new vertices
+            are appended at the end of the existing vertex list.
+            (default: True)
+        :type reset: bool
+
+        :raises ValueError: if the shape is already being edited.
+
+        """
+        if self._in_edit_mode:
+            raise ValueError("Shape is being edited already")
+
+        self._in_edit_mode = True
+        if reset:
+            self._vertices = np.array([])
+        self._vertex_cache = []
+        yield
+        self.vertices = self._vertex_cache
+        self._in_edit_mode = False
+
+    @_ensure_editable
+    def add_vertex(self, vertex):
+        """Add a vertex to the current shape
+
+        :param vertex: The (next) vertex to add to the current shape.
+        :type vertex: tuple | list | p5.Vector | np.ndarray
+
+        :raises ValueError:  when the vertex is of the wrong dimension
+        """
+        if len(vertex) != 2:
+            raise ValueError("Wrong vertex dimension")
+        self._vertex_cache.append(vertex)
+
+    def update_vertex(self, idx, vertex):
+        """Edit an indicidual vertex.
+
+        :param idx: index of the vertex to be edited
+        :type idx: int
+
+        :param vertex: The (next) vertex to add to the current shape.
+        :type vertex: tuple | list | p5.Vector | np.ndarray
+
+        :raises ValueError:  when the vertex is of the wrong dimension
+        """
+        if len(vertex) != 2:
+            raise ValueError("Wrong vertex dimension")
+        self._vertices[idx] =  np.array(vertex)
+        self._retriangulate()

@@ -67,10 +67,10 @@ def draw_shape(shape):
                       renderer.fill_color, renderer.stroke_color)
 
 def draw_pshape(shape):
+    _, edges, faces = shape._draw_data()
     vertices = shape.apply_matrix(renderer.transform_matrix)
-    add_to_draw_queue('poly', vertices, shape._tri.edges,
-                      shape._tri.tris, renderer.fill_color,
-                      renderer.stroke_color)
+    add_to_draw_queue('poly', vertices, edges, faces,
+                      renderer.fill_color, renderer.stroke_color)
 
 class Sketch(app.Canvas):
     """The main sketch instance.
