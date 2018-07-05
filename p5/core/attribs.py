@@ -22,6 +22,7 @@ from .color import Color
 from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
+from .transforms import reset_transforms
 
 __all__ = [ 'background', 'fill', 'no_fill',
             'stroke', 'no_stroke', 'tint', 'no_tint' ]
@@ -113,6 +114,7 @@ def background(*color_args, **color_kwargs):
         fill(background_color)
         no_stroke()
         with push_matrix():
+            reset_transforms()
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
     renderer.background_color = background_color.normalized
     return background_color

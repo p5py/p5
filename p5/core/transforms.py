@@ -43,7 +43,8 @@ def reset_transforms():
     """Reset all transformations to their default state.
 
     """
-    renderer.reset_view()
+    renderer.transform_matrix = np.identity(4)
+    # renderer.reset_view()
 
 def translate(x, y, z=0):
     """Translate the display origin to the given location.
