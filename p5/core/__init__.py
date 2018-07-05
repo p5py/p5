@@ -20,5 +20,4 @@ from .shape import *
 from .primitives import *
 from .transforms import *
 from .color import *
-from .image import *
 from .attribs import *
