@@ -19,193 +19,40 @@
 """
 
 import builtins
-from collections import namedtuple
+import contextlib
+import functools
 import math
-from math import sin
-from math import cos
-from math import radians
-from contextlib import contextmanager
-from functools import wraps
 
 import numpy as np
 from vispy import geometry
 
 from .. import sketch
-
 from .color import Color
 
-__all__ = ['Shape', 'PShape']
-
-class Shape:
-    """Represents a Shape in p5py.
-
-    :param kind: The type of this shape. Should be one of {'POLY', ...}
-    :type kind: str
-
-    :param vertices: A list of vertices (Point named-tuples) that make
-        up the shape.
-    :type vertices: list of named-tuples (of type `Point`)
-
-    :param edges: A list of indices into the vertices list that
-        represent edges. (Defaults to the empty list `[]`)
-    :type edges: list of tuples
-
-    """
-
-    def __init__(self, vertices, kind='POLY', edges=None, faces=None,
-                 visible=True):
-        self.kind = kind
-        self._raw_vertices = vertices
-        self._vertices = None
-        self._transformed_vertices = None
-        self._edges = edges
-        self._faces = faces
-        self._texcoords = None
-        self.visible = visible
-
-    @property
-    def visible(self):
-        return self._visible
-
-    @visible.setter
-    def visible(self, is_visible):
-        self._visible = is_visible
-        if is_visible:
-            # Shape, show thyself.
-            sketch.draw_shape(self)
-
-    @property
-    def vertices(self):
-        if self._vertices is None:
-            self.tessellate()
-        return self._vertices
-
-    @property
-    def edges(self):
-        if self._edges is None:
-            self.compute_edges()
-        return self._edges
-
-    @property
-    def faces(self):
-        if self._faces is None:
-            self.compute_faces()
-        return self._faces
-
-    @property
-    def texcoords(self):
-        if self._texcoords is None:
-            self.compute_texcoords()
-        return self._texcoords
-
-    @property
-    def transformed_vertices(self):
-        """The transformed vertices of the shape (when available)
-
-        :note: This returns the un-transformed shape vertices when the
-            shape hasn't been transformed.
-
-        """
-        if not self._transformed_vertices is None:
-            return self._transformed_vertices
-        return self.vertices
-
-    @property
-    def has_been_transformed(self):
-        """Whether the shape has been transformed by a matrix."""
-        return self._transformed_vertices is None
-
-    def transform(self, matrix):
-        """Use the given matrix to transform the shape's vertices
-
-        :param matix: The transform matrix to use while transforming
-            shape.
-        :type matrix: np.ndarray
-
-        """
-        self._transformed_vertices = self.vertices.dot(matrix.T)
-
-    def compute_faces(self):
-        """Compute the faces for this shape."""
-        self._faces = [
-            (0, k, k + 1)
-            for k in range(1, len(self.vertices) - 1)
-        ]
-
-    def compute_edges(self):
-        """Compute the edges for this shape."""
-        self._edges = [
-            (k, k+1)
-            for k in range(len(self.vertices) - 1)
-        ]
-        # connect the last vertex to the first vertex
-        if not self.kind is 'PATH':
-            self._edges.append((len(self.vertices) - 1, 0))
-
-    def compute_texcoords(self):
-        """Compute the texture coordinates for the current shape."""
-        xs = [v[0] for v in self.vertices]
-        ys = [v[1] for v in self.vertices]
-
-        rangex = (min(xs), max(xs))
-        rangey = (min(ys), max(ys))
-
-        if (rangex[0] - rangex[1] == 0) or (rangey[0] - rangey[1] == 0):
-            self._texcoords = ((0.5, 0.5) for v in self.vertices)
-        else:
-            self._texcoords = [
-                (remap(x, rangex, (0, 1)), remap(y, rangey, (0, 1)))
-                for x, y, z in self.vertices
-            ]
-
-    def tessellate(self):
-        """Generate actual vertex data from limited number of parameters.
-        """
-        psig = ''.join((v.flag if not v.flag is None else 'D')
-                       for v in self._raw_vertices)
-        if 'D' in set(psig) and len(set(psig)) == 1:
-            # the path is already tessellated. Nothing to be done.
-            self._vertices = np.array(
-                [(*v[:3], 1) for v in self._raw_vertices]
-            )
-        elif psig == 'DBBD':
-            vertices = []
-            steps = curves.bezier_resolution
-            for i in range(steps + 1):
-                t = i / steps
-                p = curves.bezier_point(*self._raw_vertices, t)
-                vertices.append((*p[:3], 1))
-            self._vertices = np.array(vertices)
-        elif psig == 'DCCD':
-            vertices = []
-            steps = curves.curve_resolution
-            for i in range(steps + 1):
-                t = i / steps
-                p = curves.curve_point(*self._raw_vertices, t)
-                vertices.append((*p[:3], 1))
-            self._vertices = np.array(vertices)
-        else:
-            raise ValueError("Cannot complete tessillation. Unknown shape type.")
+__all__ = ['PShape']
 
 def _ensure_editable(func):
     """A decorater that ensures that a shape is in 'edit' mode.
 
     """
-    @wraps(func)
+    @functools.wraps(func)
     def editable_method(instance, *args, **kwargs):
         if not instance._in_edit_mode:
             raise ValueError('{} only works in edit mode'.format(func.__name__))
         return func(instance, *args, **kwargs)
     return editable_method
 
+
 class PShape:
     """Custom shape class for p5.
 
     :param vertices: List of (polygonal) vertices for the shape.
+
     :type vertices: list | np.ndarray
 
     :param fill_color: Fill color of the shape (default: 'auto' i.e.,
         the current renderer fill)
+
     :type fill_color: 'auto' | None | tuple | p5.Color
 
     :param stroke_color: Stroke color of the shape (default: 'auto'
@@ -214,10 +61,12 @@ class PShape:
     :type stroke_color: 'auto' | None | tuple | p5.color
 
     :param visible: toggles shape visibility (default: False)
+
     :type visible: bool
 
     :param children: List of sub-shapes for the current shape
         (default: [])
+
     :type children: list
 
     """
@@ -376,7 +225,7 @@ class PShape:
         transformed = np.dot(vertices, matrix.T)
         return transformed[:, :3]
 
-    @contextmanager
+    @contextlib.contextmanager
     def edit(self, reset=True):
         """Put the shape in edit mode.
 
