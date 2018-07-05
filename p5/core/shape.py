@@ -64,18 +64,27 @@ class PShape:
 
     :type visible: bool
 
+
+    :param attribs: space-separated list of attributes that control
+        shape drawing. Each attribute should be one of {'point',
+        'path', 'open', 'closed'}. (default: 'closed')
+
+    :type attribs: str
+
     :param children: List of sub-shapes for the current shape
         (default: [])
 
     :type children: list
 
     """
-    def __init__(self, vertices=[], fill_color='auto', stroke_color='auto',
-                 visible=False, children=[]):
+    def __init__(self, vertices=[], fill_color='auto',
+                 stroke_color='auto', visible=False, attribs='closed',
+                 children=[]):
         # basic properties of the shape
         self._vertices = np.array([])
         self._edges = None
 
+        self.attribs = set(attribs.split())
         self._fill = None
         self._stroke = None
 
@@ -186,6 +195,9 @@ class PShape:
 
     @property
     def edges(self):
+        if 'point' in self.attribs:
+            return np.array([])
+
         if self._edges is None:
             n, _ = self._vertices.shape
             self._edges = np.vstack([np.arange(n),
@@ -219,7 +231,7 @@ class PShape:
 
         return vertices, edges, faces
 
-    def apply_matrix(self, matrix):
+    def apply_matrix(self, matrix, draw=True):
         """Transform all points based on the given matrix.
 
         :param matrix: a (4, 4) matrix specifying the transformation to
@@ -230,8 +242,13 @@ class PShape:
         :rtype: np.ndarray
 
         """
-        n = len(self._tri.pts)
-        vertices = np.hstack([self._tri.pts, np.zeros((n, 1)), np.ones((n, 1))])
+        if draw:
+            raw_vertices = self._tri.pts
+        else:
+            raw_vertices = self._vertices
+
+        n = len(raw_vertices)
+        vertices = np.hstack([raw_vertices, np.zeros((n, 1)), np.ones((n, 1))])
         transformed = np.dot(vertices, matrix.T)
         return transformed[:, :3]
 
