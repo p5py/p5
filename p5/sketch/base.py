@@ -70,7 +70,8 @@ def draw_pshape(shape):
     _, edges, faces = shape._draw_data()
     vertices = shape.apply_matrix(renderer.transform_matrix)
     add_to_draw_queue('poly', vertices, edges, faces,
-                      renderer.fill_color, renderer.stroke_color)
+                      shape.fill.normalized if shape.fill else None,
+                      shape.stroke.normalized if shape.stroke else None)
 
 class Sketch(app.Canvas):
     """The main sketch instance.

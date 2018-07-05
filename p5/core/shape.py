@@ -76,6 +76,8 @@ class PShape:
         self._vertices = np.array([])
         self._edges = None
 
+        self._fill = None
+        self._stroke = None
 
         # a flag to check if the shape is being edited right now.
         self._in_edit_mode = False
@@ -90,33 +92,41 @@ class PShape:
         # TODO: support different vertex types
         self._vertex_types = ['P'] * len(vertices)
 
-        # self.fill = fill_color
-        # self.stroke = stroke_color
+        self.fill = fill_color
+        self.stroke = stroke_color
 
         # TODO: support adding children nodes.
         self.children = children
 
         self.visible = visible
 
-    def _set_color(color, name, value):
-        if value is 'auto':
-            # get the current active colors
-            raise NotImplementedError
-        elif value is None:
-            color = value
+    def _set_color(self, name, value=None):
+        color = None
+        if value is None or value is 'auto':
+            color = None
         elif isinstance(value, Color):
             color = value
         else:
             color = Color(*value)
 
+        if value == 'auto':
+            if name == 'stroke' and sketch.renderer.stroke_enabled:
+                color = Color(*sketch.renderer.stroke_color,
+                              color_mode='RGBA', normed=True)
+            if name == 'fill' and sketch.renderer.fill_enabled:
+                color = Color(*sketch.renderer.fill_color,
+                              color_mode='RGBA', normed=True)
+
         if name == 'stroke':
-            self._stroke_color = color
+            self._stroke = color
         elif name == 'fill':
-            self._fill_color = color
+            self._fill = color
 
     @property
     def fill(self):
-        return self._fill_color
+        if isinstance(self._fill, Color):
+            return self._fill
+        return self._fill
 
     @fill.setter
     def fill(self, new_color):
@@ -124,7 +134,7 @@ class PShape:
 
     @property
     def stroke(self):
-        return self._stroke_color
+        return self._stroke
 
     @stroke.setter
     def stroke(self, new_color):

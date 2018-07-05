@@ -82,17 +82,6 @@ def _correct_shape(func):
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
         s = func(*args, **kwargs)
-
-        if sketch.renderer.fill_enabled:
-            s._fill = sketch.renderer.fill_color
-        else:
-            s._fill = None
-
-        if sketch.renderer.stroke_enabled:
-            s._stroke = sketch.renderer.stroke_color
-        else:
-            s._stroke = None
-
         draw_shape(s)
         return s
 
@@ -579,7 +568,7 @@ def arc(coordinate, width, height, start_angle, stop_angle,
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
         of the ellipse when mode is 'CORNER'.
 
-    :type coordinate: 3-tuple
+    :rtype coordinate: 3-tuple
 
     :param width: For ellipse modes 'CORNER' or 'CENTER' this
         represents the width of the the ellipse of which the arc is a
@@ -763,10 +752,8 @@ def create_shape(kind=None, *args, **kwargs):
     valid_values = { None, 'point', 'line', 'triangle', 'quad',
                      'rect', 'square', 'ellipse', 'circle', 'arc', }
 
-    # TODO
     def empty_shape(*args, **kwargs):
-        # return PShape()
-        raise NotImplementedError
+        return PShape()
 
     shape_map = {
         'arc': arc,
