@@ -64,7 +64,7 @@ def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
     color_range = (max_1, max_2, max_3, max_alpha)
     color_parse_mode = mode
 
-def parse_color(*args, color_mode='RGB', **kwargs):
+def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     """Parses a color from a range of different input formats.
 
     This assumes that the args and kwargs are in the following form:
@@ -104,7 +104,7 @@ def parse_color(*args, color_mode='RGB', **kwargs):
     elif 'a' in kwargs:
         alpha = kwargs['a']
     else:
-        alpha = 255
+        alpha = 1 if normed else color_range[3]
 
     hsb = None
     rgb = None
@@ -153,23 +153,29 @@ def parse_color(*args, color_mode='RGB', **kwargs):
 
     if not (hsb is None):
         h, s, b = hsb
-        h = constrain(h / color_range[0], 0, 1)
-        s = constrain(s / color_range[1], 0, 1)
-        b = constrain(b / color_range[2], 0, 1)
+        if not normed:
+            h = constrain(h / color_range[0], 0, 1)
+            s = constrain(s / color_range[1], 0, 1)
+            b = constrain(b / color_range[2], 0, 1)
         red, green, blue = colorsys.hsv_to_rgb(h, s, b)
 
     if not (rgb is None):
         r, g, b = rgb
-        red = constrain(r / color_range[0], 0, 1)
-        green = constrain(g / color_range[1], 0, 1)
-        blue = constrain(b / color_range[2], 0, 1)
+        if not normed:
+            red = constrain(r / color_range[0], 0, 1)
+            green = constrain(g / color_range[1], 0, 1)
+            blue = constrain(b / color_range[2], 0, 1)
+        else:
+            red, green, blue = r, g, b
 
-    alpha = constrain(alpha / color_range[3], 0, 1)
+    if not normed:
+        alpha = constrain(alpha / color_range[3], 0, 1)
     return red, green, blue, alpha
+
 
 class Color:
     """Represents a color."""
-    def __init__(self, *args, color_mode=None, **kwargs):
+    def __init__(self, *args, color_mode=None, normed=False, **kwargs):
         if color_mode is None:
             color_mode = color_parse_mode
 
@@ -179,7 +185,8 @@ class Color:
            b = args[0]._blue
            a = args[0]._alpha
         else:
-            r, g, b, a = parse_color(*args, color_mode=color_mode, **kwargs)
+            r, g, b, a = parse_color(*args, color_mode=color_mode,
+                                     normed=normed, **kwargs)
 
         self._red = r
         self._green = g
