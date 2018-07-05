@@ -281,7 +281,7 @@ class PShape:
     def stroke(self, new_color):
        self._set_color('stroke', new_color)
 
-    def _sanitize_vertex_list(self, vertices, tdim=3, sdim=2):
+    def _sanitize_vertex_list(self, vertices, tdim=2, sdim=3):
         """Convert all vertices to the given dimensions.
 
         :param vertices: List of vertices
@@ -322,7 +322,7 @@ class PShape:
 
     @vertices.setter
     def vertices(self, new_vertices):
-        self._vertices = np.array(new_vertices)
+        self._vertices = self._sanitize_vertex_list(new_vertices)
         self._retriangulate()
 
     @property
@@ -410,8 +410,6 @@ class PShape:
 
         :raises ValueError:  when the vertex is of the wrong dimension
         """
-        if len(vertex) != 2:
-            raise ValueError("Wrong vertex dimension")
         self._vertex_cache.append(vertex)
 
     def update_vertex(self, idx, vertex):

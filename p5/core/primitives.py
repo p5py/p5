@@ -18,6 +18,7 @@
 
 import builtins
 from collections import namedtuple
+import functools
 import math
 from math import sin
 from math import cos
@@ -34,6 +35,7 @@ from ..pmath.utils import SINCOS
 from ..pmath.utils import SINCOS_PRECISION
 
 from .shape import Shape
+from .shape import PShape
 
 __all__ = ['point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
@@ -42,6 +44,9 @@ __all__ = ['point', 'line', 'arc', 'triangle', 'quad',
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
 _shape_mode = 'CORNER'
+
+TempPoint = namedtuple('TempPoint', 'x y z')
+TempPoint.__new__.__defaults__ = (None, None, 0)
 
 BezierPoint = namedtuple('Bezier', Point._fields)
 BezierPoint.__new__.__defaults__ = (None, None, 0, 'B')
@@ -70,6 +75,29 @@ CurvePoint.__new__.__defaults__ = (None, None, 0, 'C')
 MIN_POINT_ACCURACY = 20
 MAX_POINT_ACCURACY = 200
 POINT_ACCURACY_FACTOR = 10
+
+def _correct_shape(func):
+    """Set shape parameters to default renderer parameters
+
+    """
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        s = func(*args, **kwargs)
+
+        if sketch.renderer.fill_enabled:
+            s._fill = sketch.renderer.fill_color
+        else:
+            s._fill = None
+
+        if sketch.renderer.stroke_enabled:
+            s._stroke = sketch.renderer.stroke_color
+        else:
+            s._stroke = None
+
+        draw_shape(s)
+        return s
+
+    return wrapped
 
 class Arc(Shape):
     def __init__(self, center, dim, start_angle, stop_angle,
@@ -239,44 +267,52 @@ def curve(point_1, point_2, point_3, point_4):
     ]
     return Shape(path, kind='PATH')
 
+@_correct_shape
 def triangle(p1, p2, p3):
     """Return a triangle.
 
     :param p1: coordinates of the first point of the triangle
-    :type p1: 3-tuple
+    :type p1: tuple | list | p5.Vector
 
     :param p2: coordinates of the second point of the triangle
-    :type p2: 3-tuple
+    :type p2: tuple | list | p5.Vector
 
     :param p3: coordinates of the third point of the triangle
-    :type p3: 3-tuple
+    :type p3: tuple | list | p5.Vector
 
     :returns: A triangle.
-    :rtype: Shape
+    :rtype: p5.PShape
     """
-    vertices = [Point(*p1), Point(*p2), Point(*p3)]
-    return Shape(vertices)
+    tr = PShape()
+    with tr.edit():
+        for pt in [p1, p2, p3]:
+            tr.add_vertex(pt)
+    return tr
 
+@_correct_shape
 def quad(p1, p2, p3, p4):
     """Return a quad.
 
     :param p1: coordinates of the first point of the quad
-    :type p1: 3-tuple
+    :type p1: tuple | list | p5.Vector
 
     :param p2: coordinates of the second point of the quad
-    :type p2: 3-tuple
+    :type p2: tuple | list | p5.Vector
 
     :param p3: coordinates of the third point of the quad
-    :type p3: 3-tuple
+    :type p3: tuple | list | p5.Vector
 
     :param p4: coordinates of the fourth point of the quad
-    :type p4: 3-tuple
+    :type p4: tuple | list | p5.Vector
 
     :returns: A quad.
     :rtype: Shape
     """
-    vertices = [Point(*p1), Point(*p2), Point(*p3), Point(*p4)]
-    return Shape(vertices)
+    qd = PShape()
+    with qd.edit():
+        for pt in [p1, p2, p3, p4]:
+            qd.add_vertex(pt)
+    return qd
 
 def rect(coordinate, *args, mode=None):
     """Return a rectangle.
@@ -286,7 +322,7 @@ def rect(coordinate, *args, mode=None):
         when mode is 'CENTER' or 'RADIUS', and an arbitrary corner
         when mode is 'CORNERS'
 
-    :type coordinate: 3-tuple
+    :type coordinate: tuple | list | p5.Vector
 
     :param args: For modes'CORNER' or 'CENTER' this has the form
         (width, height); for the 'RADIUS' this has the form
@@ -302,7 +338,7 @@ def rect(coordinate, *args, mode=None):
     :type mode: str
 
     :returns: A rectangle.
-    :rtype: Shape
+    :rtype: p5.PShape
 
     """
     if mode is None:
@@ -312,28 +348,28 @@ def rect(coordinate, *args, mode=None):
         corner = coordinate
         width, height = args
     elif mode == 'CENTER':
-        center = Point(*coordinate)
+        center = TempPoint(*coordinate)
         width, height = args
-        corner = Point(center.x - width/2, center.y - height/2, center.z)
+        corner = TempPoint(center.x - width/2, center.y - height/2, center.z)
     elif mode == 'RADIUS':
-        center = Point(*coordinate)
+        center = TempPoint(*coordinate)
         half_width, half_height = args
-        corner = Point(center.x - half_width, center.y - half_height, center.z)
+        corner = TempPoint(center.x - half_width, center.y - half_height, center.z)
         width = 2 * half_width
         height = 2 * half_height
     elif mode == 'CORNERS':
-        corner = Point(*coordinate)
+        corner = TempPoint(*coordinate)
         corner_2, = args
-        corner_2 = Point(*corner_2)
+        corner_2 = TempPoint(*corner_2)
         width = corner_2.x - corner.x
         height = corner_2.y - corner.y
     else:
         raise ValueError("Unknown rect mode {}".format(mode))
 
-    p1 = Point(*corner)
-    p2 = Point(p1.x + width, p1.y, p1.z)
-    p3 = Point(p2.x, p2.y + height, p2.z)
-    p4 = Point(p1.x, p3.y, p3.z)
+    p1 = TempPoint(*corner)
+    p2 = TempPoint(p1.x + width, p1.y, p1.z)
+    p3 = TempPoint(p2.x, p2.y + height, p2.z)
+    p4 = TempPoint(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
 def square(coordinate, side_length, mode=None):
@@ -344,7 +380,7 @@ def square(coordinate, side_length, mode=None):
         'CENTER' and 'RADIUS' the coordinate represents the center of
         the square.
 
-    :type coordinate: 3-tuple
+    :type coordinate: tuple | list |p5.Vector
 
     :param side_length: The side_length of the square (for modes
         'CORNER' and 'CENTER') or hald of the side length (for the
@@ -359,7 +395,7 @@ def square(coordinate, side_length, mode=None):
     :type mode: str
 
     :returns: A rectangle.
-    :rtype: Shape
+    :rtype: p5.PShape
 
     :raises ValueError: When the mode is set to 'CORNERS'
 
