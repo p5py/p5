@@ -83,10 +83,14 @@ class PShape:
         # basic properties of the shape
         self._vertices = np.array([])
         self._edges = None
+        self._outline = None
 
-        self.attribs = set(attribs.split())
+        self.attribs = set(attribs.lower().split())
         self._fill = None
         self._stroke = None
+
+        self._matrix = np.identity(4)
+        self._transformed_draw_vertices = None
 
         # a flag to check if the shape is being edited right now.
         self._in_edit_mode = False
@@ -149,6 +153,15 @@ class PShape:
     def stroke(self, new_color):
        self._set_color('stroke', new_color)
 
+    @property
+    def kind(self):
+        if 'point' in self.attribs:
+            return 'point'
+        elif 'path' in self.attribs:
+            return 'path'
+        else:
+            return 'poly'
+
     def _sanitize_vertex_list(self, vertices, tdim=2, sdim=3):
         """Convert all vertices to the given dimensions.
 
@@ -191,7 +204,9 @@ class PShape:
     @vertices.setter
     def vertices(self, new_vertices):
         self._vertices = self._sanitize_vertex_list(new_vertices)
-        self._retriangulate()
+
+        if not ('point' in self.attribs or 'path' in self.attribs):
+            self._retriangulate()
 
     @property
     def edges(self):
@@ -200,9 +215,23 @@ class PShape:
 
         if self._edges is None:
             n, _ = self._vertices.shape
-            self._edges = np.vstack([np.arange(n),
-                                     (np.arange(n) + 1) % n]).transpose()
-        return self._edges
+
+            if 'point' in self.attribs:
+                self._edges = np.array([])
+            elif 'path' in self.attribs:
+                self._edges = np.vstack([np.arange(n - 1),
+                                         (np.arange(n - 1) + 1) % n]).transpose()
+            else:
+                self._edges = np.vstack([np.arange(n),
+                                         (np.arange(n) + 1) % n]).transpose()
+
+            if 'open' in self.attribs:
+                self._outline = np.vstack([np.arange(n - 1),
+                                         (np.arange(n - 1) + 1) % n]).transpose()
+            else:
+                self._outline = self._edges
+
+            return self._edges
 
     def _retriangulate(self):
         """Triangulate the shape
@@ -217,21 +246,28 @@ class PShape:
         :returns: vertices, edges, faces of the current shape.
         :rtype: tuple
         """
-        vertices = self._tri.pts
 
-        if isinstance(self._tri.edges, np.ndarray):
-            edges = self._tri.edges
+        if self._transformed_draw_vertices is None:
+            self.apply_matrix(self._matrix)
+
+        if self.kind == 'point':
+            return self._transformed_draw_vertices, None, None
+        elif self.kind == 'path':
+            return self._transformed_draw_vertices, self.edges, None
         else:
-            edges = np.array([])
+            if isinstance(self._tri.edges, np.ndarray):
+                edges = self._tri.edges
+            else:
+                edges = np.array([])
 
-        if isinstance(self._tri.tris, np.ndarray):
-            faces = self._tri.tris
-        else:
-            faces = np.array([])
+            if isinstance(self._tri.tris, np.ndarray):
+                faces = self._tri.tris
+            else:
+                faces = np.array([])
 
-        return vertices, edges, faces
+            return self._transformed_draw_vertices, edges, faces
 
-    def apply_matrix(self, matrix, draw=True):
+    def apply_matrix(self, matrix):
         """Transform all points based on the given matrix.
 
         :param matrix: a (4, 4) matrix specifying the transformation to
@@ -242,15 +278,14 @@ class PShape:
         :rtype: np.ndarray
 
         """
-        if draw:
-            raw_vertices = self._tri.pts
-        else:
+        if 'point' in self.attribs or 'path' in self.attribs:
             raw_vertices = self._vertices
+        else:
+            raw_vertices = self._tri.pts
 
         n = len(raw_vertices)
         vertices = np.hstack([raw_vertices, np.zeros((n, 1)), np.ones((n, 1))])
-        transformed = np.dot(vertices, matrix.T)
-        return transformed[:, :3]
+        self._transformed_draw_vertices = np.dot(vertices, matrix.T)[:, :3]
 
     @contextlib.contextmanager
     def edit(self, reset=True):

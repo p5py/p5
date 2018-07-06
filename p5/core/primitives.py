@@ -75,7 +75,7 @@ MIN_POINT_ACCURACY = 20
 MAX_POINT_ACCURACY = 200
 POINT_ACCURACY_FACTOR = 10
 
-def _correct_shape(func):
+def _draw_on_return(func):
     """Set shape parameters to default renderer parameters
 
     """
@@ -313,7 +313,7 @@ class Arc(Shape):
         if ('OPEN' in self.modes) or ('CHORD' in self.modes):
             self._faces.append((0, v, 1))
 
-
+@_draw_on_return
 def point(x, y, z=0):
     """Returns a point.
 
@@ -330,8 +330,9 @@ def point(x, y, z=0):
     :rtype: Shape
 
     """
-    return Shape([Point(x, y, z)], kind='POINT')
+    return PShape([(x, y)], attribs='point')
 
+@_draw_on_return
 def line(p1, p2):
     """Returns a line.
 
@@ -346,10 +347,10 @@ def line(p1, p2):
 
     """
     path = [
-        Point(*p1),
-        Point(*p2)
+        TempPoint(*p1),
+        TempPoint(*p2)
     ]
-    return Shape(path, kind='PATH')
+    return PShape(path, attribs='path')
 
 def bezier(start, control_point_1, control_point_2, stop):
     """Return a bezier path defined by two control points.
@@ -407,7 +408,7 @@ def curve(point_1, point_2, point_3, point_4):
     ]
     return Shape(path, kind='PATH')
 
-@_correct_shape
+@_draw_on_return
 def triangle(p1, p2, p3):
     """Return a triangle.
 
@@ -429,7 +430,7 @@ def triangle(p1, p2, p3):
             tr.add_vertex(pt)
     return tr
 
-@_correct_shape
+@_draw_on_return
 def quad(p1, p2, p3, p4):
     """Return a quad.
 

@@ -67,30 +67,20 @@ def draw_shape(shape):
                       renderer.fill_color, renderer.stroke_color)
 
 def draw_pshape(shape):
-    _, edges, faces = shape._draw_data()
-
-    vertices = shape.apply_matrix(renderer.transform_matrix)
-
+    shape.apply_matrix(renderer.transform_matrix)
     fill = shape.fill.normalized if shape.fill else None
     stroke = shape.stroke.normalized if shape.stroke else None
 
-
-    if 'point' in shape.attribs:
-        add_to_draw_queue('point', vertices, None, None, fill, stroke)
-        return None
+    vertices, edges, faces = shape._draw_data()
 
     if 'open' in shape.attribs:
-        orig_verts = shape.apply_matrix(renderer.transform_matrix, False)
-        add_to_draw_queue('path', orig_verts, shape.edges[:-1, :],
+        add_to_draw_queue('path', shape.vertices, shape._outline,
                           None, None, stroke)
-        return None
-
-    if 'closed' in shape.attribs:
-        add_to_draw_queue('path', vertices, edges, faces, None, stroke)
         add_to_draw_queue('poly', vertices, edges, faces, fill, None)
-        return None
+    else:
+        add_to_draw_queue(shape.kind, vertices, edges, faces, fill, stroke)
 
-    add_to_draw_queue('poly', vertices, edges, faces, fill, stroke)
+
 
 
 class Sketch(app.Canvas):
