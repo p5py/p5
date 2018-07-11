@@ -67,20 +67,33 @@ def draw_shape(shape):
                       renderer.fill_color, renderer.stroke_color)
 
 def draw_pshape(shape):
-    shape.apply_matrix(renderer.transform_matrix)
+    vertices = shape._draw_vertices
+    n, _ = vertices.shape
+    tverts = np.dot(np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
+                    renderer.transform_matrix.T)[:, :3]
     fill = shape.fill.normalized if shape.fill else None
     stroke = shape.stroke.normalized if shape.stroke else None
 
-    vertices, edges, faces = shape._draw_data()
+    edges = shape._draw_edges
+    faces = shape._draw_faces
+
+    if edges is None:
+        print(vertices)
+        print("whale")
+        exit()
 
     if 'open' in shape.attribs:
-        add_to_draw_queue('path', shape.vertices, shape._outline,
+        overtices = shape._draw_outline_vertices
+        no, _  = overtices.shape
+        toverts = np.dot(np.hstack([overtices, np.zeros((no, 1)),
+                                    np.ones((no, 1))]),
+                         renderer.transform_matrix.T)[:, :3]
+
+        add_to_draw_queue('path', toverts, shape._draw_outline_edges,
                           None, None, stroke)
-        add_to_draw_queue('poly', vertices, edges, faces, fill, None)
+        add_to_draw_queue('poly', tverts, edges, faces, fill, None)
     else:
-        add_to_draw_queue(shape.kind, vertices, edges, faces, fill, stroke)
-
-
+        add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
 
 
 class Sketch(app.Canvas):

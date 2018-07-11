@@ -84,12 +84,14 @@ class PShape:
         self._vertices = np.array([])
         self._edges = None
         self._outline = None
+        self._outline_vertices = None
 
         self.attribs = set(attribs.lower().split())
         self._fill = None
         self._stroke = None
 
         self._matrix = np.identity(4)
+        self._transform_matrix = np.identity(4)
         self._transformed_draw_vertices = None
 
         # a flag to check if the shape is being edited right now.
@@ -98,6 +100,11 @@ class PShape:
 
         # The triangulation used to render the shapes.
         self._tri = None
+        self._tri_required = not ('point' in self.attribs) and \
+                             not ('path' in self.attribs)
+        self._tri_vertices = None
+        self._tri_edges = None
+        self._tri_faces = None
 
         if len(vertices) > 0:
             self.vertices = vertices
@@ -203,10 +210,21 @@ class PShape:
 
     @vertices.setter
     def vertices(self, new_vertices):
+        n = len(new_vertices)
         self._vertices = self._sanitize_vertex_list(new_vertices)
+        self._outline_vertices = np.hstack([self._vertices, np.zeros((n, 1))])
+        self._tri_vertices = None
+        self._tri_edges = None
+        self._tri_faces = None
 
-        if not ('point' in self.attribs or 'path' in self.attribs):
-            self._retriangulate()
+    def _compute_poly_edges(self):
+        n, _ = self._vertices.shape
+        return np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
+
+    def _compute_outline_edges(self):
+        n, _ = self._vertices.shape
+        return np.vstack([np.arange(n - 1),
+                          (np.arange(n - 1) + 1) % n]).transpose()
 
     @property
     def edges(self):
@@ -219,15 +237,11 @@ class PShape:
             if 'point' in self.attribs:
                 self._edges = np.array([])
             elif 'path' in self.attribs:
-                self._edges = np.vstack([np.arange(n - 1),
-                                         (np.arange(n - 1) + 1) % n]).transpose()
+                self._edges = self._compute_outline_edges()
             else:
-                self._edges = np.vstack([np.arange(n),
-                                         (np.arange(n) + 1) % n]).transpose()
-
+                self._edges = self._compute_poly_edges()
             if 'open' in self.attribs:
-                self._outline = np.vstack([np.arange(n - 1),
-                                         (np.arange(n - 1) + 1) % n]).transpose()
+                self._outline = self._compute_outline_edges()
             else:
                 self._outline = self._edges
 
@@ -236,56 +250,66 @@ class PShape:
     def _retriangulate(self):
         """Triangulate the shape
         """
-        self._edges = None
         self._tri = geometry.Triangulation(self.vertices, self.edges)
         self._tri.triangulate()
 
-    def _draw_data(self):
-        """Data required to draw the shape.
-
-        :returns: vertices, edges, faces of the current shape.
-        :rtype: tuple
-        """
-
-        if self._transformed_draw_vertices is None:
-            self.apply_matrix(self._matrix)
-
-        if self.kind == 'point':
-            return self._transformed_draw_vertices, None, None
-        elif self.kind == 'path':
-            return self._transformed_draw_vertices, self.edges, None
+        if isinstance(self._tri.edges, np.ndarray):
+            self._tri_edges = self._tri.edges
         else:
-            if isinstance(self._tri.edges, np.ndarray):
-                edges = self._tri.edges
-            else:
-                edges = np.array([])
+            self._tri_edges = np.array([])
 
-            if isinstance(self._tri.tris, np.ndarray):
-                faces = self._tri.tris
-            else:
-                faces = np.array([])
+        self._tri_faces = self._tri.tris
+        self._tri_vertices = self._tri.pts
 
-            return self._transformed_draw_vertices, edges, faces
-
-    def apply_matrix(self, matrix):
-        """Transform all points based on the given matrix.
-
-        :param matrix: a (4, 4) matrix specifying the transformation to
-            be applied
-        :type matrix: np.ndarray
-
-        :returns: list of transformed vertices
-        :rtype: np.ndarray
-
-        """
-        if 'point' in self.attribs or 'path' in self.attribs:
-            raw_vertices = self._vertices
+        if isinstance(self._tri.edges, np.ndarray):
+            self._tri_edges = self._tri.edges
         else:
-            raw_vertices = self._tri.pts
+            self._tri_edges = np.array([])
+            
+        if isinstance(self._tri.tris, np.ndarray):
+            self._tri_faces = self._tri.tris
+        else:
+            self._tri_faces = np.array([])
 
-        n = len(raw_vertices)
-        vertices = np.hstack([raw_vertices, np.zeros((n, 1)), np.ones((n, 1))])
-        self._transformed_draw_vertices = np.dot(vertices, matrix.T)[:, :3]
+        self._tri_vertices = self._tri.pts
+
+    @property
+    def _draw_outline_vertices(self):
+        if 'open' in self.attribs:
+            return self._draw_vertices
+        return self.vertices
+
+    @property
+    def _draw_outline_edges(self):
+        if 'open' in self.attribs:
+            return self._outline
+        return self._edges
+
+    @property
+    def _draw_vertices(self):
+        if self._tri_required and (self._tri_vertices is None):
+            self._retriangulate()
+
+        if self._tri_required:
+            return self._tri_vertices
+        return self._vertices
+
+    @property
+    def _draw_edges(self):
+        if self._tri_required:
+            if self._tri_edges is None:
+                self._retriangulate()
+            return self._tri_edges
+        return self.edges
+
+    @property
+    def _draw_faces(self):
+        if self._tri_required:
+            if self._tri_faces is None:
+                self._retriangulate()
+            return self._tri_faces
+
+        return np.array([])
 
     @contextlib.contextmanager
     def edit(self, reset=True):
@@ -337,4 +361,6 @@ class PShape:
         if len(vertex) != 2:
             raise ValueError("Wrong vertex dimension")
         self._vertices[idx] =  np.array(vertex)
-        self._retriangulate()
+        self._tri_vertices = None
+        self._tri_edges = None
+        self._tri_faces = None

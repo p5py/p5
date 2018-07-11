@@ -238,80 +238,129 @@ class Shape:
         else:
             raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
+class Arc(PShape):
+    def __init__(self, center, radii, start_angle, stop_angle,
+                 attribs='open pie', **kwargs):
+        self._center = center
+        self._radii = radii
+        self._start_angle = start_angle
+        self._stop_angle = stop_angle
 
-class Arc(Shape):
-    def __init__(self, center, dim, start_angle, stop_angle,
-                 mode='OPEN PIE'):
-        self.center = Point(*center)
-        self.radius = Point(*dim)
-        self.start_angle = start_angle
-        self.stop_angle = stop_angle
-        self.modes = set(mode.split())
-        super().__init__([], 'ARC')
+        self._faces = None
 
-    def tessellate(self):
+        super().__init__(vertices=[], attribs=attribs, **kwargs)
+        self._tessellate()
+
+    @property
+    def _draw_vertices(self):
+        if self._vertices is None:
+            self._tessellate()
+        return self._vertices
+
+    @property
+    def _draw_edges(self):
+        if self._vertices is None:
+            self._tessellate()
+        n, _ = self._vertices.shape
+        e = self._compute_outline_edges()
+        if 'chord' in self.attribs:
+            return np.concatenate([e, [[1, n - 1]]])
+        return np.concatenate([e, [[0, 1]], [[0, n]]])
+
+    @property
+    def _draw_faces(self):
+        if self._vertices is None:
+            self._tessellate()
+        n, _ = self._vertices.shape
+        ar = np.arange(1, n - 1).reshape((n - 2, 1))
+        f = np.hstack([np.zeros((n - 2, 1)), ar, ar + 1])
+
+        if 'open' in self.attribs or 'chord' in self.attribs:
+            return np.vstack([f, np.array([[0, n - 1, 1]])])
+
+        return f
+
+    @property
+    def _draw_outline_vertices(self):
+        return self._compute_outline_edges()
+
+    @property
+    def _draw_outline_edges(self):
+        return self._compute_outline_edges()
+
+    def _compute_outline_edges(self):
+        n, _ = self._vertices.shape
+        e = np.vstack([np.arange(1, n - 1), np.arange(2, n)]).transpose()
+        return e
+
+    def _tessellate(self):
         """Generate vertex and face data using radii.
-        # """
-        c1 = self.center.x - self.radius.x, self.center.y - self.radius.y, 0, 1
-        s1 = sketch.renderer.transform_matrix.dot(np.array(c1))
+        """
+        rx = self._radii[0]
+        ry = self._radii[1]
 
-        c2 = self.center.x + self.radius.x, self.center.y + self.radius.y, 0, 1
-        s2 = sketch.renderer.transform_matrix.dot(np.array(c2))
+        c1x = self._center[0]
+        c1y = self._center[1]
+        s1 = sketch.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
 
-        size_acc = (np.sqrt((s2 - s1) @ (s2 - s1)) * math.pi * 2) / POINT_ACCURACY_FACTOR
+        c2x = c1x + rx
+        c2y = c1y + ry
+        s2 = sketch.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
+
+        sdiff = (s2 - s1)
+        size_acc = (np.sqrt(np.sum(sdiff * sdiff)) * math.pi * 2) / POINT_ACCURACY_FACTOR
 
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)
 
         sclen = len(SINCOS)
-        start_index = int((self.start_angle / (math.pi * 2)) * sclen)
-        end_index = int((self.stop_angle / (math.pi * 2)) * sclen)
+        start_index = int((self._start_angle / (math.pi * 2)) * sclen)
+        end_index = int((self._stop_angle / (math.pi * 2)) * sclen)
 
-        vertices = [(*self.center[:3], 1)]
+        vertices = [(c1x, c1y)]
         for idx in range(start_index, end_index, inc):
             i = idx % sclen
             vertices.append((
-                self.center.x + self.radius.x * SINCOS[i][1],
-                self.center.y + self.radius.y * SINCOS[i][0],
-                self.center.z,
-                1
+                c1x + rx * SINCOS[i][1],
+                c1y + ry * SINCOS[i][0],
             ))
         vertices.append((
-            self.center.x + self.radius.x * SINCOS[end_index % sclen][1],
-            self.center.y + self.radius.y * SINCOS[end_index % sclen][0],
-            self.center.z,
-            1
+            c1x + rx * SINCOS[end_index % sclen][1],
+            c1y + ry * SINCOS[end_index % sclen][0],
         ))
         self._vertices = np.array(vertices)
 
-    def compute_edges(self):
-        """Compute the edges for this shape."""
-        v = len(self.vertices) - 1
-        self._edges = [
-            (k, k+1)
-            for k in range(1, v)
-        ]
+################################################################################
 
-        if 'OPEN' in self.modes:
-            return
-        elif 'PIE' in self.modes:
-            self._edges.append((v, 0))
-            self._edges.append((0, 1))
-        elif 'CHORD' in self.modes:
-            self._edges.append((v, 1))
+# class Arc(Shape):
+#     def compute_edges(self):
+#         """Compute the edges for this shape."""
+#         v = len(self.vertices) - 1
+#         self._edges = [
+#             (k, k+1)
+#             for k in range(1, v)
+#         ]
 
-    def compute_faces(self):
-        """Compute the faceds for the Arc.
-        """
-        v = len(self.vertices) - 1
-        self._faces = [
-            (0, k, k + 1) for k in range(1, v)
-        ]
+#         if 'OPEN' in self.modes:
+#             return
+#         elif 'PIE' in self.modes:
+#             self._edges.append((v, 0))
+#             self._edges.append((0, 1))
+#         elif 'CHORD' in self.modes:
+#             self._edges.append((v, 1))
 
-        if 'PIE' in self.modes:
-            return
-        if ('OPEN' in self.modes) or ('CHORD' in self.modes):
-            self._faces.append((0, v, 1))
+#     def compute_faces(self):
+#         """Compute the faceds for the Arc.
+#         """
+#         v = len(self.vertices) - 1
+#         self._faces = [
+#             (0, k, k + 1) for k in range(1, v)
+#         ]
+
+#         if 'PIE' in self.modes:
+#             return
+#         if ('OPEN' in self.modes) or ('CHORD' in self.modes):
+#             self._faces.append((0, v, 1))
 
 @_draw_on_return
 def point(x, y, z=0):
@@ -561,6 +610,7 @@ def rect_mode(mode='CORNER'):
     global _rect_mode
     _rect_mode = mode
 
+@_draw_on_return
 def arc(coordinate, width, height, start_angle, stop_angle,
         mode='OPEN PIE', ellipse_mode=None):
     """Return a ellipse.
@@ -620,7 +670,7 @@ def arc(coordinate, width, height, start_angle, stop_angle,
         dim = Point(width, height)
     else:
         raise ValueError("Unknown arc mode {}".format(emode))
-    return Arc(center, dim, start_angle, stop_angle, mode=amode)
+    return Arc(center, dim, start_angle, stop_angle, attribs=amode)
 
 def ellipse(coordinate, *args, mode=None):
     """Return a ellipse.
