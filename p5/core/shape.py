@@ -29,6 +29,12 @@ import numpy as np
 
 from .. import sketch
 
+from ..pmath import Point
+from ..pmath import curves
+from ..pmath import remap
+from ..pmath.utils import SINCOS
+from ..pmath.utils import SINCOS_PRECISION
+
 __all__ = ['Shape']
 
 
