@@ -240,12 +240,13 @@ class PShape:
                 self._edges = self._compute_outline_edges()
             else:
                 self._edges = self._compute_poly_edges()
+
             if 'open' in self.attribs:
                 self._outline = self._compute_outline_edges()
             else:
                 self._outline = self._edges
 
-            return self._edges
+        return self._edges
 
     def _retriangulate(self):
         """Triangulate the shape
@@ -335,6 +336,7 @@ class PShape:
         yield
         self.vertices = self._vertex_cache
         self._in_edit_mode = False
+        self._edges = None
 
     @_ensure_editable
     def add_vertex(self, vertex):
@@ -364,3 +366,4 @@ class PShape:
         self._tri_vertices = None
         self._tri_edges = None
         self._tri_faces = None
+        self._edges = None
