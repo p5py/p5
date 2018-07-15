@@ -24,8 +24,8 @@ __all__ = ['Vector', 'Point']
 # Floating point precision for vectors.
 EPSILON = 1e-8
 
-Point = namedtuple('Point', ['x', 'y', 'z', 'flag'])
-Point.__new__.__defaults__ = (None, None, 0, None)
+Point = namedtuple('Point', ['x', 'y', 'z'])
+Point.__new__.__defaults__ = (None, None, 0)
 
 class Vector(Point):
     """Describes a vector in two or three dimensional space.

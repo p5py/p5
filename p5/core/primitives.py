@@ -401,6 +401,7 @@ def line(p1, p2):
     ]
     return PShape(path, attribs='path')
 
+@_draw_on_return
 def bezier(start, control_point_1, control_point_2, stop):
     """Return a bezier path defined by two control points.
 
@@ -422,14 +423,17 @@ def bezier(start, control_point_1, control_point_2, stop):
     :rtype: Shape.
 
     """
-    path = [
-        Point(*start),
-        BezierPoint(*control_point_1),
-        BezierPoint(*control_point_2),
-        Point(*stop)
-    ]
-    return Shape(path, kind='PATH')
+    vertices = []
+    steps = curves.bezier_resolution
+    for i in range(steps + 1):
+        t = i / steps
+        p = curves.bezier_point(start, control_point_1,
+                                control_point_2, stop, t)
+        vertices.append(p[:3])
 
+    return PShape(vertices, attribs='path')
+
+@_draw_on_return
 def curve(point_1, point_2, point_3, point_4):
     """Return a Catmull-Rom curve defined by four points.
 
@@ -449,13 +453,14 @@ def curve(point_1, point_2, point_3, point_4):
     :rtype: Shape
 
     """
-    path = [
-        Point(*point_1),
-        CurvePoint(*point_2),
-        CurvePoint(*point_3),
-        Point(*point_4)
-    ]
-    return Shape(path, kind='PATH')
+    vertices = []
+    steps = curves.curve_resolution
+    for i in range(steps + 1):
+        t = i / steps
+        p = curves.curve_point(point_1, point_2, point_3, point_4, t)
+        vertices.append(p[:3])
+
+    return PShape(vertices, attribs='path')
 
 @_draw_on_return
 def triangle(p1, p2, p3):
