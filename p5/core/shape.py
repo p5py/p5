@@ -115,7 +115,6 @@ class PShape:
         self.fill = fill_color
         self.stroke = stroke_color
 
-        # TODO: support adding children nodes.
         self.children = children
 
         self.visible = visible
@@ -367,3 +366,20 @@ class PShape:
         self._tri_edges = None
         self._tri_faces = None
         self._edges = None
+
+    def add_child(self, child):
+        """Add a child shape to the current shape
+
+        :param child: Child to be added
+        :type child: PShape
+        """
+        self.children.append(child)
+
+    @property
+    def child_count(self):
+        """Number of children.
+
+        :returns: The current number of children.
+        :rtype: int
+        """
+        return len(self.children)
