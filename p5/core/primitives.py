@@ -36,22 +36,13 @@ from ..pmath.utils import SINCOS_PRECISION
 
 from .shape import PShape
 
-__all__ = ['Shape', 'point', 'line', 'arc', 'triangle', 'quad',
+__all__ = ['point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
            'rect_mode', 'bezier', 'curve', 'create_shape', 'draw_shape']
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
 _shape_mode = 'CORNER'
-
-TempPoint = namedtuple('TempPoint', 'x y z')
-TempPoint.__new__.__defaults__ = (None, None, 0)
-
-BezierPoint = namedtuple('Bezier', Point._fields)
-BezierPoint.__new__.__defaults__ = (None, None, 0, 'B')
-
-CurvePoint = namedtuple('Curve', Point._fields)
-CurvePoint.__new__.__defaults__ = (None, None, 0, 'C')
 
 # We use these in ellipse tessellation. The algorithm is similar to
 # the one used in Processing and the we compute the number of
@@ -86,157 +77,6 @@ def _draw_on_return(func):
         return s
 
     return wrapped
-
-class Shape:
-    """Represents a Shape in p5py.
-
-    :param kind: The type of this shape. Should be one of {'POLY', ...}
-    :type kind: str
-
-    :param vertices: A list of vertices (Point named-tuples) that make
-        up the shape.
-    :type vertices: list of named-tuples (of type `Point`)
-
-    :param edges: A list of indices into the vertices list that
-        represent edges. (Defaults to the empty list `[]`)
-    :type edges: list of tuples
-
-    """
-
-    def __init__(self, vertices, kind='POLY', edges=None, faces=None,
-                 visible=True):
-        self.kind = kind
-        self._raw_vertices = vertices
-        self._vertices = None
-        self._transformed_vertices = None
-        self._edges = edges
-        self._faces = faces
-        self._texcoords = None
-        self.visible = visible
-
-    @property
-    def visible(self):
-        return self._visible
-
-    @visible.setter
-    def visible(self, is_visible):
-        self._visible = is_visible
-        if is_visible:
-            # Shape, show thyself.
-            sketch.draw_shape(self)
-
-    @property
-    def vertices(self):
-        if self._vertices is None:
-            self.tessellate()
-        return self._vertices
-
-    @property
-    def edges(self):
-        if self._edges is None:
-            self.compute_edges()
-        return self._edges
-
-    @property
-    def faces(self):
-        if self._faces is None:
-            self.compute_faces()
-        return self._faces
-
-    @property
-    def texcoords(self):
-        if self._texcoords is None:
-            self.compute_texcoords()
-        return self._texcoords
-
-    @property
-    def transformed_vertices(self):
-        """The transformed vertices of the shape (when available)
-
-        :note: This returns the un-transformed shape vertices when the
-            shape hasn't been transformed.
-
-        """
-        if not self._transformed_vertices is None:
-            return self._transformed_vertices
-        return self.vertices
-
-    @property
-    def has_been_transformed(self):
-        """Whether the shape has been transformed by a matrix."""
-        return self._transformed_vertices is None
-
-    def transform(self, matrix):
-        """Use the given matrix to transform the shape's vertices
-
-        :param matix: The transform matrix to use while transforming
-            shape.
-        :type matrix: np.ndarray
-
-        """
-        self._transformed_vertices = self.vertices.dot(matrix.T)
-
-    def compute_faces(self):
-        """Compute the faces for this shape."""
-        self._faces = [
-            (0, k, k + 1)
-            for k in range(1, len(self.vertices) - 1)
-        ]
-
-    def compute_edges(self):
-        """Compute the edges for this shape."""
-        self._edges = [
-            (k, k+1)
-            for k in range(len(self.vertices) - 1)
-        ]
-        # connect the last vertex to the first vertex
-        if not self.kind is 'PATH':
-            self._edges.append((len(self.vertices) - 1, 0))
-
-    def compute_texcoords(self):
-        """Compute the texture coordinates for the current shape."""
-        xs = [v[0] for v in self.vertices]
-        ys = [v[1] for v in self.vertices]
-
-        rangex = (min(xs), max(xs))
-        rangey = (min(ys), max(ys))
-
-        if (rangex[0] - rangex[1] == 0) or (rangey[0] - rangey[1] == 0):
-            self._texcoords = ((0.5, 0.5) for v in self.vertices)
-        else:
-            self._texcoords = [
-                (remap(x, rangex, (0, 1)), remap(y, rangey, (0, 1)))
-                for x, y, z in self.vertices
-            ]
-
-    def tessellate(self):
-        """Generate actual vertex data from limited number of parameters.
-        """
-        psig = ''.join((v.flag if not v.flag is None else 'D')
-                       for v in self._raw_vertices)
-        if 'D' in set(psig) and len(set(psig)) == 1:
-            # the path is already tessellated. Nothing to be done.
-            self._vertices = np.array(
-                [(*v[:3], 1) for v in self._raw_vertices]
-            )
-        elif psig == 'DBBD':
-            vertices = []
-            steps = curves.bezier_resolution
-            for i in range(steps + 1):
-                t = i / steps
-                p = curves.bezier_point(*self._raw_vertices, t)
-                vertices.append((*p[:3], 1))
-            self._vertices = np.array(vertices)
-        elif psig == 'DCCD':
-            vertices = []
-            steps = curves.curve_resolution
-            for i in range(steps + 1):
-                t = i / steps
-                p = curves.curve_point(*self._raw_vertices, t)
-                vertices.append((*p[:3], 1))
-            self._vertices = np.array(vertices)
-        else:
-            raise ValueError("Cannot complete tessillation. Unknown shape type.")
 
 class Arc(PShape):
     def __init__(self, center, radii, start_angle, stop_angle,
@@ -330,38 +170,6 @@ class Arc(PShape):
         ))
         self._vertices = np.array(vertices)
 
-################################################################################
-
-# class Arc(Shape):
-#     def compute_edges(self):
-#         """Compute the edges for this shape."""
-#         v = len(self.vertices) - 1
-#         self._edges = [
-#             (k, k+1)
-#             for k in range(1, v)
-#         ]
-
-#         if 'OPEN' in self.modes:
-#             return
-#         elif 'PIE' in self.modes:
-#             self._edges.append((v, 0))
-#             self._edges.append((0, 1))
-#         elif 'CHORD' in self.modes:
-#             self._edges.append((v, 1))
-
-#     def compute_faces(self):
-#         """Compute the faceds for the Arc.
-#         """
-#         v = len(self.vertices) - 1
-#         self._faces = [
-#             (0, k, k + 1) for k in range(1, v)
-#         ]
-
-#         if 'PIE' in self.modes:
-#             return
-#         if ('OPEN' in self.modes) or ('CHORD' in self.modes):
-#             self._faces.append((0, v, 1))
-
 @_draw_on_return
 def point(x, y, z=0):
     """Returns a point.
@@ -375,8 +183,8 @@ def point(x, y, z=0):
     :param z: z-coordinate of the shape (defaults to 0).
     :type z: int or float
 
-    :returns: A point Shape.
-    :rtype: Shape
+    :returns: A point PShape.
+    :rtype: PShape
 
     """
     return PShape([(x, y)], attribs='point')
@@ -391,13 +199,13 @@ def line(p1, p2):
     :param p2: Coordinates of the end point of the line.
     :type p2: tuple
 
-    :returns: A line Shape.
-    :rtype: Shape
+    :returns: A line PShape.
+    :rtype: PShape
 
     """
     path = [
-        TempPoint(*p1),
-        TempPoint(*p2)
+        Point(*p1),
+        Point(*p2)
     ]
     return PShape(path, attribs='path')
 
@@ -420,7 +228,7 @@ def bezier(start, control_point_1, control_point_2, stop):
     :type stop: tuple.
 
     :returns: A bezier path.
-    :rtype: Shape.
+    :rtype: PShape.
 
     """
     vertices = []
@@ -450,7 +258,7 @@ def curve(point_1, point_2, point_3, point_4):
     :type point_4: tuple
 
     :returns: A curved path.
-    :rtype: Shape
+    :rtype: PShape
 
     """
     vertices = []
@@ -501,7 +309,7 @@ def quad(p1, p2, p3, p4):
     :type p4: tuple | list | p5.Vector
 
     :returns: A quad.
-    :rtype: Shape
+    :rtype: PShape
     """
     qd = PShape()
     with qd.edit():
@@ -543,28 +351,28 @@ def rect(coordinate, *args, mode=None):
         corner = coordinate
         width, height = args
     elif mode == 'CENTER':
-        center = TempPoint(*coordinate)
+        center = Point(*coordinate)
         width, height = args
-        corner = TempPoint(center.x - width/2, center.y - height/2, center.z)
+        corner = Point(center.x - width/2, center.y - height/2, center.z)
     elif mode == 'RADIUS':
-        center = TempPoint(*coordinate)
+        center = Point(*coordinate)
         half_width, half_height = args
-        corner = TempPoint(center.x - half_width, center.y - half_height, center.z)
+        corner = Point(center.x - half_width, center.y - half_height, center.z)
         width = 2 * half_width
         height = 2 * half_height
     elif mode == 'CORNERS':
-        corner = TempPoint(*coordinate)
+        corner = Point(*coordinate)
         corner_2, = args
-        corner_2 = TempPoint(*corner_2)
+        corner_2 = Point(*corner_2)
         width = corner_2.x - corner.x
         height = corner_2.y - corner.y
     else:
         raise ValueError("Unknown rect mode {}".format(mode))
 
-    p1 = TempPoint(*corner)
-    p2 = TempPoint(p1.x + width, p1.y, p1.z)
-    p3 = TempPoint(p2.x, p2.y + height, p2.z)
-    p4 = TempPoint(p1.x, p3.y, p3.z)
+    p1 = Point(*corner)
+    p2 = Point(p1.x + width, p1.y, p1.z)
+    p3 = Point(p2.x, p2.y + height, p2.z)
+    p4 = Point(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
 def square(coordinate, side_length, mode=None):
@@ -766,7 +574,6 @@ def ellipse_mode(mode='CENTER'):
     global _ellipse_mode
     _ellipse_mode = mode
 
-
 def draw_shape(shape, pos=(0, 0, 0)):
     """Draw the given shape at the specified location.
 
@@ -777,7 +584,7 @@ def draw_shape(shape, pos=(0, 0, 0)):
     :type pos: tuple | Vector
 
     """
-    sketch.draw_pshape(shape)
+    sketch.render(shape)
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape

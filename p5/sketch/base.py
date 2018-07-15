@@ -44,29 +44,7 @@ def _dummy(*args, **kwargs):
     """
     pass
 
-def draw_shape(shape):
-    """Handle the lower level stuff associated with drawing a shape.
-
-    :param shape: The shape to be drawn.
-    :type shape: Shape
-
-    """
-    num_shape_verts = len(shape.vertices)
-
-    if shape.kind.lower() == 'point':
-        idx = np.arange(0, num_shape_verts, dtype=np.uint32)
-    elif shape.kind.lower() == 'line':
-        idx = np.array(shape.edges, dtype=np.uint32).ravel()
-    else:
-        idx = np.array(shape.faces, dtype=np.uint32).ravel()
-
-    shape.transform(renderer.transform_matrix)
-    vertices = shape.transformed_vertices[:, :3]
-
-    add_to_draw_queue(shape.kind.lower(), vertices, shape.edges, shape.faces,
-                      renderer.fill_color, renderer.stroke_color)
-
-def draw_pshape(shape):
+def render(shape):
     vertices = shape._draw_vertices
     n, _ = vertices.shape
     tverts = np.dot(np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
