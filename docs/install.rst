@@ -90,7 +90,7 @@ installation fails, try installing the dependencies separately:
    $ pip install vispy
 
 In case of other installation problems, open an issue on the main `p5
-Github <https://github.com/p5py/p5/issues>` repository.
+Github <https://github.com/p5py/p5/issues>`_ repository.
 
 
 
