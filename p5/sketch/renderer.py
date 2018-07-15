@@ -181,6 +181,11 @@ def reset_view():
     fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
     fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
 
+    for buf in [fbuffer_tex_front, fbuffer_tex_back]:
+        fbuffer.color_buffer = buf
+        with fbuffer:
+            clear()
+
 def cleanup():
     """Run the clean-up routine for the renderer.
 
