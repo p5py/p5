@@ -33,8 +33,8 @@ __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
 
 default_sketch = None
 
-builtins.width = 800
-builtins.height = 600
+builtins.width = 360
+builtins.height = 360
 builtins.pixel_x_density = 1
 builtins.pixel_y_density = 1
 
