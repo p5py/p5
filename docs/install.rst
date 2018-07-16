@@ -38,7 +38,9 @@ During the installation process, make sure to take note of the folder
 where GLFW.
 
 Finally, the GLFW installation directory should be added to the
-`system path <https://en.wikipedia.org/wiki/PATH_(variable)>`_.
+`system path <https://en.wikipedia.org/wiki/PATH_(variable)>`_. Make
+sure to add containing the .dll and .a files
+(for example: `\\<path to glfw>\\glfw-3.2.1.bin.WIN64\\lib-mingw-w64`)
 
 First locate the "Environment Variables" settings dialog box. On
 recent versions of Windows (Windows 8 and later), go to System info >
