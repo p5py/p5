@@ -1,8 +1,3 @@
-.. image :: https://github.com/p5py/p5/raw/develop/docs/_static/processing-header-thin.png
-    :width: 100%
-    :align: center
-    :alt: ---
-
 p5
 ===
 
@@ -51,39 +46,8 @@ Python code for the sketch looks like:
 Installation
 ------------
 
-p5 requires Python 3 to run. Once you have the correct version of
-Python installed, you can run:
-
-.. code:: bash
-
-   $ pip install numpy
-   $ pip install p5 --user
-
-to install p5.
-
-
-Features Roadmap
-----------------
-
-Our end goal is to create a Processing-like API for Python. However,
-instead of being a strict port of the original Processing API, we will
-also try to extend it and use Python's goodness whenever we can.
-
-For now, though, we plan to focus on the following features:
-
-#. Support most 2D drawing primitives and related utility functions
-   from the Processing API (as of the latest release, this is almost
-   done).
-
-#. Support other parts of the Processing API: images, fonts, etc.
-
-#. Port relevant tutorials and reference material from Processing's
-   documentation.
-
-#. Support live coding of sketches in the Python REPL (here's a
-   `screencast <https://p5py.github.io/videos/p5-repl-demo.webm>`_ from
-   an earlier prototype).
-
+Take a look at the installation steps here in the `p5 documentation
+<http://p5.readthedocs.io/en/latest/install.html>`_
 
 License
 -------
@@ -97,14 +61,5 @@ source projects:
   project. Licensed under LGPL v2.1. See `LICENSES/lgpl-2.1.txt
   <LICENSES/lgpl-2.1.txt>`_ for the full license text.
 
-- Code from the `Glumpy <http://glumpy.github.io/>`_ project See
-  `LICENSES/glumpy.txt` for the full license text from the Glumpy
-  project.
-
 All licenses for these external components are available in the
 ``LICENSES`` folder.
-
-.. image :: https://github.com/p5py/p5/raw/develop/docs/_static/processing-header-thin.png
-    :width: 100%
-    :align: center
-    :alt: ---
