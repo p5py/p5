@@ -90,7 +90,8 @@ class Arc(Shape):
         c2 = self.center.x + self.radius.x, self.center.y + self.radius.y, 0, 1
         s2 = sketch.renderer.transform_matrix.dot(np.array(c2))
 
-        size_acc = (np.sqrt((s2 - s1) @ (s2 - s1)) * math.pi * 2) / POINT_ACCURACY_FACTOR
+        dtp = np.sqrt((np.sum((s2 - s1) * (s2 - s1))))
+        size_acc = (dtp * math.pi * 2) / POINT_ACCURACY_FACTOR
 
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)
