@@ -44,11 +44,16 @@ def _dummy(*args, **kwargs):
     """
     pass
 
+def _transform_vertices(vertices, local_matrix, global_matrix):
+    return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
+
 def render(shape):
     vertices = shape._draw_vertices
     n, _ = vertices.shape
-    tverts = np.dot(np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-                    renderer.transform_matrix.T)[:, :3]
+    tverts = _transform_vertices(
+        np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
+        np.identity(4),
+        renderer.transform_matrix.T)
     fill = shape.fill.normalized if shape.fill else None
     stroke = shape.stroke.normalized if shape.stroke else None
 
@@ -63,9 +68,10 @@ def render(shape):
     if 'open' in shape.attribs:
         overtices = shape._draw_outline_vertices
         no, _  = overtices.shape
-        toverts = np.dot(np.hstack([overtices, np.zeros((no, 1)),
-                                    np.ones((no, 1))]),
-                         renderer.transform_matrix.T)[:, :3]
+        toverts = _transform_vertices(
+            np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
+            np.identity(4),
+            renderer.transform_matrix.T)
 
         add_to_draw_queue('path', toverts, shape._draw_outline_edges,
                           None, None, stroke)
