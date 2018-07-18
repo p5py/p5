@@ -26,8 +26,10 @@ import math
 import numpy as np
 from vispy import geometry
 
-from .. import sketch
 from .color import Color
+from .. import sketch
+from ..pmath import matrix
+
 
 __all__ = ['PShape']
 
@@ -383,3 +385,177 @@ class PShape:
         :rtype: int
         """
         return len(self.children)
+
+    def apply_matrix(self, mat):
+        """Apply the given transformation matrix to the shape.
+
+        :param mat: the 4x4 matrix to be applied to the current shape.
+
+        :type mat: (4, 4) np.ndarray
+
+        """
+        self._matrix = self._matrix.dot(mat)
+
+    def reset_matrix(self):
+        """Reset the transformation matrix associated with the shape.
+
+        """
+        self._matrix = np.identity(4)
+
+    def translate(self, x, y, z=0):
+        """Translate the shape origin to the given location.
+
+        :param x: The displacement amount in the x-direction (controls
+            the left/right displacement)
+
+        :type x: int
+
+        :param y: The displacement amount in the y-direction (controls
+            the up/down displacement)
+
+        :type y: int
+
+        :param z: The displacement amount in the z-direction (0 by
+            default). This controls the displacement away-from/towards
+            the screen.
+
+        :type z: int
+
+        :returns: The translation matrix applied to the transform
+            matrix.
+
+        :rtype: np.ndarray
+
+        """
+        tmat = matrix.translation_matrix(x, y, z)
+        renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+        return tmat
+
+    def rotate(self, theta, axis=[0, 0, 1]):
+        """Rotate the shape by the given angle along the given axis.
+
+        :param theta: The angle by which to rotate (in radians)
+
+        :type theta: float
+
+        :param axis: The axis along which to rotate (defaults to the
+            z-axis)
+
+        :type axis: np.ndarray | list
+
+        :returns: The rotation matrix used to apply the
+            transformation.
+
+        :rtype: np.ndarray
+
+        """
+        axis = np.array(axis[:])
+        tmat = matrix.rotation_matrix(axis, theta)
+        return tmat
+
+    def rotate_x(self, theta):
+        """Rotate the shape along the x axis.
+
+        :param theta: angle by which to rotate (in radians)
+
+        :type theta: float
+
+        :returns: The rotation matrix used to apply the
+            transformation.
+
+        :rtype: np.ndarray
+
+        """
+        return self.rotate(theta, axis=[1, 0, 0])
+
+    def rotate_y(self, theta):
+        """Rotate the shape along the y axis.
+
+        :param theta: angle by which to rotate (in radians)
+
+        :type theta: float
+
+        :returns: The rotation matrix used to apply the
+             transformation.
+
+        :rtype: np.ndarray
+
+        """
+        return self.rotate(theta, axis=[0, 1, 0])
+
+    def rotate_z(self, theta):
+        """Rotate the shape along the z axis.
+
+        :param theta: angle by which to rotate (in radians)
+
+        :type theta: float
+
+        :returns: The rotation matrix used to apply the
+            transformation.
+
+        :rtype: np.ndarray
+
+        """
+        return self.rotate(theta)
+
+    def scale(self, sx, sy=None, sz=None):
+        """Scale the shape by the given factor.
+
+        :param sx: scale factor along the x-axis.
+
+        :type sx: float
+
+        :param sy: scale factor along the y-axis (defaults to None)
+
+        :type sy: float
+
+        :param sz: scale factor along the z-axis (defaults to None)
+
+        :type sz: float
+
+        :returns: The transformation matrix used to appy the
+            transformation.
+
+        :rtype: np.ndarray
+
+        """
+        if (not sy) and (not sz):
+            sy = sx
+            sz = sx
+        elif not sz:
+            sz = 1
+        tmat = matrix.scale_transform(sx, sy, sz)
+        return tmat
+
+    def shear_x(self, theta):
+        """Shear shape along the x-axis.
+
+        :param theta: angle to shear by (in radians)
+
+        :type theta: float
+
+        :returns: The shear matrix used to apply the tranformation.
+
+        :rtype: np.ndarray
+
+        """
+        shear_mat = np.identity(4)
+        shear_mat[0, 1] = np.tan(theta)
+        return shear_mat
+
+    def shear_y(self, theta):
+        """Shear shape along the y-axis.
+
+        :param theta: angle to shear by (in radians)
+
+        :type theta: float
+
+        :returns: The shear matrix used to apply the transformation.
+
+        :rtype: np.ndarray
+
+        """
+        shear_mat = np.identity(4)
+        shear_mat[1, 0] = np.tan(theta)
+        return shear_mat
+
