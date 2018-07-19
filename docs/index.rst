@@ -6,7 +6,7 @@
 Welcome to the p5 documentation!
 ================================
 
-.. image:: https://img.shields.io/github/release/p5py/p5.svg
+.. image:: https://img.shields.io/github/release/p5py/p5/all.svg
    :target: https://github.com/p5py/p5
 
 .. image:: https://img.shields.io/pypi/l/p5.svg
