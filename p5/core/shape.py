@@ -44,6 +44,28 @@ def _ensure_editable(func):
         return func(instance, *args, **kwargs)
     return editable_method
 
+def _apply_transform(func):
+    """Apply the matrix transformation to the shape.
+
+    """
+    @functools.wraps(func)
+    def mfunc(instance, *args, **kwargs):
+        tmat = func(instance, *args, **kwargs)
+        instance._matrix = instance._matrix.dot(tmat)
+        return tmat
+    return mfunc
+
+def _call_on_children(func):
+    """Call the method on all child shapes
+
+    """
+    @functools.wraps(func)
+    def rfunc(instance, *args, **kwargs):
+        rval = func(instance, *args, **kwargs)
+        for child in instance.children:
+            rfunc(child, *args, **kwargs)
+        return rval
+    return rfunc
 
 class PShape:
     """Custom shape class for p5.
@@ -386,6 +408,7 @@ class PShape:
         """
         return len(self.children)
 
+    @_apply_transform
     def apply_matrix(self, mat):
         """Apply the given transformation matrix to the shape.
 
@@ -396,12 +419,15 @@ class PShape:
         """
         self._matrix = self._matrix.dot(mat)
 
+    @_call_on_children
     def reset_matrix(self):
         """Reset the transformation matrix associated with the shape.
 
         """
         self._matrix = np.identity(4)
 
+    @_call_on_children
+    @_apply_transform
     def translate(self, x, y, z=0):
         """Translate the shape origin to the given location.
 
@@ -428,9 +454,10 @@ class PShape:
 
         """
         tmat = matrix.translation_matrix(x, y, z)
-        renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
         return tmat
 
+    @_call_on_children
+    @_apply_transform
     def rotate(self, theta, axis=[0, 0, 1]):
         """Rotate the shape by the given angle along the given axis.
 
@@ -498,6 +525,8 @@ class PShape:
         """
         return self.rotate(theta)
 
+    @_call_on_children
+    @_apply_transform
     def scale(self, sx, sy=None, sz=None):
         """Scale the shape by the given factor.
 
@@ -527,6 +556,8 @@ class PShape:
         tmat = matrix.scale_transform(sx, sy, sz)
         return tmat
 
+    @_call_on_children
+    @_apply_transform
     def shear_x(self, theta):
         """Shear shape along the x-axis.
 
@@ -543,6 +574,8 @@ class PShape:
         shear_mat[0, 1] = np.tan(theta)
         return shear_mat
 
+    @_call_on_children
+    @_apply_transform
     def shear_y(self, theta):
         """Shear shape along the y-axis.
 
