@@ -53,7 +53,7 @@ def render(shape):
     tverts = _transform_vertices(
         np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
         np.identity(4),
-        renderer.transform_matrix.T)
+        renderer.transform_matrix)
     fill = shape.fill.normalized if shape.fill else None
     stroke = shape.stroke.normalized if shape.stroke else None
 
@@ -71,7 +71,7 @@ def render(shape):
         toverts = _transform_vertices(
             np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
             np.identity(4),
-            renderer.transform_matrix.T)
+            renderer.transform_matrix)
 
         add_to_draw_queue('path', toverts, shape._draw_outline_edges,
                           None, None, stroke)
