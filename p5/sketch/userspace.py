@@ -19,6 +19,8 @@
 
 import __main__
 import builtins
+import os
+
 from functools import wraps
 
 import vispy
@@ -29,7 +31,7 @@ from .events import handler_names
 from .renderer import initialize_renderer
 
 __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
-           'cursor', 'exit', 'draw', 'setup', 'run']
+           'cursor', 'exit', 'draw', 'setup', 'run', 'save_frame']
 
 default_sketch = None
 
@@ -242,3 +244,15 @@ def cursor(cursor_type='ARROW'):
     # window.set_mouse_visible(True)
     # window.set_mouse_cursor(cursor)
     raise NotImplementedError
+
+def save_frame(filename="screen.png"):
+    """Save the current frame.
+
+    :param filename: name of the image file.
+    :type filename: str
+    """
+    extension = filename.split('.')[-1]
+    if extension != 'png':
+        raise NotImplementedError("Only PNG format supported!")
+    default_sketch.save_frame(filename)
+

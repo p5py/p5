@@ -26,6 +26,7 @@ import numpy as np
 import vispy
 from vispy import app
 from vispy import gloo
+from vispy import io
 
 from .. sketch import renderer
 
@@ -124,6 +125,10 @@ class Sketch(app.Canvas):
 
         self.handler_queue = []
 
+        self._save_fname = 'screen'
+        self._save_fname_num = 0
+        self._save_flag = False
+
         initialize_renderer()
         clear()
 
@@ -147,7 +152,26 @@ class Sketch(app.Canvas):
                 event._update_builtins()
                 function(event)
 
+        if self._save_flag:
+            self._save_back_buffer()
         self.update()
+
+    def _save_back_buffer(self):
+        """Save the rendere back buffer to a file
+        """
+        img_data = renderer.fbuffer.read(mode='color', alpha=False)
+        io.write_png(self._save_fname, img_data)
+        self._save_flag = False
+
+    def save_frame(self, filename):
+        """Save the current frame
+        """
+        fname_split = filename.split('.')
+        ext = '.' + fname_split[-1]
+        stem = '.'.join(fname_split[:-1])
+        self._save_fname = stem + str(self._save_fname_num).zfill(4) + ext
+        self._save_fname_num = self._save_fname_num + 1
+        self._save_flag = True
 
     def on_close(self, event):
         exit()
