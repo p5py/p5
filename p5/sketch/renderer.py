@@ -51,6 +51,9 @@ fbuffer = None
 fbuffer_tex_front = None
 fbuffer_tex_back = None
 
+vertex_buffer = None
+index_buffer = None
+
 ## Renderer Globals: USEFUL CONSTANTS
 COLOR_WHITE = (1, 1, 1, 1)
 COLOR_BLACK = (0, 0, 0, 1)
@@ -105,6 +108,8 @@ def initialize_renderer():
     global fbuffer
     global fbuffer_prog
     global default_prog
+    global vertex_buffer
+    global index_buffer
 
     fbuffer = FrameBuffer()
 
@@ -125,6 +130,9 @@ def initialize_renderer():
     fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
     fbuffer_prog['texcoord'] = fbuf_texcoords
     fbuffer_prog['position'] = fbuf_vertices
+
+    vertex_buffer = VertexBuffer()
+    index_buffer = IndexBuffer()
 
     default_prog = Program(src_default.vert, src_default.frag)
 
@@ -253,20 +261,17 @@ def flush_geometry():
 
             sidx += num_shape_verts
 
-        V = VertexBuffer(data)
-        I = IndexBuffer(np.hstack(draw_indices))
+        vertex_buffer.set_data(data)
+        index_buffer.set_data(np.hstack(draw_indices))
 
         # 4. Bind the buffer to the shader.
         #
-        default_prog.bind(V)
+        default_prog.bind(vertex_buffer)
 
         # 5. Draw the shape using the proper shape type and get rid of
         # the buffers.
         #
-        default_prog.draw(draw_type, indices=I)
-
-        V.delete()
-        I.delete()
+        default_prog.draw(draw_type, indices=index_buffer)
 
     # 6. Empty the draw queue.
     poly_draw_queue = []
