@@ -20,3 +20,4 @@ vispy.use('glfw')
 
 from .userspace import *
 from .base import render
+from .renderer import render_image

@@ -46,6 +46,7 @@ from .shaders import src_texture
 ##
 default_prog = None
 fbuffer_prog = None
+texture_prog = None
 
 fbuffer = None
 fbuffer_tex_front = None
@@ -108,6 +109,7 @@ def initialize_renderer():
     global fbuffer
     global fbuffer_prog
     global default_prog
+    global texture_prog
     global vertex_buffer
     global index_buffer
 
@@ -135,6 +137,8 @@ def initialize_renderer():
     index_buffer = IndexBuffer()
 
     default_prog = Program(src_default.vert, src_default.frag)
+    texture_prog = Program(src_texture.vert, src_texture.frag)
+    texture_prog['texcoord'] = fbuf_texcoords
 
     reset_view()
 
@@ -186,6 +190,9 @@ def reset_view():
     default_prog['modelview'] = modelview_matrix.T.flatten()
     default_prog['projection'] = projection_matrix.T.flatten()
 
+    texture_prog['modelview'] = modelview_matrix.T.flatten()
+    texture_prog['projection'] = projection_matrix.T.flatten()
+
     fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
     fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
 
@@ -213,6 +220,33 @@ def cleanup():
 ##    with draw_loop():
 ##        # multiple calls to render()
 ##
+
+def render_image(image, location, size):
+    flush_geometry()
+    texture_prog['fill_color'] = COLOR_WHITE
+    texture_prog['transform'] = transform_matrix.T.flatten()
+
+    x, y = location
+    sx, sy = size
+    data = np.zeros(4,
+                    dtype=[('position', np.float32, 2),
+                           ('texcoord', np.float32, 2)])
+    data['texcoord'] = np.array([[0.0, 0.0],
+                                 [1.0, 0.0],
+                                 [0.0, 1.0],
+                                 [1.0, 1.0]],
+                                dtype=np.float32)
+    data['position'] = np.array([[x, y + sy],
+                                 [x + sx, y + sy],
+                                 [x, y],
+                                 [x + sx, y]],
+                                dtype=np.float32)
+
+    img_data = np.array(image.getdata()).reshape(sx, sy, 4) / 255.0
+    img_tex = Texture2D(img_data.astype(np.float32))
+    texture_prog['texture'] = img_tex
+    texture_prog.bind(VertexBuffer(data))
+    texture_prog.draw('triangle_strip')
 
 def flush_geometry():
     """Flush all the shape geometry from the draw queue to the GPU.
