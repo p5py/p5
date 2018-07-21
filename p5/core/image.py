@@ -21,11 +21,11 @@ from PIL import Image
 import numpy as np
 from vispy.gloo import Texture2D
 
-
-
 from .. import sketch
 
-__all__ = ['image', 'load_image']
+__all__ = ['image', 'load_image', 'image_mode']
+
+_image_mode = 'corner'
 
 def _check_reload(func):
     """Reloads the image if required before calling the function.
@@ -172,22 +172,40 @@ class PImage:
         raise NotImplementedError
 
 
-def image(img, loc, size=None):
+def image(img, location, size=None):
     """Display the given image.
 
     :param img: the image to be displayed.
     :type img: p5.Image
 
-    :param loc: location of the image on the screen.
-    :type loc: tuple | list | np.ndarray | p5.Vector | p5.Point
+    :param location: location of the image on the screen (depending on the
+        current image mode, 'corner', 'center', 'corners', this could
+        represent the coordinate of the top-left corner, center,
+        top-left corner respectively.)
+    :type location: tuple | list | np.ndarray | p5.Vector
 
-    :param size: target size of the image. Defaults to the image size.
+    :param size: target size of the image or the bottom-right image
+        corner when the image mode is set to 'corners'. By default,
+        the value is set according to the current image size.
+
     :type size: tuple | list
 
     """
     if size is None:
         size = img.size
-    sketch.render_image(img, loc, size)
+
+    lx, ly = location
+    sx, sy = size
+
+    if _image_mode == 'center':
+        lx = int(lx - (sx / 2))
+        ly = int(ly - (sy / 2))
+
+    if _image_mode == 'corners':
+        sx = sx - lx
+        sy = sy - ly
+
+    sketch.render_image(img, (lx, ly), (sx, sy))
 
 def image_mode(mode):
     """Modifies the locaton from which the images are drawn.
@@ -196,26 +214,23 @@ def image_mode(mode):
     :type mode: str
 
     """
-    raise NotImplementedError
+    global _image_mode
+
+    if mode.lower() not in ['corner', 'center', 'corners']:
+        raise ValueError("Unknown image mode!")
+    _image_mode = mode.lower()
 
 def load_image(filename):
     """Load an image from the given filename.
 
     :param filename: Filename of the given image. The file-extennsion
-        is automatically inferred
+        is automatically inferred.
     :type filename: str
 
     """
+    # TODO: Add URL support.
     img = Image.open(filename)
     w, h = img.size
     pimg = PImage(w, h)
     pimg._img = img
     return pimg
-
-    
-
-
-
-
-
-
