@@ -88,11 +88,13 @@ def tint(*color_args, **color_kwargs):
     :returns: The tint color.
     :rtype: Color
     """
-    raise NotImplementedError("Renderer doesn't support textures.")
+    tint_color = Color(*color_args, **color_kwargs)
+    renderer.tint_enabled = True
+    renderer.tint_color = tint_color.normalized
 
 def no_tint():
     """Disable tinting of images."""
-    raise NotImplementedError("Renderer doesn't support textures.")
+    renderer.tint_enabled = False
 
 def background(*color_args, **color_kwargs):
     """Set the background color for the renderer.

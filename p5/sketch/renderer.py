@@ -70,6 +70,9 @@ fill_enabled = True
 stroke_color = COLOR_BLACK
 stroke_enabled = True
 
+tint_color = COLOR_BLACK
+tint_enabled = False
+
 ## Renderer Globals
 ## VIEW MATRICES, ETC
 ##
@@ -223,7 +226,8 @@ def cleanup():
 
 def render_image(image, location, size):
     flush_geometry()
-    texture_prog['fill_color'] = COLOR_WHITE
+
+    texture_prog['fill_color'] = tint_color if tint_enabled else COLOR_WHITE
     texture_prog['transform'] = transform_matrix.T.flatten()
 
     x, y = location

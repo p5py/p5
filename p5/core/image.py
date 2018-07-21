@@ -130,19 +130,9 @@ def image_mode(mode):
 def load_image(filename, extension):
     """Load an image from the given filename.
 
-    """
-    raise NotImplementedError
-
-def tint(tint_color):
-    """set the tint color of the sketch.
 
     """
-    raise NotImplementedError
 
-def no_tint():
-    """Disable tinting images
-
-    """
     
 
 
