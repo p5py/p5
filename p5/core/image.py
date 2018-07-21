@@ -15,17 +15,60 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+import functools
+
+from PIL import Image
+import numpy as np
+from vispy.gloo import Texture2D
+
+
 
 from .. import sketch
 
-__all__ = ['image']
+__all__ = ['image', 'load_image']
+
+def _check_reload(func):
+    """Reloads the image if required before calling the function.
+
+    """
+    @functools.wraps(func)
+    def rfunc(instance, *args, **kwargs):
+        if instance._img_data is None or instance._reload:
+            instance._load()
+        return func(instance, *args, **kwargs)
+    return rfunc
 
 class PImage:
-    def __init__(self, width, height, fmt, fct):
+    """Image class for p5.
+
+    :param width: width of the image.
+    :type width: int
+
+    :param height: height of the image.
+    :type height:
+
+    :param fmt: color format to use for the image. Should be one of
+    {'RGB', 'RGBA', 'ALPHA'}
+
+    """
+    def __init__(self, width, height, fmt='RGBA'):
         self._width = width
         self._height = height
 
+        format_map = {
+            'rgb': 'RGB',
+            'rgba': 'RGBA',
+            'alpha': "L"
+        }
+
+        self._reload = False
+        self._img = None
+        self._img_format = format_map[fmt.upper()]
+        self._img_texture = None
+        self._img_data = None
+
     @property
+    @_check_reload
     def width(self):
         return self._width
 
@@ -34,6 +77,7 @@ class PImage:
         self.size = (new_width, self._height)
 
     @property
+    @_check_reload
     def height(self):
         return self._height
 
@@ -42,6 +86,7 @@ class PImage:
         self.size = (self._width, new_height)
 
     @property
+    @_check_reload
     def size(self):
         return self._size
 
@@ -50,8 +95,34 @@ class PImage:
         self._resize(new_size)
 
     @property
-    def pixels(self):
-        raise NotImplementedError
+    @_check_reload
+    def aspect_ratio(self):
+        return self._width / self._height
+
+    @property
+    @_check_reload
+    def _texture(self):
+        if self._img_texture is None:
+            self._img_texture = Texture2D(self._data)
+        return self._img_texture
+
+    @property
+    @_check_reload
+    def _data(self):
+        return self._img_data
+
+    def _load(self):
+        if self._img is None:
+            self._img = Image.new(self._img_format, (self._width, self._height))
+
+        width, height = self._img.size
+        self._width = width
+        self._height = height
+        self._size = (widt, height)
+
+        data = np.array(self._img.getdata(), dtype=np.float32)
+        _, self._channels = data.shape
+        self._img_data = data.reshape(width, height, self._channels) / 255.0
 
     def load_pixels(self):
         raise NotImplementedError
@@ -127,11 +198,19 @@ def image_mode(mode):
     """
     raise NotImplementedError
 
-def load_image(filename, extension):
+def load_image(filename):
     """Load an image from the given filename.
 
+    :param filename: Filename of the given image. The file-extennsion
+        is automatically inferred
+    :type filename: str
 
     """
+    img = Image.open(filename)
+    w, h = img.size
+    pimg = PImage(w, h)
+    pimg._img = img
+    return pimg
 
     
 

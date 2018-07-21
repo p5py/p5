@@ -225,6 +225,17 @@ def cleanup():
 ##
 
 def render_image(image, location, size):
+    """Render the image.
+
+    :param image: image to be rendered
+    :type image: p5.Image
+
+    :param location: top-left corner of the image
+    :type location: tuple | list | p5.Vector
+
+    :param size: target size of the image to draw.
+    :type size: tuple | list | p5.Vector
+    """
     flush_geometry()
 
     texture_prog['fill_color'] = tint_color if tint_enabled else COLOR_WHITE
@@ -232,13 +243,14 @@ def render_image(image, location, size):
 
     x, y = location
     sx, sy = size
+    imx, imy = image.size
     data = np.zeros(4,
                     dtype=[('position', np.float32, 2),
                            ('texcoord', np.float32, 2)])
-    data['texcoord'] = np.array([[0.0, 0.0],
-                                 [1.0, 0.0],
-                                 [0.0, 1.0],
-                                 [1.0, 1.0]],
+    data['texcoord'] = np.array([[0.0, 1.0],
+                                 [1.0, 1.0],
+                                 [0.0, 0.0],
+                                 [1.0, 0.0]],
                                 dtype=np.float32)
     data['position'] = np.array([[x, y + sy],
                                  [x + sx, y + sy],
@@ -246,9 +258,7 @@ def render_image(image, location, size):
                                  [x + sx, y]],
                                 dtype=np.float32)
 
-    img_data = np.array(image.getdata()).reshape(sx, sy, 4) / 255.0
-    img_tex = Texture2D(img_data.astype(np.float32))
-    texture_prog['texture'] = img_tex
+    texture_prog['texture'] = image._texture
     texture_prog.bind(VertexBuffer(data))
     texture_prog.draw('triangle_strip')
 
