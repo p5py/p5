@@ -63,7 +63,7 @@ class PImage:
 
         self._reload = False
         self._img = None
-        self._img_format = format_map[fmt.upper()]
+        self._img_format = format_map[fmt.lower()]
         self._img_texture = None
         self._img_data = None
 
@@ -118,7 +118,7 @@ class PImage:
         width, height = self._img.size
         self._width = width
         self._height = height
-        self._size = (widt, height)
+        self._size = (width, height)
 
         data = np.array(self._img.getdata(), dtype=np.float32)
         _, self._channels = data.shape
