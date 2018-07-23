@@ -153,41 +153,112 @@ class PImage:
 
     @_ensure_loaded
     def __getitem__(self, key):
+        """Return the color of the indexed pixel or the requested sub-region
+
+        Note :: when the specified `key` denotes a single pixel, the
+            color of that pixel is returned. Else, a new PImage
+            (constructed using the slice specified by `key`). Note
+            that this causes the internal buffer data to be reloaded
+            (when the image is in an "unclean" state) and hence, many
+            such operations can potentially slow things down.
+
+        :returns: a sub-image or a the pixel color
+        :rtype: p5.Color | p5.PImage
+
+        :raises ValueError: When `key` is invalid.
+
+        """
         if len(key) != 2:
             raise KeyError("Invalid image index")
-        posx, posy = key
 
+        posx, posy = key
         if _is_numeric(posx) and _is_numeric(posy):
             with _restore_color_mode():
                 pos = int(posx), int(posy)
                 col = color.Color(*self._img.getpixel(pos))
             return col
-        raise NotImplementedError
 
-    def __setitem__(self, key, value):
+        region = self._img_data[posx, posy]
+        rshape = region.shape
+        rwidth = rshape[0]
+        rheight = rshape[1]
+        rimg = Image.fromarray(region, self._img.mode)
+        rpimg = PImage(rwidth, rheight, self._img_format)
+        rpimg._img = rimg
+        return rpimg
+
+    def _paste_pixel(self, key, patch):
+        # since both posx and posy are numeric, we are only pasting in
+        # a "single" color. Hence, whenever patch is a PImage, we
+        # require it to be exactly one pixel by one pixel large
+
+        if isinstance(patch, PImage):
+            if patch.size != (1, 1):
+                raise AttributeError("Incompatible image dimensions")
+            # ...and extract the color of that pixel
+            patch_color = patch[0, 0]
+
+        # if the patch is a color, we don't do much
+        elif isinstance(patch, color.Color):
+            patch_color = patch
+
+        # otherwise, we try to parse the given patch as a color (if
+        # `value` is invalid, the parsing will fail).
+        else:
+            # the try-catch just takes care of the situation when
+            # patch is just a single (non-iterable) value. Then we
+            # don't unpack it.
+            try:
+                patch_color = color.Color(*patch)
+            except TypeError as te:
+                patch_color = color.Color(patch)
+
+        # finally, write the color value to the image based on the
+        # number of channels.
+        with _restore_color_mode():
+            red = int(patch_color.red)
+            green = int(patch_color.green)
+            blue = int(patch_color.blue)
+            alpha = int(patch_color.alpha)
+
+            if self._channels == 1:
+                pixel_value = int(patch_color.gray)
+            elif self._channels == 3:
+                pixel_value = (red, green, blue)
+            elif self._channels == 4:
+                pixel_value = (red, green, blue, alpha)
+            else:
+                raise ValueError("Image has unexpected number of channels")
+
+        pixel_position = int(key[0]), int(key[1])
+        self._img.putpixel(pixel_position, pixel_value)
+
+    @_ensure_loaded
+    def _paste_patch(self, key, patch):
+        """Paste the given patch in the image.
+
+        """
+        # we first ensure that both the source patch and the target
+        # image (self) have the same color modes, if not, convert the
+        # target.
+        target_mode = self._img.mode
+        source_mode = patch._img.mode
+
+        if target_mode != source_mode:
+            patch._img.convert(target_mode)
+
+        self._img_data[key] = patch._data[key]
+        self._img = Image.fromarray(self._img_data, self._img.mode)
+
+    def __setitem__(self, key, patch):
+        """Paste the given `patch` into the current image.
+        """
         if len(key) != 2:
             raise KeyError("Invalid image index")
-        posx, posy = key
-
-        if not isinstance(value, color.Color):
-            value = color.Color(*value)
-
-        if _is_numeric(posx) and _is_numeric(posy):
-            with _restore_color_mode():
-                if self._channels == 1:
-                    pxval = int(value.gray)
-                elif self._channels == 3:
-                    pxval = int(value.red), int(value.green), int(value.blue)
-                elif self._channels == 4:
-                    pxval = int(value.red), int(value.green), \
-                            int(value.blue),  int(value.alpha)
-                else:
-                    raise ValueError("Image has unexpected number of channels")
-            pos = int(posx), int(posy)
-            self._img.putpixel(pos, pxval)
+        if _is_numeric(key[0]) and _is_numeric(key[1]):
+            self._paste_pixel(key, patch)
         else:
-            raise NotImplementedError
-
+            self._paste_patch(key, patch)
         self._reload = True
 
     def load_pixels(self):
