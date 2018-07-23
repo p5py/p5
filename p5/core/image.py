@@ -99,7 +99,8 @@ class PImage:
 
     @size.setter
     def size(self, new_size):
-        self._resize(new_size)
+        self._img = self._img.resize(new_size)
+        self._reload = True
 
     @property
     @_check_reload
