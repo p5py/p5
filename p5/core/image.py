@@ -124,7 +124,8 @@ class PImage:
     @_ensure_loaded
     def _texture(self):
         if self._img_texture is None:
-            self._img_texture = gloo.Texture2D(self._data / 255.0)
+            texdata = self._data.astype(np.float32) / 255.0
+            self._img_texture = gloo.Texture2D(texdata)
         return self._img_texture
 
     @property
@@ -141,7 +142,7 @@ class PImage:
         self._height = height
         self._size = (width, height)
 
-        data = np.array(self._img.getdata(), dtype=np.float32)
+        data = np.array(self._img.getdata(), dtype=np.uint8)
 
         if len(data.shape) == 1:
             self._channels = 1
