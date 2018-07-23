@@ -53,7 +53,9 @@ class PImage:
     :type height:
 
     :param fmt: color format to use for the image. Should be one of
-    {'RGB', 'RGBA', 'ALPHA'}
+        {'RGB', 'RGBA', 'ALPHA'}. Defaults to 'RGBA'
+
+    :type fmt: str
 
     """
     def __init__(self, width, height, fmt='RGBA'):
@@ -63,7 +65,7 @@ class PImage:
         format_map = {
             'rgb': 'RGB',
             'rgba': 'RGBA',
-            'alpha': "L"
+            'alpha': 'L',
         }
 
         self._reload = False
