@@ -14,6 +14,7 @@ requires = [
     'vispy',
     'glfw',
     'numpy',
+    'Pillow',
 ]
 
 meta_data = {}
