@@ -110,7 +110,7 @@ class PImage:
     @_check_reload
     def _texture(self):
         if self._img_texture is None:
-            self._img_texture = Texture2D(self._data)
+            self._img_texture = gloo.Texture2D(self._data / 255.0)
         return self._img_texture
 
     @property
@@ -128,12 +128,13 @@ class PImage:
         self._size = (width, height)
 
         data = np.array(self._img.getdata(), dtype=np.float32)
-        self._img_data = data.reshape(width, height, self._channels) / 255.0
 
         if len(data.shape) == 1:
             self._channels = 1
         else:
             _, self._channels = data.shape
+
+        self._img_data = data.reshape(width, height, self._channels)
 
     def load_pixels(self):
         raise NotImplementedError
