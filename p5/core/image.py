@@ -128,8 +128,12 @@ class PImage:
         self._size = (width, height)
 
         data = np.array(self._img.getdata(), dtype=np.float32)
-        _, self._channels = data.shape
         self._img_data = data.reshape(width, height, self._channels) / 255.0
+
+        if len(data.shape) == 1:
+            self._channels = 1
+        else:
+            _, self._channels = data.shape
 
     def load_pixels(self):
         raise NotImplementedError
