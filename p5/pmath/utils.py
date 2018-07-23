@@ -71,6 +71,9 @@ SINCOS = list(zip(PRE_SIN, PRE_COS))
 def _sanitize(point, target_dimension=3):
     return list(point) + [0] * (target_dimension - len(point))
 
+def _is_numeric(val):
+    return isinstance(val, int) or isinstance(val, float)
+
 def constrain(amount, low, high):
     """Constrain the given value in the specified range.
 

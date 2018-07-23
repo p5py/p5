@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import functools
+import contextlib
 
 import numpy as np
 import PIL
@@ -25,14 +26,16 @@ from PIL import ImageChops
 from PIL import ImageOps
 from vispy import gloo
 
+from . import color
 from .. import sketch
 from ..pmath import constrain
+from ..pmath.utils import _is_numeric
 
 __all__ = ['image', 'load_image', 'image_mode']
 
 _image_mode = 'corner'
 
-def _check_reload(func):
+def _ensure_loaded(func):
     """Reloads the image if required before calling the function.
 
     """
@@ -42,6 +45,16 @@ def _check_reload(func):
             instance._load()
         return func(instance, *args, **kwargs)
     return rfunc
+
+@contextlib.contextmanager
+def _restore_color_mode():
+    old_mode = color.color_parse_mode
+    old_range = color.color_range
+    color.color_mode('RGB', 255, 255, 255, 255)
+
+    yield
+
+    color.color_mode(old_mode, *old_range)
 
 class PImage:
     """Image class for p5.
@@ -75,7 +88,7 @@ class PImage:
         self._img_data = None
 
     @property
-    @_check_reload
+    @_ensure_loaded
     def width(self):
         return self._width
 
@@ -84,7 +97,7 @@ class PImage:
         self.size = (new_width, self._height)
 
     @property
-    @_check_reload
+    @_ensure_loaded
     def height(self):
         return self._height
 
@@ -93,7 +106,7 @@ class PImage:
         self.size = (self._width, new_height)
 
     @property
-    @_check_reload
+    @_ensure_loaded
     def size(self):
         return self._size
 
@@ -103,19 +116,19 @@ class PImage:
         self._reload = True
 
     @property
-    @_check_reload
+    @_ensure_loaded
     def aspect_ratio(self):
         return self._width / self._height
 
     @property
-    @_check_reload
+    @_ensure_loaded
     def _texture(self):
         if self._img_texture is None:
             self._img_texture = gloo.Texture2D(self._data / 255.0)
         return self._img_texture
 
     @property
-    @_check_reload
+    @_ensure_loaded
     def _data(self):
         return self._img_data
 
@@ -136,9 +149,49 @@ class PImage:
             _, self._channels = data.shape
 
         self._img_data = data.reshape(width, height, self._channels)
+        self._reload = False
+
+    @_ensure_loaded
+    def __getitem__(self, key):
+        if len(key) != 2:
+            raise KeyError("Invalid image index")
+        posx, posy = key
+
+        if _is_numeric(posx) and _is_numeric(posy):
+            with _restore_color_mode():
+                pos = int(posx), int(posy)
+                col = color.Color(*self._img.getpixel(pos))
+            return col
+        raise NotImplementedError
+
+    def __setitem__(self, key, value):
+        if len(key) != 2:
+            raise KeyError("Invalid image index")
+        posx, posy = key
+
+        if not isinstance(value, color.Color):
+            value = color.Color(*value)
+
+        if _is_numeric(posx) and _is_numeric(posy):
+            with _restore_color_mode():
+                if self._channels == 1:
+                    pxval = int(value.gray)
+                elif self._channels == 3:
+                    pxval = int(value.red), int(value.green), int(value.blue)
+                elif self._channels == 4:
+                    pxval = int(value.red), int(value.green), \
+                            int(value.blue),  int(value.alpha)
+                else:
+                    raise ValueError("Image has unexpected number of channels")
+            pos = int(posx), int(posy)
+            self._img.putpixel(pos, pxval)
+        else:
+            raise NotImplementedError
+
+        self._reload = True
 
     def load_pixels(self):
-        raise NotImplementedError
+        self._load()
 
     def mask(self, image):
         raise NotImplementedError
