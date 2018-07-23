@@ -17,11 +17,16 @@
 #
 import functools
 
-from PIL import Image
 import numpy as np
-from vispy.gloo import Texture2D
+import PIL
+from PIL import Image
+from PIL import ImageFilter
+from PIL import ImageChops
+from PIL import ImageOps
+from vispy import gloo
 
 from .. import sketch
+from ..pmath import constrain
 
 __all__ = ['image', 'load_image', 'image_mode']
 
@@ -154,10 +159,41 @@ class PImage:
             default_values = {
                 'threshold': 0.5,
                 'blur': 1.0,
+                'gaussian_blur': 1.0,
+                'box_blur': 1.0,
+                'posterize': 1,
             }
             param = default_values.get(filter_name, None)
 
-        raise NotImplementedError
+        if filter_name in ['blur', 'gaussian_blur']:
+            fim = self._img.filter(ImageFilter.GaussianBlur(radius=param))
+            self._img = fim
+        elif filter_name == 'box_blur':
+            self._img = self._img.filter(ImageFilter.BoxBlur(param))
+        elif filter_name in ['gray', 'grey', 'grayscale']:
+            self._img = ImageOps.grayscale(self._img)
+        elif filter_name == 'opaque':
+            self._img.putalpha(255)
+        elif filter_name == 'invert':
+            self._img = ImageOps.invert(self._img)
+        elif filter_name == 'posterize':
+            nbits = 0
+            while int(param) != 0:
+                param = param >> 1
+                nbits = nbits + 1
+            nbits = constrain(nbits, 1, 8)
+            self._img = ImageOps.posterize(self._img, nbits)
+        elif filter_name == 'threshold':
+            dat = np.asarray(ImageOps.grayscale(self._img)).copy()
+            dat[dat < int(128 * param)] = 0
+            dat[dat >= int(128 * param)] = 255
+            self._img = Image.fromarray(dat)
+        elif filter_name in ['erode', 'dilate']:
+            raise NotImplementedError
+        else:
+            raise ValueError("Unknown filter")
+
+        self._reload = True
 
     def copy(self, *args):
         raise NotImplementedError
