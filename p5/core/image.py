@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import functools
+import builtins
 import contextlib
+import functools
 
 import numpy as np
 import PIL
@@ -30,8 +31,9 @@ from . import color
 from .. import sketch
 from ..pmath import constrain
 from ..pmath.utils import _is_numeric
+from .structure import push_style
 
-__all__ = ['image', 'load_image', 'image_mode']
+__all__ = ['image', 'load_image', 'image_mode', 'load_pixels']
 
 _image_mode = 'corner'
 
@@ -448,3 +450,21 @@ def load_image(filename):
     pimg = PImage(w, h)
     pimg._img = img
     return pimg
+
+@contextlib.contextmanager
+def load_pixels():
+    pixels = PImage(builtins.width, builtins.height, 'RGB')
+    sketch.renderer.flush_geometry()
+    pixel_data = sketch.renderer.fbuffer.read(mode='color', alpha=False)
+
+    pixels._img = Image.fromarray(pixel_data)
+    builtins.pixels = pixels
+
+    pixels._load()
+
+    yield
+
+    with push_style():
+        image_mode('corner')
+        sketch.renderer.tint_enabled = False
+        image(builtins.pixels, (0, 0))

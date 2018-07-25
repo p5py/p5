@@ -55,6 +55,8 @@ builtins.pmouse_y = 0
 builtins.key = None
 builtins.key_is_pressed = False
 
+builtins.pixels = None
+
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
 
