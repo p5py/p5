@@ -376,12 +376,15 @@ class PImage:
     def blend(self, *args):
         raise NotImplementedError
 
+    @_ensure_loaded
     def save(self, file_name):
         """Save the image into a file
 
-        """
-        raise NotImplementedError
+        :param file_name: Filename to save the image as.
+        :type file_name: str
 
+        """
+        self._img.save(file_name)
 
 def image(img, location, size=None):
     """Display the given image.
