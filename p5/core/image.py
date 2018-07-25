@@ -149,7 +149,7 @@ class PImage:
         else:
             _, self._channels = data.shape
 
-        self._img_data = data.reshape(width, height, self._channels)
+        self._img_data = data.reshape(height, width, self._channels)
         self._reload = False
 
     @_ensure_loaded
