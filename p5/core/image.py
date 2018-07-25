@@ -153,6 +153,57 @@ class PImage:
         self._reload = False
 
     @_ensure_loaded
+    def _get_pixel(self, key):
+        """Return the pixel color at the given positions.
+
+        :param key: An (x, y) tuple specifying the pixel location.
+        :type key: tuple
+
+        :retuns: the Color of the given pixel in the image.
+        :rtype: p5.Color
+
+        :raises KeyError: When the pixel location is invalid.
+
+        """
+        px = int(key[0])
+        py = int(key[1])
+
+        if px >= self.width or py >= self.height:
+            raise KeyError("Invalid pixel coordinates {}.".format(key))
+
+        with _restore_color_mode():
+            col = color.Color(*self._img.getpixel((px, py)))
+
+        return col
+
+    @_ensure_loaded
+    def _get_patch(self, key):
+        """Return the patch (a sub-image) specified by the given key.
+
+        :param key: a tuple index-ing into a valid 2D array.
+        :type key: tuple
+
+        :returns: the patch specified by the given key
+        :rtype: p5.PImage
+
+        """
+        xidx, yidx = key
+        if self._channels == 1:
+            patch_data = self._img_data[xidx, yidx]
+        else:
+            patch_data = self._img_data[xidx, yidx, :]
+
+        patch_width = patch_data.shape[0]
+        patch_height = patch_data.shape[1]
+
+        patch_img = Image.fromarray(patch_data, self._img.mode)
+
+        patch = PImage(patch_width, patch_height)
+        patch._img_format = self._img_format
+        patch._img = patch_img
+        return patch
+
+    @_ensure_loaded
     def __getitem__(self, key):
         """Return the color of the indexed pixel or the requested sub-region
 
@@ -166,42 +217,31 @@ class PImage:
         :returns: a sub-image or a the pixel color
         :rtype: p5.Color | p5.PImage
 
-        :raises ValueError: When `key` is invalid.
+        :raises KeyError: When `key` is invalid.
 
         """
         if len(key) != 2:
             raise KeyError("Invalid image index")
 
-        posx, posy = key
-        if _is_numeric(posx) and _is_numeric(posy):
-            with _restore_color_mode():
-                pos = int(posx), int(posy)
-                col = color.Color(*self._img.getpixel(pos))
-            return col
+        if _is_numeric(key[0]) and _is_numeric(key[1]):
+            return self._get_pixel(key)
 
-        region = self._img_data[posx, posy]
-        rshape = region.shape
-        rwidth = rshape[0]
-        rheight = rshape[1]
-        rimg = Image.fromarray(region, self._img.mode)
-        rpimg = PImage(rwidth, rheight, self._img_format)
-        rpimg._img = rimg
-        return rpimg
+        return self._get_patch(key)
 
-    def _paste_pixel(self, key, patch):
+    def _set_pixel(self, key, point):
         # since both posx and posy are numeric, we are only pasting in
         # a "single" color. Hence, whenever patch is a PImage, we
         # require it to be exactly one pixel by one pixel large
 
-        if isinstance(patch, PImage):
-            if patch.size != (1, 1):
+        if isinstance(point, PImage):
+            if point.size != (1, 1):
                 raise AttributeError("Incompatible image dimensions")
             # ...and extract the color of that pixel
-            patch_color = patch[0, 0]
+            point_color = point[0, 0]
 
         # if the patch is a color, we don't do much
-        elif isinstance(patch, color.Color):
-            patch_color = patch
+        elif isinstance(point, color.Color):
+            point_color = point
 
         # otherwise, we try to parse the given patch as a color (if
         # `value` is invalid, the parsing will fail).
@@ -210,20 +250,20 @@ class PImage:
             # patch is just a single (non-iterable) value. Then we
             # don't unpack it.
             try:
-                patch_color = color.Color(*patch)
+                point_color = color.Color(*point)
             except TypeError as te:
-                patch_color = color.Color(patch)
+                point_color = color.Color(point)
 
         # finally, write the color value to the image based on the
         # number of channels.
         with _restore_color_mode():
-            red = int(patch_color.red)
-            green = int(patch_color.green)
-            blue = int(patch_color.blue)
-            alpha = int(patch_color.alpha)
+            red = int(point_color.red)
+            green = int(point_color.green)
+            blue = int(point_color.blue)
+            alpha = int(point_color.alpha)
 
             if self._channels == 1:
-                pixel_value = int(patch_color.gray)
+                pixel_value = int(point_color.gray)
             elif self._channels == 3:
                 pixel_value = (red, green, blue)
             elif self._channels == 4:
@@ -235,7 +275,7 @@ class PImage:
         self._img.putpixel(pixel_position, pixel_value)
 
     @_ensure_loaded
-    def _paste_patch(self, key, patch):
+    def _set_patch(self, key, patch):
         """Paste the given patch in the image.
 
         """
@@ -257,9 +297,9 @@ class PImage:
         if len(key) != 2:
             raise KeyError("Invalid image index")
         if _is_numeric(key[0]) and _is_numeric(key[1]):
-            self._paste_pixel(key, patch)
+            self._set_pixel(key, patch)
         else:
-            self._paste_patch(key, patch)
+            self._set_patch(key, patch)
         self._reload = True
 
     def load_pixels(self):
