@@ -22,6 +22,7 @@ import builtins
 from functools import wraps
 import time
 
+from PIL import Image
 import numpy as np
 import vispy
 from vispy import app
@@ -154,17 +155,23 @@ class Sketch(app.Canvas):
                 function(event)
 
         if self._save_flag:
-            self._save_back_buffer()
+            self._save_buffer()
         self.update()
 
-    def _save_back_buffer(self):
-        """Save the rendere back buffer to a file
+    def _save_buffer(self):
+        """Save the renderer buffer to the given file.
         """
         img_data = renderer.fbuffer.read(mode='color', alpha=False)
-        io.write_png(self._save_fname, img_data)
+        img = Image.fromarray(img_data)
+        img.save(self._save_fname)
         self._save_flag = False
 
-    def save_frame(self, filename):
+    def screenshot(self, filename):
+        self.queue_screenshot(filename)
+        renderer.flush_geometry()
+        self._save_buffer()
+
+    def queue_screenshot(self, filename):
         """Save the current frame
         """
         fname_split = filename.split('.')
