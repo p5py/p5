@@ -189,12 +189,12 @@ class PImage:
         """
         xidx, yidx = key
         if self._channels == 1:
-            patch_data = self._img_data[xidx, yidx]
+            patch_data = self._img_data[yidx, xidx]
         else:
-            patch_data = self._img_data[xidx, yidx, :]
+            patch_data = self._img_data[yidx, xidx, :]
 
-        patch_width = patch_data.shape[0]
-        patch_height = patch_data.shape[1]
+        patch_width = patch_data.shape[1]
+        patch_height = patch_data.shape[0]
 
         patch_img = Image.fromarray(patch_data, self._img.mode)
 
@@ -285,10 +285,12 @@ class PImage:
         target_mode = self._img.mode
         source_mode = patch._img.mode
 
+        kx, ky = key
+
         if target_mode != source_mode:
             patch._img.convert(target_mode)
 
-        self._img_data[key] = patch._data[key]
+        self._img_data[ky, kx] = patch._data[ky, kx]
         self._img = Image.fromarray(self._img_data, self._img.mode)
 
     def __setitem__(self, key, patch):
