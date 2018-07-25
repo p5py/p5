@@ -139,7 +139,7 @@ def background(*args, **kwargs):
         return background_image
 
     with push_style():
-        background_color = Color(*args, **kwargs, color_mode='RGB')
+        background_color = Color(*args, **kwargs)
         fill(background_color)
         no_stroke()
 
