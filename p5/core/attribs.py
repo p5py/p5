@@ -19,6 +19,8 @@ import builtins
 
 from ..sketch import renderer
 from .color import Color
+from .image import image
+from .image import PImage
 from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
@@ -96,27 +98,49 @@ def no_tint():
     """Disable tinting of images."""
     renderer.tint_enabled = False
 
-def background(*color_args, **color_kwargs):
+def background(*args, **kwargs):
     """Set the background color for the renderer.
 
-    :param color_args: positional arguments to be parsed as a color.
+    :param args: positional arguments to be parsed as a color.
     :type color_args: tuple
 
-    :param color_kwargs: keyword arguments to be parsed as a color.
-    :type color_kwargs: dict
+    :param kwargs: keyword arguments to be parsed as a color.
+    :type kwargs: dict
 
-    :note: Both color_args and color_kwargs are directly sent to
-        Color.parse_color
+    :note: Both args and color_kwargs are directly sent to
+        color.parse_color
 
-    :returns: The background color.
-    :rtype: Color
+    :note: When setting an image as the background, the dimensions of
+        the image should be the same as that of the sketch window.
+
+    :returns: The background color or image.
+    :rtype: p5.Color | p5.PImage
+
+    :raises ValueError: When the dimensions of the image and the
+        sketch do not match.
+
     """
+    if len(args) == 1 and isinstance(args[0], PImage):
+        background_image = args[0]
+        sketch_size = (width, height)
+
+        if sketch_size != background_image.size:
+            msg = "Image dimension {} and sketch dimension {} do not match"
+            raise ValueError(msg.format(background_image.size, sketch_size))
+
+        with push_style():
+            no_tint()
+            with push_matrix():
+                image(background_image, (0, 0))
+
+        return background_image
+
     with push_style():
-        background_color = Color(*color_args, **color_kwargs, color_mode='RGB')
+        background_color = Color(*args, **kwargs, color_mode='RGB')
         fill(background_color)
         no_stroke()
+
         with push_matrix():
             reset_transforms()
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
-    renderer.background_color = background_color.normalized
-    return background_color
+            renderer.background_color = background_color.normalized
