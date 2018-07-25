@@ -19,7 +19,9 @@ import builtins
 
 from ..sketch import renderer
 from .color import Color
+from .color import color_mode
 from .image import image
+from .image import image_mode
 from .image import PImage
 from .primitives import rect
 from .structure import push_style
@@ -130,6 +132,7 @@ def background(*args, **kwargs):
 
         with push_style():
             no_tint()
+            image_mode('corner')
             with push_matrix():
                 image(background_image, (0, 0))
 
