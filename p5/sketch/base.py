@@ -146,6 +146,7 @@ class Sketch(app.Canvas):
                     self.redraw = True
                     self.looping = False
                 else:
+                    self.looping = True
                     self.draw_method()
                     self.redraw = False
 
