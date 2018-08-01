@@ -124,7 +124,7 @@ def parse_color(*args, color_mode='RGB', **kwargs):
         rgb = (_r, _g, _b)
     elif (len(args) == 4) and color_mode.startswith('HSB'):
         _h, _s, _b, alpha = args
-        hsb = (_h, _s. _b)
+        hsb = (_h, _s, _b)
     elif 'gray' in kwargs:
         gray = kwargs['gray']
         rgb = gray, gray, gray
