@@ -127,7 +127,7 @@ class PImage:
     def _texture(self):
         if self._img_texture is None:
             texdata = self._data.astype(np.float32) / 255.0
-            self._img_texture = gloo.Texture2D(texdata)
+            self._img_texture = gloo.Texture2D(texdata, interpolation='linear')
         return self._img_texture
 
     @property
