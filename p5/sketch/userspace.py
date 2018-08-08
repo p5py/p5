@@ -210,7 +210,11 @@ def exit(*args, **kwargs):
     :param kwargs: keyword-arguments to pass to Python's builtin
         `exit()` function.
     """
-    default_sketch.show(visible=False)
+    try:
+        default_sketch.show(visible=False)
+    except AttributeError:
+        pass
+
     app.quit()
     builtins.exit(*args, **kwargs)
 
