@@ -54,7 +54,7 @@ We've also renamed a couple of things:
   .. code:: python
 
      # read the magnitude of the vector
-     m = vec.magnituge
+     m = vec.magnitude
 
      # set the magnitude of the vector
      vec.magnitude = new_magnitude
@@ -71,8 +71,8 @@ Running Sketches
   Python scripts/programs. You are free to use any text editor or
   Python IDE to run your programs.
 
-* Sketches **need** a call to the :code:`run()` function to actually
-  run the sketches. Sketches with missing :code:`run()` calls **will
+* Sketches **must** call the :code:`run()` function to actually
+  show the sketches. Sketches without a call to :code:`run()` **will
   not work**. So, a Processing sketch:
 
   .. code:: java
@@ -104,7 +104,7 @@ Running Sketches
      def mouse_pressed():
          # Things to do when the mouse is pressed.
 
-     run()
+     run() # This is essential!
 
 * Drawing commands only work inside functions.
 
@@ -191,7 +191,7 @@ Shapes, etc
 
 * Unlike Processing, p5 doesn't have special global constants for
   "modes". Functions like :code:`ellipse_mode()` and
-  :code:`rect_mode()` take strings (in all caps) as in inputs. The
+  :code:`rect_mode()` take strings (in all caps) as inputs. The
   following are valid function calls:
 
   .. code:: python
@@ -327,7 +327,7 @@ New Features
   sketch window.
 
 * :code:`circle()` and :code:`square()` functions draw circles and
-  square.
+  squares.
 
 * :code:`mouse_is_dragging` is a global variable that can be used to
   check if the mouse is being dragged.
