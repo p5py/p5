@@ -214,8 +214,9 @@ def exit(*args, **kwargs):
     :param kwargs: keyword-arguments to pass to Python's builtin
         `exit()` function.
     """
-    default_sketch.show(visible=False)
-    app.quit()
+    if not (default_sketch is None):
+        default_sketch.show(visible=False)
+        app.quit()
     builtins.exit(*args, **kwargs)
 
 def no_cursor():
