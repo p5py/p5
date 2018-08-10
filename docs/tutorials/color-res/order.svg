@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 645 200" enable-background="new 0 0 645 200" xml:space="preserve">
+<rect x="349.5" y="19.5" fill="#6B6B6B" width="167" height="166"/>
+<rect x="384.5" y="53" fill="none" stroke="#FFFFFF" stroke-miterlimit="10" width="64" height="66"/>
+<rect x="133.3" y="73.4" fill="#FFFF52" width="124.8" height="38.6"/>
+<rect x="133.5" y="36.9" fill="#FFFF52" width="124.4" height="17.6"/>
+<line fill="none" x1="349.5" y1="19" x2="516.5" y2="186"/>
+<line fill="none" stroke="#000000" stroke-miterlimit="10" x1="349.5" y1="19.5" x2="516.5" y2="186"/>
+<rect x="135.5" y="19" fill="none" width="166" height="121"/>
+<text transform="matrix(1 0 0 1 135.5 30.6963)"><tspan x="0" y="0" font-family="'TheSerif-HP5Plain'" font-size="16">background(150) </tspan><tspan x="0" y="19.2" font-family="'TheSerif-HP5Plain'" font-size="16">stroke(0) </tspan><tspan x="0" y="38.4" font-family="'TheSerif-HP5Plain'" font-size="16">line((0,0),(100,100)) </tspan><tspan x="0" y="57.6" font-family="'TheSerif-HP5Plain'" font-size="16">stroke(255) </tspan><tspan x="0" y="76.8" font-family="'TheSerif-HP5Plain'" font-size="16">no_fill()</tspan><tspan x="0" y="96" font-family="'TheSerif-HP5Plain'" font-size="16">rect((25,25),50,50) </tspan></text>
+<line fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" x1="129.2" y1="47.2" x2="122" y2="47.2"/>
+<line fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" x1="123" y1="47.2" x2="123" y2="62.8"/>
+<line fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" x1="129.2" y1="89.4" x2="122" y2="89.4"/>
+<line fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" x1="123" y1="89.4" x2="123" y2="122.5"/>
+<line fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" x1="129.2" y1="62.2" x2="122" y2="62.2"/>
+<line fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" x1="129.2" y1="121.8" x2="122" y2="121.8"/>
+</svg>
