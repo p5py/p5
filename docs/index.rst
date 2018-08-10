@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the p5 documentation!
-================================
+p5
+===
 
 .. image:: https://img.shields.io/github/release/p5py/p5/all.svg
    :target: https://github.com/p5py/p5
@@ -12,66 +12,52 @@ Welcome to the p5 documentation!
 .. image:: https://img.shields.io/pypi/l/p5.svg
    :target: https://pypi.python.org/pypi/p5
 
+.. image:: https://img.shields.io/pypi/pyversions/p5.svg
+   :target: https://pypi.python.org/pypi/p5
+
 .. image:: https://img.shields.io/github/stars/p5py/p5.svg?style=social&label=Star
    :target: https://github.com/p5py/p5
 
-..
-   .. image:: https://img.shields.io/pypi/wheel/p5.svg
-      :target: https://pypi.python.org/pypi/p5
 
-..
-   .. image:: https://img.shields.io/pypi/pyversions/p5.svg
-      :target: https://pypi.python.org/pypi/p5
+p5 is a native Python port of the `Processing
+<https://processing.org/>`_ API by `Abhik Pal
+<https://github.com/abhikpal>`_, `Manindra Mohrarna
+<https://github.com/Manindra29>`_, and `contributors
+<https://github.com/p5py/p5/graphs/contributors>`_. Processing "is a
+flexible software sketchbook and a language for learning how to code
+within the context of the visual arts." It mainly developed in Boston
+(at Fathom Information Design), Los Angeles (at the UCLA Arts Software
+Studio), and New York City (at NYU's ITP) [#processing-dev]_.
 
-p5 provides high level drawing functionality to help you quickly
-create simulations and interactive art using Python. It combines the
-core ideas of `Processing <https://processing.org/>`_ — learning to
-code in a visual context — with Python's readability to make
-programming more accessible to beginners, educators, and artists.
+The p5 documentation is structured into:
 
-The p5 documentation is organized into the following sections:
-
-- :doc:`Tutorials <tutorials/index>` take you through a series of
-  steps to create multiple p5 sketches and introduce you to the most
-  common features. Ideally you should start here if you have never
-  worked with Processing and/or p5.
-
-- :doc:`Guides <guides/index>` provide background information on p5
-  concepts and discuss topics at a high level. Unlike tutorials, the
-  guides do not have step-by-step instructions and assume a basic
-  understanding of p5 and/or Processing.
-
+- An :doc:`Installation <install>` section that guides one
+  through the basic installation process.
+- :doc:`Tutorials <tutorials/index>` with a collection of step-by-step
+  lessons covering various parts of the p5 api.
+- Short :doc:`Guides <guides/index>` that discuss key concepts and
+  details at a fairly high level.
 - The :doc:`Reference <reference/index>` provides a detailed overview
   of the complete p5 api. Code examples accompanying the reference can
-  be found in the `references` directory in the p5 examples.
-
-In addition to this documentation, we've also written and ported many
-Processing examples and reference sketches to p5. Visit the `examples
-repository <https://github.com/p5py/p5-examples>`_ or `download a zip
-<https://github.com/p5py/p5-examples/archive/master.zip>`_ with all
-the examples.
-
-Before you begin make sure you go through the :doc:`Installation
-<install>` pages to get started. If have programmed in Processing
-before, you should also take a look at the :doc:`p5 for Processing
-users <guides/for-processing-users>` guide. The API reference also
-notes differences from the Processing API.
+  be found in the `references` directory in the `p5 examples
+  <https://github.com/p5py/p5-examples>`_ repository (also `available
+  as a zip <https://github.com/p5py/p5-examples/archive/master.zip>`_)
 
 p5 is free and open source software and has been `released under the
-GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE>`_. All
-development work happens on the `Github repository
-<https://github.com/p5py/p5/>`_. If you would like to report a bug,
-request additional features, or would like to help out in general,
-please take a look at the `CONTRIBUTING
-<https://github.com/p5py/p5/blob/master/CONTRIBUTING.rst>`_ file on
-the `project repository on Github <https://github.com/p5py/p5/>`_.
+GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE>`_. To
+report a bug / make a feature request use the `issues page
+<https://github.com/p5py/p5/issues>`_ on the `main repository``
 
 .. toctree::
-   :hidden:
-   :glob:
+   :maxdepth: 2
 
    install
-   quickstart
-   tutorials/*
-   guides/*
-   reference/*
+   tutorials/index
+   guides/index
+   reference/index
+   releasenotes/index
+
+.. [#processing-dev] See `Overview
+                     <https://processing.org/overview/>`_ on the
+                     Processing website for details.
+
