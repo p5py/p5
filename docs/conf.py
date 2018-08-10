@@ -109,7 +109,6 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # documentation.
 #
 html_theme_options = {
-    'style_external_links': True,
     'navigation_depth': 3,
     'includehidden': False,
 }
