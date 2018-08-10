@@ -11,6 +11,7 @@ website <https://processing.org/tutorials/>`_.
 
    color
    objects
+   electronics
    vector
 
 .. rubric:: Beginner tutorials
