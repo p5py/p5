@@ -12,7 +12,6 @@ Color
    <https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
    repositories.
 
-
 In the digital world, when we want to talk about a color, precision is
 required. Saying "Hey, can you make that circle bluish-green?" will
 not do. Color, rather, is defined as a range of numbers. Let's start
@@ -62,12 +61,12 @@ for the window. Here's an example.
     if __name__ == '__main__':
         run()
 
-
 Stroke or fill can be eliminated with the functions:
 :meth:`p5.no_stroke` and :meth:`no_fill`. Our instinct might be to say
 ``stroke(0)`` for no outline, however, it is important to remember
 that 0 is not "nothing", but rather denotes the color black. Also,
-remember not to eliminate both -- with ``no_stroke`` and ``no_fill``, nothing will appear!
+remember not to eliminate both -- with ``no_stroke`` and ``no_fill``,
+nothing will appear!
 
 In addition, if we draw two shapes, p5 will always use the most
 recently specified stroke and fill, reading the code from top to
@@ -217,14 +216,15 @@ specifying a custom :meth:`p5.color_mode`.
 The above function says: "OK, we want to think about color in terms of
 red, green, and blue. The range of RGB values will be from 0 to 100."
 
-Although it is rarely convenient to do so, you can also have different ranges for each color component: 
+Although it is rarely convenient to do so, you can also have different
+ranges for each color component:
 
 .. code:: python
 
    color_mode('RGB', 100, 500, 10, 255)
 
-
-Now we are saying "Red values go from 0 to 100, green from 0 to 500, blue from 0 to 10, and alpha from 0 to 255."  
+Now we are saying "Red values go from 0 to 100, green from 0 to 500,
+blue from 0 to 10, and alpha from 0 to 255."
 
 Finally, while you will likely only need RGB color for all of your
 programming needs, you can also specify colors in the HSB (hue,
@@ -237,7 +237,7 @@ detail, HSB color works as follows:
 
 * **Hue** --The color type, ranges from 0 to 255 by default.
 * **Saturation** -- The vibrancy of the color, 0 to 255 by default.
-* **Brightness** --The, well, brightness of the color, 0 to 255 by
+* **Brightness** -- The, well, brightness of the color, 0 to 255 by
   default.
 
 With :meth:`p5.color_mode` you can set your own ranges for these
