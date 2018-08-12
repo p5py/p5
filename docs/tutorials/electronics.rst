@@ -178,7 +178,6 @@ to convert electrical energy into other forms such as light, heat, and
 mechanical energy. There are many different components, each with a
 specific use, but here we introduce four of the most basic types:
 resistor, capacitor, diode, and transistor.
-       
 
 Resistor
 --------
@@ -197,7 +196,6 @@ limit current, reduce voltage, and perform many other essential tasks.
 
 .. figure:: ./electronics-res/fg39-2.jpg
    :align: center
-
 
 Capacitor
 ---------
@@ -300,7 +298,6 @@ signals, amplify signals, control motors, and perform hundreds of
 other functions. They fit neatly into a breadboard by straddling the
 gap in the middle.
 
-
 Microcontrollers and I/O boards
 ===============================
 
@@ -344,7 +341,6 @@ informal groups -- bare microcontrollers, programmable I/O boards, and
 tethered I/O boards -- to discuss different ways to utilize
 microcontrollers in a project.
 
-
 Bare microcontrollers
 ---------------------
 
@@ -367,7 +363,6 @@ them in other languages such as BASIC. If you are new to electronics
 and programming, we don’t recommend starting by working directly with
 PIC or AVR chips. In our experience, beginners have had more success
 with the options introduced below.
-
 
 Programmable I/O boards
 -----------------------
@@ -793,7 +788,6 @@ with the different components.
 
 Code
 ====
-       
 
 To run these examples, unlike the other examples in this book, you
 will need additional equipment. They require either a Wiring
@@ -869,55 +863,50 @@ Example 1A:  Switch (Wiring/Arduino)
      } 
      delay(100);                            // Wait 100 milliseconds 
    } 
-   
-..
-   <pre></pre>
-
-       <p class="txt">
-           *Example 1B:  Switch (Processing)*
-       </p>
-
-   <pre>
-   // Read data from the serial port and change the color of a rectangle 
-   // when a switch connected to the board is pressed and released
-
-   import processing.serial.*; 
-
-   Serial port;                             // Create object from Serial class 
-   int val;                                 // Data received from the serial port 
-
-   void setup() { 
-     size(200, 200); 
-     frameRate(10); 
-     // Open the port that the board is connected to and use the same speed (9600 bps) 
-     port = new Serial(this, 9600); 
-   } 
-
-   void draw() { 
-     if (0 &lt; port.available()) {         // If data is available,
-       val = port.read();                   // read it and store it in val
-     } 
-     background(255);                       // Set background to white
-     if (val == 0)  {                       // If the serial value is 0,
-       fill(0);                             // set fill to black
-     } else {                               // If the serial value is not 0,
-       fill(204);                           // set fill to light gray
-     } 
-     rect(50, 50, 100, 100);
-   } 
-   </pre>
 
 
-   <hr />
+Example 1B:  Switch (p5)
+------------------------
+
+.. code:: python
+
+    from p5 import *
+    from serial import Serial
+
+    # Create object from Serial class. Here wer open the port that the
+    # board is connected to and use the same speed (9600 bps). 
+    port = Serial('/dev/ttyUSB0', 9600)
+
+    def setup():
+        size(200, 200)
+
+    def draw():
+        # read one byte of raw data from the serial port
+        raw_data = port.read()
+
+        # next convert the data (sent as a single byte) into an integer
+        data = int.from_bytes(raw_data, byteorder='little', signed=True)
+        # print(data)
+
+        if (data == 0):
+            fill(0)
+        else:
+            fill(204)
+
+        rect((50, 50), 100, 100)
+
+    if __name__ == '__main__':
+        run(frame_rate=10)
 
 
-   <p class="txt">
-       *Example 2A:  Light sensor (Wiring/Arduino)*
-   </p>
+Example 2A:  Light sensor (Wiring/Arduino)
+------------------------------------------
 
-   <img src="./electronics-res/fg39-14.svg" style= "width: 650px; height: 240px" class="tut">
+.. figure:: ./electronics-res/fg39-14.svg
+   :align: center
 
-   <pre>
+.. code:: cpp
+
    // Code to read an analog value and write it to the serial port
 
    int val; 
@@ -932,127 +921,119 @@ Example 1A:  Switch (Wiring/Arduino)
      Serial.write(val);             // Send the value
      delay(100);                    // Wait 100ms for next reading 
    }
-   </pre>
 
-   <p class="txt"> 
-       *Example 2B:  Light sensor (Processing)*
-   </p>
+Example 2B:  Light sensor (p5)
+------------------------------
 
-   <pre>
-   // Read data from the serial port and assign it to a variable. Set the fill a 
-   // rectangle on the screen using the value read from a light sensor connected 
-   // to the Wiring or Arduino board 
+.. code:: python
 
-   import processing.serial.*; 
+    from p5 import *
+    from serial import Serial
 
-   Serial port;  // Create object from Serial class
-   int val;      // Data received from the serial port 
+    # Create object from Serial class. Here wer open the port that the
+    # board is connected to and use the same speed (9600 bps). 
+    port = Serial('/dev/ttyUSB0', 9600)
 
-   void setup() { 
-     size(200, 200); 
-     noStroke(); 
-     frameRate(10);  // Run 10 frames per second
-     // Open the port that the board is connected to and use the same speed (9600 bps) 
-     port = new Serial(this, 9600); 
-   } 
+    def setup():
+        size(200, 200)
+        no_stroke()
 
-   void draw() { 
-     if (0 &lt; port.available()) {  // If data is available to read,
-       val = port.read();            // read it and store it in val
-     } 
-     background(204);                // Clear background
-     fill(val);                      // Set fill color with the value read
-     rect(50, 50, 100, 100);         // Draw square
-   } 
+    def draw():
+        # read one byte of raw data from the serial port
+        raw_data = port.read()
 
-   </pre>
+        # next convert the data (sent as a single byte) into an integer
+        data = int.from_bytes(raw_data, byteorder='little', signed=True)
+        # print(data)
+
+        # set fill color to the value just read.
+        fill(data)
+        rect((50, 50), 100, 100)
+
+    if __name__ == '__main__':
+        run(frame_rate=10)
 
 
-   <hr />
+Example 3A: Turning a light on and off
+--------------------------------------
+
+.. figure:: ./electronics-res/fg39-15.svg
+   :align: center
+
+..  code:: cpp
+
+    // Read data from the serial and turn ON or OFF a light depending on the value
+
+    char val;                          // Data received from the serial port 
+    int ledPin = 4;                    // Set the pin to digital I/O 4
+
+    void setup() { 
+      pinMode(ledPin, OUTPUT);         // Set pin as OUTPUT 
+      Serial.begin(9600);              // Start serial communication at 9600 bps 
+    } 
+
+    void loop() { 
+      if (Serial.available()) {        // If data is available to read, 
+        val = Serial.read();           // read it and store it in val 
+      } 
+      if (val == 'H') {                // If H was received
+        digitalWrite(ledPin, HIGH);    // turn the LED on 
+      } else { 
+        digitalWrite(ledPin, LOW);     // Otherwise turn it OFF
+      } 
+      delay(100);                      // Wait 100 milliseconds for next reading 
+    }
+
+Example 3B: Turning a light on and off (p5)
+-------------------------------------------
+
+.. code:: python
+
+    from p5 import *
+    from serial import Serial
+
+    # Create object from Serial class. Here we open the port that the
+    # board is connected to and use the same speed (9600 bps).
+    port = Serial('/dev/ttyUSB0', 9600)
+
+    def setup():
+        size(200, 200)
+
+    def draw():
+        background(255)
+        if mouse_over_rect():
+            # if the mouse is over the rectangle, then change fill color
+            # and send an H
+            fill(204)
+            port.write(b'H')
+        else:
+            # otherwise, change color and send an L
+            fill(0)
+            port.write(b'L')
+
+        # draw a square
+        square((50, 50), 100)
+
+    def mouse_over_rect():
+        """Test if the mouse is over a square.
+        """
+        correct_x = (mouse_x >= 50) and (mouse_x <= 150)
+        correct_y = (mouse_y >= 50) and (mouse_y <= 150)
+        return correct_x and correct_y
+
+    if __name__ == '__main__':
+        # run at 10 frames per second
+        run(frame_rate=10)
 
 
-   <p class="txt">
-       *Example 3A: Turning a light on and off*
-   </p>
+Example 4A: Controlling a servomotor(Wiring/Arduino)
+----------------------------------------------------
 
+.. figure:: ./electronics-res/fg39-16.svg
+   :align: center
 
-   <img src="./electronics-res/fg39-15.svg" style= "width: 650px; height: 240px" class="tut">
+.. code:: cpp
 
-
-   <pre>
-   // Read data from the serial and turn ON or OFF a light depending on the value
-
-   char val;                          // Data received from the serial port 
-   int ledPin = 4;                    // Set the pin to digital I/O 4
-
-   void setup() { 
-     pinMode(ledPin, OUTPUT);         // Set pin as OUTPUT 
-     Serial.begin(9600);              // Start serial communication at 9600 bps 
-   } 
-
-   void loop() { 
-     if (Serial.available()) {        // If data is available to read, 
-       val = Serial.read();           // read it and store it in val 
-     } 
-     if (val == 'H') {                // If H was received
-       digitalWrite(ledPin, HIGH);    // turn the LED on 
-     } else { 
-       digitalWrite(ledPin, LOW);     // Otherwise turn it OFF
-     } 
-     delay(100);                      // Wait 100 milliseconds for next reading 
-   } 
-   </pre>
-
-   <p class="txt">
-       *Example 3B: Turning a light on and off (Processing)*
-   </p>
-
-   <pre>
-   // Check if the mouse is over a rectangle and write the status to the serial port
-
-   import processing.serial.*; 
-
-   Serial port;                       // Create object from Serial class
-
-   void setup() { 
-     size(200, 200); 
-     noStroke(); 
-     frameRate(10); 
-     // Open the port that the board is connected to and use the same speed (9600 bps)
-     port = new Serial(this, 9600); 
-   } 
-
-   void draw() { 
-     background(255); 
-     if (mouseOverRect() == true)  {  // If mouse is over square,
-       fill(204);                     // change color and  
-       port.write('H');               // send an H to indicate mouse is over square 
-     } else {                         // If mouse is not over square,
-       fill(0);                       // change color and
-       port.write('L');               // send an L otherwise
-     } 
-     rect(50, 50, 100, 100);          // Draw a square 
-   } 
-
-
-   boolean mouseOverRect() {        // Test if mouse is over square 
-     return ((mouseX >= 50) &amp;&amp; (mouseX &lt;= 150) &amp;&amp; (mouseY >= 50) &amp;&amp; (mouseY &lt;= 150)); 
-   } 
-   </pre>
-
-
-   <hr />
-
-
-   <p class="txt">
-       *Example 4A: Controlling a servomotor(Wiring/Arduino)*
-   </p>
-
-
-   <img src="./electronics-res/fg39-16.svg" style= "width: 650px; height: 310px" class="tut">
-
-
-   <pre>
    // Read data from the serial port and set the position of a servomotor 
    // according to the value
 
@@ -1072,65 +1053,70 @@ Example 1A:  Switch (Wiring/Arduino)
      myservo.write(val);            // Set the servo position
      delay(15);                     // Wait for the servo to get there
    }
-   </pre>
 
+Example 4B: Controlling a servomotor (p5)
+-----------------------------------------
 
-   <p class="txt">
-       *Example 4B: Controlling a servomotor (Processing)*
-   </p>
+.. code:: python
 
-   <pre>
-   // Write data to the serial port according to the mouseX value
+    from p5 import *
+    from serial import Serial
 
-   import processing.serial.*;
+    # Create and initialize the port that the board is connected to and
+    # use the same speed (9600 bps)
+    port = Serial('/dev/ttyUSB0', 9600)
 
-   Serial port;                      // Create object from Serial class
-   float mx = 0.0;
+    mx = 0
 
-   void setup() { 
-     size(200, 200); 
-     noStroke(); 
-     frameRate(10); 
-     // Open the port that the board is connected to and use the same speed (9600 bps) 
-     port = new Serial(this, 9600); 
-   } 
+    def setup():
+        size(200, 200)
+        no_stroke()
 
-   void draw() {   
-     background(0);  // Clear background 
-     fill(204);	  // Set fill color 
-     rect(40, height/2-15, 120, 25);	    // Draw square
+    def draw():
+        global mx
 
-     float dif = mouseX - mx;
-     if (abs(dif) > 1.0) {
-       mx += dif/4.0;
-     }
-     mx = constrain(mx, 50, 149);                // Keeps marker on the screen
-     noStroke();
-     fill(255);
-     rect(50, (height/2)-5, 100, 5);  
-     fill(204, 102, 0);
+        # clear background, set fill color
+        background(0)
+        fill(204)
 
-     rect(mx-2, height/2-5, 4, 5);               // Draw the position marker
-     int angle = int(map(mx, 50, 149, 0, 180));  // Scale the value to the range 0-180
-     //print(angle + " ");	                      // Print the current angle (debug)
-     port.write(angle);	                      // Write the angle to the serial port
-   }
-   </pre>
+        rect((40, height / 2 - 15), 120, 25)
 
+        dif = mouse_x - mx
+        if (abs(dif) > 1):
+            mx = mx + (dif / 4.0)
 
+        # keeps marker on the screen
+        mx = constrain(mx, 50, 149)
 
-   <hr />
+        no_stroke()
+        fill(255)
+        rect((50, (height / 2) - 5), 100, 5)
+        fill(204, 102, 0)
 
+        # draw the position
+        rect((mx - 2, height / 2 - 5), 4, 5)
 
-   <p class="txt">
-       *Example 5A: Turning a DC Motor on and off (Wiring/Arduino)*
-   </p>
+        # scale the value to the range 0 to 180
+        angle = int(remap(mx, (50, 149), (0, 180)))
 
+        # print the current angle (debug)
+        # print(angle)
 
-   <img src="./electronics-res/fg39-17.svg" style= "width: 650px; height: 385px" class="tut">
+        # write out to the port (note that we first need to convert the
+        # data to bytes)
+        port.write(bytes([angle]))
 
+    if __name__ == '__main__':
+        run(frame_rate=10)
 
-   <pre>
+Example 5A: Turning a DC Motor on and off (Wiring/Arduino)
+----------------------------------------------------------
+
+.. figure:: ./electronics-res/fg39-17.svg
+   :align: center
+
+.. code:: cpp
+  
    // Read data from the serial and turn a DC motor on or off according to the value
 
    char val;             // Data received from the serial port
@@ -1147,79 +1133,85 @@ Example 1A:  Switch (Wiring/Arduino)
      } 
      if (val == 'H') {                    // If 'H' was received, 
        analogWrite(motorpin, 125);        // turn the motor on at medium speed 
-     } else { 			             // If 'H' was not received
+     } else { 			                  // If 'H' was not received
        analogWrite(motorpin, 0);          // turn the motor off 
      } 
      delay(100);                          // Wait 100 milliseconds for next reading
    }
-   </pre>
 
 
-   <p class="txt">
-       *Example 5B: Turning a DC motor on and off (Processing)*
-   </p>
+Example 5B: Turning a DC Motor on and off (p5)
+----------------------------------------------
 
-   <pre>
-   // Write data to the serial port according to the status of a button controlled 
-   // by the mouse 
+.. code:: python
 
-   import processing.serial.*;
+    # Write data to the serial port according to the status of a button
+    # controlled by the mouse
 
-   Serial port;                           // Create serial port object 
-   boolean rectOver = false;      	
-   int rectX, rectY;                      // Position of square button
-   int rectSize = 100;                    // Diameter of rect
-   color rectColor;
-   boolean buttonOn = false;              // Status of the button
-   void setup() {
-     size(200, 200); 
-     noStroke(); 
-     frameRate(10);
-     rectColor = color(100);
-     rectX = width/2 - rectSize/2;
-     rectY = height/2 - rectSize/2;
-     // Open the port that the board is connected to and use the same speed (9600 bps)
-     port = new Serial(this, 9600); 
-   } 
+    from p5 import *
+    from serial import Serial
 
-   void draw() {   
-     update(mouseX, mouseY);
-     background(0);                 // Clear background to black
-     fill(rectColor);            	         
-     rect(rectX, rectY, rectSize, rectSize);  
-   } 
+    # Create object from Serial class. Here we open the port that the
+    # board is connected to and use the same speed (9600 bps).
+    port = Serial('/dev/ttyUSB0', 9600)
 
-   void update(int x, int y) {
-     if (overRect(rectX, rectY, rectSize, rectSize) == true) {
-       rectOver = true;
-     } else {
-       rectOver = false;
-     }
-   }
+    rect_over = False
 
-   void mouseReleased() {
-     if (rectOver == true) {
-       if (buttonOn == true) {
-         rectColor = color(100);
-         buttonOn = false;
-         port.write('L');           // Send an L to indicate button is OFF
-       } else {
-         rectColor = color(180);
-         buttonOn = true;
-         port.write('H');           // Send an H to indicate button is ON 
-       }
-     }
-   }
+    # position, diameter, and color of the button
+    rect_location = None
+    rect_size = 100
+    rect_color = Color(100)
 
-   boolean overRect(int x, int y, int width, int height) {
-     if ((mouseX >= x) &amp;&amp; (mouseX &lt;= x+width) &amp;&amp; 
-         (mouseY >= y) &amp;&amp; (mouseY &lt;= y+height)) {
-       return true;
-     } else {
-       return false;
-     }
-   }
-   </pre>
+    # status of the button
+    button_on = False
+
+    def mouse_over_rect(location, dimensions):
+        w, h = dimensions
+        x, y = location.x, location.y
+
+        correct_x = (mouse_x >= x) and (mouse_x <= (x + w))
+        correct_y = (mouse_y >= y) and (mouse_y <= (y + h))
+
+        return correct_x and correct_y
+
+    def setup():
+        global rect_location
+        size(200, 200)
+        no_stroke()
+        rect_location = Vector((width / 2) - (rect_size / 2), 
+                               (height / 2) - (rect_size / 2))
+
+    def draw():
+        global rect_over
+        rect_over = mouse_over_rect(rect_location, (rect_size, rect_size))
+
+        # clear background to black
+        background(0)
+
+        fill(rect_color)
+        square(rect_location, rect_size)
+
+    def mouse_released():
+        global rect_color
+        global button_on
+
+        if rect_over:
+            if button_on:
+                rect_color = Color(100)
+                button_on = False
+
+                # send an L to indicate button is OFF
+                port.write(b'L')
+            else:
+                rect_color = Color(180)
+                button_on = True
+
+                # send an H to indicate button is ON
+                port.write(b'H')
+
+    if __name__ == '__main__':
+        # run at 10 frames per second
+        run(frame_rate=10)
 
 
 .. [#ref1] Dan O’Sullivan and Tom Igoe, *Physical Computing: Sensing
