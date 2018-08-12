@@ -146,12 +146,10 @@ class PImage:
 
         data = np.array(self._img.getdata(), dtype=np.uint8)
 
-        if len(data.shape) == 1:
-            self._channels = 1
-        else:
-            _, self._channels = data.shape
+        self._channels = len(self._img.getbands())
 
         self._img_data = data.reshape(height, width, self._channels)
+        self._img_texture = None
         self._reload = False
 
     @_ensure_loaded
@@ -292,7 +290,11 @@ class PImage:
         if target_mode != source_mode:
             patch._img.convert(target_mode)
 
-        self._img_data[ky, kx] = patch._data[ky, kx]
+        if self._channels == 1:
+            self._img_data[ky, kx] = patch._data[:, :]
+        else:
+            self._img_data[ky, kx, :] = patch._data[:, :, :]
+
         self._img = Image.fromarray(self._img_data, self._img.mode)
 
     def __setitem__(self, key, patch):
