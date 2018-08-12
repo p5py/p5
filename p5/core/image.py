@@ -341,6 +341,7 @@ class PImage:
                 'gaussian_blur': 1.0,
                 'box_blur': 1.0,
                 'posterize': 1,
+                'opacity': 0.5,
             }
             param = default_values.get(filter_name, None)
 
@@ -353,6 +354,8 @@ class PImage:
             self._img = ImageOps.grayscale(self._img)
         elif filter_name == 'opaque':
             self._img.putalpha(255)
+        elif filter_name == 'opacity':
+            self._img.putalpha(int(param * 255))
         elif filter_name == 'invert':
             self._img = ImageOps.invert(self._img)
         elif filter_name == 'posterize':
