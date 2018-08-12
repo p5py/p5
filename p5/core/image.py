@@ -380,8 +380,70 @@ class PImage:
     def copy(self, *args):
         raise NotImplementedError
 
-    def blend(self, *args):
-        raise NotImplementedError
+    def blend(self, other, mode):
+        """Blend the specified image using the given blend mode.
+
+        :param other: The image to be blended to the current image.
+        :type other: p5.PImage
+
+        :param mode: Blending mode to use. Should be one of { 'BLEND',
+            'ADD', 'SUBTRACT', 'LIGHTEST', 'DARKEST', 'DIFFERENCE',
+            'EXCLUSION', 'MULTIPLY', 'SCREEN', 'OVERLAY',
+            'HARD_LIGHT', 'SOFT_LIGHT', 'DODGE', 'BURN', }
+        :type mode: str
+
+        :raises AssertionError: When the dimensions of img do not
+            match the dimensions of the current image.
+
+        :raises KeyError: When the blend mode is invalid.
+
+        """
+        mode = mode.lower()
+        assert self.size == other.size, "Images are of different sizes!"
+
+        if self._img.mode != 'RGBA':
+            self._img = self._img.convert('RGBA')
+            self._reload = True
+
+        if other._img.mode != 'RGBA':
+            other_img = other._img.convert('RGBA')
+        else:
+            other_img = other._img
+
+        if mode == 'blend':
+            self._img = ImageChops.composite(self._img, other_img, self._img)
+        elif mode == 'add':
+            self._img = ImageChops.add(self._img, other_img)
+        elif mode == 'subtract':
+            self._img = ImageChops.subtract(self._img, other_img)
+        elif mode == 'lightest':
+            self._img = ImageChops.lighter(self._img, other_img)
+        elif mode == 'darkest':
+            self._img = ImageChops.darker(self._img, other_img)
+        elif mode == 'difference':
+            raise NotImplementedError
+        elif mode == 'exclusion':
+            raise NotImplementedError
+        elif mode == 'multiply':
+            self._img = ImageChops.multiply(self._img, other_img)
+        elif mode == 'screen':
+            self._img = ImageChops.screen(self._img, other_img)
+        elif mode == 'overlay':
+            raise NotImplementedError
+        elif mode == 'hard_light':
+            raise NotImplementedError
+        elif mode == 'soft_light':
+            raise NotImplementedError
+        elif mode == 'dodge':
+            raise NotImplementedError
+        elif mode == 'burn':
+            raise NotImplementedError
+        else:
+            raise KeyError("'{}' blend mode not found".format(mdoe.upper()))
+
+        self._reload = True
+        return self
+
 
     @_ensure_loaded
     def save(self, file_name):
