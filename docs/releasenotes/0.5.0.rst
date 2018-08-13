@@ -3,7 +3,7 @@
 
 p5 version 0.5.0 is the final release for the `Google Summer of Code
 2018 project
-<https://summerofcode.withgoogle.com/projects/#4911995556462592>`_ `by
+<https://summerofcode.withgoogle.com/projects/#4911995556462592>`_ by
 `Abhik Pal <github.com/abhikpal>`_. The project was supervised by
 `Manindra Mohrarna <https://github.com/Manindra29>`_ of the
 `Processing Foundation <https://processingfoundation.org/>`_. The goal
