@@ -33,7 +33,8 @@ from ..pmath import constrain
 from ..pmath.utils import _is_numeric
 from .structure import push_style
 
-__all__ = ['image', 'load_image', 'image_mode', 'load_pixels']
+__all__ = ['PImage', 'image', 'load_image', 'image_mode',
+           'load_pixels']
 
 _image_mode = 'corner'
 
@@ -60,6 +61,12 @@ def _restore_color_mode():
 
 class PImage:
     """Image class for p5.
+
+    Note that the image "behaves" like a 2-D list and hence, doesn't
+    expose special methods for copying / pasting / cropping. All of
+    these operations can be done by using appropriate indexing into
+    the array. See the :meth:`p5.PImage.__getitem__` and
+    :meth:`p5.PImage.__setitem__` methods for details.
 
     :param width: width of the image.
     :type width: int
@@ -92,6 +99,10 @@ class PImage:
     @property
     @_ensure_loaded
     def width(self):
+        """The width of the image
+
+        :rtype: int
+        """
         return self._width
 
     @width.setter
@@ -101,6 +112,10 @@ class PImage:
     @property
     @_ensure_loaded
     def height(self):
+        """The height of the image
+
+        :rtype: int 
+        """
         return self._height
 
     @height.setter
@@ -110,6 +125,10 @@ class PImage:
     @property
     @_ensure_loaded
     def size(self):
+        """The size of the image
+
+        :rtype: (int, int) tuple
+        """
         return self._size
 
     @size.setter
@@ -120,6 +139,10 @@ class PImage:
     @property
     @_ensure_loaded
     def aspect_ratio(self):
+        """Return the aspect ratio of the image.
+
+        :rtype: float | int
+        """
         return self._width / self._height
 
     @property
@@ -299,6 +322,7 @@ class PImage:
 
     def __setitem__(self, key, patch):
         """Paste the given `patch` into the current image.
+
         """
         if len(key) != 2:
             raise KeyError("Invalid image index")
@@ -309,6 +333,13 @@ class PImage:
         self._reload = True
 
     def load_pixels(self):
+        """Load internal pixel data for the image.
+        
+        By default image data is only loaded lazily, i.e., right
+        before displaying an image on the screen. Use this method to
+        manually load the internal image data.
+
+        """
         self._load()
 
     def mask(self, image):
@@ -377,9 +408,6 @@ class PImage:
 
         self._reload = True
 
-    def copy(self, *args):
-        raise NotImplementedError
-
     def blend(self, other, mode):
         """Blend the specified image using the given blend mode.
 
@@ -387,9 +415,8 @@ class PImage:
         :type other: p5.PImage
 
         :param mode: Blending mode to use. Should be one of { 'BLEND',
-            'ADD', 'SUBTRACT', 'LIGHTEST', 'DARKEST', 'DIFFERENCE',
-            'EXCLUSION', 'MULTIPLY', 'SCREEN', 'OVERLAY',
-            'HARD_LIGHT', 'SOFT_LIGHT', 'DODGE', 'BURN', }
+            'ADD', 'SUBTRACT', 'LIGHTEST', 'DARKEST', 'MULTIPLY',
+            'SCREEN',}
         :type mode: str
 
         :raises AssertionError: When the dimensions of img do not
@@ -410,6 +437,7 @@ class PImage:
         else:
             other_img = other._img
 
+        # todo: implement missing filters -- abhikpal (2018-08-14)
         if mode == 'blend':
             self._img = ImageChops.composite(self._img, other_img, self._img)
         elif mode == 'add':
@@ -444,7 +472,6 @@ class PImage:
         self._reload = True
         return self
 
-
     @_ensure_loaded
     def save(self, file_name):
         """Save the image into a file
@@ -456,7 +483,11 @@ class PImage:
         self._img.save(file_name)
 
 def image(img, location, size=None):
-    """Display the given image.
+    """Draw an image to the display window.
+
+    Images must be in the same folder as the sketch (or the image path
+    should be explicitly mentioned). The color of an image may be
+    modified with the :meth:`p5.tint` function. 
 
     :param img: the image to be displayed.
     :type img: p5.Image
@@ -491,10 +522,30 @@ def image(img, location, size=None):
     sketch.render_image(img, (lx, ly), (sx, sy))
 
 def image_mode(mode):
-    """Modifies the locaton from which the images are drawn.
+    """Modify the locaton from which the images are drawn.
 
-    :param mode: should be one of {'corner', 'center', 'corners'}
+    Modifies the location from which images are drawn by changing the
+    way in which parameters given to :meth:`p5.image` are intepreted.
+
+    The default mode is ``image_mode('corner')``, which interprets the
+    second parameter of ``image()`` as the upper-left corner of the
+    image. If an additional parameter is specified, it is used to set
+    the image's width and height.
+
+    ``image_mode('corners')`` interprets the first parameter of
+    ``image()`` as the location of one corner, and the second
+    parameter as the opposite corner.
+
+    ``image_mode('center')`` interprets the first parameter of
+    ``image()`` as the image's center point. If an additional
+    parameter is specified, it is used to set the width and height of
+    the image.
+
+    :param mode: should be one of ``{'corner', 'center', 'corners'}``
     :type mode: str
+
+    :raises ValueError: When the given image mode is not understood.
+        Check for typoes.
 
     """
     global _image_mode
@@ -506,12 +557,23 @@ def image_mode(mode):
 def load_image(filename):
     """Load an image from the given filename.
 
-    :param filename: Filename of the given image. The file-extennsion
-        is automatically inferred.
+    Loads an image into a variable of type PImage. Four types of
+    images may be loaded. 
+
+    In most cases, load all images in setup() or outside the draw()
+    call to preload them at the start of the program. Loading images
+    inside draw() will reduce the speed of a program. 
+
+    :param filename: Filename (or path)of the given image. The
+        file-extennsion is automatically inferred.
     :type filename: str
 
+    :returns: An :class:`p5.PImage` instance with the given image data
+    :rtype: :class:`p5.PImage`
+
     """
-    # TODO: Add URL support.
+    # todo: add support for loading images from URLs -- abhikpal
+    # (2018-08-14)
     img = Image.open(filename)
     w, h = img.size
     pimg = PImage(w, h)
@@ -520,6 +582,13 @@ def load_image(filename):
 
 @contextlib.contextmanager
 def load_pixels():
+    """Load a snapshot of the display window into the ``pixels`` Image.
+    
+    This context manager loads data into the global ``pixels`` Image.
+    Once the program execution leaves the context manager, all changes
+    to the image are written to the main display.
+
+    """
     pixels = PImage(builtins.width, builtins.height, 'RGB')
     sketch.renderer.flush_geometry()
     pixel_data = sketch.renderer.fbuffer.read(mode='color', alpha=False)
@@ -535,3 +604,5 @@ def load_pixels():
         image_mode('corner')
         sketch.renderer.tint_enabled = False
         image(builtins.pixels, (0, 0))
+
+    builtins.pixels = None

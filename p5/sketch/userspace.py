@@ -249,12 +249,51 @@ def cursor(cursor_type='ARROW'):
     raise NotImplementedError
 
 def save(filename='screen.png'):
+    """Save an image from the display window. 
+
+    Saves an image from the display window. Append a file extension to
+    the name of the file, to indicate the file format to be used.If no
+    extension is included in the filename, the image will save in PNG
+    format and .png will be added to the name. By default, these files
+    are saved to the folder where the sketch is saved. Alternatively,
+    the files can be saved to any location on the computer by using an
+    absolute path (something that starts with / on Unix and Linux, or
+    a drive letter on Windows).
+
+    :param filename: Filename of the image (defaults to
+        ``screen.png``)
+
+    :type filename: str
+
+    """
+    # TODO: images saved using ``save()`` should *not* be numbered.
+    # --abhikpal (2018-08-14)
     default_sketch.screenshot(filename)
 
 def save_frame(filename="screen.png"):
-    """Save the current frame.
+    """Save a numbered sequence of images whenever the function is run.
 
-    :param filename: name of the image file.
+    Saves a numbered sequence of images, one image each time the
+    function is run. To save an image that is identical to the display
+    window, run the function at the end of :meth:`p5.draw` or within
+    mouse and key events such as :meth:`p5.mouse_pressed` and
+    :meth:`p5.key_pressed`. 
+
+    If save_frame() is used without parameters, it will save files as
+    screen-0000.png, screen-0001.png, and so on. Append a file
+    extension, to indicate the file format to be used. Image files are
+    saved to the sketch's folder. Alternatively, the files can be
+    saved to any location on the computer by using an absolute path
+    (something that starts with / on Unix and Linux, or a drive letter
+    on Windows).
+
+    :param filename: name (or name with path) of the image file.
+        (defaults to ``screen.png``)
+
     :type filename: str
+
     """
+    # todo: allow setting the frame number in the file name of the
+    # saved image (instead of using the default sequencing) --abhikpal
+    # (2018-08-14)
     default_sketch.queue_screenshot(filename)

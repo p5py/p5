@@ -30,7 +30,7 @@ from .image import image
 from .image import PImage
 from .structure import push_style
 
-__all__ = ['create_font', 'load_font', 'text', 'text_font', 'text_size']
+__all__ = ['create_font', 'load_font', 'text', 'text_font',]
 
 _font_family = ImageFont.load_default()
 
