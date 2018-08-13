@@ -6,13 +6,21 @@ p5 version 0.5.0 is the final release for the `Google Summer of Code
 <https://summerofcode.withgoogle.com/projects/#4911995556462592>`_ `by
 `Abhik Pal <github.com/abhikpal>`_. The project was supervised by
 `Manindra Mohrarna <https://github.com/Manindra29>`_ of the
-`Processing Foundation <https://processingfoundation.org/>`_. This
-release builds on a release from earlier this summer that moved the
-internal windowing framework and OpenGL interface to vispy.
+`Processing Foundation <https://processingfoundation.org/>`_. The goal
+of the project were:
 
-In addition to the new features described in the next section, the
-documentation accompanying this release also includes ports of some
-Processing tutorials:
+#. Move the internal windowing and OpenGL framework to `vispy
+   <https://vispy.org>`_
+#. Fix the then open issues and merge pull requests
+#. Add support for user defined polygons
+#. Add image support
+
+We met all of these goals completely. The first two were covered by a
+`release from earlier in the summer
+<https://github.com/p5py/p5/releases/tag/v0.4.0a1.dev2>`_. These
+release notes summarize our later two goals. In addition to the stated
+goals we were also able to add minimal typography support and port
+some tutorials from Processing to p5:
 
 * :doc:`Color by Daniel Shiffman </tutorials/color>`
 * :doc:`Vectors by Daniel Shiffman </tutorials/vector>`
