@@ -4,6 +4,13 @@ Shape
 
 .. automodule:: p5
 
+PShape
+======
+
+.. autoclass:: PShape
+   :members:
+
+
 2D Primitives
 =============
 
@@ -131,3 +138,4 @@ rect_mode()
 -----------
 
 .. autofunction:: rect_mode
+

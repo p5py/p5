@@ -4,21 +4,22 @@ Math
 
 .. automodule:: p5
 
+.. note::
+
+   Many math functions available in Processing are already included in
+   Python's math standard library. There methods aren't listed here.
+   Please refer to the `documentation for the math standard library
+   <https://docs.python.org/3/library/math.html>`_.
 
 Vector
 ======
 
 .. autoclass:: Vector
    :members:
+   :special-members:
 
 Calculation
 ===========
-
-abs()
------
-
-.. autofunction:: builtins.abs
-
 
 ceil()
 ------
@@ -68,12 +69,6 @@ sq()
 .. autofunction:: sq
 
 
-pow()
------
-
-.. autofunction:: pow
-
-
 magnitude()
 -----------
 
@@ -85,29 +80,10 @@ remap()
 
 .. autofunction:: remap
 
-
-max()
------
-
-.. autofunction:: builtins.max
-
-
-min()
------
-
-.. autofunction:: builtins.min
-
-
 normalize()
 -----------
 
 .. autofunction:: normalize
-
-
-round()
--------
-
-.. autofunction:: builtins.round
 
 
 sqrt()

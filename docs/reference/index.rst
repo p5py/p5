@@ -11,4 +11,6 @@ Reference
    output
    transform
    color
+   image
+   typography
    math
