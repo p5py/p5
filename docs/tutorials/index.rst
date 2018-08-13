@@ -56,8 +56,9 @@ website <https://processing.org/tutorials/>`_.
   in a matrix using a two-dimensional array.
 * **Sound by R. Luke DuBois and Wilm Thoben:** Learn how to play,
   analyze, and synthesize sound with the Sound Library.
-* **Electronics by Hernando Berragán and Casey Reas:** Control physical
-  media with Processing, Arduino, and Wiring.
+* :doc:`Electronics by Hernando Berragán and Casey Reas
+  <electronics>`: Control physical media with Processing, Arduino, and
+  Wiring.
 * **Network by Alexander R. Galloway:** An introduction to sending and
   receiving data with clients and servers
 * **Print by Casey Reas:** Use Processing to output print quality
