@@ -1,0 +1,67 @@
+0.5.0
+=====
+
+p5 version 0.5.0 is the final release for the `Google Summer of Code
+2018 project
+<https://summerofcode.withgoogle.com/projects/#4911995556462592>`_ `by
+`Abhik Pal <github.com/abhikpal>`_. The project was supervised by
+`Manindra Mohrarna <https://github.com/Manindra29>`_ of the
+`Processing Foundation <https://processingfoundation.org/>`_. This
+release builds on a release from earlier this summer that moved the
+internal windowing framework and OpenGL interface to vispy.
+
+In addition to the new features described in the next section, the
+documentation accompanying this release also includes ports of some
+Processing tutorials:
+
+* :doc:`Color by Daniel Shiffman </tutorials/color>`
+* :doc:`Vectors by Daniel Shiffman </tutorials/vector>`
+* :doc:`Electronics by Hernando Berragán and Casey Reas
+  </tutorials/electronics>`
+
+API Additions
+-------------
+
+* The :class:`p5.PShape` class is equivalent to `PShape
+  <https://processing.org/reference/PImage.html>`_ in Processing. This
+  allows creation of arbitrary user defined polygons that can have
+  their own style (fill, stroke, etc) and transform (rotation,
+  translation) attributes.
+
+* The :class:`p5.PImage` class allows for manipulating images in p5.
+  Most of the API is similar to that of Processing's. Each image
+  object "pretends" to be a 2D array and hence operations for
+  cropping, copying, and pasting data can have implemented as indexing
+  operations on the image. For instance, given some image ``img`` with
+  dimensions 800 × 600, ``img[400:, :300]`` gives a new image with the
+  required region. Individual pixels can be set / read as
+  :class:`p5.Color` objects though indices into the image. The class
+  also includes functionality to apply filters and blend two images
+  together.
+
+* The :meth:`p5.load_image` and :meth:`p5.image` function allow,
+  respectively, loading and displaying images on the screen.
+
+* The :meth:`p5.image_mode` function controls how parameters to
+  :meth:`p5.image` are interpreted.
+
+* :meth:`p5.tint` and the related :meth:`p5.no_tint` function allow
+  for setting and disabling tinting of images that are drawn on the
+  screen.
+
+* The :meth:`p5.load_pixels` context manager loads the current display
+  as a global ``pixels`` PImage object. This combines functionality of
+  Processing's `loadPixels()
+  <https://processing.org/reference/loadPixels_.html>`_ and
+  `updatePixels()
+  <https://processing.org/reference/updatePixels_.html>`_.
+
+* :meth:`p5.save` and :meth:`p5.save_frame` methods allow users to
+  either save the current state of the sketch or the final rendered
+  frame as an image.
+
+* This release also introduces some basic typography functions like
+  :meth:`p5.text` for displaying text on screen. The
+  :meth:`p5.load_font` and :meth:`p5.create_font` allow loading font
+  files to change the display typeface using :meth:`text_font`. As of
+  now, only TrueType (ttf) and bitmap fonts are supported.
