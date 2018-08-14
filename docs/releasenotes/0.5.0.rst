@@ -11,11 +11,10 @@ of the project were:
 
 #. Move the internal windowing and OpenGL framework to `vispy
    <https://vispy.org>`_
-#. Fix the then open issues and merge pull requests
 #. Add support for user defined polygons
 #. Add image support
 
-We met all of these goals completely. The first two were covered by a
+We met all of these goals completely. The first was covered by a
 `release from earlier in the summer
 <https://github.com/p5py/p5/releases/tag/v0.4.0a1.dev2>`_. These
 release notes summarize our later two goals. In addition to the stated
