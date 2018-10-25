@@ -168,6 +168,7 @@ class PImage:
         self._size = (width, height)
 
         data = np.array(self._img.getdata(), dtype=np.uint8)
+        data = np.array(self._img, dtype=np.uint8)
 
         self._channels = len(self._img.getbands())
 
