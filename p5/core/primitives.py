@@ -473,8 +473,8 @@ def arc(coordinate, width, height, start_angle, stop_angle,
 
     if emode == 'CORNER':
         corner = Point(*coordinate)
-        dim = Point(width, height)
-        center = (corner.x + (dim.x / 2), corner.y + (dim.y / 2), corner.z)
+        dim = Point(width/2, height/2)
+        center = (corner.x + dim.x, corner.y + dim.y, corner.z)
     elif emode == 'CENTER':
         center = Point(*coordinate)
         dim = Point(width / 2, height / 2)
