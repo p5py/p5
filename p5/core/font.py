@@ -79,13 +79,18 @@ def text(text_string, position, wrap_at=None):
     :rtype: str
 
     """
-    size = (builtins.width, builtins.height)
-    canvas = Image.new("RGBA", size, color=(0, 0, 0, 0))
-    canvas_draw = ImageDraw.Draw(canvas)
+    global _font_family
     
     if not (wrap_at is None):
         text_string = textwrap.fill(text_string, wrap_at)
-    canvas_draw.text(position, text_string, font=_font_family)
+        size = _font_family.getsize_multiline(text_string)
+    else:
+        size = _font_family.getsize(text_string)
+        
+    canvas = Image.new("RGBA", size, color=(0, 0, 0, 0))
+    canvas_draw = ImageDraw.Draw(canvas)
+    
+    canvas_draw.text((0, 0), text_string, font=_font_family)
 
     text_image = PImage(*size)
     text_image._img = canvas
@@ -94,7 +99,7 @@ def text(text_string, position, wrap_at=None):
         if sketch.renderer.fill_enabled:
             sketch.renderer.tint_enabled = True
             sketch.renderer.tint_color = sketch.renderer.fill_color
-        image(text_image, (0, 0))
+        image(text_image, position)
     
     return text_string
 
