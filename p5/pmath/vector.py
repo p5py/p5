@@ -368,6 +368,7 @@ class Vector(Point):
         if self.magnitude == 0.0:
             raise ValueError("Vector has magnitude 0; can't normalize.")
         self.magnitude = 1
+        return self
 
     def limit(self, upper_limit=None, lower_limit=None):
         """Limit the magnitude of the vector to the given range.
