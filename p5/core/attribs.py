@@ -114,6 +114,16 @@ def background(*args, **kwargs):
 
     :note: When setting an image as the background, the dimensions of
         the image should be the same as that of the sketch window.
+    
+    :note:  Images can only be set as a background from draw().
+        This is because images do not actually change the renderer,
+        they only draw the image.
+        Colors, on the other hand, actually change the renderer color.
+    
+    :note:  Inconsistent behaviour between color and image.
+        Color changes the renderer background, whereas image simply draws.
+        This means background can be used with color in setup()
+        but images cannot be.
 
     :returns: The background color or image.
     :rtype: p5.Color | p5.PImage
@@ -138,12 +148,17 @@ def background(*args, **kwargs):
 
         return background_image
 
+    #Parse the color
+    background_color = Color(*args, **kwargs)
+    
+    #Draw a filled rectangle for immediate effect
     with push_style():
-        background_color = Color(*args, **kwargs)
         fill(background_color)
         no_stroke()
-
         with push_matrix():
             reset_transforms()
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
-            renderer.background_color = background_color.normalized
+
+    #Change the renderer settings for effect later
+    renderer.background_color = background_color.normalized
+    return background_color
