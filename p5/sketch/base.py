@@ -144,7 +144,9 @@ class Sketch(app.Canvas):
                     self.setup_done = True
                     self.show(visible=True)
                     self.redraw = True
+                    self.looping = False
                 else:
+                    self.looping = True
                     self.draw_method()
                     self.redraw = False
 
