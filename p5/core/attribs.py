@@ -101,7 +101,7 @@ def no_tint():
     renderer.tint_enabled = False
 
 def background(*args, **kwargs):
-    """Set the background color for the renderer.
+    """Set the background color or image for the renderer.
 
     :param args: positional arguments to be parsed as a color.
     :type color_args: tuple
@@ -114,16 +114,6 @@ def background(*args, **kwargs):
 
     :note: When setting an image as the background, the dimensions of
         the image should be the same as that of the sketch window.
-    
-    :note:  Images can only be set as a background from draw().
-        This is because images do not actually change the renderer,
-        they only draw the image.
-        Colors, on the other hand, actually change the renderer color.
-    
-    :note:  Inconsistent behaviour between color and image.
-        Color changes the renderer background, whereas image simply draws.
-        This means background can be used with color in setup()
-        but images cannot be.
 
     :returns: The background color or image.
     :rtype: p5.Color | p5.PImage
@@ -146,6 +136,7 @@ def background(*args, **kwargs):
             with push_matrix():
                 image(background_image, (0, 0))
 
+        renderer.background_image = background_image
         return background_image
 
     #Parse the color
@@ -160,5 +151,6 @@ def background(*args, **kwargs):
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
 
     #Change the renderer settings for effect later
+    renderer.background_image = None
     renderer.background_color = background_color.normalized
     return background_color

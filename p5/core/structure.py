@@ -29,7 +29,8 @@ def push_style():
     by the following functions (the ones indicated by an asterisks '*'
     aren't available yet):
 
-    - background
+    - background_color
+    - background_image
     - fill, no_fill
     - stroke, no_stroke
     - rect_mode
@@ -53,6 +54,7 @@ def push_style():
 
     """
     prev_background_color = renderer.background_color
+    prev_background_image = renderer.background_image
     prev_fill_color = renderer.fill_color
     prev_fill_enabled = renderer.fill_enabled
     prev_stroke_enabled = renderer.stroke_enabled
@@ -70,6 +72,7 @@ def push_style():
     yield
 
     renderer.background_color = prev_background_color
+    renderer.background_image = prev_background_image
     renderer.fill_color = prev_fill_color
     renderer.fill_enabled = prev_fill_enabled
     renderer.stroke_color = prev_stroke_color
