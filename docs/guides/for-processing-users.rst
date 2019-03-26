@@ -250,10 +250,10 @@ Event System
          if event.key == 'A':
              # code to run when the <A> key is presesed.
 
-         elif event.key() == 'UP':
+         elif event.key == 'UP':
              # code to run when the <UP> key is presesed.
 
-         elif event.key() == 'SPACE':
+         elif event.key == 'SPACE':
              # code to run when the <SPACE> key is presesed.
 
          # ...etc
