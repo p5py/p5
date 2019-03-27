@@ -101,7 +101,7 @@ def no_tint():
     renderer.tint_enabled = False
 
 def background(*args, **kwargs):
-    """Set the background color for the renderer.
+    """Set the background color or image for the renderer.
 
     :param args: positional arguments to be parsed as a color.
     :type color_args: tuple
@@ -136,14 +136,21 @@ def background(*args, **kwargs):
             with push_matrix():
                 image(background_image, (0, 0))
 
+        renderer.background_image = background_image
         return background_image
 
+    #Parse the color
+    background_color = Color(*args, **kwargs)
+    
+    #Draw a filled rectangle for immediate effect
     with push_style():
-        background_color = Color(*args, **kwargs)
         fill(background_color)
         no_stroke()
-
         with push_matrix():
             reset_transforms()
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
-            renderer.background_color = background_color.normalized
+
+    #Change the renderer settings for effect later
+    renderer.background_image = None
+    renderer.background_color = background_color.normalized
+    return background_color
