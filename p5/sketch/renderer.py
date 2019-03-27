@@ -36,9 +36,9 @@ from .shaders import src_default
 from .shaders import src_fbuffer
 from .shaders import src_texture
 
-from .structure import push_style
-from .transforms import push_matrix
-from .image import image, image_mode
+from p5.core.structure import push_style
+from p5.core.transforms import push_matrix
+from p5.core.image import image, image_mode
 ##
 ## Renderer globals.
 ##
