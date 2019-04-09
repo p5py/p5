@@ -36,9 +36,11 @@ from .shaders import src_default
 from .shaders import src_fbuffer
 from .shaders import src_texture
 
+
 from ..core.structure import push_style
 from ..core.transforms import push_matrix
 from ..core.image import image, image_mode
+
 ##
 ## Renderer globals.
 ##
@@ -66,7 +68,6 @@ COLOR_DEFAULT_BG = (0.8, 0.8, 0.8, 1.0)
 ## Renderer Globals: STYLE/MATERIAL PROPERTIES
 ##
 background_color = COLOR_DEFAULT_BG
-background_image = None
 
 fill_color = COLOR_WHITE
 fill_enabled = True
@@ -153,12 +154,7 @@ def clear(color=True, depth=True):
     """Clear the renderer background."""
     gloo.set_state(clear_color=background_color)
     gloo.clear(color=color, depth=depth)
-    if background_image is not None:
-        with push_style():
-            tint_enabled = False
-            image_mode('corner')
-            with push_matrix():
-                image(background_image, (0, 0))
+
 def reset_view():
     """Reset the view of the renderer."""
     global viewport
