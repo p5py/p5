@@ -15,12 +15,6 @@ many ways you can help make p5 better; you can, for instance:
 Depending on what you are interested in, use the list above to jump to
 the relevant section.
 
-For the time being, we are **not** looking for contributions to code
-and/or the documentation. Once we have some internal plumbing for p5
-done and a decent amount of documentation ready, we'll add more
-information to the relevant sections.
-
-
 File bug reports
 ----------------
 
