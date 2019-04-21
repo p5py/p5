@@ -540,8 +540,8 @@ class PImage:
         				for k in range(0, len(self_pixel)):
         					self_pixel[k] = self_pixel[k] / 255
         					other_pixel[k] = other_pixel[k] / 255
-        					if(other_pixel == 0):
-        						self_pixel = 255
+        					if(other_pixel[k] == 0):
+        						self_pixel[k] = 255
         					else:
         						self_pixel[k] = int((1 - (1-self_pixel[k]) / other_pixel[k]) * 255)
         				self._img.putpixel((i, j), (self_pixel[0], self_pixel[1], self_pixel[2], 255))
