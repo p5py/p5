@@ -115,8 +115,8 @@ class Sketch(app.Canvas):
         self.setup_method = setup_method
         self.draw_method = draw_method
 
-        self.looping = True
-        self.redraw = False
+        self.looping = None
+        self.redraw = None
         self.setup_done = False
         self.timer = app.Timer(1.0 / frame_rate, connect=self.on_timer)
 
@@ -137,18 +137,20 @@ class Sketch(app.Canvas):
         self.measure_fps(callback=lambda _: None)
         builtins.frame_rate = round(self.fps, 2)
         with draw_loop():
-            if self.looping or self.redraw:
-                builtins.frame_count += 1
-                if not self.setup_done:
-                    self.setup_method()
-                    self.setup_done = True
-                    self.show(visible=True)
-                    self.redraw = True
-                    self.looping = False
-                else:
-                    self.looping = True
-                    self.draw_method()
+            builtins.frame_count += 1
+            if not self.setup_done:
+                self.setup_method()
+                self.setup_done = True
+                self.show(visible=True)
+                if self.redraw is None:
                     self.redraw = False
+                if self.looping is None:
+                    self.looping = True
+            elif self.looping:
+                self.draw_method()
+            elif self.redraw:
+                self.draw_method()
+                self.redraw = False
 
             while len(self.handler_queue) != 0:
                 function, event = self.handler_queue.pop(0)

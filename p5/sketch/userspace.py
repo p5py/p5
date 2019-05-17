@@ -181,6 +181,7 @@ def no_loop():
 
     """
     default_sketch.looping = False
+    default_sketch.redraw = True
 
 def loop():
     """Make sure `draw()` is being called continuously.
