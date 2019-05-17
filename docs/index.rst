@@ -53,6 +53,7 @@ report a bug / make a feature request use the `issues page
 
    install
    tutorials/index
+   examples/index
    guides/index
    reference/index
    releasenotes/index
