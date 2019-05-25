@@ -19,3 +19,33 @@ Structure
    structure/redraw
    structure/function
    structure/recursion
+
+Transform
+#########
+
+.. toctree::
+   :maxdepth: 1
+
+   transform/translate
+   transform/scale
+   transform/rotate
+   transform/arm
+
+Color
+#####
+
+.. toctree::
+   :maxdepth: 1
+
+   color/hue
+   color/saturation
+   color/brightness
+   color/color variables
+   color/relativity
+   color/linear gradient
+   color/radial gradient
+   
+Arrays
+#####
+
+
