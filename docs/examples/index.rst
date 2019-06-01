@@ -48,4 +48,10 @@ Color
 Arrays
 #####
 
+.. toctree::
+   :maxdepth: 1
 
+   array/array
+   array/array2d
+   array/arrayObject
+   
