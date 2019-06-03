@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import builtins
 import contextlib
 import functools
 import textwrap
@@ -25,7 +24,6 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-from .. import sketch
 from .image import image
 from .image import PImage
 from .structure import push_style
@@ -96,9 +94,9 @@ def text(text_string, position, wrap_at=None):
     text_image._img = canvas
 
     with push_style():
-        if sketch.renderer.fill_enabled:
-            sketch.renderer.tint_enabled = True
-            sketch.renderer.tint_color = sketch.renderer.fill_color
+        if p5.renderer.fill_enabled:
+            p5.renderer.tint_enabled = True
+            p5.renderer.tint_color = p5.renderer.fill_color
         image(text_image, position)
     
     return text_string

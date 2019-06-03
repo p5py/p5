@@ -16,9 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import builtins
 from collections import namedtuple
 from enum import IntEnum
+
+from ..core import p5
 
 Position = namedtuple('Position', ['x', 'y'])
 
@@ -194,8 +195,8 @@ class KeyEvent(Event):
             self.key = Key('UNKNOWN')
 
     def _update_builtins(self):
-        builtins.key_is_pressed = self.pressed
-        builtins.key = self.key if self.pressed else None
+        p5.key_is_pressed = self.pressed
+        p5.key = self.key if self.pressed else None
 
 
 class MouseEvent(Event):
@@ -232,8 +233,8 @@ class MouseEvent(Event):
         super().__init__(*args, **kwargs)
 
         x, y = self._raw.pos
-        x = max(min(builtins.width, x), 0)
-        y = max(min(builtins.height, builtins.height - y), 0)
+        x = max(min(p5.width, x), 0)
+        y = max(min(p5.height, p5.height - y), 0)
         dx, dy = self._raw.delta
 
         if (self._raw.press_event != None) and (self._raw.last_event != None):
@@ -243,8 +244,8 @@ class MouseEvent(Event):
         else:
             self.change = Position(0, 0)
 
-        self.x = max(min(builtins.width, x), 0)
-        self.y = max(min(builtins.height, builtins.height - y), 0)
+        self.x = max(min(p5.width, x), 0)
+        self.y = max(min(p5.height, p5.height - y), 0)
 
         self.position = Position(x, y)
         self.scroll = Position(int(dx), int(dy))
@@ -253,13 +254,13 @@ class MouseEvent(Event):
         self.button = MouseButton(self._raw.buttons)
 
     def _update_builtins(self):
-        builtins.pmouse_x = builtins.mouse_x
-        builtins.pmouse_y = builtins.mouse_y
-        builtins.mouse_x = self.x
-        builtins.mouse_y = self.y
-        builtins.mouse_is_pressed = self._active
-        builtins.mouse_is_dragging = (self.change == (0, 0))
-        builtins.mouse_button = self.button if self.pressed else None
+        p5.pmouse_x = p5.mouse_x
+        p5.pmouse_y = p5.mouse_y
+        p5.mouse_x = self.x
+        p5.mouse_y = self.y
+        p5.mouse_is_pressed = self._active
+        p5.mouse_is_dragging = (self.change == (0, 0))
+        p5.mouse_button = self.button if self.pressed else None
 
     def __repr__(self):
         press = 'pressed' if self.pressed else 'not-pressed'

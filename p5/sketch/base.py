@@ -18,7 +18,6 @@
 
 """Base module for a sketch."""
 
-import builtins
 from functools import wraps
 import time
 
@@ -29,58 +28,17 @@ from vispy import app
 from vispy import gloo
 from vispy import io
 
-from .. sketch import renderer
+from ..core import p5
 
 from .events import KeyEvent
 from .events import MouseEvent
 from .events import handler_names
 
-from .renderer import draw_loop
-from .renderer import initialize_renderer
-from .renderer import clear
-from .renderer import reset_view
-from .renderer import add_to_draw_queue
 
 def _dummy(*args, **kwargs):
     """Eat all arguments, do nothing.
     """
     pass
-
-def _transform_vertices(vertices, local_matrix, global_matrix):
-    return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
-
-def render(shape):
-    vertices = shape._draw_vertices
-    n, _ = vertices.shape
-    tverts = _transform_vertices(
-        np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-        shape._matrix,
-        renderer.transform_matrix)
-    fill = shape.fill.normalized if shape.fill else None
-    stroke = shape.stroke.normalized if shape.stroke else None
-
-    edges = shape._draw_edges
-    faces = shape._draw_faces
-
-    if edges is None:
-        print(vertices)
-        print("whale")
-        exit()
-
-    if 'open' in shape.attribs:
-        overtices = shape._draw_outline_vertices
-        no, _  = overtices.shape
-        toverts = _transform_vertices(
-            np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
-            shape._matrix,
-            renderer.transform_matrix)
-
-        add_to_draw_queue('path', toverts, shape._draw_outline_edges,
-                          None, None, stroke)
-        add_to_draw_queue('poly', tverts, edges, faces, fill, None)
-    else:
-        add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
-
 
 class Sketch(app.Canvas):
     """The main sketch instance.
@@ -106,8 +64,8 @@ class Sketch(app.Canvas):
                  handlers=dict(), frame_rate=60):
         app.Canvas.__init__(
             self,
-            title=builtins.title,
-            size=(builtins.width, builtins.height),
+            title=p5.title,
+            size=(p5.width, p5.height),
             keys='interactive',
             resizable=False,
         )
@@ -130,14 +88,14 @@ class Sketch(app.Canvas):
         self._save_fname_num = 0
         self._save_flag = False
 
-        initialize_renderer()
-        clear()
+        p5.renderer.initialize_renderer()
+        p5.renderer.clear()
 
     def on_timer(self, event):
         self.measure_fps(callback=lambda _: None)
-        builtins.frame_rate = round(self.fps, 2)
-        with draw_loop():
-            builtins.frame_count += 1
+        p5.frame_rate = round(self.fps, 2)
+        with p5.renderer.draw_loop():
+            p5.frame_count += 1
             if not self.setup_done:
                 self.setup_method()
                 self.setup_done = True
@@ -164,14 +122,14 @@ class Sketch(app.Canvas):
     def _save_buffer(self):
         """Save the renderer buffer to the given file.
         """
-        img_data = renderer.fbuffer.read(mode='color', alpha=False)
+        img_data = p5.renderer.fbuffer.read(mode='color', alpha=False)
         img = Image.fromarray(img_data)
         img.save(self._save_fname)
         self._save_flag = False
 
     def screenshot(self, filename):
         self.queue_screenshot(filename)
-        renderer.flush_geometry()
+        p5.renderer.flush_geometry()
         self._save_buffer()
 
     def queue_screenshot(self, filename):
@@ -191,9 +149,9 @@ class Sketch(app.Canvas):
         pass
 
     def on_resize(self, event):
-        reset_view()
-        with draw_loop():
-            clear()
+        p5.renderer.reset_view()
+        with p5.renderer.draw_loop():
+            p5.renderer.clear()
 
     def _enqueue_event(self, handler_name, event):
         event._update_builtins()
@@ -223,13 +181,13 @@ class Sketch(app.Canvas):
         self._enqueue_event('mouse_clicked', mev)
 
     def on_mouse_move(self, event):
-        mev = MouseEvent(event, active=builtins.mouse_is_pressed)
+        mev = MouseEvent(event, active=p5.mouse_is_pressed)
         self._enqueue_event('mouse_moved', mev)
-        if builtins.mouse_is_pressed:
+        if p5.mouse_is_pressed:
             self._enqueue_event('mouse_dragged', mev)
 
     def on_mouse_wheel(self, event):
-        mev = MouseEvent(event, active=builtins.mouse_is_pressed)
+        mev = MouseEvent(event, active=p5.mouse_is_pressed)
         self._enqueue_event('mouse_wheel', mev)
 
     # def on_touch(self, event):

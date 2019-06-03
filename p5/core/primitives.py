@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import builtins
 from collections import namedtuple
 import functools
 import math
@@ -26,8 +25,6 @@ from math import radians
 
 import numpy as np
 
-from .. import sketch
-
 from ..pmath import Point
 from ..pmath import curves
 from ..pmath import remap
@@ -35,6 +32,8 @@ from ..pmath.utils import SINCOS
 from ..pmath.utils import SINCOS_PRECISION
 
 from .shape import PShape
+
+from . import p5
 
 __all__ = ['point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
@@ -141,11 +140,11 @@ class Arc(PShape):
 
         c1x = self._center[0]
         c1y = self._center[1]
-        s1 = sketch.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
+        s1 = p5.renderer.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
 
         c2x = c1x + rx
         c2y = c1y + ry
-        s2 = sketch.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
+        s2 = p5.renderer.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
 
         sdiff = (s2 - s1)
         size_acc = (np.sqrt(np.sum(sdiff * sdiff)) * math.pi * 2) / POINT_ACCURACY_FACTOR
@@ -336,7 +335,7 @@ def rect(coordinate, *args, mode=None):
 
     :param mode: The drawing mode for the rectangle. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -393,7 +392,7 @@ def square(coordinate, side_length, mode=None):
 
     :param mode: The drawing mode for the square. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -411,7 +410,7 @@ def square(coordinate, side_length, mode=None):
     return rect(coordinate, side_length, side_length, mode=mode)
 
 def rect_mode(mode='CORNER'):
-    """Change the rect and square drawing mode for the sketch.
+    """Change the rect and square drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing rects. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
@@ -456,7 +455,7 @@ def arc(coordinate, width, height, start_angle, stop_angle,
 
     :param ellipse_mode: The drawing mode used for the ellipse. Should be one of
         {'CORNER', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -504,7 +503,7 @@ def ellipse(coordinate, *args, mode=None):
 
     :param mode: The drawing mode for the ellipse. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -544,7 +543,7 @@ def circle(coordinate, radius, mode=None):
 
     :param mode: The drawing mode for the ellipse. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -562,7 +561,7 @@ def circle(coordinate, radius, mode=None):
     return ellipse(coordinate, radius, radius, mode=mode)
 
 def ellipse_mode(mode='CENTER'):
-    """Change the ellipse and circle drawing mode for the sketch.
+    """Change the ellipse and circle drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing ellipses. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
@@ -584,9 +583,9 @@ def draw_shape(shape, pos=(0, 0, 0)):
     :type pos: tuple | Vector
 
     """
-    sketch.render(shape)
+    p5.renderer.render(shape)
     for child_shape in shape.children:
-        sketch.render(children)
+        p5.renderer.render(children)
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape

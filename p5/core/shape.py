@@ -18,7 +18,6 @@
 """Shape class for p5.
 """
 
-import builtins
 import contextlib
 import functools
 import math
@@ -29,6 +28,8 @@ from vispy import geometry
 from .color import Color
 from .. import sketch
 from ..pmath import matrix
+
+from . import p5
 
 
 __all__ = ['PShape']
@@ -153,11 +154,11 @@ class PShape:
             color = Color(*value)
 
         if value == 'auto':
-            if name == 'stroke' and sketch.renderer.stroke_enabled:
-                color = Color(*sketch.renderer.stroke_color,
+            if name == 'stroke' and p5.renderer.stroke_enabled:
+                color = Color(*p5.renderer.stroke_color,
                               color_mode='RGBA', normed=True)
-            if name == 'fill' and sketch.renderer.fill_enabled:
-                color = Color(*sketch.renderer.fill_color,
+            if name == 'fill' and p5.renderer.fill_enabled:
+                color = Color(*p5.renderer.fill_color,
                               color_mode='RGBA', normed=True)
 
         if name == 'stroke':

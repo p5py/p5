@@ -23,3 +23,4 @@ from .color import *
 from .attribs import *
 from .image import *
 from .font import *
+from .constants import *

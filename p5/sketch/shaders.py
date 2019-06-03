@@ -100,6 +100,50 @@ void main() {
 }
 """
 
+# vertex shader
+stroke_vertex_source = """
+#include "math/point-to-line-distance.glsl"
+#include "math/point-to-line-projection.glsl"
+
+attribute vec3 position1;
+attribute vec3 position2;
+attribute vec3 tangent;
+attribute vec4 color;
+
+attribute float cap;
+attribute float marker;
+attribute float width;
+    
+uniform mat4 modelview;
+uniform mat4 projection;
+
+varying vec4 frag_color;
+
+void main()
+{
+    if(width < 1){
+        gl_Position = projection * modelview * vec4(position1, 1.0);
+    } else{
+        vec3 tan = position2 - position1;
+        vec3 norm = normalize(vec3(tan.y, -tan.x, 0.0));
+
+        gl_Position = projection * modelview * vec4(position1 + marker*width*norm, 1.0);
+        frag_color = color;
+    }
+}
+"""
+
+stroke_fragment_source = """
+varying vec4 frag_color;
+
+void main()
+{
+    gl_FragColor = frag_color;
+}
+"""
+
+
 src_default = ShaderSource(default_vertex_source, default_fragment_source)
 src_texture = ShaderSource(texture_vertex_source, texture_fragment_source)
 src_fbuffer = ShaderSource(fbuffer_vertex_source, fbuffer_fragment_source)
+src_stroke = ShaderSource(stroke_vertex_source, stroke_fragment_source)

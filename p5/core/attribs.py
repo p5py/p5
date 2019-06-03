@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import builtins
 
-from ..sketch import renderer
 from .color import Color
 from .color import color_mode
 from .image import image
@@ -27,6 +25,8 @@ from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
 from .transforms import reset_transforms
+
+from . import p5
 
 __all__ = [ 'background', 'fill', 'no_fill',
             'stroke', 'no_stroke', 'tint', 'no_tint' ]
@@ -45,14 +45,14 @@ def fill(*fill_args, **fill_kwargs):
 
     """
     fill_color = Color(*fill_args, **fill_kwargs)
-    renderer.fill_enabled = True
-    renderer.fill_image_enabled = False
-    renderer.fill_color = fill_color.normalized
+    p5.renderer.fill_enabled = True
+    p5.renderer.fill_image_enabled = False
+    p5.renderer.fill_color = fill_color.normalized
     return fill_color
 
 def no_fill():
     """Disable filling geometry."""
-    renderer.fill_enabled = False
+    p5.renderer.fill_enabled = False
 
 def stroke(*color_args, **color_kwargs):
     """Set the color used to draw lines around shapes
@@ -70,12 +70,12 @@ def stroke(*color_args, **color_kwargs):
     :rtype: Color
     """
     stroke_color = Color(*color_args, **color_kwargs)
-    renderer.stroke_enabled = True
-    renderer.stroke_color = stroke_color.normalized
+    p5.renderer.stroke_enabled = True
+    p5.renderer.stroke_color = stroke_color.normalized
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""
-    renderer.stroke_enabled = False
+    p5.renderer.stroke_enabled = False
 
 def tint(*color_args, **color_kwargs):
     """Set the tint color for the sketch.
@@ -93,15 +93,18 @@ def tint(*color_args, **color_kwargs):
     :rtype: Color
     """
     tint_color = Color(*color_args, **color_kwargs)
-    renderer.tint_enabled = True
-    renderer.tint_color = tint_color.normalized
+    p5.renderer.tint_enabled = True
+    p5.renderer.tint_color = tint_color.normalized
 
 def no_tint():
     """Disable tinting of images."""
-    renderer.tint_enabled = False
+    p5.renderer.tint_enabled = False
+
+def strokeWeight(weight):
+    p5.renderer.strokeWeight = weight
 
 def background(*args, **kwargs):
-    """Set the background color for the renderer.
+    """Set the background color for the p5.renderer.
 
     :param args: positional arguments to be parsed as a color.
     :type color_args: tuple
@@ -145,5 +148,5 @@ def background(*args, **kwargs):
 
         with push_matrix():
             reset_transforms()
-            rect((0, 0), builtins.width, builtins.height, mode='CORNER')
-            renderer.background_color = background_color.normalized
+            rect((0, 0), p5.width, p5.height, mode='CORNER')
+            p5.renderer.background_color = background_color.normalized

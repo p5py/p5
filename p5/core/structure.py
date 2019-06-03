@@ -17,9 +17,10 @@
 #
 from contextlib import contextmanager
 
-from ..sketch import renderer
+
 from . import primitives
 from . import color
+from . import p5
 
 @contextmanager
 def push_style():
@@ -52,13 +53,13 @@ def push_style():
     - (*) ambient
 
     """
-    prev_background_color = renderer.background_color
-    prev_fill_color = renderer.fill_color
-    prev_fill_enabled = renderer.fill_enabled
-    prev_stroke_enabled = renderer.stroke_enabled
-    prev_stroke_color = renderer.stroke_color
-    prev_tint_color = renderer.tint_color
-    prev_tint_enabled = renderer.tint_enabled
+    prev_background_color = p5.renderer.background_color
+    prev_fill_color = p5.renderer.fill_color
+    prev_fill_enabled = p5.renderer.fill_enabled
+    prev_stroke_enabled = p5.renderer.stroke_enabled
+    prev_stroke_color = p5.renderer.stroke_color
+    prev_tint_color = p5.renderer.tint_color
+    prev_tint_enabled = p5.renderer.tint_enabled
 
     prev_ellipse_mode = primitives._ellipse_mode
     prev_rect_mode = primitives._rect_mode
@@ -69,13 +70,13 @@ def push_style():
 
     yield
 
-    renderer.background_color = prev_background_color
-    renderer.fill_color = prev_fill_color
-    renderer.fill_enabled = prev_fill_enabled
-    renderer.stroke_color = prev_stroke_color
-    renderer.stroke_enabled = prev_stroke_enabled
-    renderer.tint_color = prev_tint_color
-    renderer.tint_enabled = prev_tint_enabled
+    p5.renderer.background_color = prev_background_color
+    p5.renderer.fill_color = prev_fill_color
+    p5.renderer.fill_enabled = prev_fill_enabled
+    p5.renderer.stroke_color = prev_stroke_color
+    p5.renderer.stroke_enabled = prev_stroke_enabled
+    p5.renderer.tint_color = prev_tint_color
+    p5.renderer.tint_enabled = prev_tint_enabled
 
     primitives._ellipse_mode = prev_ellipse_mode
     primitives._rect_mode = prev_rect_mode

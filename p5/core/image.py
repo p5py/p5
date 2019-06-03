@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import builtins
 import contextlib
 import functools
 
@@ -519,7 +518,7 @@ def image(img, location, size=None):
         sx = sx - lx
         sy = sy - ly
 
-    sketch.render_image(img, (lx, ly), (sx, sy))
+    p5.renderer.render_image(img, (lx, ly), (sx, sy))
 
 def image_mode(mode):
     """Modify the locaton from which the images are drawn.
