@@ -94,8 +94,6 @@ Demonstrates the syntax for creating an array of custom objects.
 		wideCount = width / unit
 		highCount = height / unit
 
-		print(int(wideCount))
-
 		count = wideCount * highCount
 		index = 0
 		for y in range(int(highCount)):

@@ -36,14 +36,14 @@ from ..core.constants import *
 from .shaders import src_default
 from .shaders import src_fbuffer
 from .shaders import src_texture
-from .shaders import src_stroke
+from .shaders import src_line
 
 class Renderer2D:
 	def __init__(self):
 		self.default_prog = None
 		self.fbuffer_prog = None
 		self.texture_prog = None
-		self.stroke_prog = None
+		self.line_prog = None
 
 		self.fbuffer = None
 		self.fbuffer_tex_front = None
@@ -88,6 +88,7 @@ class Renderer2D:
 		self.poly_draw_queue = []
 		self.line_draw_queue = []
 		self.point_draw_queue = []
+		self.draw_queue = []
 
 	def initialize_renderer(self):
 		self.fbuffer = FrameBuffer()
@@ -155,10 +156,10 @@ class Renderer2D:
 		self.texture_prog['modelview'] = self.modelview_matrix.T.flatten()
 		self.texture_prog['projection'] = self.projection_matrix.T.flatten()
 
-		self.stroke_prog = Program(src_stroke.vert, src_stroke.frag)
+		self.line_prog = Program(src_line.vert, src_line.frag)
 
-		self.stroke_prog['modelview'] = self.modelview_matrix.T.flatten()
-		self.stroke_prog['projection'] = self.projection_matrix.T.flatten()
+		self.line_prog['modelview'] = self.modelview_matrix.T.flatten()
+		self.line_prog['projection'] = self.projection_matrix.T.flatten()
 
 		self.fbuffer_tex_front = Texture2D((p5.height, p5.width, 3))
 		self.fbuffer_tex_back = Texture2D((p5.height, p5.width, 3))
@@ -213,195 +214,222 @@ class Renderer2D:
 
 
 	def _transform_vertices(self, vertices, local_matrix, global_matrix):
-	    return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
+		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
 	def render(self, shape):
-	    vertices = shape._draw_vertices
-	    n, _ = vertices.shape
-	    tverts = self._transform_vertices(
-	        np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-	        shape._matrix,
-	        self.transform_matrix)
-	    fill = shape.fill.normalized if shape.fill else None
-	    stroke = shape.stroke.normalized if shape.stroke else None
+		vertices = shape._draw_vertices
+		n, _ = vertices.shape
+		tverts = self._transform_vertices(
+			np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
+			shape._matrix,
+			self.transform_matrix)
+		fill = shape.fill.normalized if shape.fill else None
+		stroke = shape.stroke.normalized if shape.stroke else None
 
-	    edges = shape._draw_edges
-	    faces = shape._draw_faces
+		edges = shape._draw_edges
+		faces = shape._draw_faces
 
-	    if edges is None:
-	        print(vertices)
-	        print("whale")
-	        exit()
+		if edges is None:
+			print(vertices)
+			print("whale")
+			exit()
 
-	    if 'open' in shape.attribs:
-	        overtices = shape._draw_outline_vertices
-	        no, _  = overtices.shape
-	        toverts = self._transform_vertices(
-	            np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
-	            shape._matrix,
-	            self.transform_matrix)
+		if 'open' in shape.attribs:
+			overtices = shape._draw_outline_vertices
+			no, _  = overtices.shape
+			toverts = self._transform_vertices(
+				np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
+				shape._matrix,
+				self.transform_matrix)
 
-	        self.add_to_draw_queue('path', toverts, shape._draw_outline_edges,
-	                          None, None, stroke)
-	        self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
-	    else:
-	        self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
+
+			self.add_to_draw_queue('path', toverts, shape._draw_outline_edges,
+							  None, None, stroke)
+			self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
+		else:
+			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
 
 	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None):
-	    """Add the given vertex data to the draw queue.
+		"""Add the given vertex data to the draw queue.
 
-	    :param stype: type of shape to be added. Should be one of {'poly',
-	        'path', 'point'}
-	    :type stype: str
+		:param stype: type of shape to be added. Should be one of {'poly',
+			'path', 'point'}
+		:type stype: str
 
-	    :param vertices: (N, 3) array containing the vertices to be drawn.
-	    :type vertices: np.ndarray
+		:param vertices: (N, 3) array containing the vertices to be drawn.
+		:type vertices: np.ndarray
 
-	    :param edges: (N, 2) array containing edges as tuples of indices
-	        into the vertex array. This can be None when not appropriate
-	        (eg. for points)
-	    :type edges: None | np.ndarray
+		:param edges: (N, 2) array containing edges as tuples of indices
+			into the vertex array. This can be None when not appropriate
+			(eg. for points)
+		:type edges: None | np.ndarray
 
-	    :param faces: (N, 3) array containing faces as tuples of indices
-	        into the vertex array. For 'point' and 'path' shapes, this can
-	        be None
-	    :type faces: np.ndarray
+		:param faces: (N, 3) array containing faces as tuples of indices
+			into the vertex array. For 'point' and 'path' shapes, this can
+			be None
+		:type faces: np.ndarray
 
-	    :param fill: Fill color of the shape as a normalized RGBA tuple.
-	        When set to `None` the shape doesn't get a fill (default: None)
-	    :type fill: None | tuple
+		:param fill: Fill color of the shape as a normalized RGBA tuple.
+			When set to `None` the shape doesn't get a fill (default: None)
+		:type fill: None | tuple
 
-	    :param stroke: Stroke color of the shape as a normalized RGBA
-	        tuple. When set to `None` the shape doesn't get stroke
-	        (default: None)
-	    :type stroke: None | tuple
+		:param stroke: Stroke color of the shape as a normalized RGBA
+			tuple. When set to `None` the shape doesn't get stroke
+			(default: None)
+		:type stroke: None | tuple
 
-	    """
+		"""
 
+		fill_shape = self.fill_enabled and not (fill is None)
+		stroke_shape = self.stroke_enabled and not (stroke is None)
 
-	    fill_shape = self.fill_enabled and not (fill is None)
-	    stroke_shape = self.stroke_enabled and not (stroke is None)
+		if fill_shape and stype not in ['point', 'path']:
+			idx = np.array(faces, dtype=np.uint32).ravel()
+			self.draw_queue.append(["triangles", (vertices, idx, fill)])
 
-	    if fill_shape and stype not in ['point', 'path']:
-	        idx = np.array(faces, dtype=np.uint32).ravel()
-	        self.poly_draw_queue.append((vertices, idx, fill))
-
-	    if stroke_shape:
-	        if stype == 'point':
-	            idx = np.arange(0, len(vertices), dtype=np.uint32)
-	            self.point_draw_queue.append((vertices, idx, stroke))
-	        else:
-	            idx = np.array(edges, dtype=np.uint32).ravel()
-	            self.line_draw_queue.append((vertices, idx, stroke))
+		if stroke_shape:
+			if stype == 'point':
+				idx = np.arange(0, len(vertices), dtype=np.uint32)
+				self.draw_queue.append(["points", (vertices, idx, stroke)])
+			else:
+				idx = np.array(edges, dtype=np.uint32).ravel()
+				self.draw_queue.append(["lines", (vertices, idx, stroke)])
 
 	def flush_geometry(self):
-	    """Flush all the shape geometry from the draw queue to the GPU.
-	    """
+		"""Flush all the shape geometry from the draw queue to the GPU.
+		"""
+		for shape in self.draw_queue:
+			if shape[0] == "point" or shape[0] == "triangles":
+				self.render_default(shape[0], shape[1])
+			elif shape[0] == "lines":
+				self.render_line(shape[1])
 
-	    ## RETAINED MODE RENDERING.
-	    #
-	    names = ['poly', 'line', 'point']
-	    types = ['triangles', 'lines', 'points']
-	    queues = [self.poly_draw_queue, self.line_draw_queue, self.point_draw_queue]
+		self.draw_queue = []
 
-	    for draw_type, draw_queue, name in zip(types, queues, names):
-	        # 1. Get the maximum number of vertices persent in the shapes
-	        # in the draw queue.
-	        #
-	        if len(draw_queue) == 0:
-	            continue
+	def render_default(self, draw_type, queue):
 
-	        num_vertices = 0
-	        for vertices, _, _ in draw_queue:
-	            num_vertices = num_vertices + len(vertices)
+		# 1. Get the maximum number of vertices persent in the shapes
+		# in the draw queue.
+		#
+		if len(queue) == 0:
+			return
 
-	        # 2. Create empty buffers based on the number of vertices.
-	        #
-	        data = np.zeros(num_vertices,
-	                        dtype=[('position', np.float32, 3),
-	                               ('color', np.float32, 4)])
+		num_vertices = len(queue[0])
+		
+		# 2. Create empty buffers based on the number of vertices.
+		#
+		data = np.zeros(num_vertices,
+						dtype=[('position', np.float32, 3),
+							   ('color', np.float32, 4)])
 
-	        # 3. Loop through all the shapes in the geometry queue adding
-	        # it's information to the buffer.
-	        #
-	        sidx = 0
-	        draw_indices = []
-	        for vertices, idx, color in draw_queue:
-	            num_shape_verts = len(vertices)
+		# 3. Loop through all the shapes in the geometry queue adding
+		# it's information to the buffer.
+		#
+		sidx = 0
+		draw_indices = []
+		
+		vertices, idx, color = queue
+		num_shape_verts = len(vertices)
 
-	            data['position'][sidx:(sidx + num_shape_verts),] = vertices
+		data['position'][sidx:(sidx + num_shape_verts),] = vertices
 
-	            color_array = np.array([color] * num_shape_verts)
-	            data['color'][sidx:sidx + num_shape_verts, :] = color_array
+		color_array = np.array([color] * num_shape_verts)
+		data['color'][sidx:sidx + num_shape_verts, :] = color_array
 
-	            draw_indices.append(sidx + idx)
+		draw_indices.append(idx)
 
-	            sidx += num_shape_verts
+		self.vertex_buffer.set_data(data)
+		self.index_buffer.set_data(np.hstack(draw_indices))
 
-	        self.vertex_buffer.set_data(data)
-	        self.index_buffer.set_data(np.hstack(draw_indices))
+		# 4. Bind the buffer to the shader.
+		#
+		self.default_prog.bind(self.vertex_buffer)
 
-	        # 4. Bind the buffer to the shader.
-	        #
-	        self.default_prog.bind(self.vertex_buffer)
+		# 5. Draw the shape using the proper shape type and get rid of
+		# the buffers.
+		#
+		self.default_prog.draw(draw_type, indices=self.index_buffer)
 
-	        # 5. Draw the shape using the proper shape type and get rid of
-	        # the buffers.
-	        #
-	        self.default_prog.draw(draw_type, indices=self.index_buffer)
+	def render_line(self, vertices):
+		self.line_prog["color"] = vertices[2]
+		self.line_prog["linewidth"] = self.stroke_weight
 
-	    # 6. Empty the draw queue.
-	    poly_draw_queue = []
-	    line_draw_queue = []
-	    point_draw_queue = []
+		vertex = vertices[0]
+
+		p0 = []
+		p1 = []
+		p2 = []
+
+		positions1 = []
+		positions2 = []
+		markers = []
+
+		for i in range(len(vertex) - 1):
+			positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
+			positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+			markers.extend([1, -1, 1])
+
+			positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+			positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
+			markers.extend([1, -1, 1])
+
+		positions1 = np.array(positions1, np.float32)
+		positions2 = np.array(positions2, np.float32)
+		markers = np.array(markers, np.float32)
+
+		self.line_prog['position1'] = gloo.VertexBuffer(positions1)
+		self.line_prog['position2'] = gloo.VertexBuffer(positions2)
+		self.line_prog['marker'] = gloo.VertexBuffer(markers)
+
+		self.line_prog.draw('triangles')
 
 	def render_image(self, image, location, size):
-	    """Render the image.
+		"""Render the image.
 
-	    :param image: image to be rendered
-	    :type image: p5.Image
+		:param image: image to be rendered
+		:type image: p5.Image
 
-	    :param location: top-left corner of the image
-	    :type location: tuple | list | p5.Vector
+		:param location: top-left corner of the image
+		:type location: tuple | list | p5.Vector
 
-	    :param size: target size of the image to draw.
-	    :type size: tuple | list | p5.Vector
-	    """
-	    self.flush_geometry()
+		:param size: target size of the image to draw.
+		:type size: tuple | list | p5.Vector
+		"""
+		self.flush_geometry()
 
-	    self.texture_prog['fill_color'] = self.tint_color if self.tint_enabled else self.COLOR_WHITE
-	    self.texture_prog['transform'] = self.transform_matrix.T.flatten()
+		self.texture_prog['fill_color'] = self.tint_color if self.tint_enabled else self.COLOR_WHITE
+		self.texture_prog['transform'] = self.transform_matrix.T.flatten()
 
-	    x, y = location
-	    sx, sy = size
-	    imx, imy = image.size
-	    data = np.zeros(4,
-	                    dtype=[('position', np.float32, 2),
-	                           ('texcoord', np.float32, 2)])
-	    data['texcoord'] = np.array([[0.0, 1.0],
-	                                 [1.0, 1.0],
-	                                 [0.0, 0.0],
-	                                 [1.0, 0.0]],
-	                                dtype=np.float32)
-	    data['position'] = np.array([[x, y + sy],
-	                                 [x + sx, y + sy],
-	                                 [x, y],
-	                                 [x + sx, y]],
-	                                dtype=np.float32)
+		x, y = location
+		sx, sy = size
+		imx, imy = image.size
+		data = np.zeros(4,
+						dtype=[('position', np.float32, 2),
+							   ('texcoord', np.float32, 2)])
+		data['texcoord'] = np.array([[0.0, 1.0],
+									 [1.0, 1.0],
+									 [0.0, 0.0],
+									 [1.0, 0.0]],
+									dtype=np.float32)
+		data['position'] = np.array([[x, y + sy],
+									 [x + sx, y + sy],
+									 [x, y],
+									 [x + sx, y]],
+									dtype=np.float32)
 
-	    self.texture_prog['texture'] = image._texture
-	    self.texture_prog.bind(VertexBuffer(data))
-	    self.texture_prog.draw('triangle_strip')
+		self.texture_prog['texture'] = image._texture
+		self.texture_prog.bind(VertexBuffer(data))
+		self.texture_prog.draw('triangle_strip')
 
 	def cleanup(self):
-	    """Run the clean-up routine for the renderer.
+		"""Run the clean-up routine for the renderer.
 
-	    This method is called when all drawing has been completed and the
-	    program is about to exit.
+		This method is called when all drawing has been completed and the
+		program is about to exit.
 
-	    """
-	    self.default_prog.delete()
-	    self.fbuffer_prog.delete()
-	    self.stroke_prog.delete()
-	    self.fbuffer.delete()
+		"""
+		self.default_prog.delete()
+		self.fbuffer_prog.delete()
+		self.line_prog.delete()
+		self.fbuffer.delete()
 

@@ -29,7 +29,7 @@ from .transforms import reset_transforms
 from . import p5
 
 __all__ = [ 'background', 'fill', 'no_fill',
-            'stroke', 'no_stroke', 'tint', 'no_tint' ]
+            'stroke', 'no_stroke', 'tint', 'no_tint' , 'stroke_weight']
 
 def fill(*fill_args, **fill_kwargs):
     """Set the fill color of the shapes.
@@ -72,6 +72,9 @@ def stroke(*color_args, **color_kwargs):
     stroke_color = Color(*color_args, **color_kwargs)
     p5.renderer.stroke_enabled = True
     p5.renderer.stroke_color = stroke_color.normalized
+
+def stroke_weight(thickness):
+    p5.renderer.stroke_weight = thickness
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""

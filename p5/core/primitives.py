@@ -140,11 +140,11 @@ class Arc(PShape):
 
         c1x = self._center[0]
         c1y = self._center[1]
-        s1 = p5.renderer.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
+        s1 = p5.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
 
         c2x = c1x + rx
         c2y = c1y + ry
-        s2 = p5.renderer.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
+        s2 = p5.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
 
         sdiff = (s2 - s1)
         size_acc = (np.sqrt(np.sum(sdiff * sdiff)) * math.pi * 2) / POINT_ACCURACY_FACTOR

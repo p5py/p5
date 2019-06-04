@@ -107,13 +107,11 @@ stroke_vertex_source = """
 
 attribute vec3 position1;
 attribute vec3 position2;
-attribute vec3 tangent;
-attribute vec4 color;
+attribute float marker; // which triangle to render
 
-attribute float cap;
-attribute float marker;
-attribute float width;
-    
+uniform float linewidth;
+uniform vec4 color;
+
 uniform mat4 modelview;
 uniform mat4 projection;
 
@@ -121,15 +119,17 @@ varying vec4 frag_color;
 
 void main()
 {
-    if(width < 1){
+    if(linewidth < 1){
         gl_Position = projection * modelview * vec4(position1, 1.0);
     } else{
-        vec3 tan = position2 - position1;
-        vec3 norm = normalize(vec3(tan.y, -tan.x, 0.0));
+        vec3 prevSlope = position2 - position1;
+        vec3 norm = normalize(vec3(prevSlope.y, -prevSlope.x, 0.0));
 
-        gl_Position = projection * modelview * vec4(position1 + marker*width*norm, 1.0);
-        frag_color = color;
+        gl_Position = projection * modelview * vec4(position1 + marker*linewidth*norm, 1.0);
+        
     }
+
+    frag_color = color;
 }
 """
 
@@ -146,4 +146,4 @@ void main()
 src_default = ShaderSource(default_vertex_source, default_fragment_source)
 src_texture = ShaderSource(texture_vertex_source, texture_fragment_source)
 src_fbuffer = ShaderSource(fbuffer_vertex_source, fbuffer_fragment_source)
-src_stroke = ShaderSource(stroke_vertex_source, stroke_fragment_source)
+src_line = ShaderSource(stroke_vertex_source, stroke_fragment_source)

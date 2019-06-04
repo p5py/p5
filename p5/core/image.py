@@ -588,12 +588,12 @@ def load_pixels():
     to the image are written to the main display.
 
     """
-    pixels = PImage(builtins.width, builtins.height, 'RGB')
-    sketch.renderer.flush_geometry()
+    pixels = PImage(p5.width, p5.height, 'RGB')
+    #sketch.renderer.flush_geometry()
     pixel_data = sketch.renderer.fbuffer.read(mode='color', alpha=False)
 
     pixels._img = Image.fromarray(pixel_data)
-    builtins.pixels = pixels
+    p5.pixels = pixels
 
     pixels._load()
 
@@ -602,6 +602,6 @@ def load_pixels():
     with push_style():
         image_mode('corner')
         sketch.renderer.tint_enabled = False
-        image(builtins.pixels, (0, 0))
+        image(p5.pixels, (0, 0))
 
-    builtins.pixels = None
+    p5.pixels = None

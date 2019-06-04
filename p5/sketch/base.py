@@ -94,6 +94,7 @@ class Sketch(app.Canvas):
     def on_timer(self, event):
         self.measure_fps(callback=lambda _: None)
         p5.frame_rate = round(self.fps, 2)
+
         with p5.renderer.draw_loop():
             p5.frame_count += 1
             if not self.setup_done:
