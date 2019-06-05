@@ -166,7 +166,6 @@ class Renderer2D:
 		self.fbuffer_tex_front = Texture2D((p5.height, p5.width, 3))
 		self.fbuffer_tex_back = Texture2D((p5.height, p5.width, 3))
 
-		print()
 		print(self.modelview_matrix)
 		print(self.projection_matrix)
 
@@ -364,23 +363,52 @@ class Renderer2D:
 		p1 = []
 		p2 = []
 
+		positions0 = []
 		positions1 = []
 		positions2 = []
 		markers = []
 
-		for i in range(len(vertex) - 1):
-			positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
-			positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+		for i in range(len(vertex)):
+			if i == 0:
+				positions0.extend([vertex[i], vertex[i], vertex[i + 1]])
+				positions0.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+
+				positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
+				positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+
+				positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+				positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
+
+			elif i == len(vertex) - 1:
+				continue
+				positions0.extend([vertex[i + 1], vertex[i + 1], vertex[i - 1]])
+				positions0.extend([vertex[i - 1], vertex[i - 1], vertex[i + 1]])
+
+				positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
+				positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+
+				positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
+				positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+
+			else:
+				positions0.extend([vertex[i - 1], vertex[i - 1], vertex[i + 1]])
+				positions0.extend([vertex[i + 1], vertex[i + 1], vertex[i - 1]])
+
+				positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
+				positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+
+				positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+				positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
+
+			markers.extend([1, -1, 1])
 			markers.extend([1, -1, 1])
 
-			positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
-			positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
-			markers.extend([1, -1, 1])
-
+		positions0 = np.array(positions0, np.float32)
 		positions1 = np.array(positions1, np.float32)
 		positions2 = np.array(positions2, np.float32)
 		markers = np.array(markers, np.float32)
 
+		self.line_prog['position0'] = gloo.VertexBuffer(positions0)
 		self.line_prog['position1'] = gloo.VertexBuffer(positions1)
 		self.line_prog['position2'] = gloo.VertexBuffer(positions2)
 		self.line_prog['marker'] = gloo.VertexBuffer(markers)

@@ -105,6 +105,7 @@ stroke_vertex_source = """
 #include "math/point-to-line-distance.glsl"
 #include "math/point-to-line-projection.glsl"
 
+attribute vec3 position0;
 attribute vec3 position1;
 attribute vec3 position2;
 attribute float marker; // which triangle to render
@@ -119,14 +120,28 @@ varying vec4 frag_color;
 
 void main()
 {
-    if(linewidth < 1){
-        gl_Position = projection * modelview * vec4(position1, 1.0);
-    } else{
-        vec3 prevSlope = position2 - position1;
-        vec3 norm = normalize(vec3(prevSlope.y, -prevSlope.x, 0.0));
+    vec3 p1;
+    vec3 p2;
+    float width = 1.0;
 
-        gl_Position = projection * modelview * vec4(position1 + marker*linewidth*norm, 1.0);
+    if(position0 == position1){ // Start
+        p1 = position1;
+        p2 = position2;
+    } else if(position1 == position2){ // End
+        p1 = position0;
+        p2 = position1;
+    } else{ // Join
+        p1 = position1;
+        p2 = position2;
     }
+
+    if(linewidth > 1.0){
+        width = linewidth;
+    }
+
+    vec3 prevSlope = p2 - p1;
+    vec3 norm = normalize(vec3(prevSlope.y, -prevSlope.x, 0.0));
+    gl_Position = projection * modelview * vec4(p1 + marker*width*norm/2, 1.0);
 
     frag_color = color;
 }
