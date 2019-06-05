@@ -84,6 +84,8 @@ class Renderer2D:
 		self.modelview_matrix = np.identity(4)
 		self.projection_matrix = np.identity(4)
 
+
+
 		## Renderer Globals: RENDERING
 		self.poly_draw_queue = []
 		self.line_draw_queue = []
@@ -163,6 +165,10 @@ class Renderer2D:
 
 		self.fbuffer_tex_front = Texture2D((p5.height, p5.width, 3))
 		self.fbuffer_tex_back = Texture2D((p5.height, p5.width, 3))
+
+		print()
+		print(self.modelview_matrix)
+		print(self.projection_matrix)
 
 		for buf in [self.fbuffer_tex_front, self.fbuffer_tex_back]:
 			self.fbuffer.color_buffer = buf
@@ -293,7 +299,7 @@ class Renderer2D:
 				self.draw_queue.append(["points", (vertices, idx, stroke)])
 			else:
 				idx = np.array(edges, dtype=np.uint32).ravel()
-				self.draw_queue.append(["lines", (vertices, idx, stroke)])
+				self.draw_queue.append(["lines", (vertices, idx, stroke, self.stroke_weight)])
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
@@ -352,8 +358,6 @@ class Renderer2D:
 
 	def render_line(self, vertices):
 		self.line_prog["color"] = vertices[2]
-		self.line_prog["linewidth"] = self.stroke_weight
-
 		vertex = vertices[0]
 
 		p0 = []
@@ -380,6 +384,7 @@ class Renderer2D:
 		self.line_prog['position1'] = gloo.VertexBuffer(positions1)
 		self.line_prog['position2'] = gloo.VertexBuffer(positions2)
 		self.line_prog['marker'] = gloo.VertexBuffer(markers)
+		self.line_prog['linewidth'] = gloo.VertexBuffer([vertices[3]]*len(markers))
 
 		self.line_prog.draw('triangles')
 

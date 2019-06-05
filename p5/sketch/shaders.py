@@ -109,7 +109,7 @@ attribute vec3 position1;
 attribute vec3 position2;
 attribute float marker; // which triangle to render
 
-uniform float linewidth;
+attribute float linewidth;
 uniform vec4 color;
 
 uniform mat4 modelview;
@@ -126,7 +126,6 @@ void main()
         vec3 norm = normalize(vec3(prevSlope.y, -prevSlope.x, 0.0));
 
         gl_Position = projection * modelview * vec4(position1 + marker*linewidth*norm, 1.0);
-        
     }
 
     frag_color = color;
