@@ -166,9 +166,6 @@ class Renderer2D:
 		self.fbuffer_tex_front = Texture2D((p5.height, p5.width, 3))
 		self.fbuffer_tex_back = Texture2D((p5.height, p5.width, 3))
 
-		print(self.modelview_matrix)
-		print(self.projection_matrix)
-
 		for buf in [self.fbuffer_tex_front, self.fbuffer_tex_back]:
 			self.fbuffer.color_buffer = buf
 			with self.fbuffer:
@@ -363,55 +360,60 @@ class Renderer2D:
 		p1 = []
 		p2 = []
 
-		positions0 = []
-		positions1 = []
-		positions2 = []
+		pos = []
+		posPrev = []
+		posCurr = []
+		posNext = []
 		markers = []
+		caps = []
+		joins = []
+		side = []
 
-		for i in range(len(vertex)):
-			if i == 0:
-				positions0.extend([vertex[i], vertex[i], vertex[i + 1]])
-				positions0.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+		for i in range(len(vertex) - 1):
+			for j in [0, 0, 1, 0, 1, 1]:
+				cap = False
+				if i + j -1 >= 0:
+					posPrev.append(vertex[i + j - 1])
+				else:
+					cap = True
+					posPrev.append(vertex[i + j])
 
-				positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
-				positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+				if i + j + 1 < len(vertex):
+					posNext.append(vertex[i + j + 1])
+				else:
+					cap = True
+					posNext.append(vertex[i + j])
 
-				positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
-				positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
+				if cap:
+					caps.append(1.0)
+					joins.append(0.0)
+				else:
+					caps.append(0.0)
+					joins.append(1.0)
 
-			elif i == len(vertex) - 1:
-				continue
-				positions0.extend([vertex[i + 1], vertex[i + 1], vertex[i - 1]])
-				positions0.extend([vertex[i - 1], vertex[i - 1], vertex[i + 1]])
+				posCurr.append(vertex[i + j])
 
-				positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
-				positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
+			markers.extend([1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
+			side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0])
+			pos.extend([vertex[i]]*6)
 
-				positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
-				positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
-
-			else:
-				positions0.extend([vertex[i - 1], vertex[i - 1], vertex[i + 1]])
-				positions0.extend([vertex[i + 1], vertex[i + 1], vertex[i - 1]])
-
-				positions1.extend([vertex[i], vertex[i], vertex[i + 1]])
-				positions1.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
-
-				positions2.extend([vertex[i + 1], vertex[i + 1], vertex[i]])
-				positions2.extend([vertex[i], vertex[i], vertex[i + 1]])
-
-			markers.extend([1, -1, 1])
-			markers.extend([1, -1, 1])
-
-		positions0 = np.array(positions0, np.float32)
-		positions1 = np.array(positions1, np.float32)
-		positions2 = np.array(positions2, np.float32)
+		posPrev = np.array(posPrev, np.float32)
+		posCurr = np.array(posCurr, np.float32)
+		posNext = np.array(posNext, np.float32)
 		markers = np.array(markers, np.float32)
+		caps = np.array(caps, np.float32)
+		joins = np.array(joins, np.float32)
+		side = np.array(side, np.float32)
+		pos = np.array(pos, np.float32)
 
-		self.line_prog['position0'] = gloo.VertexBuffer(positions0)
-		self.line_prog['position1'] = gloo.VertexBuffer(positions1)
-		self.line_prog['position2'] = gloo.VertexBuffer(positions2)
+		self.line_prog['posPrev'] = gloo.VertexBuffer(posPrev)
+		self.line_prog['posCurr'] = gloo.VertexBuffer(posCurr)
+		self.line_prog['posNext'] = gloo.VertexBuffer(posNext)
 		self.line_prog['marker'] = gloo.VertexBuffer(markers)
+		self.line_prog['cap'] = gloo.VertexBuffer(caps)
+		self.line_prog['join'] = gloo.VertexBuffer(joins)
+		self.line_prog['side'] = gloo.VertexBuffer(side)
+		self.line_prog['pos'] = gloo.VertexBuffer(pos)
 		self.line_prog['linewidth'] = gloo.VertexBuffer([vertices[3]]*len(markers))
 
 		self.line_prog.draw('triangles')

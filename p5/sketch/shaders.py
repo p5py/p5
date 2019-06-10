@@ -102,56 +102,158 @@ void main() {
 
 # vertex shader
 stroke_vertex_source = """
-#include "math/point-to-line-distance.glsl"
-#include "math/point-to-line-projection.glsl"
-
-attribute vec3 position0;
-attribute vec3 position1;
-attribute vec3 position2;
-attribute float marker; // which triangle to render
-
+attribute vec3 pos;
+attribute vec3 posPrev;
+attribute vec3 posCurr;
+attribute vec3 posNext;
+attribute float marker;
+attribute float cap;
+attribute float join;
 attribute float linewidth;
+attribute float side;
+
 uniform vec4 color;
 
 uniform mat4 modelview;
 uniform mat4 projection;
 
 varying vec4 frag_color;
+varying float v_linejoin;
+varying float v_linecap;
+varying float v_linewidth;
+varying vec3 v_pos;
+
+vec3 rotate(vec3 a, float theta){
+    return vec3(
+            a.x*cos(theta) - a.y*sin(theta),
+            a.y*sin(theta) + a.y*cos(theta),
+            1
+        );
+}
 
 void main()
-{
-    vec3 p1;
-    vec3 p2;
+{   
+    v_linejoin = 1.0;
+    v_linecap = 1.0;
+
     float width = 1.0;
 
-    if(position0 == position1){ // Start
-        p1 = position1;
-        p2 = position2;
-    } else if(position1 == position2){ // End
-        p1 = position0;
-        p2 = position1;
-    } else{ // Join
-        p1 = position1;
-        p2 = position2;
-    }
+    bool join = false;
+    bool cap = false;
 
-    if(linewidth > 1.0){
+    float pi = 3.1415926535897;
+
+    if(linewidth > 1){
         width = linewidth;
     }
 
-    vec3 prevSlope = p2 - p1;
-    vec3 norm = normalize(vec3(prevSlope.y, -prevSlope.x, 0.0));
-    gl_Position = projection * modelview * vec4(p1 + marker*width*norm/2, 1.0);
+    vec3 tangentPrev = posPrev - posCurr;
+    vec3 tangentNext = posNext - posCurr;
+    vec3 lineTangent;
+    vec3 outsideTangent;
 
+    if(side > 0.0){
+        lineTangent = normalize(tangentNext);
+        outsideTangent = normalize(tangentPrev);
+    } else{
+        lineTangent = normalize(tangentPrev);
+        outsideTangent = normalize(tangentNext);
+    }
+
+    // calculate a vector perpendicular to the line
+    vec3 perpendicular = normalize(vec3(lineTangent.y, -lineTangent.x, 0.0));
+
+    float angle = acos(dot(lineTangent, outsideTangent));
+    vec3 bisector = normalize(lineTangent + outsideTangent);
+    float alignment = dot(perpendicular, outsideTangent);
+
+    float factor = 1;
+
+    if(side > 0.0){ // left side
+        if(alignment > 0.0){
+            if(marker > 0.0){
+                perpendicular = bisector;
+                factor = cos(pi/2 - angle/2);
+            } else{
+                perpendicular = bisector;
+                factor = cos(pi/2 - angle/2);
+            }
+        } else{
+            if(marker > 0.0){
+                perpendicular = -bisector;
+                factor = cos(pi/2 - angle/2);
+            } else{
+                perpendicular = -bisector;
+                factor = cos(pi/2 - angle/2);
+            }
+        }
+    } else{ // right side
+        if(alignment > 0.0){
+            if(marker > 0.0){
+                perpendicular = bisector;
+                factor = cos(pi/2 - angle/2);
+            } else{
+                perpendicular = bisector;
+                factor = cos(pi/2 - angle/2);
+            }
+        } else{
+            if(marker > 0.0){
+                perpendicular = -bisector;
+                factor = cos(pi/2 - angle/2);
+            } else{
+                perpendicular = -bisector;
+                factor = cos(pi/2 - angle/2);
+            }
+        }
+    }
+
+    if(tangentPrev.x == 0 && tangentPrev.y == 0){
+        factor = 1.0;
+        perpendicular = normalize(vec3(lineTangent.y, -lineTangent.x, 0.0));
+    } else if(tangentNext.x == 0 && tangentNext.y == 0){
+        factor = 1.0;
+        perpendicular = normalize(vec3(lineTangent.y, -lineTangent.x, 0.0));
+    } else if(length(bisector) == 0.0){
+        factor = 1.0;
+        perpendicular = normalize(vec3(lineTangent.y, -lineTangent.x, 0.0));
+    }
+
+    gl_Position = projection * modelview * vec4(posCurr + marker*width*perpendicular/2/factor, 1.0);
     frag_color = color;
+
+    //Set vertex shader variables
+    v_linewidth = width;
+    v_pos = pos;
+    
 }
 """
 
 stroke_fragment_source = """
 varying vec4 frag_color;
+varying float v_linejoin;
+varying float v_linecap;
+varying float v_linewidth;
+varying vec3 v_pos;
+
+float distance(vec2 a, vec2 b){
+    float dx = a.x - b.x;
+    float dy = a.y - b.y;
+    return sqrt(dx*dx + dy*dy);
+}
 
 void main()
 {
+    vec2 uv = gl_FragCoord.xy;
+
+    float dx = v_pos.x - uv.x;
+    float dy = (400 - uv.y) - v_pos.y;
+
+    if(dx*dx + dy*dy < v_linewidth*v_linewidth/4){
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    } else{
+        gl_FragColor = frag_color;
+    }
+
     gl_FragColor = frag_color;
 }
 """
