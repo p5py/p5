@@ -72,8 +72,8 @@ class Renderer2D:
 
 		## Renderer Globals: Curves
 		self.stroke_weight = 1
-		self.stroke_cap = PROJECT
-		self.stroke_join = MITER
+		self.stroke_cap = 2
+		self.stroke_join = 0
 
 		## Renderer Globals
 		## VIEW MATRICES, ETC
@@ -162,6 +162,7 @@ class Renderer2D:
 
 		self.line_prog['modelview'] = self.modelview_matrix.T.flatten()
 		self.line_prog['projection'] = self.projection_matrix.T.flatten()
+		self.line_prog["height"] = p5.height
 
 		self.fbuffer_tex_front = Texture2D((p5.height, p5.width, 3))
 		self.fbuffer_tex_back = Texture2D((p5.height, p5.width, 3))
@@ -295,7 +296,9 @@ class Renderer2D:
 				self.draw_queue.append(["points", (vertices, idx, stroke)])
 			else:
 				idx = np.array(edges, dtype=np.uint32).ravel()
-				self.draw_queue.append(["lines", (vertices, idx, stroke, self.stroke_weight)])
+				self.draw_queue.append(["lines", (
+					vertices, idx, stroke, self.stroke_weight, self.stroke_cap, self.stroke_join
+					)])
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
@@ -353,71 +356,56 @@ class Renderer2D:
 		self.default_prog.draw(draw_type, indices=self.index_buffer)
 
 	def render_line(self, vertices):
-		self.line_prog["color"] = vertices[2]
-		self.line_prog["height"] = p5.height
-		vertex = vertices[0]
+		'''
+		This rendering algorithm works by tesselating the line into
+		multiple triangles.
 
-		p0 = []
-		p1 = []
-		p2 = []
+		Reference: https://blog.mapbox.com/drawing-antialiased-lines-with-opengl-8766f34192dc
+		'''
+		vertex = vertices[0]
 
 		pos = []
 		posPrev = []
 		posCurr = []
 		posNext = []
 		markers = []
-		caps = []
-		joins = []
 		side = []
 
-		for i in range(len(vertex) - 1):
-			for j in [0, 0, 1, 0, 1, 1]:
-				cap = False
+		for i in range(len(vertex) - 1): # the data is sent to renderer in line segments
+			for j in [0, 0, 1, 0, 1, 1]: # all the vertices of triangles
 				if i + j -1 >= 0:
 					posPrev.append(vertex[i + j - 1])
 				else:
-					cap = True
 					posPrev.append(vertex[i + j])
 
 				if i + j + 1 < len(vertex):
 					posNext.append(vertex[i + j + 1])
 				else:
-					cap = True
 					posNext.append(vertex[i + j])
-
-				if cap:
-					caps.append(1.0)
-					joins.append(0.0)
-				else:
-					caps.append(0.0)
-					joins.append(1.0)
 
 				posCurr.append(vertex[i + j])
 
-			markers.extend([1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
-			side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0])
-			pos.extend([vertex[i]]*6)
+			markers.extend([1.0, -1.0, -1.0, -1.0, 1.0, -1.0]) # Is the vertex up/below the line segment
+			side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0]) # Left or right side of the segment
+			pos.extend([vertex[i]]*6) # Left vertex of each segment
 
 		posPrev = np.array(posPrev, np.float32)
 		posCurr = np.array(posCurr, np.float32)
 		posNext = np.array(posNext, np.float32)
 		markers = np.array(markers, np.float32)
-		caps = np.array(caps, np.float32)
-		joins = np.array(joins, np.float32)
 		side = np.array(side, np.float32)
 		pos = np.array(pos, np.float32)
 
+		self.line_prog['pos'] = gloo.VertexBuffer(pos)
 		self.line_prog['posPrev'] = gloo.VertexBuffer(posPrev)
 		self.line_prog['posCurr'] = gloo.VertexBuffer(posCurr)
 		self.line_prog['posNext'] = gloo.VertexBuffer(posNext)
 		self.line_prog['marker'] = gloo.VertexBuffer(markers)
-		self.line_prog['cap'] = gloo.VertexBuffer(caps)
-		self.line_prog['join'] = gloo.VertexBuffer(joins)
 		self.line_prog['side'] = gloo.VertexBuffer(side)
-		self.line_prog['pos'] = gloo.VertexBuffer(pos)
 		self.line_prog['linewidth'] = gloo.VertexBuffer([vertices[3]]*len(markers))
-		self.line_prog['join_type'] = gloo.VertexBuffer([1]*len(markers))
-		self.line_prog['cap_type'] = gloo.VertexBuffer([2]*len(markers))
+		self.line_prog['join_type'] = gloo.VertexBuffer([vertices[5]]*len(markers))
+		self.line_prog['cap_type'] = gloo.VertexBuffer([vertices[4]]*len(markers))
+		self.line_prog["color"] = gloo.VertexBuffer([vertices[2]]*len(markers))
 
 		self.line_prog.draw('triangles')
 

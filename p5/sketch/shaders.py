@@ -106,24 +106,18 @@ attribute vec3 pos;
 attribute vec3 posPrev;
 attribute vec3 posCurr;
 attribute vec3 posNext;
+attribute vec4 color;
 
 attribute float marker;
-attribute float cap;
-attribute float join;
 attribute float linewidth;
 attribute float side;
 attribute float join_type;
 attribute float cap_type;
 
-uniform vec4 color;
-
 uniform mat4 modelview;
 uniform mat4 projection;
-uniform float height;
 
 varying vec4 frag_color;
-varying float v_linejoin;
-varying float v_linecap;
 varying float v_linewidth;
 varying float v_join_type;
 varying float v_cap_type;
@@ -131,15 +125,13 @@ varying float v_length;
 varying float v_join; // > 1 if the vertex is stroke join
 varying float v_cap;  // > 1 if the vertex is stroke cap 
 
-varying vec3 v_tangentNext; // tangents for stroke join and cap methods
-varying vec3 v_tangentPrev; // tangents for stroke join and cap methods
+varying vec3 v_tangentNext;
+varying vec3 v_tangentPrev;
 
 varying vec3 v_pos;
 
 void main()
 {   
-    v_linejoin = 1.0;
-    v_linecap = 1.0;
 
     float width = 1.0;
 
@@ -148,7 +140,7 @@ void main()
 
     float pi = 3.1415926535897;
 
-    if(linewidth > 1){
+    if(linewidth > 1){ // if width of line < 1, render line of width 1
         width = linewidth;
     }
 
@@ -157,7 +149,7 @@ void main()
     vec3 lineTangent;
     vec3 outsideTangent;
 
-    if(side > 0.0){
+    if(side > 0.0){ // is this left/right side of line segment
         lineTangent = normalize(tangentNext);
         outsideTangent = normalize(tangentPrev);
     } else{
@@ -212,7 +204,7 @@ void main()
         }
     }
 
-    // Cap or straight edge
+    // For cap or straight edge
     vec3 offset = vec3(0.0, 0.0, 0.0);
     if(tangentPrev.x == 0 && tangentPrev.y == 0){
         factor = 1.0;
@@ -255,10 +247,8 @@ void main()
 
 stroke_fragment_source = """
 varying vec4 frag_color;
-varying float v_linejoin;
-varying float v_linecap;
 varying float v_linewidth;
-varying float v_cap;
+varying float v_cap; // render cap or join
 
 varying float v_join_type;
 varying float v_cap_type;
@@ -268,6 +258,9 @@ varying vec3 v_tangentNext; // tangents for stroke join and cap methods
 varying vec3 v_tangentPrev; // tangents for stroke join and cap methods
 varying float v_length;
 
+
+// The origin of fragment coordinates is located at bottom left .
+// Hence, to convert it to top left, we need to know the height.
 uniform float height;
 
 void main()
