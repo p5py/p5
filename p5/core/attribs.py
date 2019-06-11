@@ -25,11 +25,25 @@ from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
 from .transforms import reset_transforms
+from .constants import *
 
 from . import p5
 
 __all__ = [ 'background', 'fill', 'no_fill',
-            'stroke', 'no_stroke', 'tint', 'no_tint' , 'stroke_weight']
+            'stroke', 'no_stroke', 'tint', 'no_tint' , 
+            'stroke_weight', 'strokeCap', 'strokeJoin']
+
+strokeCapCodes = {
+    PROJECT: 0,
+    SQUARE: 1,
+    ROUND: 2
+}
+
+strokeJoinCodes = {
+    MITER: 0,
+    BEVEL: 1,
+    ROUND: 2
+}
 
 def fill(*fill_args, **fill_kwargs):
     """Set the fill color of the shapes.
@@ -79,6 +93,18 @@ def stroke_weight(thickness):
 def no_stroke():
     """Disable drawing the stroke around shapes."""
     p5.renderer.stroke_enabled = False
+
+def strokeCap(c):
+    if c in strokeCapCodes.keys():
+        p5.renderer.stroke_cap = strokeCapCodes[c]
+    else:
+        raise ValueError("Invalid Stroke Cap %s" % c)
+
+def strokeJoin(j):
+    if j in strokeJoinCodes.keys():
+        p5.renderer.stroke_join = strokeJoinCodes[j]
+    else:
+        raise ValueError("Invalid Stroke Cap %s" % j)
 
 def tint(*color_args, **color_kwargs):
     """Set the tint color for the sketch.
