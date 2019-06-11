@@ -354,6 +354,7 @@ class Renderer2D:
 
 	def render_line(self, vertices):
 		self.line_prog["color"] = vertices[2]
+		self.line_prog["height"] = p5.height
 		vertex = vertices[0]
 
 		p0 = []
@@ -415,6 +416,8 @@ class Renderer2D:
 		self.line_prog['side'] = gloo.VertexBuffer(side)
 		self.line_prog['pos'] = gloo.VertexBuffer(pos)
 		self.line_prog['linewidth'] = gloo.VertexBuffer([vertices[3]]*len(markers))
+		self.line_prog['join_type'] = gloo.VertexBuffer([1]*len(markers))
+		self.line_prog['cap_type'] = gloo.VertexBuffer([2]*len(markers))
 
 		self.line_prog.draw('triangles')
 

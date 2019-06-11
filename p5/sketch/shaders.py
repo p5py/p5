@@ -106,30 +106,35 @@ attribute vec3 pos;
 attribute vec3 posPrev;
 attribute vec3 posCurr;
 attribute vec3 posNext;
+
 attribute float marker;
 attribute float cap;
 attribute float join;
 attribute float linewidth;
 attribute float side;
+attribute float join_type;
+attribute float cap_type;
 
 uniform vec4 color;
 
 uniform mat4 modelview;
 uniform mat4 projection;
+uniform float height;
 
 varying vec4 frag_color;
 varying float v_linejoin;
 varying float v_linecap;
 varying float v_linewidth;
-varying vec3 v_pos;
+varying float v_join_type;
+varying float v_cap_type;
+varying float v_length;
+varying float v_join; // > 1 if the vertex is stroke join
+varying float v_cap;  // > 1 if the vertex is stroke cap 
 
-vec3 rotate(vec3 a, float theta){
-    return vec3(
-            a.x*cos(theta) - a.y*sin(theta),
-            a.y*sin(theta) + a.y*cos(theta),
-            1
-        );
-}
+varying vec3 v_tangentNext; // tangents for stroke join and cap methods
+varying vec3 v_tangentPrev; // tangents for stroke join and cap methods
+
+varying vec3 v_pos;
 
 void main()
 {   
@@ -167,7 +172,7 @@ void main()
     vec3 bisector = normalize(lineTangent + outsideTangent);
     float alignment = dot(perpendicular, outsideTangent);
 
-    float factor = 1;
+    float factor = 1; // multiplication factor to scale the length of bisector
 
     if(side > 0.0){ // left side
         if(alignment > 0.0){
@@ -207,24 +212,44 @@ void main()
         }
     }
 
+    // Cap or straight edge
+    vec3 offset = vec3(0.0, 0.0, 0.0);
     if(tangentPrev.x == 0 && tangentPrev.y == 0){
         factor = 1.0;
+        v_cap = 1.0;
         perpendicular = normalize(vec3(lineTangent.y, -lineTangent.x, 0.0));
+        offset = -width/2*lineTangent;
     } else if(tangentNext.x == 0 && tangentNext.y == 0){
         factor = 1.0;
+        v_cap = 1.0;
         perpendicular = normalize(vec3(lineTangent.y, -lineTangent.x, 0.0));
+        offset = -width/2*lineTangent;
     } else if(length(bisector) == 0.0){
+        v_cap = -1.0;
         factor = 1.0;
         perpendicular = normalize(vec3(lineTangent.y, -lineTangent.x, 0.0));
+    } else{
+        v_cap = -1.0;
     }
 
-    gl_Position = projection * modelview * vec4(posCurr + marker*width*perpendicular/2/factor, 1.0);
+    gl_Position = projection * modelview * vec4(posCurr + offset + marker*width*perpendicular/2/factor, 1.0);
     frag_color = color;
 
     //Set vertex shader variables
     v_linewidth = width;
+    v_cap_type = cap_type;
+    v_join_type = join_type;
     v_pos = pos;
-    
+
+    if(side > 0.0){ // left side
+        v_tangentNext = posNext - posCurr;
+        v_tangentPrev = posPrev - posCurr;
+        v_length = length(v_tangentNext);
+    } else{ // right side
+        v_tangentNext = posCurr - posPrev;
+        v_tangentPrev = posCurr - posNext;
+        v_length = length(v_tangentNext);
+    }    
 }
 """
 
@@ -233,28 +258,77 @@ varying vec4 frag_color;
 varying float v_linejoin;
 varying float v_linecap;
 varying float v_linewidth;
+varying float v_cap;
+
+varying float v_join_type;
+varying float v_cap_type;
 varying vec3 v_pos;
 
-float distance(vec2 a, vec2 b){
-    float dx = a.x - b.x;
-    float dy = a.y - b.y;
-    return sqrt(dx*dx + dy*dy);
-}
+varying vec3 v_tangentNext; // tangents for stroke join and cap methods
+varying vec3 v_tangentPrev; // tangents for stroke join and cap methods
+varying float v_length;
+
+uniform float height;
 
 void main()
 {
     vec2 uv = gl_FragCoord.xy;
+    float inside;
 
-    float dx = v_pos.x - uv.x;
-    float dy = (400 - uv.y) - v_pos.y;
+    vec3 p; // vector from fragment to vertex
+    p = vec3(
+            uv.x - v_pos.x,
+            (height - uv.y) - v_pos.y,
+            1.0
+        );
 
-    if(dx*dx + dy*dy < v_linewidth*v_linewidth/4){
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    if(dot(v_tangentNext, p) < 0.0){
+        // do nothing
+    } else if(dot(v_tangentNext, p)/length(v_tangentNext) > v_length){
+        // shift coordinates of p to next vertex
+        p = vec3(
+            uv.x - (v_pos.x + v_tangentNext.x),
+            (height - uv.y) - (v_pos.y + v_tangentNext.y),
+            1.0
+        );
     } else{
         gl_FragColor = frag_color;
+        return;
     }
 
-    gl_FragColor = frag_color;
+    if(v_cap > 0.0){
+        // render stroke cap
+        if(v_cap_type == 0.0){ // PROJECT
+            inside = 1.0;
+        } else if(v_cap_type == 1.0){ // SQUARE
+            inside = -1.0;
+        }
+        else if(v_cap_type == 2.0){ // ROUND
+            inside = v_linewidth/2 - length(p);
+        }
+    } else{
+        // render stroke join
+        if(v_join_type == 0.0){ // MITER
+            inside = 1.0;
+        } else if(v_join_type == 1.0){ // BEVEL
+            vec3 bisector = -normalize(normalize(v_tangentPrev) + normalize(v_tangentNext));
+            inside = v_linewidth/2 - dot(p, bisector);
+
+            if(inside > 0.0){
+                inside = v_linewidth/2 - dot(p, -bisector);
+            }
+        }
+        else if(v_join_type == 2.0){ // ROUND
+            inside = v_linewidth/2 - length(p);
+        }
+    }
+
+    if(inside > 0.0){
+        gl_FragColor = frag_color;
+    } else{
+        // discard the fragment
+        discard;
+    }    
 }
 """
 
