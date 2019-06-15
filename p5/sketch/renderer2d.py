@@ -245,7 +245,6 @@ class Renderer2D:
 				shape._matrix,
 				self.transform_matrix)
 
-
 			self.add_to_draw_queue('path', toverts, shape._draw_outline_edges,
 							  None, None, stroke)
 			self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
@@ -295,32 +294,44 @@ class Renderer2D:
 				idx = np.arange(0, len(vertices), dtype=np.uint32)
 				self.draw_queue.append(["points", (vertices, idx, stroke)])
 			else:
-				idx = np.array(edges, dtype=np.uint32).ravel()
+				#idx = np.array(edges, dtype=np.uint32).ravel()
 				self.draw_queue.append(["lines", (
-					vertices, idx, stroke, self.stroke_weight, self.stroke_cap, self.stroke_join
+					vertices, edges, stroke, self.stroke_weight, self.stroke_cap, self.stroke_join
 					)])
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
 		"""
-		for shape in self.draw_queue:
-			if shape[0] == "point" or shape[0] == "triangles":
-				self.render_default(shape[0], shape[1])
-			elif shape[0] == "lines":
-				self.render_line(shape[1])
+		current_shape = None
+		current_queue = []
+		for index, shape in enumerate(self.draw_queue):
+			current_shape = self.draw_queue[index][0]
+			current_queue.append(self.draw_queue[index][1])
+
+			if index < len(self.draw_queue) - 1:
+				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
+					continue
+
+			if current_shape == "point" or current_shape == "triangles":
+				self.render_default(current_shape, current_queue)
+			elif current_shape == "lines":
+				self.render_line(current_queue)
+
+			current_queue = []
 
 		self.draw_queue = []
 
-	def render_default(self, draw_type, queue):
-
+	def render_default(self, draw_type, draw_queue):
 		# 1. Get the maximum number of vertices persent in the shapes
 		# in the draw queue.
 		#
-		if len(queue) == 0:
+		if len(draw_queue) == 0:
 			return
 
-		num_vertices = len(queue[0])
-		
+		num_vertices = 0
+		for vertices, _, _ in draw_queue:
+			num_vertices = num_vertices + len(vertices)
+
 		# 2. Create empty buffers based on the number of vertices.
 		#
 		data = np.zeros(num_vertices,
@@ -332,16 +343,17 @@ class Renderer2D:
 		#
 		sidx = 0
 		draw_indices = []
-		
-		vertices, idx, color = queue
-		num_shape_verts = len(vertices)
+		for vertices, idx, color in draw_queue:
+			num_shape_verts = len(vertices)
 
-		data['position'][sidx:(sidx + num_shape_verts),] = vertices
+			data['position'][sidx:(sidx + num_shape_verts),] = vertices
 
-		color_array = np.array([color] * num_shape_verts)
-		data['color'][sidx:sidx + num_shape_verts, :] = color_array
+			color_array = np.array([color] * num_shape_verts)
+			data['color'][sidx:sidx + num_shape_verts, :] = color_array
 
-		draw_indices.append(idx)
+			draw_indices.append(sidx + idx)
+
+			sidx += num_shape_verts
 
 		self.vertex_buffer.set_data(data)
 		self.index_buffer.set_data(np.hstack(draw_indices))
@@ -355,14 +367,13 @@ class Renderer2D:
 		#
 		self.default_prog.draw(draw_type, indices=self.index_buffer)
 
-	def render_line(self, vertices):
+	def render_line(self, queue):
 		'''
 		This rendering algorithm works by tesselating the line into
 		multiple triangles.
 
 		Reference: https://blog.mapbox.com/drawing-antialiased-lines-with-opengl-8766f34192dc
 		'''
-		vertex = vertices[0]
 
 		pos = []
 		posPrev = []
@@ -371,23 +382,34 @@ class Renderer2D:
 		markers = []
 		side = []
 
-		for i in range(len(vertex) - 1): # the data is sent to renderer in line segments
-			for j in [0, 0, 1, 0, 1, 1]: # all the vertices of triangles
-				if i + j -1 >= 0:
-					posPrev.append(vertex[i + j - 1])
-				else:
-					posPrev.append(vertex[i + j])
+		linewidth = []
+		join_type = []
+		cap_type = []
+		color = []
 
-				if i + j + 1 < len(vertex):
-					posNext.append(vertex[i + j + 1])
-				else:
-					posNext.append(vertex[i + j])
+		for line in queue:
+			for segment in line[1]:
+				for i in range(len(segment) - 1): # the data is sent to renderer in line segments
+					for j in [0, 0, 1, 0, 1, 1]: # all the vertices of triangles
+						if i + j -1 >= 0:
+							posPrev.append(line[0][segment[i + j - 1]])
+						else:
+							posPrev.append(line[0][segment[i + j]])
 
-				posCurr.append(vertex[i + j])
+						if i + j + 1 < len(segment):
+							posNext.append(line[0][segment[i + j + 1]])
+						else:
+							posNext.append(line[0][segment[i + j]])
 
-			markers.extend([1.0, -1.0, -1.0, -1.0, 1.0, -1.0]) # Is the vertex up/below the line segment
-			side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0]) # Left or right side of the segment
-			pos.extend([vertex[i]]*6) # Left vertex of each segment
+						posCurr.append(line[0][segment[i + j]])
+
+					markers.extend([1.0, -1.0, -1.0, -1.0, 1.0, -1.0]) # Is the vertex up/below the line segment
+					side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0]) # Left or right side of the segment
+					pos.extend([line[0][segment[i]]]*6) # Left vertex of each segment
+					linewidth.extend([line[3]]*6)
+					join_type.extend([line[5]]*6)
+					cap_type.extend([line[4]]*6)
+					color.extend([line[2]]*6)
 
 		posPrev = np.array(posPrev, np.float32)
 		posCurr = np.array(posCurr, np.float32)
@@ -395,6 +417,10 @@ class Renderer2D:
 		markers = np.array(markers, np.float32)
 		side = np.array(side, np.float32)
 		pos = np.array(pos, np.float32)
+		linewidth = np.array(linewidth, np.float32)
+		join_type = np.array(join_type, np.float32)
+		cap_type = np.array(cap_type, np.float32)
+		color = np.array(color, np.float32)
 
 		self.line_prog['pos'] = gloo.VertexBuffer(pos)
 		self.line_prog['posPrev'] = gloo.VertexBuffer(posPrev)
@@ -402,10 +428,10 @@ class Renderer2D:
 		self.line_prog['posNext'] = gloo.VertexBuffer(posNext)
 		self.line_prog['marker'] = gloo.VertexBuffer(markers)
 		self.line_prog['side'] = gloo.VertexBuffer(side)
-		self.line_prog['linewidth'] = gloo.VertexBuffer([vertices[3]]*len(markers))
-		self.line_prog['join_type'] = gloo.VertexBuffer([vertices[5]]*len(markers))
-		self.line_prog['cap_type'] = gloo.VertexBuffer([vertices[4]]*len(markers))
-		self.line_prog["color"] = gloo.VertexBuffer([vertices[2]]*len(markers))
+		self.line_prog['linewidth'] = gloo.VertexBuffer(linewidth)
+		self.line_prog['join_type'] = gloo.VertexBuffer(join_type)
+		self.line_prog['cap_type'] = gloo.VertexBuffer(cap_type)
+		self.line_prog["color"] = gloo.VertexBuffer(color)
 
 		self.line_prog.draw('triangles')
 
