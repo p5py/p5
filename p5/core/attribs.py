@@ -31,18 +31,18 @@ from . import p5
 
 __all__ = [ 'background', 'fill', 'no_fill',
             'stroke', 'no_stroke', 'tint', 'no_tint' , 
-            'stroke_weight', 'strokeCap', 'strokeJoin']
+            'stroke_weight', 'stroke_cap', 'stroke_join']
 
-strokeCapCodes = {
-    PROJECT: 0,
-    SQUARE: 1,
-    ROUND: 2
+stroke_cap_codes = {
+    'PROJECT': 0,
+    'SQUARE': 1,
+    'ROUND': 2
 }
 
-strokeJoinCodes = {
-    MITER: 0,
-    BEVEL: 1,
-    ROUND: 2
+stroke_join_codes = {
+    'MITER': 0,
+    'BEVEL': 1,
+    'ROUND': 2
 }
 
 def fill(*fill_args, **fill_kwargs):
@@ -94,15 +94,15 @@ def no_stroke():
     """Disable drawing the stroke around shapes."""
     p5.renderer.stroke_enabled = False
 
-def strokeCap(c):
-    if c in strokeCapCodes.keys():
-        p5.renderer.stroke_cap = strokeCapCodes[c]
+def stroke_cap(c):
+    if c in stroke_cap_codes.keys():
+        p5.renderer.stroke_cap = stroke_cap_codes[c]
     else:
         raise ValueError("Invalid Stroke Cap %s" % c)
 
-def strokeJoin(j):
-    if j in strokeJoinCodes.keys():
-        p5.renderer.stroke_join = strokeJoinCodes[j]
+def stroke_join(j):
+    if j in stroke_join_codes.keys():
+        p5.renderer.stroke_join = stroke_join_codes[j]
     else:
         raise ValueError("Invalid Stroke Cap %s" % j)
 
