@@ -24,4 +24,3 @@ from .attribs import *
 from .image import *
 from .font import *
 from .constants import *
-from .p5 import *

@@ -21,24 +21,4 @@
 sketch = None
 renderer = None
 
-width = 360
-height = 360
-pixel_x_density = 1
-pixel_y_density = 1
 
-title = "p5"
-frame_count = -1
-frame_rate = None
-focused = True
-
-mouse_button = None
-mouse_is_pressed = False
-mouse_is_dragging = False
-mouse_x = 0
-mouse_y = 0
-pmouse_x = 0
-pmouse_y = 0
-key = None
-key_is_pressed = False
-
-pixels = None

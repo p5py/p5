@@ -20,6 +20,7 @@
 import __main__
 import os
 
+import builtins
 from functools import wraps
 
 import vispy
@@ -34,6 +35,29 @@ from .renderer2d import Renderer2D
 
 __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
            'cursor', 'exit', 'draw', 'setup', 'run', 'save_frame', 'save']
+
+builtins.width = 360
+builtins.height = 360
+builtins.pixel_x_density = 1
+builtins.pixel_y_density = 1
+
+builtins.title = "p5"
+builtins.frame_count = -1
+builtins.frame_rate = None
+builtins.focused = True
+
+builtins.mouse_button = None
+builtins.mouse_is_pressed = False
+builtins.mouse_is_dragging = False
+builtins.mouse_x = 0
+builtins.mouse_y = 0
+builtins.pmouse_x = 0
+builtins.pmouse_y = 0
+builtins.key = None
+builtins.key_is_pressed = False
+
+builtins.pixels = None
+
 
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
@@ -122,8 +146,8 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode=P2D):
     physical_width, physical_height = p5.sketch.physical_size
     width, height = p5.sketch.size
 
-    p5.pixel_x_density = physical_width // width
-    p5.pixel_y_density = physical_height // height
+    builtins.pixel_x_density = physical_width // width
+    builtins.pixel_y_density = physical_height // height
 
     p5.sketch.timer.start()
 
@@ -137,7 +161,7 @@ def title(new_title):
     :type new_title: str
 
     """
-    p5.title = new_title
+    builtins.title = new_title
     p5.sketch.title = new_title
 
 def size(width, height):
@@ -150,9 +174,9 @@ def size(width, height):
     :type height: int
 
     """
-    p5.width = int(width)
-    p5.height = int(height)
-    p5.sketch.size = (p5.width, p5.height)
+    builtins.width = int(width)
+    builtins.height = int(height)
+    p5.sketch.size = (builtins.width, builtins.height)
 
 def no_loop():
     """Stop draw() from being continuously called.

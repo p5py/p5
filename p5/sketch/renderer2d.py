@@ -20,6 +20,8 @@ import numpy as np
 import math
 from ..pmath import matrix
 
+import builtins
+
 from vispy import gloo
 from vispy.gloo import FrameBuffer
 from vispy.gloo import IndexBuffer
@@ -30,7 +32,6 @@ from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
 
-from ..core import p5
 from ..core.constants import *
 
 from .shaders import src_default
@@ -126,27 +127,27 @@ class Renderer2D:
 		self.viewport = (
 			0,
 			0,
-			int(p5.width * p5.pixel_x_density),
-			int(p5.height * p5.pixel_y_density),
+			int(builtins.width * builtins.pixel_x_density),
+			int(builtins.height * builtins.pixel_y_density),
 		)
 		self.texture_viewport = (
 			0,
 			0,
-			p5.width,
-			p5.height,
+			builtins.width,
+			builtins.height,
 		)
 
 		gloo.set_viewport(*self.viewport)
 
-		cz = (p5.height / 2) / math.tan(math.radians(30))
+		cz = (builtins.height / 2) / math.tan(math.radians(30))
 		self.projection_matrix = matrix.perspective_matrix(
 			math.radians(60),
-			p5.width / p5.height,
+			builtins.width / builtins.height,
 			0.1 * cz,
 			10 * cz
 		)
-		self.modelview_matrix = matrix.translation_matrix(-p5.width / 2, \
-													 p5.height / 2, \
+		self.modelview_matrix = matrix.translation_matrix(-builtins.width / 2, \
+													 builtins.height / 2, \
 													 -cz)
 		self.modelview_matrix = self.modelview_matrix.dot(matrix.scale_transform(1, -1, 1))
 
@@ -162,10 +163,10 @@ class Renderer2D:
 
 		self.line_prog['modelview'] = self.modelview_matrix.T.flatten()
 		self.line_prog['projection'] = self.projection_matrix.T.flatten()
-		self.line_prog["height"] = p5.height
+		self.line_prog["height"] = builtins.height
 
-		self.fbuffer_tex_front = Texture2D((p5.height, p5.width, 3))
-		self.fbuffer_tex_back = Texture2D((p5.height, p5.width, 3))
+		self.fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
+		self.fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
 
 		for buf in [self.fbuffer_tex_front, self.fbuffer_tex_back]:
 			self.fbuffer.color_buffer = buf
@@ -439,13 +440,13 @@ class Renderer2D:
 		"""Render the image.
 
 		:param image: image to be rendered
-		:type image: p5.Image
+		:type image: builtins.Image
 
 		:param location: top-left corner of the image
-		:type location: tuple | list | p5.Vector
+		:type location: tuple | list | builtins.Vector
 
 		:param size: target size of the image to draw.
-		:type size: tuple | list | p5.Vector
+		:type size: tuple | list | builtins.Vector
 		"""
 		self.flush_geometry()
 

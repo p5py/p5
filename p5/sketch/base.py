@@ -18,6 +18,7 @@
 
 """Base module for a sketch."""
 
+import builtins
 from functools import wraps
 import time
 
@@ -64,8 +65,8 @@ class Sketch(app.Canvas):
                  handlers=dict(), frame_rate=60):
         app.Canvas.__init__(
             self,
-            title=p5.title,
-            size=(p5.width, p5.height),
+            title=builtins.title,
+            size=(builtins.width, builtins.height),
             keys='interactive',
             resizable=False,
         )
@@ -93,10 +94,10 @@ class Sketch(app.Canvas):
 
     def on_timer(self, event):
         self.measure_fps(callback=lambda _: None)
-        p5.frame_rate = round(self.fps, 2)
+        builtins.frame_rate = round(self.fps, 2)
 
         with p5.renderer.draw_loop():
-            p5.frame_count += 1
+            builtins.frame_count += 1
             if not self.setup_done:
                 self.setup_method()
                 self.setup_done = True
@@ -182,13 +183,13 @@ class Sketch(app.Canvas):
         self._enqueue_event('mouse_clicked', mev)
 
     def on_mouse_move(self, event):
-        mev = MouseEvent(event, active=p5.mouse_is_pressed)
+        mev = MouseEvent(event, active=builtins.mouse_is_pressed)
         self._enqueue_event('mouse_moved', mev)
-        if p5.mouse_is_pressed:
+        if builtins.mouse_is_pressed:
             self._enqueue_event('mouse_dragged', mev)
 
     def on_mouse_wheel(self, event):
-        mev = MouseEvent(event, active=p5.mouse_is_pressed)
+        mev = MouseEvent(event, active=builtins.mouse_is_pressed)
         self._enqueue_event('mouse_wheel', mev)
 
     # def on_touch(self, event):
