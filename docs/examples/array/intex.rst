@@ -7,5 +7,5 @@ Array
 
    array
    array2d
-   arrayObjects
+   arrayObject
    
