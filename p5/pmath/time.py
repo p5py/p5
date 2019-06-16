@@ -16,9 +16,23 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .utils import *
-from .vector import *
-from .rand import *
-from .curves import *
-from .time import *
-from . import matrix
+import datetime
+
+def day():
+	return datetime.datetime.now().day
+
+def hour():
+	return datetime.datetime.now().hour
+
+def millis():
+	return datetime.datetime.now().microsecond
+
+def minute():
+	return datetime.datetime.now().minute
+
+def second():
+	return datetime.datetime.now().second
+
+def year():
+	return datetime.datetime.now().year
+
