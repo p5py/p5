@@ -16,6 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import builtins
+
 from .color import Color
 from .color import color_mode
 from .image import image
@@ -94,13 +96,34 @@ def no_stroke():
     """Disable drawing the stroke around shapes."""
     p5.renderer.stroke_enabled = False
 
+def stroke_weight(weight):
+    """Sets the width of the stroke used for lines, points, and the border around shapes. All widths are set in units of pixels.
+
+    :param weight: thickness of stroke in pixels
+    :type weight: int
+
+    """
+    p5.renderer.strokeWeight = weight
+
 def stroke_cap(c):
+    """Sets the style of the joints which connect line segments. These joints are either mitered, beveled, or rounded and specified with the corresponding parameters MITER, BEVEL, and ROUND. The default joint is MITER.
+
+    :param c: either 'SQUARE', 'PROJECT' or 'ROUND'
+    :type c: string
+
+    """
     if c in stroke_cap_codes.keys():
         p5.renderer.stroke_cap = stroke_cap_codes[c]
     else:
         raise ValueError("Invalid Stroke Cap %s" % c)
 
 def stroke_join(j):
+    """Sets the style of the joints which connect line segments. These joints are either mitered, beveled, or rounded and specified with the corresponding parameters MITER, BEVEL, and ROUND. The default joint is MITER.
+
+    :param weight: either 'MITER', 'BEVEL' or 'ROUND'
+    :type j: string
+
+    """
     if j in stroke_join_codes.keys():
         p5.renderer.stroke_join = stroke_join_codes[j]
     else:
@@ -128,9 +151,6 @@ def tint(*color_args, **color_kwargs):
 def no_tint():
     """Disable tinting of images."""
     p5.renderer.tint_enabled = False
-
-def strokeWeight(weight):
-    p5.renderer.strokeWeight = weight
 
 def background(*args, **kwargs):
     """Set the background color for the p5.renderer.
@@ -177,5 +197,5 @@ def background(*args, **kwargs):
 
         with push_matrix():
             reset_transforms()
-            rect((0, 0), p5.width, p5.height, mode='CORNER')
+            rect((0, 0), builtins.width, builtins.height, mode='CORNER')
             p5.renderer.background_color = background_color.normalized
