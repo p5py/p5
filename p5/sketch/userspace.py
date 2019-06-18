@@ -1,6 +1,6 @@
 #
 # part of p5: a python package based on processing
-# copyright (c) 2017-2018 abhik pal
+# copyright (c) 2017-2019 abhik pal
 #
 # this program is free software: you can redistribute it and/or modify
 # it under the terms of the gnu general public license as published by
