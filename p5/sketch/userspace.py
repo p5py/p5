@@ -136,8 +136,10 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode=P2D):
 
     if mode == P2D:
         p5.renderer = Renderer2D()
+        p5.mode = '2D'
     elif mode == P3D:
         raise NotImplementedError("P3D has not been implemented in p5py")
+        p5.mode = '3D'
     else:
         raise ValueError("Invalid Mode %s" % mode)
 

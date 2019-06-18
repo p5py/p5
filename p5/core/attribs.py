@@ -90,20 +90,17 @@ def stroke(*color_args, **color_kwargs):
     p5.renderer.stroke_color = stroke_color.normalized
 
 def stroke_weight(thickness):
-    p5.renderer.stroke_weight = thickness
-
-def no_stroke():
-    """Disable drawing the stroke around shapes."""
-    p5.renderer.stroke_enabled = False
-
-def stroke_weight(weight):
     """Sets the width of the stroke used for lines, points, and the border around shapes. All widths are set in units of pixels.
 
     :param weight: thickness of stroke in pixels
     :type weight: int
 
     """
-    p5.renderer.strokeWeight = weight
+    p5.renderer.stroke_weight = thickness
+
+def no_stroke():
+    """Disable drawing the stroke around shapes."""
+    p5.renderer.stroke_enabled = False
 
 def stroke_cap(c):
     """Sets the style of the joints which connect line segments. These joints are either mitered, beveled, or rounded and specified with the corresponding parameters MITER, BEVEL, and ROUND. The default joint is MITER.
