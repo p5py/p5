@@ -376,6 +376,11 @@ class Renderer2D:
 		Reference: https://blog.mapbox.com/drawing-antialiased-lines-with-opengl-8766f34192dc
 		'''
 
+		if len(queue) == 0:
+			return
+		elif len(queue[0][1]) == 0:
+			return 
+
 		pos = []
 		posPrev = []
 		posCurr = []

@@ -585,7 +585,7 @@ def draw_shape(shape, pos=(0, 0, 0)):
     """
     p5.renderer.render(shape)
     for child_shape in shape.children:
-        p5.renderer.render(children)
+        p5.renderer.render(child_shape)
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape
