@@ -73,3 +73,31 @@ Input
    input/keyboard functions
    input/milliseconds
    input/clock
+
+Form
+####
+
+.. toctree::
+   :maxdepth: 1
+
+   form/point and lines
+   form/shape primitives
+   form/pie chart
+   form/regular polygon
+   form/star
+   form/triangle strip
+   form/bezier
+   
+
+Image
+#####
+
+.. toctree::
+   :maxdepth: 1
+
+   image/load and display image
+   image/background image
+   image/transparency
+   image/alpha mask
+   image/create image
+   image/pointillism

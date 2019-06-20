@@ -4,75 +4,44 @@ Load and Display
 
 .. raw:: html
 
-  <script>
+    <script>
+    let img; // Declare variable 'img'.
+
     function setup() {
-      var canvas = createCanvas(720, 400);
-      canvas.parent('sketch-holder');
+        var canvas = createCanvas(720, 400);
+        canvas.parent('sketch-holder');
+        img = loadImage('https://p5js.org/assets/examples/assets/moonwalk.jpg'); // Load the image
     }
 
     function draw() {
-    // Set the background to black and turn off the fill color
-    background(0);
-    noFill();
-
-    // The two parameters of the point() method each specify
-    // coordinates.
-    // The first parameter is the x-coordinate and the second is the Y
-    stroke(255);
-    point(width * 0.5, height * 0.5);
-    point(width * 0.5, height * 0.25);
-
-    // Coordinates are used for drawing all shapes, not just points.
-    // Parameters for different functions are used for different
-    // purposes. For example, the first two parameters to line()
-    // specify the coordinates of the first endpoint and the second
-    // two parameters specify the second endpoint
-    stroke(0, 153, 255);
-    line(0, height * 0.33, width, height * 0.33);
-
-    // By default, the first two parameters to rect() are the
-    // coordinates of the upper-left corner and the second pair
-    // is the width and height
-    stroke(255, 153, 0);
-    rect(width * 0.25, height * 0.1, width * 0.5, height * 0.8);
+        // Displays the image at its actual size at point (0,0)
+        image(img, 0, 0);
+        // Displays the image at point (0, height/2) at half size
+        image(img, 0, height / 2, img.width / 2, img.height / 2);
     }
+
     </script>
     <div id="sketch-holder"></div>
 
 
-All shapes drawn to the screen have a position that is specified as a coordinate. All coordinates are measured as the distance from the origin in units of pixels. The origin [0, 0] is the coordinate is in the upper left of the window and the coordinate in the lower right is [width-1, height-1].
+Images can be loaded and displayed to the screen at their actual size or any other size.
 
 .. code:: python
 
-  from p5 import *
+    from p5 import *
 
-  def draw():
-      # Sets the screen to be 640 pixels wide and 360 pixels high
-      size(640, 360)
+    img = None
 
-      # Set the background to black and turn off the fill color
-      background(0)
-      no_fill()
+    def setup():
+        global img
+        size(720, 400)
+        img = load_image("moonwalk.jpg")
 
-      # The two parameters of the point() method each specify coordinates.
-      # The first parameter is the x-coordinate and the second is the Y
-      stroke(255)
-      point(width * 0.5, height * 0.1)
-      point(width * 0.5, height * 0.9)
+    def draw():
+        global img
+        background(0)
+        image(img, (0, 0))
+        image(img, (0, height / 2), (img.width / 2, img.height / 2))
 
-      # Coordinates are used for drawing all shapes, not just points.
-      # Parameters for different functions are used for different purposes.
-      # For example, the first parameter to line() specify
-      # the coordinates of the first endpoint and the second parameter
-      # specify the second endpoint
-      stroke(0, 153, 255)
-      line((0, height*0.33), (width, height*0.33))
-
-      # By default, the first parameter to rect() is the
-      # coordinates of the upper-left corner and the second and third
-      # parameter is the width and height
-      stroke(255, 153, 0)
-      rect((width*0.25, height*0.1), width * 0.5, height * 0.8)
-
-  if __name__ == '__main__':
-      run()
+    if __name__ == '__main__':
+        run()
