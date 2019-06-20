@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -120,8 +120,13 @@ def end_shape(mode=""):
 	close_shape = mode == "CLOSE"
 
 	# if the shape is closed, the first element is also the last element
-	if close_shape and (not is_contour):
-		vertices.append(vertices[0])
+	if close_shape:
+		attribs = "closed"
+		if not is_contour:
+			vertices.append(vertices[0])		
+	else:
+		attribs = "open"
+
 
 	shape = PShape([(0,0)])
 	if is_curve and (shape_kind == "POLYGON" or shape_kind == None):
@@ -150,7 +155,7 @@ def end_shape(mode=""):
 					p = curves.bezier_point(start, c1, c2, stop, t)
 					shape_vertices.append(p[:3])
 
-			shape.add_child(PShape(shape_vertices))
+			shape.add_child(PShape(shape_vertices, attribs=attribs))
 	elif is_bezier and (shape_kind == "POLYGON" or shape_kind == None):
 		shape_vertices = []
 		steps = curves.curve_resolution
@@ -168,7 +173,7 @@ def end_shape(mode=""):
 						p = curves.bezier_point(start, c1, c2, stop, t)
 						shape_vertices.append(p[:3])
 
-		shape.add_child(PShape(shape_vertices))
+		shape.add_child(PShape(shape_vertices, attribs=attribs))
 	elif is_quadratic and (shape_kind == "POLYGON" or shape_kind == None):
 		shape_vertices = []
 		steps = curves.curve_resolution
@@ -185,7 +190,7 @@ def end_shape(mode=""):
 						p = curves.quadratic_point(start, control, stop, t)
 						shape_vertices.append(p[:3])
 
-		shape.add_child(PShape(shape_vertices))
+		shape.add_child(PShape(shape_vertices, attribs=attribs))
 	else:
 		if shape_kind == "POINTS":
 			shape.add_child(PShape(vertices, attribs='point'))
@@ -206,7 +211,6 @@ def end_shape(mode=""):
 				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
 			else:
 				for i in range(0, len(vertices) - 2, 1):
-					print(i)
 					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 2]]))
 		elif shape_kind == "TRIANGLE_FAN":
 			if len(vertices) < 3:
@@ -227,7 +231,7 @@ def end_shape(mode=""):
 				for i in range(0, len(vertices) - 2, 2):
 					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 3], vertices[i + 2]]))
 		else:
-			shape.add_child(PShape(vertices))
+			shape.add_child(PShape(vertices, attribs=attribs))
 
 	is_bezier = False
 	is_curve = False
