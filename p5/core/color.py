@@ -179,10 +179,15 @@ class Color:
             color_mode = color_parse_mode
 
         if (len(args) == 1) and isinstance(args[0], Color):
-           r = args[0]._red
-           g = args[0]._green
-           b = args[0]._blue
-           a = args[0]._alpha
+            r = args[0]._red
+            g = args[0]._green
+            b = args[0]._blue
+            a = args[0]._alpha
+        elif len(args) == 2 and isinstance(args[0], Color):
+            r = args[0]._red
+            g = args[0]._green
+            b = args[0]._blue
+            a = args[1]
         else:
             r, g, b, a = parse_color(*args, color_mode=color_mode,
                                      normed=normed, **kwargs)

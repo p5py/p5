@@ -85,12 +85,7 @@ class Renderer2D:
 		self.modelview_matrix = np.identity(4)
 		self.projection_matrix = np.identity(4)
 
-
-
 		## Renderer Globals: RENDERING
-		self.poly_draw_queue = []
-		self.line_draw_queue = []
-		self.point_draw_queue = []
 		self.draw_queue = []
 
 	def initialize_renderer(self):
@@ -245,8 +240,6 @@ class Renderer2D:
 				np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
 				shape._matrix,
 				self.transform_matrix)
-
-			print((edges[:-1]))
 
 			self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
 			self.add_to_draw_queue('path', toverts, edges[:-1],

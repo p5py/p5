@@ -25,6 +25,7 @@ from PIL import ImageFilter
 from PIL import ImageChops
 from PIL import ImageOps
 from vispy import gloo
+from . import p5
 
 from . import color
 from .. import sketch

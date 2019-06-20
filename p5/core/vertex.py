@@ -128,7 +128,7 @@ def end_shape(mode=""):
 		attribs = "open"
 
 
-	shape = PShape([(0,0)])
+	shape = PShape([(0,0)], children=[])
 	if is_curve and (shape_kind == "POLYGON" or shape_kind == None):
 		if len(vertices) > 3:
 			b = []
@@ -238,5 +238,5 @@ def end_shape(mode=""):
 	is_quadratic = False
 	is_contour = False
 	is_first_contour = True
-	 
+	
 	return shape
