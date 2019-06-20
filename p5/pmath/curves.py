@@ -29,7 +29,10 @@ __all__ = [
     'bezier_point', 'bezier_tangent', 'bezier_detail',
 
     # CURVE METHODS
-    'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness'
+    'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness',
+
+    # QUADRATIC METHODS
+    'quadratic_point'
 ]
 
 curve_resolution = 20
@@ -222,6 +225,41 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
         sum((3 - i)*(t**(2 - i)) * basis[4*i + j] for i in range(3))
         for j in range(4)
     ]
+
+    x = sum(pt.x * c for pt, c in zip(P, coeffs))
+    y = sum(pt.y * c for pt, c in zip(P, coeffs))
+
+    return Point(x, y)
+
+@typecast_arguments_as_points
+def quadratic_point(start, control, stop, parameter):
+    """Return the coordinates of a point along a bezier curve.
+
+    :param point_1: The start point of the curve.
+    :type point_1: 3-tuple.
+
+    :param point_3: The control point of the curve.
+    :type point_3: 3-tuple.
+
+    :param point_4: The end point of the curve.
+    :type point_4: 3-tuple.
+
+    :param parameter: The parameter for the required point location
+        along the curve. Should be in the range [0.0, 1.0] where 0
+        indicates the start of the curve and 1 indicates the end of
+        the curve.
+    :type parameter: float
+
+    :returns: The coordinate of the point at the required location
+        along the curve.
+    :rtype: Point (namedtuple with x, y, z attributes)
+
+    """
+    t = parameter
+    t_ = 1 - parameter
+
+    P = [start, control, stop]
+    coeffs = [t_*t_, 2*t*t_, t*t]
 
     x = sum(pt.x * c for pt, c in zip(P, coeffs))
     y = sum(pt.y * c for pt, c in zip(P, coeffs))
