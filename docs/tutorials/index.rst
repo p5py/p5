@@ -13,6 +13,7 @@ website <https://processing.org/tutorials/>`_.
    objects
    electronics
    vector
+   coordinate system and shapes
 
 .. rubric:: Beginner tutorials
 
