@@ -14,6 +14,7 @@ website <https://processing.org/tutorials/>`_.
    electronics
    vector
    coordinate system and shapes
+   trigonometry primer
 
 .. rubric:: Beginner tutorials
 
