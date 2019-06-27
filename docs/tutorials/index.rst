@@ -15,6 +15,7 @@ website <https://processing.org/tutorials/>`_.
    vector
    coordinate system and shapes
    trigonometry primer
+   arrays
 
 .. rubric:: Beginner tutorials
 

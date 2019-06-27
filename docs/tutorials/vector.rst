@@ -45,9 +45,7 @@ book), you probably, at one point or another, learned how to write a
 simple bouncing ball sketch.
 
 .. figure:: vector-res/bouncingball1.jpg
-   :align: center
-
-   Example : Bouncing ball with No Vectors.
+   :align: left
 
 .. code:: python
 
@@ -498,10 +496,8 @@ the difference between two points -- the mouse location and the center
 of the window.
 
 .. figure:: ./vector-res/vector_sub.jpg
-   :align: center
+   :align: left
    
-   Example: Vector subtraction
-
 .. code:: python
 
     from p5 import *
@@ -626,9 +622,7 @@ And implementing multiplication in code is as simple as:
    u = u * 3
 
 .. figure:: ./vector-res/vector_mult.jpg
-   :align: center
-
-   Example: Vector multiplication
+   :align: left
    
 .. code:: python
 
@@ -750,9 +744,7 @@ or in ``Vector``:
 
 
 .. figure:: vector-res/vector_mag.jpg
-   :align: center
-
-   Example: Vector magnitude
+   :align: left
 
 .. code:: python
 
@@ -865,10 +857,7 @@ will fix that right up:
            self = self / m
 
 .. figure:: ./vector-res/vector_norm.jpg
-   :align: center
-
-   Example: Normalizing a Vector 
-
+   :align: left
 
 .. code:: python
 
@@ -1106,11 +1095,7 @@ and call the appropriate functions in draw():
 Here is the entire example for reference:
 
 .. figure:: ./vector-res/vector_motion.jpg
-   :align: center
-
-   Example: Motion 101 (velocity)
-
-Here is the entire example for reference:
+   :align: left
 
 .. code:: python
 
@@ -1286,9 +1271,7 @@ Let's take a look at the changes to the Mover class now, complete with
 acceleration and ``limit()``.
 
 .. figure:: ./vector-res/vector_acc.jpg
-   :align: center
-
-   Example: Motion 101 (velocity and constant acceleration)
+   :align: left
 
 .. code:: python
 
@@ -1316,9 +1299,7 @@ want to pick a new acceleration each cycle, i.e. each time update() is
 called.
 
 .. figure:: ./vector-res/vector_acc.jpg
-   :align: center
-
-   Example: Motion 101 (velocity and random acceleration)
+   :align: left
 
 .. code:: python
 
@@ -1606,7 +1587,7 @@ To summarize, we have the following steps:
 And here are those steps in the update() function itself:
 
 .. figure:: ./vector-res/vector_mouse1.jpg
-   :align: center
+   :align: left
 
 .. code:: python
 
@@ -1647,9 +1628,7 @@ Let's take a look at what this example would look like with an array
 of Mover objects (rather than just one).
 
 .. figure:: ./vector-res/vector_mouse2.jpg
-   :align: center
-
-   Example: Accelerating towards mouse
+   :align: left
 
 .. code:: python
 
