@@ -16,6 +16,7 @@ website <https://processing.org/tutorials/>`_.
    coordinate system and shapes
    trigonometry primer
    arrays
+   two dimensional arrays
 
 .. rubric:: Beginner tutorials
 
