@@ -17,6 +17,7 @@ website <https://processing.org/tutorials/>`_.
    trigonometry primer
    arrays
    two dimensional arrays
+   curves
 
 .. rubric:: Beginner tutorials
 
