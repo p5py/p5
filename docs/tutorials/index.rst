@@ -18,6 +18,7 @@ website <https://processing.org/tutorials/>`_.
    arrays
    two dimensional arrays
    curves
+   interactivity
 
 .. rubric:: Beginner tutorials
 

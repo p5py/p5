@@ -44,9 +44,7 @@ also the function :meth:`p5.background` which sets a background color
 for the window. Here's an example.
 
 .. figure:: ./color-res/background-beispiel.png
-   :align: center
-
-   Example: Using ``background``, ``stroke``, and ``fill``
+   :align: left
 
 .. code:: python
 
@@ -110,9 +108,7 @@ You will get the hang of RGB color mixing through experimentation, but
 next we will cover some code using some common colors.
 
 .. figure:: ./color-res/example_1_3.png
-   :align: center
-
-   Example: RGB Color
+   :align: left
 
 .. code:: python
 
@@ -159,10 +155,8 @@ transparent (i.e., 0% opaque) and 255 completely opaque (i.e., 100%
 opaque).
 
 .. figure:: ./color-res/example_1_4.png
-   :align: center
-
-   Example: Alpha transparency
-
+   :align: left
+   
 .. code:: python
 
     from p5 import *
