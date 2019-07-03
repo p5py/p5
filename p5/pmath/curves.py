@@ -40,6 +40,13 @@ curve_tightness_amount = 0
 
 bezier_resolution = 20
 
+curve_basis_matrix = [
+    [-0.5, 1.5, -1.5, 0.5],
+    [1, -2.5, 2, -0.5],
+    [-0.5, 0, 0.5, 0],
+    [0, 1, 0, 0]
+]
+
 def typecast_arguments_as_points(func):
     """Typecast all but the last argument of the function as Points."""
     @wraps(func)
@@ -184,7 +191,9 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
     basis = curve_basis_matrix
     P = [point_1, point_2, point_3, point_4]
 
-    coeffs = [sum(t**(3 - i) * basis[4*i + j] for i in range(4)) for j in range(4)]
+    coeffs = [sum(t**(3 - i) * basis[i][j] for i in range(4)) for j in range(4)]
+
+    print(coeffs, parameter)
 
     x = sum(pt.x * c for pt, c in zip(P, coeffs))
     y = sum(pt.y * c for pt, c in zip(P, coeffs))
@@ -222,7 +231,7 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     P = [point_1, point_2, point_3, point_4]
 
     coeffs = [
-        sum((3 - i)*(t**(2 - i)) * basis[4*i + j] for i in range(3))
+        sum((3 - i)*(t**(2 - i)) * basis[i][j] for i in range(3))
         for j in range(4)
     ]
 
