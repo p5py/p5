@@ -31,7 +31,8 @@ from .structure import push_style
 from . import p5
 
 __all__ = ['create_font', 'load_font', 'text', 'text_font',
-	'text_align', 'text_leading', 'text_size', 'text_width'
+	'text_align', 'text_leading', 'text_size', 'text_width',
+	'text_ascent', 'text_descent'
 	]
 
 _font_family = ImageFont.load_default()
@@ -196,3 +197,26 @@ def text_width(text):
 	"""
 
 	return _font_family.getsize(text)[0]
+
+def text_ascent():
+	"""Returns ascent of the current font at its current size
+
+	:returns: ascent of the current font at its current size
+	:rtype: float
+
+	"""
+	global _font_family
+	ascent, descent = _font_family.getmetrics()
+	return ascent
+
+def text_descent():
+	"""Returns descent of the current font at its current size
+
+	:returns:  descent of the current font at its current size
+	:rtype: float
+
+	"""
+
+	global _font_family
+	ascent, descent = _font_family.getmetrics()
+	return descent
