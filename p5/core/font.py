@@ -43,8 +43,8 @@ _text_leading = 0
 def create_font(name, size=10):
 	"""Create the given font at the appropriate size.
 	
-	:param name: Filename of the font file (only pil and ttf fonts are
-		supported.)
+	:param name: Filename of the font file (only pil, otf and ttf 
+		fonts are supported.)
 	:type name: str
 
 	:param size: Font size (only required when `name` refers to a
@@ -53,7 +53,7 @@ def create_font(name, size=10):
 
 	"""
 
-	if name.endswith('ttf'):
+	if name.endswith('ttf') or name.endswith('otf'):
 		font = ImageFont.truetype(name, size)
 	elif name.endswith('pil'):
 		font = ImageFont.load(name)
@@ -183,7 +183,10 @@ def text_size(size):
 	global _font_family
 
 	# reload the font with new size
-	_font_family = ImageFont.truetype(_font_family.path, size)
+	if _font_family.path.endswith('ttf') or _font_family.path.endswith('otf'):
+		_font_family = ImageFont.truetype(_font_family.path, size)
+	else:
+		raise ValueError("text_size is nor supported for Bitmap Fonts")
 
 def text_width(text):
 	"""Calculates and returns the width of any character or text string
