@@ -112,6 +112,7 @@ def text(text_string, position, wrap_at=None):
 	text_image._img = canvas
 
 	width, height = size
+	position = list(position)
 	if _text_align_x == "LEFT":
 		position[0] += 0
 	elif _text_align_x == "RIGHT":
@@ -183,8 +184,9 @@ def text_size(size):
 	global _font_family
 
 	# reload the font with new size
-	if _font_family.path.endswith('ttf') or _font_family.path.endswith('otf'):
-		_font_family = ImageFont.truetype(_font_family.path, size)
+	if hasattr(_font_family, 'path'):
+		if _font_family.path.endswith('ttf') or _font_family.path.endswith('otf'):
+			_font_family = ImageFont.truetype(_font_family.path, size)
 	else:
 		raise ValueError("text_size is nor supported for Bitmap Fonts")
 

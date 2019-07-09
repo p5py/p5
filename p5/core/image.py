@@ -18,6 +18,8 @@
 import contextlib
 import functools
 
+import builtins
+
 import numpy as np
 import PIL
 from PIL import Image
@@ -591,7 +593,7 @@ def load_pixels():
     """
     pixels = PImage(builtins.width, builtins.height, 'RGB')
     #sketch.renderer.flush_geometry()
-    pixel_data = sketch.renderer.fbuffer.read(mode='color', alpha=False)
+    pixel_data = p5.renderer.fbuffer.read(mode='color', alpha=False)
 
     pixels._img = Image.fromarray(pixel_data)
     builtins.pixels = pixels
@@ -602,7 +604,7 @@ def load_pixels():
 
     with push_style():
         image_mode('corner')
-        sketch.renderer.tint_enabled = False
+        p5.renderer.tint_enabled = False
         image(builtins.pixels, (0, 0))
 
     builtins.pixels = None
