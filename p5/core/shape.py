@@ -103,7 +103,9 @@ class PShape:
 
     """
     def __init__(self, vertices=[], fill_color='auto',
-                 stroke_color='auto', visible=False, attribs='closed',
+                 stroke_color='auto', stroke_weight="auto", 
+                 stroke_join="auto", stroke_cap="auto", 
+                 visible=False, attribs='closed',
                  children=[]):
         # basic properties of the shape
         self._vertices = np.array([])
@@ -114,6 +116,9 @@ class PShape:
         self.attribs = set(attribs.lower().split())
         self._fill = None
         self._stroke = None
+        self._stroke_weight = None
+        self._stroke_cap = None
+        self._stroke_join = None
 
         self._matrix = np.identity(4)
         self._transform_matrix = np.identity(4)
@@ -134,26 +139,21 @@ class PShape:
         if len(vertices) > 0:
             self.vertices = vertices
 
-        # TODO: support different vertex types
-        self._vertex_types = ['P'] * len(vertices)
-
         self.fill = fill_color
         self.stroke = stroke_color
+        self.stroke_weight = stroke_weight
+        self.stroke_cap = stroke_cap
+        self.stroke_join = stroke_join
 
         self.children = children
-
         self.visible = visible
 
     def _set_color(self, name, value=None):
         color = None
-        if value is None or value is 'auto':
-            color = None
-        elif isinstance(value, Color):
+
+        if isinstance(value, Color):
             color = value
         else:
-            color = Color(*value)
-
-        if value == 'auto':
             if name == 'stroke' and p5.renderer.stroke_enabled:
                 color = Color(*p5.renderer.stroke_color,
                               color_mode='RGBA', normed=True)
@@ -168,8 +168,6 @@ class PShape:
 
     @property
     def fill(self):
-        if isinstance(self._fill, Color):
-            return self._fill
         return self._fill
 
     @fill.setter
@@ -182,7 +180,40 @@ class PShape:
 
     @stroke.setter
     def stroke(self, new_color):
-       self._set_color('stroke', new_color)
+        self._set_color('stroke', new_color)
+
+    @property
+    def stroke_weight(self):
+        return self._stroke_weight
+
+    @stroke_weight.setter
+    def stroke_weight(self, stroke):
+        if stroke == "auto":
+            self._stroke_weight = p5.renderer.stroke_weight
+        else:
+            self._stroke_weight = stroke
+
+    @property
+    def stroke_join(self):
+        return self._stroke_join
+
+    @stroke_join.setter
+    def stroke_join(self, stroke):
+        if stroke == "auto":
+            self._stroke_join = p5.renderer.stroke_join
+        else:
+            self._stroke_join = stroke
+
+    @property
+    def stroke_cap(self):
+        return self._stroke_cap
+
+    @stroke_cap.setter
+    def stroke_cap(self, stroke):
+        if stroke == "auto":
+            self._stroke_cap = p5.renderer.stroke_cap
+        else:
+            self._stroke_cap = stroke
 
     @property
     def kind(self):

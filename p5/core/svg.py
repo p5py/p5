@@ -16,10 +16,43 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from . import PShape
 import xml.etree.ElementTree as etree
+import re
+
 from ..pmath import Point
+
+from . import Color
+from . import PShape
 from . import primitives
+
+default_values = { # default properties of SVG
+	"stroke-width": 1,
+	"stroke-color": Color(0, 0, 0), 
+	"stroke-join": 0,
+	"stroke-cap": 1,
+	"stroke": Color(0, 0, 0),
+	"fill": Color(0, 0, 0)
+}
+
+def get_style(element, style):
+	# style parser for svg
+	values = element.get("style")
+
+	if values:
+		for s in values.split(";"):
+			if style in s:
+				value = s.split(':')[1]
+				
+				if style == "stroke" or style == "fill":
+					# cannot parse colors by name
+					break
+				if style == "stroke-width":
+					return int(value.replace("px", ""))
+
+	if style in default_values.keys():
+		return default_values[style]
+	else:
+		return None
 
 def parse_rect(element):
 	width = float(element.get('width'))
@@ -27,17 +60,30 @@ def parse_rect(element):
 	x = float(element.get('x'))
 	y = float(element.get('y'))
 
+	fill = get_style(element, "fill")
+	stroke_weight = get_style(element, "stroke-width")
+	stroke = get_style(element, "stroke")
+	stroke_cap = get_style(element, "stroke-cap")
+
 	return PShape([
 		(x, y),
 		(x + width, y),
 		(x + width, y + height),
 		(x, y + height)
-		], children=[])
+		], children=[], 
+		fill_color=fill, stroke_weight=stroke_weight, 
+		stroke_color=stroke, stroke_cap=stroke_cap)
 
 def parse_circle(element):
 	cx = float(element.get('cx'))
 	cy = float(element.get('cy')) 
 	r = float(element.get('r'))
+
+	fill = get_style(element, "fill")
+	stroke_weight = get_style(element, "stroke-width")
+	stroke = get_style(element, "stroke")
+	stroke_cap = get_style(element, "stroke-cap")
+
 	return primitives.circle((cx, cy), r)
 
 def parse_line(element):
@@ -45,7 +91,15 @@ def parse_line(element):
 	y1 = float(element.get('y1'))
 	x2 = float(element.get('x2'))
 	y2 = float(element.get('y2'))
-	return PShape([(x1, y1), (x2, y2)], attribs='path')
+
+	fill = get_style(element, "fill")
+	stroke_weight = get_style(element, "stroke-width")
+	stroke = get_style(element, "stroke")
+	stroke_cap = get_style(element, "stroke-cap")
+
+	return PShape([(x1, y1), (x2, y2)], attribs='path', 
+		fill_color=fill, stroke_weight=stroke_weight, 
+		stroke_color=stroke, stroke_cap=stroke_cap)
 
 def parse_ellipse(element):
 	cx = float(element.get('cx'))
@@ -60,7 +114,7 @@ parser_function = {
 	"circle": parse_circle,
 	"line": parse_line,
 	"ellipse": parse_ellipse,
-	#"path": parse_path
+	#"path": parse_path # TODO
 }
 
 def load_shape(filename):

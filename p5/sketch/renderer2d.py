@@ -222,11 +222,16 @@ class Renderer2D:
 			np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
 			shape._matrix,
 			self.transform_matrix)
+		
 		fill = shape.fill.normalized if shape.fill else None
 		stroke = shape.stroke.normalized if shape.stroke else None
+		stroke_weight = shape.stroke_weight
+		stroke_cap = shape.stroke_cap
+		stroke_join = shape.stroke_join
 
 		edges = shape._draw_edges
 		faces = shape._draw_faces
+
 
 		if edges is None:
 			print(vertices)
@@ -245,9 +250,11 @@ class Renderer2D:
 			self.add_to_draw_queue('path', toverts, edges[:-1],
 							  None, None, stroke)
 		else:
-			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
+			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke, 
+					stroke_weight, stroke_cap, stroke_join)
 
-	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None):
+	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None,
+			stroke_weight=None, stroke_cap=None, stroke_join=None):
 		"""Add the given vertex data to the draw queue.
 
 		:param stype: type of shape to be added. Should be one of {'poly',
@@ -290,9 +297,8 @@ class Renderer2D:
 				idx = np.arange(0, len(vertices), dtype=np.uint32)
 				self.draw_queue.append(["points", (vertices, idx, stroke)])
 			else:
-				#idx = np.array(edges, dtype=np.uint32).ravel()
 				self.draw_queue.append(["lines", (
-					vertices, edges, stroke, self.stroke_weight, self.stroke_cap, self.stroke_join
+					vertices, edges, stroke, stroke_weight, stroke_cap, stroke_join
 					)])
 
 	def flush_geometry(self):
