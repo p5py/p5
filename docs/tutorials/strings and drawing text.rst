@@ -494,7 +494,150 @@ The character by character method also allows us to display text along a curve. 
 .. image:: ./strings_and_drawing_text-res/boxes.jpg
    :align: center
 
-What we need to do is replace each box with a character from a String that fits inside the box. And since characters all do not have the same width, instead of using a variable "w" that stays constant, each box will have a variable width along the curve according to the textWidth() function.
+
+.. code:: python
+
+	from p5 import *
+
+	f = None
+
+	# The radius of a circle
+	r = 100
+
+	# The width and height of the boxes
+	w = 40
+	h = 40
+
+	def setup():
+		global f
+		size(320, 320)
+		f = create_font("Arial.ttf", 16)
+		text_font(f)
+
+	def draw():
+		global f, letters
+		background(255)
+		
+		# Start in the center and draw the circle
+		translate(width / 2, height / 2)
+		no_fill()
+		stroke(0)
+
+		# Our curve is a circle with radius r in the center of the window.
+		ellipse((0, 0), r*2, r*2)
+
+		# 10 boxes along the curve
+		totalBoxes = 10
+
+		# We must keep track of our position along the curve
+		arclength = 0
+
+		# For every box
+		for i in range(totalBoxes):
+			# Each box is centered so we move half the width
+			arclength += w/2
+
+			# Angle in radians is the arclength divided by the radius
+			theta = arclength / r
+
+			push_matrix()
+			# Polar to cartesian coordinate conversion
+			translate(r*cos(theta), r*sin(theta))
+
+			# Rotate the box
+			rotate(theta)
+
+			# Display the box
+			fill(0, 100)
+
+			rect_mode("CENTER")
+			rect((0,0),w,h)
+			pop_matrix()
+
+			# Move halfway again
+			arclength += w/2
+
+
+	if __name__ == '__main__':
+		run()
+
+What we need to do is replace each box with a character from a String that fits inside the box. And since characters all do not have the same width, instead of using a variable "w" that stays constant, each box will have a variable width along the curve according to the ``text_width()`` function.
 
 .. image:: ./strings_and_drawing_text-res/textcurve.jpg
    :align: center
+
+.. code:: python
+
+	from p5 import *
+
+	f = None
+
+	# The radius of a circle
+	r = 100
+
+	# The width and height of the boxes
+	w = 40
+	h = 40
+
+	message = "text along a curve"
+
+	def setup():
+		global f
+		size(320, 320)
+		f = create_font("Arial.ttf", 16)
+		text_font(f)
+
+		# The text must be centered!
+		text_align("CENTER")
+
+	def draw():
+		global f, letters
+		background(255)
+		
+		# Start in the center and draw the circle
+		translate(width / 2, height / 2)
+		no_fill()
+		stroke(0)
+
+		# Our curve is a circle with radius r in the center of the window.
+		ellipse((0, 0), r*2, r*2)
+
+		# 10 boxes along the curve
+		totalBoxes = 10
+
+		# We must keep track of our position along the curve
+		arclength = 0
+
+		# For every box
+		for i in range(totalBoxes):
+			# Instead of a constant width, we check the width of each character.
+			currentChar = message[i]
+			x = text_width(currentChar)
+
+			# Each box is centered so we move half the width
+			arclength += w/2
+
+			# Angle in radians is the arclength divided by the radius
+			# Starting on the left side of the circle by adding PI
+			theta = PI + arclength / r
+
+			push_matrix()
+			# Polar to cartesian coordinate conversion
+			translate(r*cos(theta), r*sin(theta))
+
+			# Rotate the box
+			rotate(theta)
+
+			# Display the box
+			fill(0, 100)
+
+			text(currentChar, (0,0)) 
+			pop_matrix()
+
+			# Move halfway again
+			arclength += w/2
+
+
+	if __name__ == '__main__':
+		run()
+
