@@ -101,3 +101,12 @@ Image
    image/alpha mask
    image/create image
    image/pointillism
+
+Typography
+##########
+
+.. toctree::
+   :maxdepth: 1
+
+   typography/letters
+   typography/words
