@@ -165,17 +165,17 @@ def look_at(eye, at, up):
     :rtype: np.ndarray
     """
     z = _normalize(eye - at)
-    x = _normalize(up.cross(z))
-    y = z.cross(x)
+    x = _normalize(np.cross(up, z))
+    y = np.cross(z, x)
 
     mat = triple_axis_rotation_matrix(x, y, z)
     mat.transpose()
 
-    m[0, 3] = (-1) * x.dot(eye)
-    m[1, 3] = (-1) * y.dot(eye)
-    m[2, 3] = (-1) * z.dot(eye)
+    mat[0, 3] = (-1) * x.dot(eye)
+    mat[1, 3] = (-1) * y.dot(eye)
+    mat[2, 3] = (-1) * z.dot(eye)
 
-    return m
+    return mat
 
 def perspective_matrix(field_of_view, aspect_ratio, near_plane, far_plane):
     """Return a perspective matrix.

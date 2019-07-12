@@ -32,6 +32,7 @@ from .events import handler_names
 from ..core import p5
 from ..core.constants import *
 from .renderer2d import Renderer2D
+from .renderer3d import Renderer3D
 
 __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
            'cursor', 'exit', 'draw', 'setup', 'run', 'save_frame', 'save']
@@ -94,7 +95,7 @@ def setup():
     """
     pass
 
-def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode=P2D):
+def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D"):
     """Run a sketch.
 
     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
@@ -134,12 +135,12 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode=P2D):
             hfunc = getattr(__main__, handler)
             handlers[handler] = _fix_interface(hfunc)
 
-    if mode == P2D:
+    if mode == "P2D":
         p5.renderer = Renderer2D()
         p5.mode = '2D'
-    elif mode == P3D:
-        raise NotImplementedError("P3D has not been implemented in p5py")
+    elif mode == "P3D":
         p5.mode = '3D'
+        p5.renderer = Renderer3D()
     else:
         raise ValueError("Invalid Mode %s" % mode)
 

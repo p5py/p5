@@ -199,8 +199,11 @@ def shear_y(theta):
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
     return shear_mat
 
-def camera():
-    raise NotImplementedError
+def camera(position, target_position, up_vector):
+    p5.renderer.lookat_matrix = matrix.look_at(
+        np.array(position), 
+        np.array(target_position), 
+        np.array(up_vector))
 
 def frustum():
     raise NotImplementedError

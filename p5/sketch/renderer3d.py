@@ -34,17 +34,12 @@ from contextlib import contextmanager
 
 from ..core.constants import *
 
-from .shaders2d import src_default
-from .shaders2d import src_fbuffer
-from .shaders2d import src_texture
-from .shaders2d import src_line
+from .shaders3d import src_default
+from .shaders3d import src_fbuffer
 
-class Renderer2D:
+class Renderer3D:
 	def __init__(self):
 		self.default_prog = None
-		self.fbuffer_prog = None
-		self.texture_prog = None
-		self.line_prog = None
 
 		self.fbuffer = None
 		self.fbuffer_tex_front = None
@@ -84,6 +79,7 @@ class Renderer2D:
 		self.transform_matrix = np.identity(4)
 		self.modelview_matrix = np.identity(4)
 		self.projection_matrix = np.identity(4)
+		self.lookat_matrix = np.identity(4)
 
 		## Renderer Globals: RENDERING
 		self.draw_queue = []
@@ -113,8 +109,6 @@ class Renderer2D:
 		self.index_buffer = IndexBuffer()
 
 		self.default_prog = Program(src_default.vert, src_default.frag)
-		self.texture_prog = Program(src_texture.vert, src_texture.frag)
-		self.texture_prog['texcoord'] = self.fbuf_texcoords
 
 		self.reset_view()
 
@@ -150,15 +144,7 @@ class Renderer2D:
 
 		self.default_prog['modelview'] = self.modelview_matrix.T.flatten()
 		self.default_prog['projection'] = self.projection_matrix.T.flatten()
-
-		self.texture_prog['modelview'] = self.modelview_matrix.T.flatten()
-		self.texture_prog['projection'] = self.projection_matrix.T.flatten()
-
-		self.line_prog = Program(src_line.vert, src_line.frag)
-
-		self.line_prog['modelview'] = self.modelview_matrix.T.flatten()
-		self.line_prog['projection'] = self.projection_matrix.T.flatten()
-		self.line_prog["height"] = builtins.height
+		self.default_prog['perspective_matrix'] = self.lookat_matrix.T.flatten()
 
 		self.fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
 		self.fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
@@ -190,6 +176,7 @@ class Renderer2D:
 
 		self.default_prog['modelview'] = self.modelview_matrix.T.flatten()
 		self.default_prog['projection'] = self.projection_matrix.T.flatten()
+		self.default_prog['perspective_matrix'] = self.lookat_matrix.T.flatten()
 
 		self.fbuffer.color_buffer = self.fbuffer_tex_back
 
@@ -210,7 +197,6 @@ class Renderer2D:
 		self.fbuffer_prog.draw('triangle_strip')
 
 		self.fbuffer_tex_front, self.fbuffer_tex_back = self.fbuffer_tex_back, self.fbuffer_tex_front
-
 
 	def _transform_vertices(self, vertices, local_matrix, global_matrix):
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
@@ -316,8 +302,8 @@ class Renderer2D:
 
 			if current_shape == "point" or current_shape == "triangles":
 				self.render_default(current_shape, current_queue)
-			elif current_shape == "lines":
-				self.render_line(current_queue)
+			#elif current_shape == "lines":
+			#	self.render_line(current_queue)
 
 			current_queue = []
 
@@ -369,119 +355,6 @@ class Renderer2D:
 		#
 		self.default_prog.draw(draw_type, indices=self.index_buffer)
 
-	def render_line(self, queue):
-		'''
-		This rendering algorithm works by tesselating the line into
-		multiple triangles.
-
-		Reference: https://blog.mapbox.com/drawing-antialiased-lines-with-opengl-8766f34192dc
-		'''
-
-		if len(queue) == 0:
-			return
-
-		pos = []
-		posPrev = []
-		posCurr = []
-		posNext = []
-		markers = []
-		side = []
-
-		linewidth = []
-		join_type = []
-		cap_type = []
-		color = []
-
-		for line in queue:
-			if len(line[1]) == 0:
-				continue
-
-			for segment in line[1]:
-				for i in range(len(segment) - 1): # the data is sent to renderer in line segments
-					for j in [0, 0, 1, 0, 1, 1]: # all the vertices of triangles
-						if i + j -1 >= 0:
-							posPrev.append(line[0][segment[i + j - 1]])
-						else:
-							posPrev.append(line[0][segment[i + j]])
-
-						if i + j + 1 < len(segment):
-							posNext.append(line[0][segment[i + j + 1]])
-						else:
-							posNext.append(line[0][segment[i + j]])
-
-						posCurr.append(line[0][segment[i + j]])
-
-					markers.extend([1.0, -1.0, -1.0, -1.0, 1.0, -1.0]) # Is the vertex up/below the line segment
-					side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0]) # Left or right side of the segment
-					pos.extend([line[0][segment[i]]]*6) # Left vertex of each segment
-					linewidth.extend([line[3]]*6)
-					join_type.extend([line[5]]*6)
-					cap_type.extend([line[4]]*6)
-					color.extend([line[2]]*6)
-
-		if len(pos) > 0:
-			posPrev = np.array(posPrev, np.float32)
-			posCurr = np.array(posCurr, np.float32)
-			posNext = np.array(posNext, np.float32)
-			markers = np.array(markers, np.float32)
-			side = np.array(side, np.float32)
-			pos = np.array(pos, np.float32)
-			linewidth = np.array(linewidth, np.float32)
-			join_type = np.array(join_type, np.float32)
-			cap_type = np.array(cap_type, np.float32)
-			color = np.array(color, np.float32)
-
-			self.line_prog['pos'] = gloo.VertexBuffer(pos)
-			self.line_prog['posPrev'] = gloo.VertexBuffer(posPrev)
-			self.line_prog['posCurr'] = gloo.VertexBuffer(posCurr)
-			self.line_prog['posNext'] = gloo.VertexBuffer(posNext)
-			self.line_prog['marker'] = gloo.VertexBuffer(markers)
-			self.line_prog['side'] = gloo.VertexBuffer(side)
-			self.line_prog['linewidth'] = gloo.VertexBuffer(linewidth)
-			self.line_prog['join_type'] = gloo.VertexBuffer(join_type)
-			self.line_prog['cap_type'] = gloo.VertexBuffer(cap_type)
-			self.line_prog["color"] = gloo.VertexBuffer(color)
-
-			self.line_prog.draw('triangles')
-
-	def render_image(self, image, location, size):
-		"""Render the image.
-
-		:param image: image to be rendered
-		:type image: builtins.Image
-
-		:param location: top-left corner of the image
-		:type location: tuple | list | builtins.Vector
-
-		:param size: target size of the image to draw.
-		:type size: tuple | list | builtins.Vector
-		"""
-		self.flush_geometry()
-
-		self.texture_prog['fill_color'] = self.tint_color if self.tint_enabled else self.COLOR_WHITE
-		self.texture_prog['transform'] = self.transform_matrix.T.flatten()
-
-		x, y = location
-		sx, sy = size
-		imx, imy = image.size
-		data = np.zeros(4,
-						dtype=[('position', np.float32, 2),
-							   ('texcoord', np.float32, 2)])
-		data['texcoord'] = np.array([[0.0, 1.0],
-									 [1.0, 1.0],
-									 [0.0, 0.0],
-									 [1.0, 0.0]],
-									dtype=np.float32)
-		data['position'] = np.array([[x, y + sy],
-									 [x + sx, y + sy],
-									 [x, y],
-									 [x + sx, y]],
-									dtype=np.float32)
-
-		self.texture_prog['texture'] = image._texture
-		self.texture_prog.bind(VertexBuffer(data))
-		self.texture_prog.draw('triangle_strip')
-
 	def cleanup(self):
 		"""Run the clean-up routine for the renderer.
 
@@ -491,6 +364,5 @@ class Renderer2D:
 		"""
 		self.default_prog.delete()
 		self.fbuffer_prog.delete()
-		self.line_prog.delete()
 		self.fbuffer.delete()
 

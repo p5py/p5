@@ -135,7 +135,7 @@ def text(text_string, position, wrap_at=None):
 	
 	return text_string
 
-def text_font(font):
+def text_font(font, size=10):
 	"""Set current text font.
 
 	:param font:
