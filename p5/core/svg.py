@@ -17,21 +17,22 @@
 #
 
 import xml.etree.ElementTree as etree
-import re
+import math
 
 from ..pmath import Point
 
 from . import Color
 from . import PShape
 from . import primitives
+from . import transforms
 
-default_values = { # default properties of SVG
+default_values = { # default values of SVG attributes
 	"stroke-width": 1,
 	"stroke-color": Color(0, 0, 0), 
 	"stroke-join": 0,
 	"stroke-cap": 1,
-	"stroke": Color(0, 0, 0),
-	"fill": Color(0, 0, 0)
+	"stroke": "none",
+	"fill": "none"
 }
 
 def get_style(element, style):
@@ -44,8 +45,7 @@ def get_style(element, style):
 				value = s.split(':')[1]
 				
 				if style == "stroke" or style == "fill":
-					# cannot parse colors by name
-					break
+					return value
 				if style == "stroke-width":
 					return int(value.replace("px", ""))
 
@@ -60,9 +60,9 @@ def parse_rect(element):
 	x = float(element.get('x'))
 	y = float(element.get('y'))
 
-	fill = get_style(element, "fill")
+	fill = Color(get_style(element, "fill"))
 	stroke_weight = get_style(element, "stroke-width")
-	stroke = get_style(element, "stroke")
+	stroke = Color(get_style(element, "stroke"))
 	stroke_cap = get_style(element, "stroke-cap")
 
 	return PShape([
@@ -76,15 +76,21 @@ def parse_rect(element):
 
 def parse_circle(element):
 	cx = float(element.get('cx'))
-	cy = float(element.get('cy')) 
+	cy = float(element.get('cy'))
 	r = float(element.get('r'))
 
-	fill = get_style(element, "fill")
+	fill = Color(get_style(element, "fill"))
 	stroke_weight = get_style(element, "stroke-width")
-	stroke = get_style(element, "stroke")
+	stroke = Color(get_style(element, "stroke"))
 	stroke_cap = get_style(element, "stroke-cap")
 
-	return primitives.circle((cx, cy), r)
+	return primitives.Arc(
+		(cx, cy),
+		(r/2, r/2),
+		0, 2*math.pi,
+		"CHORD",
+		fill_color=fill, stroke_weight=stroke_weight, 
+		stroke_color=stroke, stroke_cap=2)
 
 def parse_line(element):
 	x1 = float(element.get('x1'))
@@ -92,9 +98,9 @@ def parse_line(element):
 	x2 = float(element.get('x2'))
 	y2 = float(element.get('y2'))
 
-	fill = get_style(element, "fill")
+	fill = Color(get_style(element, "fill"))
 	stroke_weight = get_style(element, "stroke-width")
-	stroke = get_style(element, "stroke")
+	stroke = Color(get_style(element, "stroke"))
 	stroke_cap = get_style(element, "stroke-cap")
 
 	return PShape([(x1, y1), (x2, y2)], attribs='path', 
@@ -106,7 +112,19 @@ def parse_ellipse(element):
 	cy = float(element.get('cx'))
 	rx = float(element.get('rx'))
 	ry = float(element.get('ry'))
-	return primitives.ellipse((cx, cy), rx, ry)
+
+	fill = Color(get_style(element, "fill"))
+	stroke_weight = get_style(element, "stroke-width")
+	stroke = Color(get_style(element, "stroke"))
+	stroke_cap = get_style(element, "stroke-cap")
+
+	return primitives.Arc(
+		(cx, cy),
+		(rx/2, ry/2),
+		0, 2*math.pi, 
+		"CHORD", 
+		fill_color=fill, stroke_weight=stroke_weight, 
+		stroke_color=stroke, stroke_cap=2)
 
 parser_function = {
 	# tag: parser
@@ -131,7 +149,7 @@ def load_shape(filename):
 
 def parser(elements):
 	shape = PShape([(0,0)], children=[])
- 
+
 	for e in elements:
 		tag = e.tag.replace('{http://www.w3.org/2000/svg}', "")
 		if tag in parser_function.keys():
@@ -143,6 +161,8 @@ def parser(elements):
 
 	return shape
 
-@primitives._draw_on_return
-def shape(shape, x, y):
-	return shape
+def shape(shape, x=0, y=0):
+	transforms.push_matrix()
+	transforms.translate(x, y)
+	primitives.draw_shape(shape)
+	transforms.pop_matrix()
