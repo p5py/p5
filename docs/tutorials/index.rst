@@ -19,6 +19,10 @@ website <https://processing.org/tutorials/>`_.
    two dimensional arrays
    curves
    interactivity
+   images and pixels
+   typography
+   strings and drawing text
+   2D transformations
 
 .. rubric:: Beginner tutorials
 
