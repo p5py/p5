@@ -75,6 +75,7 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     - h, s, v
     - r, g, b, a
     - h, s, v, a
+    - hex
 
     - gray = ...
     - gray = ..., alpha = ...
@@ -109,8 +110,18 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     rgb = None
 
     if len(args) == 1:
-        gray = args[0]
-        rgb = gray, gray, gray
+        if isinstance(args[0], int):
+            gray = args[0]
+            rgb = gray, gray, gray
+        elif isinstance(args[0], str):
+            if args[0][0] == "#":
+                hexadecimal = args[0]
+
+            alpha = 255
+            _r = int(hexadecimal[1:3], 16)
+            _g = int(hexadecimal[3:5], 16)
+            _b = int(hexadecimal[5:7], 16)
+            rgb = (_r, _g, _b)
     elif len(args) == 2:
         gray, alpha = args
         rgb =  gray, gray, gray
