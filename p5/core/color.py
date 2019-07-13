@@ -22,6 +22,8 @@ import math
 from ..pmath import lerp
 from ..pmath import constrain
 
+from .constants import colour_codes
+
 __all__ = ['color_mode', 'Color']
 
 color_parse_mode = 'RGB'
@@ -76,6 +78,7 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     - r, g, b, a
     - h, s, v, a
     - hex
+    - colour name
 
     - gray = ...
     - gray = ..., alpha = ...
@@ -116,7 +119,12 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
         elif isinstance(args[0], str):
             if args[0][0] == "#":
                 hexadecimal = args[0]
-
+            else:
+                name = args[0].lower()
+                if name in colour_codes.keys():
+                    hexadecimal = colour_codes[name]
+                else:
+                    raise ValueError("Invalid colour name %s" %name)
             alpha = 255
             _r = int(hexadecimal[1:3], 16)
             _g = int(hexadecimal[3:5], 16)
