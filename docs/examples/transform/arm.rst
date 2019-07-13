@@ -62,7 +62,8 @@ The angle of each segment is controlled with the mouseX and mouseY position. The
 
 	def setup():
 		size(640, 360)
-		stroke(255, 160)	  
+		stroke(255, 160)
+		stroke_weight(30)
 
 		global x, y
 		x = width * 0.3
@@ -77,6 +78,7 @@ The angle of each segment is controlled with the mouseX and mouseY position. The
 		push_matrix()
 		segment(x, y, angle1)
 		segment(segLength, 0, angle2)
+		pop_matrix()
 
 	def segment(x, y, a):
 		translate(x, y)
