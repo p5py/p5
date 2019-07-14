@@ -42,6 +42,9 @@ def get_style(element, style):
 	# style parser for svg
 	values = element.get("style")
 
+	if element.get(style):
+		return element.get(style)
+
 	if values:
 		for s in values.split(";"):
 			if style in s:
@@ -159,7 +162,7 @@ def transform_shape(element):
 	# apply to all its children
 	for child in element.children:
 		transform_shape(child)
-		
+
 	return element
 
 def parser(element):
