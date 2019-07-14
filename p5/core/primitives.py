@@ -79,7 +79,9 @@ def _draw_on_return(func):
 
 class Arc(PShape):
     def __init__(self, center, radii, start_angle, stop_angle,
-                 attribs='open pie', **kwargs):
+                 attribs='open pie', fill_color='auto',
+                 stroke_color='auto', stroke_weight="auto", 
+                 stroke_join="auto", stroke_cap="auto", **kwargs):
         self._center = center
         self._radii = radii
         self._start_angle = start_angle
@@ -87,7 +89,9 @@ class Arc(PShape):
 
         self._faces = None
 
-        super().__init__(vertices=[], attribs=attribs, **kwargs)
+        super().__init__(vertices=[], attribs=attribs, fill_color=fill_color,
+                 stroke_color=stroke_color, stroke_weight=stroke_weight, 
+                 stroke_join=stroke_join, stroke_cap=stroke_cap, **kwargs)
         self._tessellate()
 
     @property
@@ -585,7 +589,7 @@ def draw_shape(shape, pos=(0, 0, 0)):
     """
     p5.renderer.render(shape)
     for child_shape in shape.children:
-        p5.renderer.render(child_shape)
+        draw_shape(child_shape)
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape
