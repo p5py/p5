@@ -18,6 +18,8 @@
 
 import xml.etree.ElementTree as etree
 import math
+import re
+import numpy as np
 
 from ..pmath import Point
 
@@ -25,6 +27,7 @@ from . import Color
 from . import PShape
 from . import primitives
 from . import transforms
+from ..pmath import matrix
 
 default_values = { # default values of SVG attributes
 	"stroke-width": 1,
@@ -124,7 +127,7 @@ def parse_ellipse(element):
 		0, 2*math.pi, 
 		"CHORD", 
 		fill_color=fill, stroke_weight=stroke_weight, 
-		stroke_color=stroke, stroke_cap=2)
+		stroke_color=stroke, stroke_cap=2)	
 
 parser_function = {
 	# tag: parser
@@ -132,7 +135,7 @@ parser_function = {
 	"circle": parse_circle,
 	"line": parse_line,
 	"ellipse": parse_ellipse,
-	#"path": parse_path # TODO
+	#"path": parse_path
 }
 
 def load_shape(filename):
@@ -145,12 +148,37 @@ def load_shape(filename):
 	width = root.get('width')
 	height = root.get('height')
 	
-	return parser(root)
+	svg = transform_shape(parser(root))
 
-def parser(elements):
+	return svg
+
+def transform_shape(element):
+	# apply to current element
+	element.apply_transform_matrix(element._transform_matrix)
+
+	# apply to all its children
+	for child in element.children:
+		transform_shape(child)
+		
+	return element
+
+def parser(element):
 	shape = PShape([(0,0)], children=[])
 
-	for e in elements:
+	transform = element.get('transform')
+	transform_matrix = np.identity(4)
+	if transform:
+		properties = re.findall(r"(\w+)\(([\w\.]+)[,\s]*([^(]*)\)", transform)
+		for p in properties:
+			if p[0] == "scale":
+				mat = matrix.scale_transform(float(p[1]), float(p[2]))
+				transform_matrix = transform_matrix.dot(mat)
+			elif p[0] == "translate":
+				mat = matrix.translation_matrix(float(p[1]), float(p[2]))
+				transform_matrix = transform_matrix.dot(mat)
+	shape.transform_matrix(transform_matrix)
+
+	for e in element:
 		tag = e.tag.replace('{http://www.w3.org/2000/svg}', "")
 		if tag in parser_function.keys():
 			shape.add_child(parser_function[tag](e))

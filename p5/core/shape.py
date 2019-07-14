@@ -431,6 +431,9 @@ class PShape:
         """
         self.children.append(child)
 
+    def transform_matrix(self, mat):
+        self._transform_matrix = mat
+
     @property
     def child_count(self):
         """Number of children.
@@ -440,7 +443,6 @@ class PShape:
         """
         return len(self.children)
 
-    @_apply_transform
     def apply_matrix(self, mat):
         """Apply the given transformation matrix to the shape.
 
@@ -449,6 +451,10 @@ class PShape:
         :type mat: (4, 4) np.ndarray
 
         """
+        self._matrix = self._matrix.dot(mat)
+
+    @_call_on_children
+    def apply_transform_matrix(self, mat):
         self._matrix = self._matrix.dot(mat)
 
     @_call_on_children

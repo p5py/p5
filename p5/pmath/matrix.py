@@ -43,7 +43,7 @@ def _normalize(arry):
     mag = _magnitude(arry)
     return arry / mag
 
-def scale_transform(x, y, z):
+def scale_transform(x, y, z=1):
     """Return a scale transformation matrix.
 
     :param x: Scale factor in the x direction.
@@ -65,7 +65,7 @@ def scale_transform(x, y, z):
     scale_matrix[2, 2] = z
     return scale_matrix
 
-def translation_matrix(x, y, z):
+def translation_matrix(x, y, z=0):
    """Return a new translation matrix.
 
    :param x: translation in the x-direction.

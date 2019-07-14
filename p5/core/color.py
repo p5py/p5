@@ -117,19 +117,24 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
             gray = args[0]
             rgb = gray, gray, gray
         elif isinstance(args[0], str):
-            if args[0][0] == "#":
-                hexadecimal = args[0]
+            name = args[0].lower()
+            if name == "none":
+                alpha = 0
+                rgb = (0, 0, 0)
             else:
-                name = args[0].lower()
-                if name in colour_codes.keys():
+                if name[0] == "#":
+                    hexadecimal = args[0]                
+                elif name in colour_codes.keys():
                     hexadecimal = colour_codes[name]
                 else:
                     raise ValueError("Invalid colour name %s" %name)
-            alpha = 255
-            _r = int(hexadecimal[1:3], 16)
-            _g = int(hexadecimal[3:5], 16)
-            _b = int(hexadecimal[5:7], 16)
-            rgb = (_r, _g, _b)
+
+                alpha = 255
+                _r = int(hexadecimal[1:3], 16)
+                _g = int(hexadecimal[3:5], 16)
+                _b = int(hexadecimal[5:7], 16)
+                rgb = (_r, _g, _b)
+            
     elif len(args) == 2:
         gray, alpha = args
         rgb =  gray, gray, gray
@@ -188,6 +193,7 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
 
     if not normed:
         alpha = constrain(alpha / color_range[3], 0, 1)
+
     return red, green, blue, alpha
 
 
