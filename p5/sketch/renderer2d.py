@@ -202,6 +202,7 @@ class Renderer2D:
 			yield
 
 			self.flush_geometry()
+			self.transform_matrix = np.identity(4)
 
 		gloo.set_viewport(*self.viewport)
 		self._comm_toggles(False)

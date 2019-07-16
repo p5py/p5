@@ -193,6 +193,5 @@ def background(*args, **kwargs):
         no_stroke()
 
         with push_matrix():
-            reset_transforms()
             rect((0, 0), builtins.width, builtins.height, mode='CORNER')
             p5.renderer.background_color = background_color.normalized
