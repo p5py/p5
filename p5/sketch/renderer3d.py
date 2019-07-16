@@ -219,7 +219,6 @@ class Renderer3D:
 		edges = shape._draw_edges
 		faces = shape._draw_faces
 
-
 		if edges is None:
 			print(vertices)
 			print("whale")
@@ -285,7 +284,7 @@ class Renderer3D:
 				self.draw_queue.append(["points", (vertices, idx, stroke)])
 			else:
 				self.draw_queue.append(["lines", (
-					vertices, edges, stroke, stroke_weight, stroke_cap, stroke_join
+					vertices, idx, stroke
 					)])
 
 	def flush_geometry(self):
@@ -301,11 +300,7 @@ class Renderer3D:
 				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
 					continue
 
-			if current_shape == "point" or current_shape == "triangles":
-				self.render_default(current_shape, current_queue)
-			#elif current_shape == "lines":
-			#	self.render_line(current_queue)
-
+			self.render_default(current_shape, current_queue)
 			current_queue = []
 
 		self.draw_queue = []
@@ -335,7 +330,7 @@ class Renderer3D:
 		for vertices, idx, color in draw_queue:
 			num_shape_verts = len(vertices)
 
-			data['position'][sidx:(sidx + num_shape_verts),] = vertices
+			data['position'][sidx:(sidx + num_shape_verts),] = np.array(vertices)
 
 			color_array = np.array([color] * num_shape_verts)
 			data['color'][sidx:sidx + num_shape_verts, :] = color_array
