@@ -203,6 +203,30 @@ def shear_y(theta):
     return shear_mat
 
 def camera(position, target_position, up_vector):
+    """Sets the camera position for a 3D sketch. 
+    Parameters for this function define the position for 
+    the camera, the center of the sketch (where the 
+    camera is pointing), and an up direction (the 
+    orientation of the camera).
+
+    When called with no arguments, this function 
+    creates a default camera equivalent to 
+    camera(
+        (0, 0, (height/2.0) / tan(PI*30.0 / 180.0)),
+        (0, 0, 0),
+        (0, 1, 0)
+        )
+
+    :param position: camera position coordinates
+    :type position: tuple
+
+    :param target_position: target position of camera in world coordinates 
+    :type target_position: tuple
+
+    :param up_vector: up direction vector for the camera
+    :type up_vector: tuple
+
+    """
     p5.renderer.lookat_matrix = matrix.look_at(
         np.array(position), 
         np.array(target_position), 

@@ -85,9 +85,18 @@ def draw_shape(shape, pos=(0, 0, 0)):
 
 @_draw_on_return
 def plane(width, height):
+    """Draw the given shape at the specified location.
+
+    :param shape: The shape that needs to be drawn.
+    :type shape: p5.PShape
+
+    :param pos: Position of the shape
+    :type pos: tuple | Vector
+
+    """
     return PShape([
-        (0, 0, 0), 
-        (0, height, 0), 
-        (width, height, 0), 
-        (height, 0, 0)
+        (-width/2, -height/2, 0), 
+        (width/2, -height/2, 0), 
+        (width/2, height/2, 0), 
+        (-width/2, height/2, 0)
         ])

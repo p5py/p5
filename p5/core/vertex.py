@@ -34,6 +34,14 @@ is_contour = False
 is_first_contour = True
 
 def begin_shape(kind=None):
+	"""
+	Begin shape drawing.  This is a helpful way of generating
+	custom shapes quickly.
+
+	:param kind: POINTS, LINES, TRIANGLES, TRIANGLE_FAN TRIANGLE_STRIP, QUADS, or QUAD_STRIP
+    :type kind: str
+
+    """
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types
 	if (
 		kind == "POINTS" or
@@ -53,22 +61,66 @@ def begin_shape(kind=None):
 	vertices_types = []
 	contour_vertices_types = []
 
-def curve_vertex(x, y):
-	global is_curve, vertices, contour_vertices, vertices_types, contour_vertices_types
+def curve_vertex(x, y, z=0):
+	"""
+	Specifies vertex coordinates for curves. The first 
+	and last points in a series of curveVertex() lines 
+	will be used to guide the beginning and end of a the 
+	curve. A minimum of four points is required to draw a 
+	tiny curve between the second and third points. Adding 
+	a fifth point with curveVertex() will draw the curve 
+	between the second, third, and fourth points. The 
+	curveVertex() function is an implementation of 
+	Catmull-Rom splines.
+
+	:param x: x-coordinate of the vertex
+    :type x: float
+
+	:param y: y-coordinate of the vertex
+    :type y: float
+
+    :param z: z-coordinate of the vertex
+    :type z: float
+    """
+
+	global is_curve, vertices, contour_vertices
+	global vertices_types, contour_vertices_types
 	is_curve = True
 
 	if p5.mode == "3D":
 		return
 	else:
 		if is_contour:
-			contour_vertices.append((x, y))
+			contour_vertices.append((x, y, z))
 			contour_vertices_types.append(2)
 		else:
-			vertices.append((x, y)) # False attribute if the vertex is 
+			vertices.append((x, y, z)) # False attribute if the vertex is 
 			vertices_types.append(2)
 
 def bezier_vertex(x2, y2, x3, y3, x4, y4):
-	global is_bezier, vertices, contour_vertices, vertices_types, contour_vertices_types
+	"""
+	Specifies vertex coordinates for Bezier curves
+
+	:param x2: x-coordinate of the first control point
+    :type x2: float
+
+	:param y2: y-coordinate of the first control point
+    :type y2: float
+
+	:param x3: x-coordinate of the second control point
+    :type x3: float
+
+	:param y3: y-coordinate of the second control point
+    :type y3: float
+
+    :param x4: x-coordinate of the anchor point
+    :type x4: float
+
+	:param y4: y-coordinate of the anchor point
+    :type y4: float
+    """
+	global is_bezier, vertices, contour_vertices
+	global vertices_types, contour_vertices_types
 	is_bezier = True
 
 	if p5.mode == "3D":
@@ -82,7 +134,24 @@ def bezier_vertex(x2, y2, x3, y3, x4, y4):
 			vertices_types.append(3)
 
 def quadratic_vertex(cx, cy, x3, y3):
-	global is_quadratic, vertices, contour_vertices, vertices_types, contour_vertices_types
+	"""
+	Specifies vertex coordinates for quadratic Bezier curves
+
+	:param cx: x-coordinate of the control point
+    :type cx: float
+
+	:param cy: y-coordinate of the control point
+    :type cy: float
+
+	:param x3: x-coordinate of the anchor point
+    :type x3: float
+
+	:param y3: y-coordinate of the anchor point
+    :type y3: float
+
+    """
+	global is_quadratic, vertices, contour_vertices
+	global vertices_types, contour_vertices_types
 	is_quadratic = True
 
 	if p5.mode == "3D":
@@ -95,20 +164,63 @@ def quadratic_vertex(cx, cy, x3, y3):
 			vertices.append((cx, cy, x3, y3)) 
 			vertices_types.append(3)
 
-def vertex(x, y):
+def vertex(x, y, z=0):
+	"""
+	All shapes are constructed by connecting a series of 
+	vertices. vertex() is used to specify the vertex 
+	coordinates for points, lines, triangles, quads, 
+	and polygons. It is used exclusively within the 
+	beginShape() and endShape() functions.
+
+	:param x: x-coordinate of the vertex
+    :type x: float
+
+	:param y: y-coordinate of the vertex
+    :type y: float
+
+    :param z: z-coordinate of the vertex
+    :type z: float
+    """
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
 	if p5.mode == "3D":
 		return
 	else:
 		if is_contour:
-			contour_vertices.append((x, y))
+			contour_vertices.append((x, y, z))
 			contour_vertices_types.append(1)
 		else:
-			vertices.append((x, y))
+			vertices.append((x, y, z))
 			vertices_types.append(1)
+
+def begin_contour():
+	"""
+	Use the beginContour() and endContour() functions 
+	to create negative shapes within shapes such as 
+	the center of the letter 'O'. beginContour() begins 
+	recording vertices for the shape and endContour() stops 
+	recording. The vertices that define a negative shape must 
+	"wind" in the opposite direction from the exterior shape. 
+	First draw vertices for the exterior clockwise order, then 
+	for internal shapes, draw vertices shape in counter-clockwise. 
+
+	"""
+	raise NotImplementedError("begin_contour() is not yet supported")
+
+def end_contour():
+	raise NotImplementedError("end_contour() is not yet supported")
 
 @primitives._draw_on_return
 def end_shape(mode=""):
+	"""
+	The endShape() function is the companion to beginShape()
+	and may only be called after beginShape(). When endshape()
+	is called, all of image data defined since the previous call
+	to beginShape() is rendered.
+
+	:param mode: use CLOSE to close the shape
+    :type mode: str
+
+    """
 	global vertices, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
 
 	if len(vertices) == 0:

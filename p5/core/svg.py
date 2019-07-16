@@ -142,6 +142,14 @@ parser_function = {
 }
 
 def load_shape(filename):
+	"""
+	Loads the given .svg file and converts it into
+	PShape object.
+
+	:param filename: link to .svg file
+    :type filename: str
+
+	"""
 	tree = etree.parse(filename)
 
 	root = tree.getroot()
@@ -193,6 +201,18 @@ def parser(element):
 	return shape
 
 def shape(shape, x=0, y=0):
+	"""
+	Draws shapes to the display window
+
+	:param shape: shape object
+    :type shape: PShape
+
+	:param x: x-coordinate of the shape
+    :type x: float
+
+    :param y: y-coordinate of the shape
+    :type y: float
+	"""
 	transforms.push_matrix()
 	transforms.translate(x, y)
 	primitives.draw_shape(shape)

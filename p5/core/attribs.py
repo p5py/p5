@@ -103,7 +103,10 @@ def no_stroke():
     p5.renderer.stroke_enabled = False
 
 def stroke_cap(c):
-    """Sets the style of the joints which connect line segments. These joints are either mitered, beveled, or rounded and specified with the corresponding parameters MITER, BEVEL, and ROUND. The default joint is MITER.
+    """Sets the style of the joints which connect line segments. 
+    These joints are either mitered, beveled, or rounded and 
+    specified with the corresponding parameters MITER, BEVEL, 
+    and ROUND. The default joint is MITER.
 
     :param c: either 'SQUARE', 'PROJECT' or 'ROUND'
     :type c: string
@@ -115,7 +118,10 @@ def stroke_cap(c):
         raise ValueError("Invalid Stroke Cap %s" % c)
 
 def stroke_join(j):
-    """Sets the style of the joints which connect line segments. These joints are either mitered, beveled, or rounded and specified with the corresponding parameters MITER, BEVEL, and ROUND. The default joint is MITER.
+    """Sets the style of the joints which connect line segments. 
+    These joints are either mitered, beveled, or rounded and 
+    specified with the corresponding parameters MITER, BEVEL, 
+    and ROUND. The default joint is MITER.
 
     :param weight: either 'MITER', 'BEVEL' or 'ROUND'
     :type j: string
