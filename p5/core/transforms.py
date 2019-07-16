@@ -26,24 +26,25 @@ from ..pmath import matrix
 
 from . import p5
 
-__all__ = ['push_matrix', 'pop_matrix', 'reset_transforms', 'translate', 'rotate',
+__all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
            'rotate_x', 'rotate_y', 'rotate_z', 'scale', 'shear_x',
            'shear_y', 'camera', 'frustum', 'ortho', 'perspective',
            'print_matrix', 'reset_matrix', 'apply_matrix']
 
-matrix_stack = []
-
+@contextmanager
 def push_matrix():
-    matrix_stack.append(p5.renderer.transform_matrix.copy())
-
-def pop_matrix():
-    p5.renderer.transform_matrix = matrix_stack.pop()
+    previous_matrix = p5.renderer.transform_matrix.copy()
+    try:
+        yield previous_matrix
+    finally:
+        p5.renderer.transform_matrix = previous_matrix
 
 def reset_transforms():
     """Reset all transformations to their default state.
 
     """
     p5.renderer.transform_matrix = np.identity(4)
+    # p5.renderer.reset_view()
 
 def translate(x, y, z=0):
     """Translate the display origin to the given location.

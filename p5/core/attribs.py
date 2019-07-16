@@ -182,7 +182,8 @@ def background(*args, **kwargs):
         with push_style():
             no_tint()
             image_mode('corner')
-            image(background_image, (0, 0))
+            with push_matrix():
+                image(background_image, (0, 0))
 
         return background_image
 
@@ -191,5 +192,7 @@ def background(*args, **kwargs):
         fill(background_color)
         no_stroke()
 
-        rect((0, 0), builtins.width, builtins.height, mode='CORNER')
-        p5.renderer.background_color = background_color.normalized
+        with push_matrix():
+            reset_transforms()
+            rect((0, 0), builtins.width, builtins.height, mode='CORNER')
+            p5.renderer.background_color = background_color.normalized
