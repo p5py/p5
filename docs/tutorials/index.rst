@@ -23,6 +23,7 @@ website <https://processing.org/tutorials/>`_.
    typography
    strings and drawing text
    2D transformations
+   network
 
 .. rubric:: Beginner tutorials
 
