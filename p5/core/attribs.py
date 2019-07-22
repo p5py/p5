@@ -31,7 +31,7 @@ from .constants import *
 
 from . import p5
 
-__all__ = [ 'background', 'fill', 'no_fill',
+__all__ = [ 'background', 'clear', 'fill', 'no_fill',
             'stroke', 'no_stroke', 'tint', 'no_tint' , 
             'stroke_weight', 'stroke_cap', 'stroke_join']
 
@@ -201,3 +201,9 @@ def background(*args, **kwargs):
         with push_matrix():
             p5.renderer.background_color = background_color.normalized
             p5.renderer.clear()
+
+def clear():
+    """
+    Clears the pixels within a buffer. 
+    """
+    p5.renderer.clear()

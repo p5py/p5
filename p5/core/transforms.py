@@ -232,11 +232,59 @@ def camera(position, target_position, up_vector):
         np.array(target_position), 
         np.array(up_vector))
 
+def perspective(fovy, aspect, near, far):
+    """
+    Sets a perspective projection for the camera in a 3D sketch.  
+
+    :param fovy: camera frustum vertical field of view, from bottom to top of view, in angleMode units
+    :type fovy: float
+
+    :param aspect: camera frustum aspect ratio
+    :type aspect: float
+
+    :param near: frustum near plane length
+    :type near: float
+
+    :param far: frustum far plane length
+    :type far: float   
+    """
+    p5.renderer.projection_matrix = matrix.perspective_matrix(
+            fovy,
+            aspect,
+            near,
+            far
+        )
+
+def ortho(left, right, bottom, top, near, far):
+    """
+    Sets an orthographic projection for the camera in
+    a 3D sketch and defines a box-shaped viewing frustum
+    within which objects are seen.
+
+    :param left: camera frustum left plane
+    :type left: float
+
+    :param right: camera frustum right plane
+    :type right: float
+
+    :param bottom: camera frustum bottom plane
+    :type bottom: float
+
+    :param top: camera frustum top plane
+    :type top: float
+
+    :param near: camera frustum near plane
+    :type near: float
+
+    :param far: camera frustum far plane
+    :type far: float   
+    """
+    p5.renderer.lookat_matrix = np.array([
+        [2/(right - left), 0, 0, -(right + left)/(right - left)],
+        [0, 2/(top - bottom), 0, -(top + bottom)/(top - bottom)],
+        [0, 0, -2/(far - near), -(far + near)/(far - near)],
+        [0, 0, 0, 1],
+        ])
+
 def frustum():
-    raise NotImplementedError
-
-def ortho():
-    raise NotImplementedError
-
-def perspective():
     raise NotImplementedError

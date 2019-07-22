@@ -20,6 +20,8 @@
 import __main__
 import os
 
+import math
+import numpy as np
 import builtins
 from functools import wraps
 
@@ -30,6 +32,8 @@ from .base import Sketch
 from .events import handler_names
 
 from ..core import p5
+from ..pmath import matrix
+
 from ..core.constants import *
 from .renderer2d import Renderer2D
 from .renderer3d import Renderer3D
@@ -137,9 +141,9 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D"):
 
     if mode == "P2D":
         p5.renderer = Renderer2D()
-        p5.mode = '2D'
+        p5.mode = 'P2D'
     elif mode == "P3D":
-        p5.mode = '3D'
+        p5.mode = 'P3D'
         p5.renderer = Renderer3D()
     else:
         raise ValueError("Invalid Mode %s" % mode)
@@ -180,6 +184,13 @@ def size(width, height):
     builtins.width = int(width)
     builtins.height = int(height)
     p5.sketch.size = (builtins.width, builtins.height)
+
+    # update the look at matrix coordinates according to sketch size
+    if p5.mode == "P3D":
+        p5.renderer.lookat_matrix = matrix.look_at(
+        np.array([0, 0, height/math.tan(math.pi/6)]), 
+        np.array([0, 0, 0]), 
+        np.array([0, 1, 0]))
 
 def no_loop():
     """Stop draw() from being continuously called.
