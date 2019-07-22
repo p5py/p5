@@ -18,21 +18,8 @@
 
 from collections import namedtuple
 import functools
-import math
-from math import sin
-from math import cos
-from math import radians
 
-import numpy as np
-
-from ..pmath import Point
-from ..pmath import curves
-from ..pmath import remap
-from ..pmath.utils import SINCOS
-from ..pmath.utils import SINCOS_PRECISION
-
-from .shape import PShape
-
+from vispy import geometry
 from . import p5
 
 # We use these in ellipse tessellation. The algorithm is similar to
@@ -80,23 +67,57 @@ def draw_shape(shape, pos=(0, 0, 0)):
 
     """
     p5.renderer.render(shape)
-    for child_shape in shape.children:
-        p5.renderer.render(child_shape)
 
 @_draw_on_return
-def plane(width, height):
-    """Draw the given shape at the specified location.
-
-    :param shape: The shape that needs to be drawn.
-    :type shape: p5.PShape
-
-    :param pos: Position of the shape
-    :type pos: tuple | Vector
-
+def cylinder(radius=20, height=20, detail_x=24, detail_y=1):
     """
-    return PShape([
-        (-width/2, -height/2, 0), 
-        (width/2, -height/2, 0), 
-        (width/2, height/2, 0), 
-        (-width/2, height/2, 0)
-        ])
+    Draws a cylinder
+
+    :param radius: radius of the surface
+    :type radius: float
+
+    :param height: height of the cylinder
+    :type height: float
+
+    :param detail_x: number of segments, the more segments the smoother geometry default is 24
+    :type detail_x: int
+
+    :param detail_y: number of segments in y-dimension, the more segments the smoother geometry default is 1
+    :type detail_y: int
+    """
+    return geometry.create_cylinder(cols=detail_x, rows=detail_y, radius=[radius, radius], length=height)
+
+@_draw_on_return
+def cone(radius=20, height=20, detail_x=24, detail_y=1):
+    """
+    Draws a cone
+
+    :param radius: radius of the bottom surface
+    :type radius: float
+
+    :param height: height of the cone
+    :type height: float
+
+    :param detail_x: number of segments, the more segments the smoother geometry default is 24
+    :type detail_x: int
+
+    :param detail_y: number of segments in y-dimension, the more segments the smoother geometry default is 1
+    :type detail_y: int
+    """
+    return geometry.create_cone(cols=detail_x , radius=radius, length=height)
+
+@_draw_on_return
+def sphere(radius=10, detail_x=24, detail_y=24):
+    """
+    Draws a sphere
+
+    :param radius: radius of the sphere
+    :type radius: float
+
+    :param detail_x: number of segments, the more segments the smoother geometry default is 24
+    :type detail_x: int
+
+    :param detail_y: number of segments, the more segments the smoother geometry default is 24
+    :typ
+    """
+    return geometry.create_sphere(rows=detail_x, cols=detail_y, radius=radius)

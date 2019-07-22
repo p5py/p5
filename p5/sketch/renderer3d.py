@@ -196,44 +196,20 @@ class Renderer3D:
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
 	def render(self, shape):
-		vertices = shape._draw_vertices
+		vertices = shape.get_vertices()
 		n, _ = vertices.shape
 		tverts = self._transform_vertices(
-			np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-			shape._matrix,
+			np.hstack([vertices, np.ones((n, 1))]),
+			np.identity(4),
 			self.transform_matrix)
-		
-		fill = shape.fill.normalized if shape.fill else None
-		stroke = shape.stroke.normalized if shape.stroke else None
-		stroke_weight = shape.stroke_weight
-		stroke_cap = shape.stroke_cap
-		stroke_join = shape.stroke_join
 
-		edges = shape._draw_edges
-		faces = shape._draw_faces
+		edges = shape.get_edges()
+		faces = shape.get_faces()
 
-		if edges is None:
-			print(vertices)
-			print("whale")
-			exit()
+		self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color)
 
-		if 'open' in shape.attribs:
-			overtices = shape._draw_outline_vertices
-			no, _  = overtices.shape
-			toverts = self._transform_vertices(
-				np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
-				shape._matrix,
-				self.transform_matrix)
 
-			self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
-			self.add_to_draw_queue('path', toverts, edges[:-1],
-							  None, None, stroke)
-		else:
-			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke, 
-					stroke_weight, stroke_cap, stroke_join)
-
-	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None,
-			stroke_weight=None, stroke_cap=None, stroke_join=None):
+	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None):
 		"""Add the given vertex data to the draw queue.
 
 		:param stype: type of shape to be added. Should be one of {'poly',
@@ -276,6 +252,7 @@ class Renderer3D:
 				idx = np.arange(0, len(vertices), dtype=np.uint32)
 				self.draw_queue.append(["points", (vertices, idx, stroke)])
 			else:
+				idx = np.array(edges, dtype=np.uint32).ravel()
 				self.draw_queue.append(["lines", (
 					vertices, idx, stroke
 					)])
