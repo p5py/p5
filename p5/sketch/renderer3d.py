@@ -77,7 +77,6 @@ class Renderer3D:
 		self.viewport = None
 		self.texture_viewport = None
 		self.transform_matrix = np.identity(4)
-		self.modelview_matrix = np.identity(4)
 		self.projection_matrix = np.identity(4)
 		self.lookat_matrix = np.identity(4)
 
@@ -135,14 +134,9 @@ class Renderer3D:
 			0.1 * cz,
 			10 * cz
 		)
-		self.modelview_matrix = matrix.translation_matrix(-builtins.width / 2, \
-													 builtins.height / 2, \
-													 -cz)
-		self.modelview_matrix = self.modelview_matrix.dot(matrix.scale_transform(1, -1, 1))
 
 		self.transform_matrix = np.identity(4)
 
-		self.default_prog['modelview'] = self.modelview_matrix.T.flatten()
 		self.default_prog['projection'] = self.projection_matrix.T.flatten()
 		self.default_prog['perspective_matrix'] = self.lookat_matrix.T.flatten()
 
@@ -174,7 +168,6 @@ class Renderer3D:
 
 		self.transform_matrix = np.identity(4)
 
-		self.default_prog['modelview'] = self.modelview_matrix.T.flatten()
 		self.default_prog['projection'] = self.projection_matrix.T.flatten()
 		self.default_prog['perspective_matrix'] = self.lookat_matrix.T.flatten()
 

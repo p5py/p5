@@ -28,13 +28,12 @@ attribute vec4 color;
 
 varying vec4 frag_color;
 
-uniform mat4 modelview;
 uniform mat4 projection;
 uniform mat4 perspective_matrix;
 
 void main()
 {
-    gl_Position = projection * modelview * perspective_matrix * vec4(position, 1.0);
+    gl_Position = projection * perspective_matrix * vec4(position, 1.0);
     frag_color = color;
 }
 """
