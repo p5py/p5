@@ -24,6 +24,7 @@ website <https://processing.org/tutorials/>`_.
    strings and drawing text
    2D transformations
    network
+   data
 
 .. rubric:: Beginner tutorials
 
