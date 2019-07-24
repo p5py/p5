@@ -94,7 +94,7 @@ Once we have become comfortable with the concept of drawing a rectangle, an ``el
 
 .. image:: ./coordinate_system_and_shapes-res/drawing-12.svg
 	:align: center
-	:width: 50%s
+	:width: 50%
 
 It is important to acknowledge that these ellipses do not look particularly circular. Processing has a built-in methodology for selecting which pixels should be used to create a circular shape. Zoomed in like this, we get a bunch of squares in a circle-like pattern, but zoomed out on a computer screen, we get a nice round ellipse. Processing also gives us the power to develop our own algorithms for coloring in individual pixels (in fact, we can already imagine how we might do this using "point" over and over again), but for now, we are content with allowing the "ellipse" statement to do the hard work. (For more about pixels, start with: the pixels reference page, though be warned this is a great deal more advanced than this tutorial.) 
 

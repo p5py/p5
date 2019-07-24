@@ -86,6 +86,10 @@ def text(text_string, position, wrap_at=None):
 	:rtype: str
 
 	"""
+
+	if len(text_string) == 0:
+		return 
+
 	global _font_family, _text_leading
 	
 	multiline = False

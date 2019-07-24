@@ -29,6 +29,7 @@ from vispy.gloo import Program
 from vispy.gloo import RenderBuffer
 from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
+from vispy import geometry
 
 from contextlib import contextmanager
 
@@ -196,18 +197,18 @@ class Renderer3D:
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
 	def render(self, shape):
-		vertices = shape.get_vertices()
-		n, _ = vertices.shape
-		tverts = self._transform_vertices(
-			np.hstack([vertices, np.ones((n, 1))]),
-			np.identity(4),
-			self.transform_matrix)
+		if isinstance(shape, geometry.MeshData):
+			vertices = shape.get_vertices()
+			n, _ = vertices.shape
+			tverts = self._transform_vertices(
+				np.hstack([vertices, np.ones((n, 1))]),
+				np.identity(4),
+				self.transform_matrix)
 
-		edges = shape.get_edges()
-		faces = shape.get_faces()
+			edges = shape.get_edges()
+			faces = shape.get_faces()
 
 		self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color)
-
 
 	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None):
 		"""Add the given vertex data to the draw queue.
@@ -253,9 +254,7 @@ class Renderer3D:
 				self.draw_queue.append(["points", (vertices, idx, stroke)])
 			else:
 				idx = np.array(edges, dtype=np.uint32).ravel()
-				self.draw_queue.append(["lines", (
-					vertices, idx, stroke
-					)])
+				self.draw_queue.append(["lines", (vertices, idx, stroke)])
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
