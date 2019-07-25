@@ -38,6 +38,8 @@ from ..core.constants import *
 from .shaders3d import src_default
 from .shaders3d import src_fbuffer
 
+from ..core.geometry import Geometry
+
 class Renderer3D:
 	def __init__(self):
 		self.default_prog = None
@@ -197,7 +199,16 @@ class Renderer3D:
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
 	def render(self, shape):
-		if isinstance(shape, geometry.MeshData):
+		if isinstance(shape, Geometry):
+			n, _ = shape.vertices.shape
+			tverts = self._transform_vertices(
+				np.hstack([shape.vertices, np.ones((n, 1))]),
+				np.identity(4),
+				self.transform_matrix)
+
+			edges = shape.edges
+			faces = shape.faces
+		elif isinstance(shape, geometry.MeshData):
 			vertices = shape.get_vertices()
 			n, _ = vertices.shape
 			tverts = self._transform_vertices(

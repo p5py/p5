@@ -19,8 +19,11 @@
 from collections import namedtuple
 import functools
 
+import numpy as np
+
 from vispy import geometry
 from . import p5
+from .geometry import Geometry
 
 # We use these in ellipse tessellation. The algorithm is similar to
 # the one used in Processing and the we compute the number of
@@ -121,3 +124,57 @@ def sphere(radius=10, detail_x=24, detail_y=24):
     :typ
     """
     return geometry.create_sphere(rows=detail_x, cols=detail_y, radius=radius)
+
+@_draw_on_return
+def box(width, height, depth, detail_x=1, detail_y=1):
+    geom = Geometry(detail_x, detail_y)
+
+    cube_indices = [
+        [0, 4, 2, 6], # -1, 0, 0],// -x
+        [1, 3, 5, 7], # +1, 0, 0],// +x
+        [0, 1, 4, 5], # 0, -1, 0],// -y
+        [2, 6, 3, 7], # 0, +1, 0],// +y
+        [0, 2, 1, 3], # 0, 0, -1],// -z
+        [4, 5, 6, 7] # 0, 0, +1] // +z
+    ]
+
+    geom.stroke_indices = [
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [6, 7],
+        [8, 9],
+        [9, 11],
+        [14, 15],
+        [16, 17],
+        [17, 19],
+        [18, 19],
+        [20, 21],
+        [22, 23]
+    ]
+
+    for i in range(len(cube_indices)):
+        cube_index = cube_indices[i]
+        v = i * 4
+        for j in range(4):
+            d = cube_index[j]
+
+            octant = [
+                ((d & 1) * 2 - 1) / 2,
+                ((d & 2) - 1) / 2,
+                ((d & 4) / 2 - 1) / 2
+            ]
+
+            geom.vertices.append(octant)
+            geom.uvs.extend([j & 1, (j & 2) / 2])
+
+        geom.faces.append([v, v + 1, v + 2])
+        geom.faces.append([v + 2, v + 1, v + 3])
+
+    geom.compute_normals()
+    geom.make_triangle_edges()
+
+    geom.vertices = np.array(geom.vertices)*100
+    return geom
+
+
