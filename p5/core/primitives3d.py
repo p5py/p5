@@ -18,6 +18,7 @@
 
 from collections import namedtuple
 import functools
+import math
 
 import numpy as np
 
@@ -112,22 +113,6 @@ def cone(radius=20, height=20, detail_x=24, detail_y=1):
     return geometry.create_cone(cols=detail_x , radius=radius, length=height)
 
 @_draw_on_return
-def sphere(radius=10, detail_x=24, detail_y=24):
-    """
-    Draws a sphere
-
-    :param radius: radius of the sphere
-    :type radius: float
-
-    :param detail_x: number of segments, the more segments the smoother geometry default is 24
-    :type detail_x: int
-
-    :param detail_y: number of segments, the more segments the smoother geometry default is 24
-    :typ
-    """
-    return geometry.create_sphere(rows=detail_x, cols=detail_y, radius=radius)
-
-@_draw_on_return
 def box(width, height, depth, detail_x=1, detail_y=1):
     geom = Geometry(detail_x, detail_y)
 
@@ -195,6 +180,39 @@ def plane(width, height, detail_x=1, detail_y=1):
     geom.compute_faces()
     #geom.compute_normals()
     geom.make_triangle_edges()
+    #geom.vertices_to_edges()
     geom.matrix = matrix.scale_transform(width, height, 1)
+
+    return geom
+
+def sphere(radius=50, detail_x=24, detail_y=24):
+    return ellipsoid(radius, radius, radius, detail_x, detail_y)
+
+@_draw_on_return
+def ellipsoid(radius_x, radius_y, radius_z, detail_x=24, detail_y=24):
+    geom = Geometry(detail_x, detail_y)
+
+    for i in range(detail_y + 1):
+        v = i / detail_y
+        phi = math.pi * v - math.pi/2
+        cosPhi = math.cos(phi)
+        sinPhi = math.sin(phi)
+
+        for j in range(detail_x + 1):
+            u = j / detail_x
+            theta = 2 * math.pi * u
+            cosTheta = math.cos(theta)
+            sinTheta = math.sin(theta)
+            p = [cosPhi * sinTheta, sinPhi, cosPhi * cosTheta]
+
+            geom.vertices.append(p)
+            geom.vertex_normals.append(p)
+            geom.uvs.extend([u, v])
+
+    geom.compute_faces()
+    geom.make_triangle_edges()
+    #geom.vertices_to_edges()
+
+    geom.matrix = matrix.scale_transform(radius_x, radius_y, radius_z)
 
     return geom
