@@ -268,3 +268,5 @@ Now that the table is loaded, I can show how you grab individual pieces of data 
 .. image:: ./data-res/data_05_headers.jpg
    :align: center
 
+In the above grid you can see that the data is organized in terms of rows and columns. One way to access the data, therefore, would be to request a value by its numeric row and column location (with zero being the first row or first column). This is similar to accessing a pixel color at a given (x,y) location, though in this case the y position (row) comes first. The following code requests a piece of data at a given (row, column) location.
+

@@ -25,6 +25,8 @@ from vispy import geometry
 from . import p5
 from .geometry import Geometry
 
+from ..pmath import matrix
+
 # We use these in ellipse tessellation. The algorithm is similar to
 # the one used in Processing and the we compute the number of
 # subdivisions per ellipse using the following formula:
@@ -173,8 +175,26 @@ def box(width, height, depth, detail_x=1, detail_y=1):
 
     geom.compute_normals()
     geom.make_triangle_edges()
+    #geom.compute_normals()
+    geom.matrix = matrix.scale_transform(width, height, depth)
 
-    geom.vertices = np.array(geom.vertices)*100
     return geom
 
+@_draw_on_return
+def plane(width, height, detail_x=1, detail_y=1):
+    geom = Geometry(detail_x, detail_y)
 
+    for i in range(detail_y + 1):
+        v = i/detail_y
+        for j in range(detail_x + 1):
+            u = j/detail_x
+            p = [u - 0.5, v - 0.5, 0]
+            geom.vertices.append(p)
+            geom.uvs.extend([u, v])
+
+    geom.compute_faces()
+    #geom.compute_normals()
+    geom.make_triangle_edges()
+    geom.matrix = matrix.scale_transform(width, height, 1)
+
+    return geom

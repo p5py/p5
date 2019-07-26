@@ -200,14 +200,15 @@ class Renderer3D:
 
 	def render(self, shape):
 		if isinstance(shape, Geometry):
-			n, _ = shape.vertices.shape
+			n = len(shape.vertices)
 			tverts = self._transform_vertices(
 				np.hstack([shape.vertices, np.ones((n, 1))]),
-				np.identity(4),
+				shape.matrix,
 				self.transform_matrix)
 
 			edges = shape.edges
 			faces = shape.faces
+
 		elif isinstance(shape, geometry.MeshData):
 			vertices = shape.get_vertices()
 			n, _ = vertices.shape

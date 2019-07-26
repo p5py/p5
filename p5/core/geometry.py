@@ -22,7 +22,7 @@ import numpy as np
 import math
 
 class Geometry:
-	def __init__(self, detail_x=None, detail_y=None):
+	def __init__(self, detail_x=1, detail_y=1):
 		self.vertices = []
 
 		self.line_vertices = []
@@ -37,10 +37,12 @@ class Geometry:
 		# a 2D array containing edge connectivity pattern for create line vertices
 		# based on faces for most objects
 		self.edges = []
-		self.detail_x = detail_x if detail_x else 1
-		self.detail_y = detail_y if detail_y else 1
+		self.detail_x = detail_x
+		self.detail_y = detail_y
 
 		self.stroke_indices = []
+
+		self.matrix = np.identity(4)
 
 	def reset(self):
 		self.vertices = []
@@ -53,7 +55,7 @@ class Geometry:
 
 	def compute_faces(self):
 		self.faces = []
-		slice_ount = self.detail_x + 1
+		sliceCount = self.detail_x + 1
 		for i in range(self.detail_y):
 			for j in range(self.detail_x):
 				a = i * sliceCount + j
