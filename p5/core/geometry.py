@@ -91,7 +91,7 @@ class Geometry:
 	def compute_normals(self):
 		self.vertex_normals = []
 		for iv in range(len(self.vertices)):
-			self.vertex_normals.append([])
+			self.vertex_normals.append([0, 0, 0])
 
 		for f in range(len(self.faces)):
 			face = self.faces[f]
@@ -99,7 +99,7 @@ class Geometry:
 
 			for fv in range(3):
 				vertex_index = face[fv]
-				self.vertex_normals[vertex_index].append(face_normal)
+				self.vertex_normals[vertex_index] += face_normal
 
 		for iv in range(len(self.vertices)):
 			self.vertex_normals[iv] = self.vertex_normals[iv]/np.linalg.norm(self.vertex_normals[iv])
@@ -112,6 +112,18 @@ class Geometry:
 			begin = self.vertices[self.edges[i][0]]
 			end = self.vertices[self.edges[i][1]]
 
-			direction = np.linalg.norm(end - begin)
+			direction = np.array(end) - np.array(begin)
+			direction = direction/np.linalg.norm(direction)
+			direction = direction.tolist()
 
+			a = begin
+			b = begin
+			c = end
+			d = end
+			dirAdd = direction
+			dirSub = direction
+			dirAdd.append(1)
+			dirSub.append(-1)
 
+			self.line_normals.extend([dirAdd, dirSub, dirAdd, dirAdd, dirSub, dirSub])
+			self.line_vertices.extend([a, b, c, c, b, d])
