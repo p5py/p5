@@ -181,7 +181,7 @@ Let's begin by working with the simplest means of data retrieval: reading from a
 
 In order to create a text file, you can use any simple text editor. Windows Notepad or Mac OS X TextEdit will do; just make sure you format the file as “plain text.” It is also advisable to name the text files with the “.txt” extension, to avoid any confusion. And just as with image files, these text files should be placed in the sketch’s “data” directory in order for them to be recognized by the Processing sketch.
 
-Once the text file is in place, Python's open() function is used to read the content of the file into a String array. The individual lines of text in the file each become an individual element in the array. 
+Once the text file is in place, Python's open() function is used to read the content of the file into a String array.
 
 .. image:: ./data-res/fig_18_02_filetxt.png
    :align: center
@@ -189,8 +189,9 @@ Once the text file is in place, Python's open() function is used to read the con
 .. code:: python
 	
 	# This code will print all the lines from the source text file.
-	lines = open("file.txt", "r").read()
-	print("There are " + len(lines) + " lines.")
+	file = open('words.txt', 'r').read()
+	lines = file.split('\n') # split the string at \n
+	print("There are " + str(len(lines)) + " lines")
 	print(lines)
 
 To run the code, create a text file called “file.txt,” type a bunch of lines in that file, and place it in your sketch’s data directory.
@@ -209,53 +210,47 @@ The results of visualizing this data are shown below.
 .. code:: python
 
 	from p5 import *
-
 	data = []
 
 	def setup():
 		global data
-		size(200,200)
-		# Load text file as a String
-		stuff = loadStrings("data.csv")
-		# Convert string into an array of integers using ',' as a delimiter
-		for i in stuff[0].split(","):
-			data.append(i)
+		size(200, 200)
+		# Load the text file as a string
+		file = open('data.csv', 'r').read()
+		stuff = file.split(',') # split the string at ,
+		# Convert the string into an array of integers
+		for number in stuff:
+			data.append(int(number))
 
 	def draw():
 		global data
 		background(255)
 		stroke(0)
-
-		for i in data:
+		for i in range(len(data)):
 			# Use array of ints to set the color and height of each rectangle.
-			rect((i*20, 0), 20, data[i])
-
-		no_loop()
+			rect((i*29, 0), 20, data[i])
 
 	if __name__ == '__main__':
 		run()
 
-Looking at how to parse a csv file with ``split()`` was a nice learning exercise. In truth, dealing with csv files (which can easily be generated from spreadsheet software such as Google docs) is such a common activity that Processing has an entire built-in class called Table to handle the parsing for you.
+Looking at how to parse a csv file with ``split()`` was a nice learning exercise. In truth, dealing with csv files (which can easily be generated from spreadsheet software such as Google docs) is such a common activity. Python's inbuilt csv library can be used to parse csv files.
 
 Tabular Data
 ============
 
-A table consists of data arranged as a set of rows and columns, also called “tabular data.” If you've ever used a spreadsheet, this is tabular data. Processing's loadTable() function takes comma-separated (csv) or tab-separated (tsv) values and automatically places the contents into a Table object storing the data in columns and rows. This is a great deal more convenient than struggling to manually parse large data files with split(). It works as follows. Let's say you have a data file that looks like:
+A table consists of data arranged as a set of rows and columns, also called “tabular data.” If you've ever used a spreadsheet, this is tabular data. Python's csv takes the file and parses the values and automatically places the contents into a Table object storing the data in columns and rows. This is a great deal more convenient than struggling to manually parse large data files with split(). It works as follows. Let's say you have a data file that looks like:
 
 .. image:: ./data-res/fig_18_05_datacsv.png
    :align: center
 
-Instead of saying:
+
+We can now use:
 
 .. code:: python
 
-	stuff = loadStrings("data.csv")
-
-We can now say:
-
-.. code:: python
-
-	table = loadTable("data.csv")
+	with open("data.csv") as f:
+		table = csv.DictReader(f) 
+		table = list(table) # Convert DictReader object to list
 
 Now I've missed an important detail. Take a look again at the data.csv text file above. Notice how the first line of text is not the data itself, but rather a header row. This row includes labels that describe the data included in each subsequent row. The good news is that Processing can automatically interpret and store the headers for you, if you pass in the option "header" when loading the table. (In addition to "header", there are other options you can specify. For example, if your file is called data.txt but is comma separated data you can pass in the option "csv". If it also has a header row, then you can specifiy both options like so: "header,csv").
 
@@ -268,5 +263,171 @@ Now that the table is loaded, I can show how you grab individual pieces of data 
 .. image:: ./data-res/data_05_headers.jpg
    :align: center
 
-In the above grid you can see that the data is organized in terms of rows and columns. One way to access the data, therefore, would be to request a value by its numeric row and column location (with zero being the first row or first column). This is similar to accessing a pixel color at a given (x,y) location, though in this case the y position (row) comes first. The following code requests a piece of data at a given (row, column) location.
+In the above grid you can see that the data is organized in terms of rows and columns. Python's `csv.DictReader` converts the csv file into a list of dictionaries. To assess a particular element from the csv file, we need to specify the number of row in the list and the name of the attribute.
+
+
+.. code:: python
+
+	val1 = table[2]["y"] # val now has the value 235
+	
+	val2 = table[3]["diameter"] # val2 now has the value 44.758068
+
+	s = table[0]["name"] # s now has the value “Happy”
+
+To access the entire row, the index of the row can be used as follows:
+
+.. code:: python
+	
+	row = table[2]
+
+One I have the row object, I can ask for data from some or all the columns
+	
+.. code:: python
+
+	x = row["x"] # x has the value 273
+	y = row["y"] # y has the value 235
+	d = row["diameter"] # d has the value 61.14072
+	s = row["name"] # s has the value “Joyous”
+
+If you want to grab all the rows and iterate over them you can do so in a loop with a counter accessing each row one at a time. 
+
+.. code:: python
+
+	for i in range(len(table)):
+		# Access each row of the table one at a time, in a loop.
+		row = table[i]
+		x = row["x"]
+		y = row["y"]
+		d = row["diameter"]
+		s = row["name"]
+
+		# do something with the data
+
+To add a new row to a Table, simply add new row to the array with dictionary of column
+
+.. code:: python
+
+	table.append({
+		"x": mouse_x,
+		"y": mouse_y,
+		"diameter": random_uniform(40, 80),
+		"name": "new label"
+	})
+
+To delete a row, simply call the method `del` and pass in the numeric index of the row you would like removed. For example, the following code removes the first row whenever the size of the table is greater than ten rows.
+
+.. code:: python
+
+	if len(table) > 10:
+		del table[0]
+
+The following example puts all of the above code together. Notice how each row of the table contains the data for a Bubble object.
+
+**Loading and Saving Data**
+
+.. image:: ./data-res/fig_18_07_tablebubbles.png
+   :align: center
+
+.. code:: python
+
+	from p5 import *
+	import csv
+
+	table = []
+	bubbles = []
+
+	def setup():
+		size(480, 360)
+		loadData()
+
+	def draw():
+		global bubbles
+		background(255)
+		# Display all bubbles
+		for i in range(len(bubbles)):
+			bubbles[i].display()
+
+	def loadData():
+		global table, bubbles
+		table = []
+		bubbles = []
+		with open("data.csv") as f:
+			table = csv.DictReader(f) 
+			table = list(table) # Convert DictReader object to list
+
+		for i in range(len(table)):
+			#  Iterate over all the rows in a table.
+			row = table[i]
+
+			# Access the fields via their column name (or index).
+			bubbles.append(Bubble(float(row["x"]), float(row["y"]), float(row["diameter"]), row["name"]))
+
+	def mouse_pressed():
+		global table
+		# When the mouse is pressed, create a new row and set the values for each column of that row.
+		table.append({
+			"x": mouse_x,
+			"y": mouse_y,
+			"diameter": random_uniform(40, 80),
+			"name": "Blah!"
+		})
+
+		# If the table has more than 10 rows, delete the oldest row.
+		if len(table) > 10:
+			del table[0]
+
+		# This writes the table back to the original CSV file
+		# and reloads the file so that what's drawn matches.
+		with open("data.csv", "w") as f:
+			dict_writer = csv.DictWriter(f, table[0].keys())
+			dict_writer.writeheader()
+			dict_writer.writerows(table)
+
+		loadData()
+
+	class Bubble:
+		def __init__(self, tempX, tempY, tempD, s):
+			self.x = tempX
+			self.y = tempY
+			self.diameter = tempD
+			self.name = s
+
+		def rollover(self, px, py):
+			d = dist((px, py), (self.x, self.y))
+			if d < self.diameter / 2:
+				return True
+			else:
+				return False
+
+		def display(self):
+			stroke(0)
+			stroke_weight(2)
+			no_fill()
+			ellipse((self.x, self.y), self.diameter, self.diameter)
+			if self.rollover(self.x, self.y):
+				fill(0)
+				text_align("CENTER")
+				text(self.name, self.x, self.y + self.diameter/2 + 20)
+
+	if __name__ == '__main__':
+		run()
+
+Here, the distance between a given point and a circle's center is compared to that circle's radius as depicted:
+
+.. image:: ./data-res/fig_18_08_rollover.png
+   :align: center
+
+In the code below, the function returns a boolean value (true or false) depending on whether the point (mx,my) is inside the circle. Notice how radius is equal to half the diameter.
+
+.. code:: python
+
+	def rollover(px, py):
+		d = dist((px, py), (x, y))
+		if d < self.diameter / 2:
+			return True
+		else:
+			return False
+
+Data that is not in a Standardized Format
+=========================================
 
