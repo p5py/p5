@@ -279,7 +279,7 @@ def ortho(left, right, bottom, top, near, far):
     :param far: camera frustum far plane
     :type far: float   
     """
-    p5.renderer.lookat_matrix = np.array([
+    p5.renderer.projection_matrix = np.array([
         [2/(right - left), 0, 0, -(right + left)/(right - left)],
         [0, 2/(top - bottom), 0, -(top + bottom)/(top - bottom)],
         [0, 0, -2/(far - near), -(far + near)/(far - near)],

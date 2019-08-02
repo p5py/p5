@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from collections import namedtuple
 import functools
 import math
 
@@ -83,7 +82,7 @@ def box(width, height, depth, detail_x=1, detail_y=1):
         [0, 1, 4, 5], # 0, -1, 0],// -y
         [2, 6, 3, 7], # 0, +1, 0],// +y
         [0, 2, 1, 3], # 0, 0, -1],// -z
-        [4, 5, 6, 7] # 0, 0, +1] // +z
+        [4, 5, 6, 7]  # 0, 0, +1] // +z
     ]
 
     geom.stroke_indices = [

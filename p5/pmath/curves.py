@@ -193,8 +193,6 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
 
     coeffs = [sum(t**(3 - i) * basis[i][j] for i in range(4)) for j in range(4)]
 
-    print(coeffs, parameter)
-
     x = sum(pt.x * c for pt, c in zip(P, coeffs))
     y = sum(pt.y * c for pt, c in zip(P, coeffs))
 
