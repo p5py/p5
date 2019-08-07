@@ -29,7 +29,6 @@ from vispy.gloo import Program
 from vispy.gloo import RenderBuffer
 from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
-from vispy import geometry
 
 from contextlib import contextmanager
 
@@ -39,6 +38,7 @@ from .shaders3d import src_default
 from .shaders3d import src_fbuffer
 
 from ..core.geometry import Geometry
+from ..core.shape import PShape
 
 class Renderer3D:
 	def __init__(self):
@@ -162,7 +162,7 @@ class Renderer3D:
 
 		if state:
 			gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
-			gloo.set_state(depth_func='lequal')
+			gloo.set_state(depth_func='equal')
 
 	@contextmanager
 	def draw_loop(self):
@@ -209,18 +209,45 @@ class Renderer3D:
 			edges = shape.edges
 			faces = shape.faces
 
-		elif isinstance(shape, geometry.MeshData):
-			vertices = shape.get_vertices()
+			self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color)
+
+		elif isinstance(shape, PShape):
+			vertices = shape._draw_vertices
 			n, _ = vertices.shape
 			tverts = self._transform_vertices(
-				np.hstack([vertices, np.ones((n, 1))]),
-				np.identity(4),
+				np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
+				shape._matrix,
 				self.transform_matrix)
+			
+			fill = shape.fill.normalized if shape.fill else None
+			stroke = shape.stroke.normalized if shape.stroke else None
+			stroke_weight = shape.stroke_weight
+			stroke_cap = shape.stroke_cap
+			stroke_join = shape.stroke_join
 
-			edges = shape.get_edges()
-			faces = shape.get_faces()
+			edges = shape._draw_edges
+			faces = shape._draw_faces
 
-		self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color)
+
+			if edges is None:
+				print(vertices)
+				print("whale")
+				exit()
+
+			if 'open' in shape.attribs:
+				overtices = shape._draw_outline_vertices
+				no, _  = overtices.shape
+				toverts = self._transform_vertices(
+					np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
+					shape._matrix,
+					self.transform_matrix)
+
+				self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
+				self.add_to_draw_queue('path', toverts, edges[:-1],
+								  None, None, stroke)
+			else:
+				self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
+
 
 	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None):
 		"""Add the given vertex data to the draw queue.
