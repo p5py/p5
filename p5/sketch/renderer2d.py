@@ -232,8 +232,7 @@ class Renderer2D:
 
 		edges = shape._draw_edges
 		faces = shape._draw_faces
-
-
+		
 		if edges is None:
 			print(vertices)
 			print("whale")
@@ -247,9 +246,10 @@ class Renderer2D:
 				shape._matrix,
 				self.transform_matrix)
 
-			self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
+			self.add_to_draw_queue('poly', tverts, edges, faces, fill, stroke, 
+					stroke_weight, stroke_cap, stroke_join)
 			self.add_to_draw_queue('path', toverts, edges[:-1],
-							  None, None, stroke)
+							None, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 		else:
 			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke, 
 					stroke_weight, stroke_cap, stroke_join)
@@ -400,7 +400,7 @@ class Renderer2D:
 			for segment in line[1]:
 				for i in range(len(segment) - 1): # the data is sent to renderer in line segments
 					for j in [0, 0, 1, 0, 1, 1]: # all the vertices of triangles
-						if i + j -1 >= 0:
+						if i + j - 1 >= 0:
 							posPrev.append(line[0][segment[i + j - 1]])
 						else:
 							posPrev.append(line[0][segment[i + j]])
@@ -420,30 +420,32 @@ class Renderer2D:
 					cap_type.extend([line[4]]*6)
 					color.extend([line[2]]*6)
 
-		if len(pos) > 0:
-			posPrev = np.array(posPrev, np.float32)
-			posCurr = np.array(posCurr, np.float32)
-			posNext = np.array(posNext, np.float32)
-			markers = np.array(markers, np.float32)
-			side = np.array(side, np.float32)
-			pos = np.array(pos, np.float32)
-			linewidth = np.array(linewidth, np.float32)
-			join_type = np.array(join_type, np.float32)
-			cap_type = np.array(cap_type, np.float32)
-			color = np.array(color, np.float32)
+		if len(pos) == 0:
+			return 
 
-			self.line_prog['pos'] = gloo.VertexBuffer(pos)
-			self.line_prog['posPrev'] = gloo.VertexBuffer(posPrev)
-			self.line_prog['posCurr'] = gloo.VertexBuffer(posCurr)
-			self.line_prog['posNext'] = gloo.VertexBuffer(posNext)
-			self.line_prog['marker'] = gloo.VertexBuffer(markers)
-			self.line_prog['side'] = gloo.VertexBuffer(side)
-			self.line_prog['linewidth'] = gloo.VertexBuffer(linewidth)
-			self.line_prog['join_type'] = gloo.VertexBuffer(join_type)
-			self.line_prog['cap_type'] = gloo.VertexBuffer(cap_type)
-			self.line_prog["color"] = gloo.VertexBuffer(color)
+		posPrev = np.array(posPrev, np.float32)
+		posCurr = np.array(posCurr, np.float32)
+		posNext = np.array(posNext, np.float32)
+		markers = np.array(markers, np.float32)
+		side = np.array(side, np.float32)
+		pos = np.array(pos, np.float32)
+		linewidth = np.array(linewidth, np.float32)
+		join_type = np.array(join_type, np.float32)
+		cap_type = np.array(cap_type, np.float32)
+		color = np.array(color, np.float32)
 
-			self.line_prog.draw('triangles')
+		self.line_prog['pos'] = gloo.VertexBuffer(pos)
+		self.line_prog['posPrev'] = gloo.VertexBuffer(posPrev)
+		self.line_prog['posCurr'] = gloo.VertexBuffer(posCurr)
+		self.line_prog['posNext'] = gloo.VertexBuffer(posNext)
+		self.line_prog['marker'] = gloo.VertexBuffer(markers)
+		self.line_prog['side'] = gloo.VertexBuffer(side)
+		self.line_prog['linewidth'] = gloo.VertexBuffer(linewidth)
+		self.line_prog['join_type'] = gloo.VertexBuffer(join_type)
+		self.line_prog['cap_type'] = gloo.VertexBuffer(cap_type)
+		self.line_prog["color"] = gloo.VertexBuffer(color)
+
+		self.line_prog.draw('triangles')
 
 	def render_image(self, image, location, size):
 		"""Render the image.

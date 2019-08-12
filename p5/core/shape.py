@@ -23,7 +23,7 @@ import functools
 import math
 
 import numpy as np
-from vispy import geometry
+import triangle as tr
 
 from .color import Color
 from .. import sketch
@@ -102,13 +102,14 @@ class PShape:
     :type children: list
 
     """
-    def __init__(self, vertices=[], fill_color='auto',
+    def __init__(self, vertices=[], contour=[], fill_color='auto',
                  stroke_color='auto', stroke_weight="auto", 
                  stroke_join="auto", stroke_cap="auto", 
                  visible=False, attribs='closed',
                  children=[]):
         # basic properties of the shape
         self._vertices = np.array([])
+        self.contour = np.array(contour)
         self._edges = None
         self._outline = None
         self._outline_vertices = None
@@ -303,31 +304,46 @@ class PShape:
 
         return self._edges
 
+    def get_interior_point(self, shape_vertices):
+        # Returns a random point inside the shape
+        if len(shape_vertices) < 2:
+            return []
+
+        # Triangulate the shape
+        triangulate = tr.triangulate(dict(vertices=shape_vertices), "a10")
+        for vertex in triangulate["vertices"]:
+            if vertex not in shape_vertices:
+                return [vertex]
+        return []
+
     def _retriangulate(self):
         """Triangulate the shape
         """
-        self._tri = geometry.Triangulation(self.vertices, self.edges)
-        self._tri.triangulate()
-
-        if isinstance(self._tri.edges, np.ndarray):
-            self._tri_edges = self._tri.edges
-        else:
+        if len(self.vertices) < 2:
             self._tri_edges = np.array([])
-
-        self._tri_faces = self._tri.tris
-        self._tri_vertices = self._tri.pts
-
-        if isinstance(self._tri.edges, np.ndarray):
-            self._tri_edges = self._tri.edges
-        else:
-            self._tri_edges = np.array([])
-            
-        if isinstance(self._tri.tris, np.ndarray):
-            self._tri_faces = self._tri.tris
-        else:
             self._tri_faces = np.array([])
+            self._tri_vertices = self.vertices
+            return
 
-        self._tri_vertices = self._tri.pts
+        if len(self.contour) > 1:
+            n, _ = self.contour.shape
+            contour_edges = np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
+            triangulation_vertices = np.vstack([self.vertices, self.contour])
+            triangulation_segments = np.vstack([self.edges, contour_edges + len(self.edges)])
+            triangulate_parameters = dict(vertices=triangulation_vertices, 
+                segments=triangulation_segments, holes=self.get_interior_point(self.contour))
+            self._tri = tr.triangulate(triangulate_parameters, "p")
+        else:
+            triangulate_parameters = dict(vertices=self.vertices, segments=self.edges)
+            self._tri = tr.triangulate(triangulate_parameters)
+
+        if "segments" in self._tri.keys():
+            self._tri_edges = self._tri["segments"]
+        else:
+            self._tri_edges = self.edges
+
+        self._tri_faces = self._tri["triangles"]
+        self._tri_vertices = self._tri["vertices"]
 
     @property
     def _draw_outline_vertices(self):

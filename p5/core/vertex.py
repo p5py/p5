@@ -31,8 +31,10 @@ is_bezier = False
 is_curve = False
 is_quadratic = False
 is_contour = False
-is_first_contour = True
 
+
+__all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
+           'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']           
 def begin_shape(kind=None):
 	"""
 	Begin shape drawing.  This is a helpful way of generating
@@ -42,7 +44,7 @@ def begin_shape(kind=None):
     :type kind: str
 
     """
-	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types
+	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
 	if (
 		kind == "POINTS" or
 		kind == "LINES" or
@@ -56,6 +58,7 @@ def begin_shape(kind=None):
 	else:
 		shape_kind = None
 
+	is_contour = False
 	vertices = []
 	contour_vertices = []
 	vertices_types = []
@@ -83,7 +86,7 @@ def curve_vertex(x, y, z=0):
     :type z: float
     """
 
-	global is_curve, vertices, contour_vertices
+	global is_curve, vertices, contour_vertices, is_contour
 	global vertices_types, contour_vertices_types
 	is_curve = True
 
@@ -120,7 +123,7 @@ def bezier_vertex(x2, y2, x3, y3, x4, y4):
     :type y4: float
     """
 	global is_bezier, vertices, contour_vertices
-	global vertices_types, contour_vertices_types
+	global vertices_types, contour_vertices_types, is_contour
 	is_bezier = True
 
 	if p5.mode == "3D":
@@ -151,7 +154,7 @@ def quadratic_vertex(cx, cy, x3, y3):
 
     """
 	global is_quadratic, vertices, contour_vertices
-	global vertices_types, contour_vertices_types
+	global vertices_types, contour_vertices_types, is_contour
 	is_quadratic = True
 
 	if p5.mode == "3D":
@@ -182,14 +185,15 @@ def vertex(x, y, z=0):
     :type z: float
     """
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
+	global is_contour
 	if p5.mode == "3D":
 		return
 	else:
 		if is_contour:
-			contour_vertices.append((x, y, z))
+			contour_vertices.append((x, y))
 			contour_vertices_types.append(1)
 		else:
-			vertices.append((x, y, z))
+			vertices.append((x, y))
 			vertices_types.append(1)
 
 def begin_contour():
@@ -204,10 +208,86 @@ def begin_contour():
 	for internal shapes, draw vertices shape in counter-clockwise. 
 
 	"""
-	raise NotImplementedError("begin_contour() is not yet supported")
+	global is_contour, contour_vertices, contour_vertices_types
+	is_contour = True
+	contour_vertices = []
+	contour_vertices_types = []
 
 def end_contour():
-	raise NotImplementedError("end_contour() is not yet supported")
+	global is_contour
+	is_contour = False
+
+def get_curve_vertices(verts):
+	if len(verts) == 0:
+		return []
+
+	s = 1 - curves.curve_tightness_amount
+	shape_vertices = [(verts[1][0], verts[1][1], 0.0)]
+	steps = curves.curve_resolution
+
+	for i in range(1, len(verts) - 2):
+		v = verts[i]
+		start = (shape_vertices[len(shape_vertices) - 1][0], shape_vertices[len(shape_vertices) - 1][1])
+		c1 = [
+			v[0] + (s * verts[i + 1][0] - s * verts[i - 1][0]) / 6,
+			v[1] + (s * verts[i + 1][1] - s * verts[i - 1][1]) / 6
+		]
+		c2 = [
+			verts[i + 1][0] +
+			(s * verts[i][0] - s * verts[i + 2][0]) / 6,
+			verts[i + 1][1] + (s * verts[i][1] - s * verts[i + 2][1]) / 6
+		]
+		stop = [verts[i + 1][0], verts[i + 1][1]]
+		
+		for i in range(steps + 1):
+			t = i / steps
+			p = curves.bezier_point(start, c1, c2, stop, t)
+			shape_vertices.append(p[:3])
+
+	return shape_vertices
+
+def get_bezier_vertices(verts, vert_types):
+	if len(verts) == 0:
+		return []
+
+	shape_vertices = []
+	steps = curves.curve_resolution
+	for i in range(len(verts)):
+		if vert_types[i] == 1 or vert_types[i] == 2:
+			shape_vertices.append((verts[i][0], verts[i][1], 0.0))
+		else:
+			start = (shape_vertices[len(shape_vertices) - 1][0], shape_vertices[len(shape_vertices) - 1][1])
+			c1 = [verts[i][0], verts[i][1]]
+			c2 = [verts[i][2], verts[i][3]]
+			stop = [verts[i][4], verts[i][5]]
+
+			for i in range(steps + 1):
+					t = i / steps
+					p = curves.bezier_point(start, c1, c2, stop, t)
+					shape_vertices.append(p[:3])
+
+	return shape_vertices
+
+def get_quadratic_vertices(verts, vert_types):
+	if len(verts) == 0:
+		return []
+	
+	shape_vertices = []
+	steps = curves.curve_resolution
+	for i in range(len(verts)):
+		if vert_types[i] == 1 or vert_types[i] == 2:
+			shape_vertices.append((verts[i][0], verts[i][1], 0.0))
+		else:
+			start = (shape_vertices[len(shape_vertices) - 1][0], shape_vertices[len(shape_vertices) - 1][1])
+			control = [verts[i][0], verts[i][1]]
+			stop = [verts[i][2], verts[i][3]]
+
+			for i in range(steps + 1):
+				t = i / steps
+				p = curves.quadratic_point(start, control, stop, t)
+				shape_vertices.append(p[:3])
+
+	return shape_vertices
 
 @primitives._draw_on_return
 def end_shape(mode=""):
@@ -221,7 +301,7 @@ def end_shape(mode=""):
     :type mode: str
 
     """
-	global vertices, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
+	global vertices, vertices_types, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
 
 	if len(vertices) == 0:
 		return
@@ -239,70 +319,14 @@ def end_shape(mode=""):
 	else:
 		attribs = "open"
 
-
 	shape = PShape([(0,0)], children=[])
 	if is_curve and (shape_kind == "POLYGON" or shape_kind == None):
 		if len(vertices) > 3:
-			b = []
-			s = 1 - curves.curve_tightness_amount
-			shape_vertices = [(vertices[1][0], vertices[1][1], 0.0)]
-			steps = curves.curve_resolution
-
-			for i in range(1, len(vertices) - 2):
-				v = vertices[i]
-				start = (shape_vertices[len(shape_vertices) - 1][0], shape_vertices[len(shape_vertices) - 1][1])
-				c1 = [
-					v[0] + (s * vertices[i + 1][0] - s * vertices[i - 1][0]) / 6,
-					v[1] + (s * vertices[i + 1][1] - s * vertices[i - 1][1]) / 6
-				]
-				c2 = [
-					vertices[i + 1][0] +
-					(s * vertices[i][0] - s * vertices[i + 2][0]) / 6,
-					vertices[i + 1][1] + (s * vertices[i][1] - s * vertices[i + 2][1]) / 6
-				]
-				stop = [vertices[i + 1][0], vertices[i + 1][1]]
-				
-				for i in range(steps + 1):
-					t = i / steps
-					p = curves.bezier_point(start, c1, c2, stop, t)
-					shape_vertices.append(p[:3])
-
-			shape.add_child(PShape(shape_vertices, attribs=attribs))
+			shape.add_child(PShape(get_curve_vertices(vertices), contour=get_curve_vertices(contour_vertices), attribs=attribs))
 	elif is_bezier and (shape_kind == "POLYGON" or shape_kind == None):
-		shape_vertices = []
-		steps = curves.curve_resolution
-		for i in range(len(vertices)):
-			if vertices_types[i] == 1 or vertices_types[i] == 2:
-				shape_vertices.append((vertices[i][0], vertices[i][1], 0.0))
-			else:
-				start = (shape_vertices[len(shape_vertices) - 1][0], shape_vertices[len(shape_vertices) - 1][1])
-				c1 = [vertices[i][0], vertices[i][1]]
-				c2 = [vertices[i][2], vertices[i][3]]
-				stop = [vertices[i][4], vertices[i][5]]
-
-				for i in range(steps + 1):
-						t = i / steps
-						p = curves.bezier_point(start, c1, c2, stop, t)
-						shape_vertices.append(p[:3])
-
-		shape.add_child(PShape(shape_vertices, attribs=attribs))
+		shape.add_child(PShape(get_bezier_vertices(vertices, vertices_types), contour=get_bezier_vertices(contour_vertices, contour_vertices_types), attribs=attribs))
 	elif is_quadratic and (shape_kind == "POLYGON" or shape_kind == None):
-		shape_vertices = []
-		steps = curves.curve_resolution
-		for i in range(len(vertices)):
-			if vertices_types[i] == 1 or vertices_types[i] == 2:
-				shape_vertices.append((vertices[i][0], vertices[i][1], 0.0))
-			else:
-				start = (shape_vertices[len(shape_vertices) - 1][0], shape_vertices[len(shape_vertices) - 1][1])
-				control = [vertices[i][0], vertices[i][1]]
-				stop = [vertices[i][2], vertices[i][3]]
-
-				for i in range(steps + 1):
-						t = i / steps
-						p = curves.quadratic_point(start, control, stop, t)
-						shape_vertices.append(p[:3])
-
-		shape.add_child(PShape(shape_vertices, attribs=attribs))
+		shape.add_child(PShape(get_quadratic_vertices(vertices, vertices_types), contour=get_bezier_vertices(contour_vertices, contour_vertices_types), attribs=attribs))
 	else:
 		if shape_kind == "POINTS":
 			shape.add_child(PShape(vertices, attribs='point'))
@@ -343,12 +367,11 @@ def end_shape(mode=""):
 				for i in range(0, len(vertices) - 2, 2):
 					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 3], vertices[i + 2]]))
 		else:
-			shape.add_child(PShape(vertices, attribs=attribs))
+			shape.add_child(PShape(vertices, contour=contour_vertices, attribs=attribs))
 
 	is_bezier = False
 	is_curve = False
 	is_quadratic = False
 	is_contour = False
-	is_first_contour = True
 	
 	return shape
