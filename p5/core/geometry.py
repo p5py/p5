@@ -15,13 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-"""3D geometry class for p5py
+
+"""
+3D geometry class for p5py
 """
 
 import numpy as np
 import math
 
 class Geometry:
+	"""
+	Geometry class for all 3D shapes
+
+    :param detail_x: number of triangle subdivisions in x-dimension
+    :type detail_x: integer
+
+    :param detail_y: number of triangle subdivisions in y-dimension
+    :type detail_y: integer
+
+	"""
 	def __init__(self, detail_x=1, detail_y=1):
 		self.vertices = []
 
@@ -45,6 +57,9 @@ class Geometry:
 		self.matrix = np.identity(4)
 
 	def reset(self):
+		"""
+		Reset geometry parameters
+		"""
 		self.vertices = []
 		self.line_vertices = []
 		self.line_normals = []
@@ -54,6 +69,9 @@ class Geometry:
 		self.edges = []
 
 	def compute_faces(self):
+		"""
+		Adds the faces for the geometry for predefined order of vertices
+		"""
 		self.faces = []
 		sliceCount = self.detail_x + 1
 		for i in range(self.detail_y):
@@ -66,6 +84,9 @@ class Geometry:
 				self.faces.append([d, b, c])
 
 	def make_triangle_edges(self):
+		"""
+		Adds the edges to the geometry based on the faces
+		"""
 		self.edges = []
 		for j in range(len(self.faces)):
 			self.edges.append([self.faces[j][0], self.faces[j][1]])
@@ -73,6 +94,9 @@ class Geometry:
 			self.edges.append([self.faces[j][2], self.faces[j][0]])
 
 	def get_face_normal(self, faceId):
+		"""
+		Returns the normal for a given face
+		"""
 		face = self.faces[faceId]
 		vA = np.array(self.vertices[face[0]])
 		vB = np.array(self.vertices[face[1]])
@@ -89,6 +113,9 @@ class Geometry:
 		return n*math.sin(sinAlpha)/ln
 
 	def compute_normals(self):
+		"""
+		Compute normals for every vertex
+		"""
 		self.vertex_normals = []
 		for iv in range(len(self.vertices)):
 			self.vertex_normals.append([0, 0, 0])
