@@ -47,7 +47,6 @@ def _ensure_editable(func):
 
 def _apply_transform(func):
     """Apply the matrix transformation to the shape.
-
     """
     @functools.wraps(func)
     def mfunc(instance, *args, **kwargs):
@@ -58,7 +57,6 @@ def _apply_transform(func):
 
 def _call_on_children(func):
     """Call the method on all child shapes
-
     """
     @functools.wraps(func)
     def rfunc(instance, *args, **kwargs):
@@ -72,41 +70,34 @@ class PShape:
     """Custom shape class for p5.
 
     :param vertices: List of (polygonal) vertices for the shape.
-
     :type vertices: list | np.ndarray
 
     :param fill_color: Fill color of the shape (default: 'auto' i.e.,
         the current renderer fill)
-
     :type fill_color: 'auto' | None | tuple | p5.Color
 
     :param stroke_color: Stroke color of the shape (default: 'auto'
         i.e., the current renderer stroke color)
-
     :type stroke_color: 'auto' | None | tuple | p5.color
 
     :param visible: toggles shape visibility (default: False)
-
     :type visible: bool
-
 
     :param attribs: space-separated list of attributes that control
         shape drawing. Each attribute should be one of {'point',
         'path', 'open', 'closed'}. (default: 'closed')
-
     :type attribs: str
 
     :param children: List of sub-shapes for the current shape
         (default: [])
-
     :type children: list
 
     """
-    def __init__(self, vertices=[], contour=[], fill_color='auto',
+    def __init__(self, vertices=[], fill_color='auto',
                  stroke_color='auto', stroke_weight="auto", 
                  stroke_join="auto", stroke_cap="auto", 
                  visible=False, attribs='closed',
-                 children=[]):
+                 children=[], contour=[]):
         # basic properties of the shape
         self._vertices = np.array([])
         self.contour = np.array(contour)
@@ -463,7 +454,6 @@ class PShape:
         """Apply the given transformation matrix to the shape.
 
         :param mat: the 4x4 matrix to be applied to the current shape.
-
         :type mat: (4, 4) np.ndarray
 
         """
@@ -487,23 +477,19 @@ class PShape:
 
         :param x: The displacement amount in the x-direction (controls
             the left/right displacement)
-
         :type x: int
 
         :param y: The displacement amount in the y-direction (controls
             the up/down displacement)
-
         :type y: int
 
         :param z: The displacement amount in the z-direction (0 by
             default). This controls the displacement away-from/towards
             the screen.
-
         :type z: int
 
         :returns: The translation matrix applied to the transform
             matrix.
-
         :rtype: np.ndarray
 
         """
@@ -516,17 +502,14 @@ class PShape:
         """Rotate the shape by the given angle along the given axis.
 
         :param theta: The angle by which to rotate (in radians)
-
         :type theta: float
 
         :param axis: The axis along which to rotate (defaults to the
             z-axis)
-
         :type axis: np.ndarray | list
 
         :returns: The rotation matrix used to apply the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -538,12 +521,10 @@ class PShape:
         """Rotate the shape along the x axis.
 
         :param theta: angle by which to rotate (in radians)
-
         :type theta: float
 
         :returns: The rotation matrix used to apply the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -553,12 +534,10 @@ class PShape:
         """Rotate the shape along the y axis.
 
         :param theta: angle by which to rotate (in radians)
-
         :type theta: float
 
         :returns: The rotation matrix used to apply the
              transformation.
-
         :rtype: np.ndarray
 
         """
@@ -568,12 +547,10 @@ class PShape:
         """Rotate the shape along the z axis.
 
         :param theta: angle by which to rotate (in radians)
-
         :type theta: float
 
         :returns: The rotation matrix used to apply the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -585,20 +562,16 @@ class PShape:
         """Scale the shape by the given factor.
 
         :param sx: scale factor along the x-axis.
-
         :type sx: float
 
         :param sy: scale factor along the y-axis (defaults to None)
-
         :type sy: float
 
         :param sz: scale factor along the z-axis (defaults to None)
-
         :type sz: float
 
         :returns: The transformation matrix used to appy the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -616,11 +589,9 @@ class PShape:
         """Shear shape along the x-axis.
 
         :param theta: angle to shear by (in radians)
-
         :type theta: float
 
         :returns: The shear matrix used to apply the tranformation.
-
         :rtype: np.ndarray
 
         """
@@ -634,11 +605,9 @@ class PShape:
         """Shear shape along the y-axis.
 
         :param theta: angle to shear by (in radians)
-
         :type theta: float
 
         :returns: The shear matrix used to apply the transformation.
-
         :rtype: np.ndarray
 
         """
