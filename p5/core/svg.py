@@ -54,6 +54,8 @@ def get_style(element, style):
 					return value
 				if style == "stroke-width":
 					return int(value.replace("px", ""))
+				if style == "stroke-opacity":
+					return float(value)
 
 	if style in default_values.keys():
 		return default_values[style]
@@ -78,7 +80,8 @@ def parse_rect(element):
 		(x, y + height)
 		], children=[], 
 		fill_color=fill, stroke_weight=stroke_weight, 
-		stroke_color=stroke, stroke_cap=stroke_cap)
+		stroke_color=stroke, stroke_cap=stroke_cap,
+		stroke_join=default_values["stroke-join"])
 
 def parse_circle(element):
 	cx = float(element.get('cx'))
@@ -111,7 +114,8 @@ def parse_line(element):
 
 	return PShape([(x1, y1), (x2, y2)], attribs='path', 
 		fill_color=fill, stroke_weight=stroke_weight, 
-		stroke_color=stroke, stroke_cap=stroke_cap)
+		stroke_color=stroke, stroke_cap=stroke_cap,
+		stroke_join=default_values["stroke-join"])
 
 def parse_ellipse(element):
 	cx = float(element.get('cx'))
@@ -124,13 +128,14 @@ def parse_ellipse(element):
 	stroke = Color(get_style(element, "stroke"))
 	stroke_cap = get_style(element, "stroke-cap")
 
+
 	return primitives.Arc(
 		(cx, cy),
 		(rx/2, ry/2),
 		0, 2*math.pi, 
 		"CHORD", 
 		fill_color=fill, stroke_weight=stroke_weight, 
-		stroke_color=stroke, stroke_cap=2)	
+		stroke_color=stroke, stroke_cap=2, stroke_join=default_values["stroke-join"])	
 
 parser_function = {
 	# tag: parser
@@ -187,6 +192,7 @@ def parser(element):
 			elif p[0] == "translate":
 				mat = matrix.translation_matrix(float(p[1]), float(p[2]))
 				transform_matrix = transform_matrix.dot(mat)
+
 	shape.transform_matrix(transform_matrix)
 
 	for e in element:
