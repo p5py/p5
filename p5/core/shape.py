@@ -218,6 +218,7 @@ class PShape:
 
     def _sanitize_vertex_list(self, vertices, tdim=2, sdim=3):
         """Convert all vertices to the given dimensions.
+        Removes consecutive duplicates to prevent errors in triangulation.
 
         :param vertices: List of vertices
         :type vertices: list
@@ -237,8 +238,15 @@ class PShape:
 
         """
         sanitized = []
+        for i in range(len(vertices)):
+            if i < len(vertices) - 1:
+                if vertices[i] == vertices[i + 1]:
+                    continue
+            elif i == len(vertices) - 1 and i != 0:
+                if vertices[i] == vertices[0]:
+                    continue
 
-        for v in vertices:
+            v = vertices[i]
             if (len(v) > max(tdim, sdim)) or (len(v) < min(tdim, sdim)):
                 raise ValueError("unexpected vertex dimension")
 
@@ -257,8 +265,9 @@ class PShape:
 
     @vertices.setter
     def vertices(self, new_vertices):
-        n = len(new_vertices)
         self._vertices = self._sanitize_vertex_list(new_vertices)
+
+        n = len(self._vertices)
         self._outline_vertices = np.hstack([self._vertices, np.zeros((n, 1))])
         self._tri_vertices = None
         self._tri_edges = None
@@ -326,7 +335,7 @@ class PShape:
             self._tri = tr.triangulate(triangulate_parameters, "p")
         else:
             triangulate_parameters = dict(vertices=self.vertices, segments=self.edges)
-            self._tri = tr.triangulate(triangulate_parameters)
+            self._tri = tr.triangulate(triangulate_parameters, "p")
 
         if "segments" in self._tri.keys():
             self._tri_edges = self._tri["segments"]
