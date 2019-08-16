@@ -308,7 +308,7 @@ def truncated_cone(bottom_radius, top_radius, height, detail_x, detail_y, bottom
                 start_index + detail_x + jj
                 ])
 
-            start_index += detail_x*2
+        start_index += detail_x*2
 
     for yy in range(detail_y):
         for ii in range(detail_x):
