@@ -310,10 +310,11 @@ class PShape:
             return []
 
         # Triangulate the shape
-        triangulate = tr.triangulate(dict(vertices=shape_vertices), "a10")
+        triangulate = tr.triangulate(dict(vertices=shape_vertices), "a5")
         for vertex in triangulate["vertices"]:
             if vertex not in shape_vertices:
                 return [vertex]
+
         return []
 
     def _retriangulate(self):
@@ -332,6 +333,7 @@ class PShape:
             triangulation_segments = np.vstack([self.edges, contour_edges + len(self.edges)])
             triangulate_parameters = dict(vertices=triangulation_vertices, 
                 segments=triangulation_segments, holes=self.get_interior_point(self.contour))
+
             self._tri = tr.triangulate(triangulate_parameters, "p")
         else:
             triangulate_parameters = dict(vertices=self.vertices, segments=self.edges)
