@@ -108,7 +108,7 @@ class Arc(PShape):
         e = self._compute_outline_edges()
         if 'chord' in self.attribs:
             return np.concatenate([e, [[1, n - 1]]])
-        return np.concatenate([e, [[0, 1]], [[0, n]]])
+        return np.concatenate([e, [[0, n - 1]]])
 
     @property
     def _draw_faces(self):

@@ -239,17 +239,8 @@ class Renderer2D:
 			exit()
 
 		if 'open' in shape.attribs:
-			overtices = shape._draw_outline_vertices
-			no, _  = overtices.shape
-			toverts = self._transform_vertices(
-				np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
-				shape._matrix,
-				self.transform_matrix)
-
-			self.add_to_draw_queue('poly', tverts, edges, faces, fill, stroke, 
+			self.add_to_draw_queue('poly', tverts, edges[:-1], faces, fill, stroke, 
 					stroke_weight, stroke_cap, stroke_join)
-			self.add_to_draw_queue('path', toverts, edges[:-1],
-							None, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 		else:
 			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke, 
 					stroke_weight, stroke_cap, stroke_join)
