@@ -118,9 +118,6 @@ class Arc(PShape):
         ar = np.arange(1, n - 1).reshape((n - 2, 1))
         f = np.hstack([np.zeros((n - 2, 1)), ar, ar + 1])
 
-        if 'open' in self.attribs or 'chord' in self.attribs:
-            return np.vstack([f, np.array([[0, n - 1, 1]])])
-
         return f
 
     @property
