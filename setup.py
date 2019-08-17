@@ -15,6 +15,7 @@ requires = [
     'glfw',
     'numpy',
     'Pillow',
+    'triangle',
 ]
 
 meta_data = {}
