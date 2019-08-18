@@ -306,7 +306,7 @@ class Renderer2D:
 				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
 					continue
 
-			if current_shape == "point" or current_shape == "triangles":
+			if current_shape == "points" or current_shape == "triangles":
 				self.render_default(current_shape, current_queue)
 			elif current_shape == "lines":
 				self.render_line(current_queue)
