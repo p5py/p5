@@ -15,11 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import contextlib
-import functools
 import textwrap
 
-import PIL
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont

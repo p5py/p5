@@ -21,7 +21,6 @@ import functools
 import builtins
 
 import numpy as np
-import PIL
 from PIL import Image
 from PIL import ImageFilter
 from PIL import ImageChops
@@ -30,7 +29,6 @@ from vispy import gloo
 from . import p5
 
 from . import color
-from .. import sketch
 from ..pmath import constrain
 from ..pmath.utils import _is_numeric
 from .structure import push_style
@@ -469,7 +467,7 @@ class PImage:
         elif mode == 'burn':
             raise NotImplementedError
         else:
-            raise KeyError("'{}' blend mode not found".format(mdoe.upper()))
+            raise KeyError("'{}' blend mode not found".format(mode.upper()))
 
         self._reload = True
         return self

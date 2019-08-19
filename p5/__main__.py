@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys
 from . import _p5
 
 # we should be parsing sys args here and expose a series of commands

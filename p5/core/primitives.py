@@ -16,20 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from collections import namedtuple
 import functools
 import math
-from math import sin
-from math import cos
-from math import radians
 
 import numpy as np
 
 from ..pmath import Point
 from ..pmath import curves
-from ..pmath import remap
 from ..pmath.utils import SINCOS
-from ..pmath.utils import SINCOS_PRECISION
 
 from .shape import PShape
 

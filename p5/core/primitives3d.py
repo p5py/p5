@@ -19,8 +19,6 @@
 import functools
 import math
 
-import numpy as np
-
 from . import p5
 from .geometry import Geometry
 

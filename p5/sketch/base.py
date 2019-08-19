@@ -19,15 +19,9 @@
 """Base module for a sketch."""
 
 import builtins
-from functools import wraps
-import time
 
 from PIL import Image
-import numpy as np
-import vispy
 from vispy import app
-from vispy import gloo
-from vispy import io
 
 from ..core import p5
 

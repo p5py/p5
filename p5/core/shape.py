@@ -20,13 +20,11 @@
 
 import contextlib
 import functools
-import math
 
 import numpy as np
 import triangle as tr
 
 from .color import Color
-from .. import sketch
 from ..pmath import matrix
 
 from . import p5

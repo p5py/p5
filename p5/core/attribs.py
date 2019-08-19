@@ -19,14 +19,11 @@
 import builtins
 
 from .color import Color
-from .color import color_mode
 from .image import image
 from .image import image_mode
 from .image import PImage
-from .primitives import rect
 from .structure import push_style
 from .transforms import push_matrix
-from .transforms import reset_transforms
 from .constants import *
 
 from . import p5
@@ -179,7 +176,7 @@ def background(*args, **kwargs):
     """
     if len(args) == 1 and isinstance(args[0], PImage):
         background_image = args[0]
-        sketch_size = (width, height)
+        sketch_size = (builtins.width, builtins.height)
 
         if sketch_size != background_image.size:
             msg = "Image dimension {} and sketch dimension {} do not match"

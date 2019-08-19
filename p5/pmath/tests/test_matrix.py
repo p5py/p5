@@ -15,7 +15,6 @@ class TestMatrix(unittest.TestCase):
         self.assertTrue(np.array_equal(matrix._normalize(v), v/5.0))
 
     def test_scale_transform(self):
-        I = np.identity(4)
         T = matrix.scale_transform(1, 2, 3)
         R = np.array([
             [1, 0, 0, 0],

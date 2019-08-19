@@ -21,8 +21,6 @@ import math
 import re
 import numpy as np
 
-from ..pmath import Point
-
 from . import Color
 from . import PShape
 from . import primitives

@@ -17,11 +17,9 @@
 #
 
 from contextlib import contextmanager
-import math
 
 import numpy as np
 
-from ..pmath import Vector
 from ..pmath import matrix
 
 from . import p5

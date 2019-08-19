@@ -26,7 +26,6 @@ from vispy import gloo
 from vispy.gloo import FrameBuffer
 from vispy.gloo import IndexBuffer
 from vispy.gloo import Program
-from vispy.gloo import RenderBuffer
 from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 

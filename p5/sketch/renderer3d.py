@@ -26,7 +26,6 @@ from vispy import gloo
 from vispy.gloo import FrameBuffer
 from vispy.gloo import IndexBuffer
 from vispy.gloo import Program
-from vispy.gloo import RenderBuffer
 from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 
@@ -221,10 +220,6 @@ class Renderer3D:
 			
 			fill = shape.fill.normalized if shape.fill else None
 			stroke = shape.stroke.normalized if shape.stroke else None
-			stroke_weight = shape.stroke_weight
-			stroke_cap = shape.stroke_cap
-			stroke_join = shape.stroke_join
-
 			edges = shape._draw_edges
 			faces = shape._draw_faces
 

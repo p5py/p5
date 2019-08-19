@@ -18,14 +18,12 @@
 """Userspace functions"""
 
 import __main__
-import os
 
 import math
 import numpy as np
 import builtins
 from functools import wraps
 
-import vispy
 from vispy import app
 
 from .base import Sketch
