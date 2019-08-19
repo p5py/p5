@@ -25,6 +25,7 @@ website <https://processing.org/tutorials/>`_.
    2D transformations
    network
    data
+   pshape
 
 .. rubric:: Beginner tutorials
 

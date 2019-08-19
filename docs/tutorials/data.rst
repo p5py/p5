@@ -431,3 +431,320 @@ In the code below, the function returns a boolean value (true or false) dependin
 Data that is not in a Standardized Format
 =========================================
 
+What if your data is not in a standard format like a table, how do you deal with it then? Python's requests library can be used to pull text from an URL.
+
+.. code:: python
+
+	lines = requests.get("http://www.yahoo.com")
+
+When you send a URL path into `urllib.request.urlopen()`, you get back the raw HTML (Hypertext Markup Language) source of the requested web page. It’s the same stuff that appears upon selecting “View Source” from a browser’s menu options. You don’t need to be an HTML expert to follow this section, but if you are not familiar at all with HTML, you might want to read http://en.wikipedia.org/wiki/HTML.
+
+Unlike with the comma-delimited data from a text file that was specially formatted for use in a Processing sketch, it’s not practical to have the resulting raw HTML stored in an array of strings (each element representing one line from the source). Converting the array into one long string can make things a bit simpler. As you saw earlier in the chapter, this can be achieved using join().
+
+.. code:: python
+
+	onelongstring = " ".join(lines)
+
+When pulling raw HTML from a web page, it’s likely you do not want all of the source, but just a small piece of it. Perhaps you’re looking for weather information, a stock quote, or a news headline. You can take advantage of the text manipulation functions you learned — index(), substring(), and len() — to find pieces of data within a large block of text. Take, for example, the following String object:
+
+.. code:: python
+
+	stuff = "Number of apples:62. Boy, do I like apples or what!"
+
+Let’s say I want to pull out the number of apples from the above text. My algorithm would be as follows:
+
+1. Find the end of the substring “apples:” Call it start.
+
+2. Find the first period after “apples:” Call it end.
+
+3. Make a substring of the characters between start and end.
+
+4. Convert the string to a number (if I want to use it as such).
+
+In code, this looks like:
+
+.. code:: python
+
+	stuff = "Number of apples:62. Boy, do I like apples or what!"
+	start = stuff.index("apples:" ) + 7 # STEP 1 
+	# The index where a string ends can be found by 
+	# searching for that string and adding its length (here, 8).
+	end = stuff.index(".", start) # STEP 2
+	apples = stuff[start: end] # STEP 3
+	apple_no = int(apples) # STEP 4
+
+The above code will do the trick, but I should be a bit more careful to make sure I don’t run into any errors if I do not find the string I am searching for. I can add some error checking and generalize the code into a function:
+
+.. code:: python
+
+	# A function that returns a substring between two substrings. 
+	# If the beginning of end "tag" is not found, the function returns an empty string.
+	def giveMeTextBetween(s, startTag, endTag):
+		# Find the index of the beginning tag
+		try:
+			startIndex = s.index(startTag) # STEP 1 
+		except ValueError:
+			return ""
+		# Move to the end of the beginning tag
+		startIndex += len(startTag)
+		try:
+			# Find the index of the end tag
+			endIndex = s.index(endTag, startIndex)
+		except ValueError:
+			return""
+			
+		return s[startIndex: endIndex]
+
+	stuff = "Number of apples:62. Boy, do I like apples or what!"
+	print(giveMeTextBetween(stuff, "apples:", '.'))
+
+
+With this technique, you are ready to connect to a website from within Processing and grab data to use in your sketches. For example, you could read the HTML source from nytimes.com and look for today’s headlines, search finance.yahoo.com for stock quotes, count how many times the word “flower” appears on your favorite blog, and so on. However, HTML is an ugly, scary place with inconsistently formatted pages that are difficult to reverse engineer and parse effectively. Not to mention the fact that companies change the source code of web pages rather often, so any example that I might make while I am writing this paragraph might break by the time you read this paragraph.
+
+For grabbing data from the web, an XML (Extensible Markup Language) or JSON (JavaScript Object Notation) feed will prove to be more reliable and easier to parse. Unlike HTML (which is designed to make content viewable by a human’s eyes) XML and JSON are designed to make content viewable by a computer and facilitate the sharing of data across different systems. Most data (news, weather, and more) is available this way, and I will look at examples in #beginner_xml and #JSON. Though much less desirable, manual HTML parsing is still useful for a couple reasons. First, it never hurts to practice text manipulation techniques that reinforce key programming concepts. But more importantly, sometimes there is data you really want that is not available in an API format, and the only way to get it is with such a technique. (I should also mention that regular expressions, an incredibly powerful techinque in text pattern matching, could also be employed here. As much as I love regex, it’s unfortunately beyond the scope of this tutorial.)
+
+An example of data only available as HTML is the Internet Movie Database. IMDb contains information about movies sorted by year, genre, ratings, etc. For each movie, you can find the cast and crew list, a plot summary, running time, a movie poster image, the list goes on. However, IMDb has no API and does not provide its data as XML or JSON. Pulling the data into Processing therefore requires a bit of detective work. Let's look at the page for the Shaun the Sheep Movie
+
+.. image:: ./data-res/fig_18_09_shaunsheep.png
+   :align: center
+
+Looking in the HTML source from the above URL, I find a giant mess of markup.
+
+.. image:: ./data-res/fig_18_10_shaunsheep_sourc.png
+   :align: center
+
+It’s up to me to pore through the raw source and find the data I am looking for. Let's say I want to know the running time of the movie and grab the movie poster image. After some digging, I find that the movie is 139 minutes long as listed in the following HTML.
+
+.. code:: html
+
+	<div class="txt-block">
+	  <h4 class="inline">Runtime:</h4> 
+	    <time itemprop="duration" datetime="PT139M">139 min</time>
+	</div>
+
+For any given movie, the running time itself will be variable, but the HTML structure of the page will stay the same. I can therefore deduce that running time will always appear in between:
+
+.. code:: html
+
+	<time itemprop="duration" datetime="PT139M">
+
+and 
+
+.. code:: html
+
+	</time>
+
+Knowing where the data starts and ends, I can use giveMeTextBetween() to pull out the running time. A quote in Java marks the beginning or end of a string. So how do you include an actual quote in a String object? The answer is via an “escape” sequence. A quote can be included using a backward slash, followed by a quote. For example: String q = "This String has a quote \"in it";
+
+.. code:: python
+
+	import urllib.request
+
+	q = "This String has a quote \"in it"
+	url = "http://www.imdb.com/title/tt0058331"
+	response = urllib.request.urlopen(url)
+	lines = []
+	for line in response.readlines():
+		lines.append(line.decode("utf-8"))
+
+	html = " ".join(lines)
+
+	start = ""
+	end = ""
+	runningtime = giveMeTextBetween(html, start, end)
+	print(runningtime)
+
+The following code retrieves both the running time and movie poster iamge from IMDb and displays it onscreen.
+
+**Parsing IMDb Manually **
+
+.. image:: ./data-res/fig_18_11_parsing_imdb.png
+   :align: center
+
+.. code:: python
+
+	import requests
+	from p5 import *
+
+	poster = None
+	runningtime = None
+
+	def setup():
+		size(300, 350)
+		loadData()
+
+	def draw():
+		global poster, runningtime
+		# Display all the stuff I want to display
+		background(255)
+		image(poster, (10, 10), 164, 250)
+		fill(0)
+		text("Shaun the Sheep", (10, 300))
+		text(runningtime, (10, 320))
+
+	def loadData():
+		global poster, runningtime
+		url = "http://www.imdb.com/title/tt2872750/"
+		# Get the raw HTML source into an array of strings (each line is one element in the array).
+		# The next step is to turn array into one long string with join().
+		
+		html = requests.get(url).text
+		start = ""
+		end = ""
+		runningtime = giveMeTextBetween(html, start, end) # Searching for running time.
+
+		start = ""
+		# Search for the URL of the poster image.
+		imgUrl = giveMeTextBetween(html, start, end)
+		# Now, load that image!
+		poster = load_image(imgUrl)
+
+	# A function that returns a substring between two substrings. 
+	# If the beginning of end "tag" is not found, the function returns an empty string.
+	def giveMeTextBetween(s, startTag, endTag):
+		# Find the index of the beginning tag
+		try:
+			startIndex = s.index(startTag) # STEP 1 
+		except ValueError:
+			return ""
+		# Move to the end of the beginning tag
+		startIndex += len(startTag)
+		try:
+			# Find the index of the end tag
+			endIndex = s.index(endTag, startIndex)
+		except ValueError:
+			return""
+
+		return s[startIndex: endIndex]
+
+	if __name__ == '__main__':
+		run()
+
+Text Analysis
+=============
+
+Loading text from a URL need not only be an exercise in parsing out small bits of information. It’s possible with Processing to analyze large amounts of text found on the web from news feeds, articles, and speeches, to entire books. A nice source is Project Gutenberg which makes available thousands of public domain texts. Algorithms for analyzing text merits an entire book itself, but let’s look at some basic techniques.
+
+A text concordance is an alphabetical list of words that appear in a book or body of text along with contextual information. A sophisticated concordance might keep a list of where each word appears (like an index) as well as which words appear next to which other words. In this case, I'm going to create a simple concordance, one that simply stores a list of words and their corresponding counts, i.e., how many times they appeared in the text. Concordances can be used for text analysis applications such as spam filtering or sentiment analysis. To accomplish this task, I am going to use the Processing built-in class IntDict.
+
+
+As you learned earlier, an array is an ordered list of variables. Each element of the array is numbered and be accessed by its numeric index.
+
+.. image:: ./data-res/fig_18_12_traditional_arra.png
+   :align: center
+
+However, what if instead of numbering the elements of an array you could name them? This element is named “Sue,” this one “Bob,” this one “Jane,” and so on and so forth. In programming, this kind of data structure is often referred to as an associative array, map, or dictionary. It’s a collection of (key, value) pairs. Imagine you had a dictionary of people's ages. When you look up “Sue” (the key), the definition, or value, is her age, 24.
+
+.. image:: ./data-res/fig_18_13_associative_arra.png
+   :align: center
+
+Associative arrays can be incredibly convenient for various applications. For example, you could keep a list of student IDs (student name, id) or a list of prices (product name, price) in a dictionary. Here a dictionary is the perfect data structure to hold the concordance. Each element of the dictionary is a word paired with its count.
+
+Creating an IntDict is as easy as calling an empty constructor. Let's say you want a dictionary to keep track of an inventory of supplies.
+
+.. code:: python
+
+	inventory = {}
+
+Values can be paired with their keys using the following syntax:
+
+.. code:: python
+	
+	inventory["pencils"] = 10
+	inventory["paper clips"] = 128
+	inventory["pens"] = 16
+
+**Text Concordance Using IntDict **
+
+
+
+.. image:: ./data-res/fig_18_14_concordance_viz.png
+   :align: center
+
+If your data is available via a standardized format such as XML or JSON, the process of manually searching through text for individual pieces of data is no longer required. XML is designed to facilitate the sharing of data across different systems, and you can retrieve that data using the built-in Processing XML class.
+
+XML organizes information in a tree structure. Let’s imagine a list of students. Each student has an ID number, name, address, email, and telephone number. Each student’s address has a city, state, and zip code. An XML tree for this dataset might look like the following:
+
+.. image:: ./data-res/data_06_xml.jpg
+   :align: center
+
+.. code:: XML
+
+	<?xml version = "1.0" encoding = "UTF-8 "?>
+	<students>
+	  <student>
+	    <id>001</id>
+	    <name>Daniel Shiffman</name>
+	    <phone>555-555-5555</phone>
+	    <email>daniel@shiffman.net</email>
+	    <address>
+	      <street>123 Processing Way</street>
+	      <city>Loops</city>
+	      <state>New York</state>
+	      <zip>01234</zip>
+	    </address>
+	  </student>
+	  <student>
+	    <id>002</id>
+	    <name>Zoog</name>
+	    <phone>555-555-5555</phone>
+	    <email>zoog@planetzoron.uni</email>
+	    <address>
+	      <street>45.3 Nebula 5</street>
+	      <city>Boolean City</city>
+	      <state>Booles</state>
+	      <zip>12358</zip>
+	    </address>
+	  </student>
+	</students>
+
+Note the similarities to object-oriented programming. You can think of the XML tree in the following terms. The XML document represents an array of student objects. Each student object has multiple pieces of information, an ID, a name, a phone number, an email address, and a mailing address. The mailing address is also an object that has multiple pieces of data, such as street, city, state, and zip.
+
+Let's look at some data made available from a web service such as Yahoo Weather. Here is the raw XML source. (Note I have edited it slightly for simplification purposes.)
+
+.. code:: XML
+
+	<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+	<rss version="2.0" xmlns:yweather="http://xml.weather.yahoo.com/ns/rss/1.0">
+	  <channel>
+	    <item>
+	      <title>Conditions for New York, NY at 12:49 pm EDT</title>
+	      <geo:lat>40.67</geo:lat>
+	      <geo:long>-73.94</geo:long>
+	      <link>http://us.rd.yahoo.com/dailynews/rss/weather/New_York__NY//link>
+	      <pubDate>Thu, 24 Jul 2014 12:49 pm EDT</pubDate>
+	      <yweather:condition text="Partly Cloudy" code="30" temp="76"/>
+	      <yweather:forecast day="Thu" low="65" high="82" text="Partly Cloudy"/>
+	    </item>
+	  </channel>
+	</rss>
+
+The data is mapped in the tree stucture shown below:
+
+.. image:: ./data-res/data_07_weatherxml.jpg
+   :align: center
+
+You may be wondering what the top level “RSS” is all about. Yahoo’s XML weather data is provided in RSS format. RSS stands for “Really Simple Syndication” and is a standardized XML format for syndicating web content (such as news articles, etc.). You can read more about `RSS on Wikipedia <https://en.wikipedia.org/wiki/RSS>`_
+
+Now that you have a handle on the tree structure, let's look at the specifics inside that structure. With the exception of the first line (which simply indicates that this page is XML formatted), this XML document contains a nested list of elements, each with a start tag, that is, <channel>, and an end tag, that is, </channel>. Some of these elements have content between the tags:
+
+.. code:: XML
+
+	<title>Conditions for New York, NY at 12:49 pm EDT</title>
+
+and some have attributes (formatted by Attribute Name equals Attribute Value in quotes):
+
+.. code:: XML
+
+	<yweather:forecast day="Thu" low="65" high="82" text="Partly Cloudy"/>
+
+
+Using the Processing XML Class
+==============================
+
+Since the syntax of XML is standardized, I could certainly use split(), indexof(), and substring() to find the pieces I want in the XML source. The point here, however, is that because XML is a standard format, I don't have to do this. Rather, I can use an XML parser. In Processing, XML can be parsed using the built-in Processing class XML.
+
+.. code:: XML
+
+	xml = loadXML("http://xml.weather.yahoo.com/forecastrss?p=10003")
+
