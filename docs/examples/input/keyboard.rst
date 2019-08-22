@@ -50,30 +50,32 @@ Click on the image to give it focus and press the letter keys to create forms in
 	rectWidth = 0
 
 	def setup():
+		global rectWidth
+
 		size(640, 360)
 		no_stroke()
 		background(0)
 
-		global rectWidth
 		rectWidth = width/4
 
 	def draw():
 		pass
 
 	def key_pressed():
-		keyIndex = -1
 		global rectWidth
+		keyIndex = -1
 
-		if key >= 'A'and key <= 'Z':
-			keyIndex = key - 'A'
-		elif key >= 'a' and key <= 'z':
-			keyIndex = key - 'a'
+		if ord(str(key)) >= ord(str("A")) and ord(str(key)) <= ord(str("Z")):
+			keyIndex = ord(str(key)) - ord(str("A"))
+		elif ord(str(key)) >= ord(str("a")) and ord(str(key)) <= ord(str("z")):
+			keyIndex = ord(str(key)) - ord(str("a"))
 
 		if keyIndex == -1:
 			# If it's not a letter key, clear the screen
 			background(0)
 		else:
-			fill(millis() % 255)
+			# It's a letter key, fill a rectangle
+			fill(millis()%255)
 			x = remap(keyIndex, [0, 25], [0, width - rectWidth])
 			rect((x, 0), rectWidth, height)
 
