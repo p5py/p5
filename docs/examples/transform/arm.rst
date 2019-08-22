@@ -75,10 +75,10 @@ The angle of each segment is controlled with the mouseX and mouseY position. The
 		angle1 = (mouse_x/width - 0.5) * -PI
 		angle2 = (mouse_y/height - 0.5) * PI
 
-		push_matrix()
-		segment(x, y, angle1)
-		segment(segLength, 0, angle2)
-		pop_matrix()
+		with push_matrix():
+			segment(x, y, angle1)
+			segment(segLength, 0, angle2)
+			pop_matrix()
 
 	def segment(x, y, a):
 		translate(x, y)
