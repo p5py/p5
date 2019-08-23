@@ -455,9 +455,6 @@ The ``key`` variable stores a single alphanumeric character. Specifically, it ho
 .. image:: ./interactivity-res/07_17_1.png
    :align: left
 
-.. image:: ./interactivity-res/07_17_2.png
-   :align: left
-
 .. code:: python
 
    from p5 import *
@@ -566,8 +563,42 @@ Because each character has a numeric value as defined by the ASCII table (p. 605
 Coded keys
 ==========
 
-In addition to reading key values for numbers, letters, and symbols, Processing can also read the values from other keys including the arrow keys and the Alt, Control, Shift, Backspace, Tab, Enter, Return, Escape, and Delete keys. The variable keyCode stores the ALT, CONTROL, SHIFT, UP, DOWN, LEFT, and RIGHT keys as constants. Before determining which coded key is pressed, it’s necessary to check first to see if the key is coded. The expression key==CODED is true if the key is coded and false otherwise. Even though not alphanumeric, the keys included in the ASCII specification (BACKSPACE, TAB, ENTER, RETURN, ESC, and DELETE) will not be identified as a coded key. If you’re making cross-platform projects, note that the Enter key is commonly used on PCs and UNIX and the Return key is used on Macintosh. Check for both Enter and Return to make sure your program will work for all platforms (see code 12-17).
+In addition to reading key values for numbers, letters, and symbols, Processing can also read the values from other keys including the arrow keys and the Alt, Control, Shift, Backspace, Tab, Enter, Return, Escape, and Delete keys. The variable keyCode stores the ALT, CONTROL, SHIFT, UP, DOWN, LEFT, and RIGHT keys as constants. Before determining which coded key is pressed, it’s necessary to check first to see if the key is coded. The expression key==CODED is true if the key is coded and false otherwise. Even though not alphanumeric, the keys included in the ASCII specification (BACKSPACE, TAB, ENTER, RETURN, ESC, and DELETE) will not be identified as a coded key. If you’re making cross-platform projects, note that the Enter key is commonly used on PCs and UNIX and the Return key is used on Macintosh. Check for both Enter and Return to make sure your program will work for all platforms.
 
+.. image:: ./interactivity-res/07_21_1.png
+   :align: left
+
+.. image:: ./interactivity-res/07_21_2.png
+   :align: left
+
+.. image:: ./interactivity-res/07_21_3.png
+   :align: left
+
+.. code:: python
+
+   from p5 import *
+
+   y = 35
+
+   def setup():
+       size(100, 100)
+
+   def draw():
+       global y
+       background(204)
+       line((10, 50), (90, 50))
+
+       if key == "UP":
+           y = 20
+       elif key == "DOWN":
+           y = 50
+       else:
+           y = 35
+
+       rect((25, y), 50, 30)
+
+   if __name__ == '__main__':
+       run()
 
 Events
 ======
