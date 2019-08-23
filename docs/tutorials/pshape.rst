@@ -4,15 +4,12 @@ PShape
 
 :Authors: Daniel Shiffman; Arihant Parsoya (p5 port)
 
-:Copyright: This tutorial is "Extension 5" from `Processing: A
-   Programming Handbook for Visual Designers and Artists, Second
-   Edition <https://processing.org/handbook>`_, published by MIT
-   Press. © 2014 MIT Press. If you see any errors or have comments,
-   please let us know. The tutorial was ported to p5 by Arihant Parsoya. If
-   you see any errors or have comments, open an issue on either the
-   `p5 <https://github.com/p5py/p5/issues>`_ or `Processing
-   <https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
-   repositories.
+:Copyright: If you see any errors or have comments, please let us know.
+	The tutorial was ported to p5 by Arihant Parsoya. If
+   	you see any errors or have comments, open an issue on either the
+   	`p5 <https://github.com/p5py/p5/issues>`_ or `Processing
+   	<https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
+   	repositories.
 
 One of the very first things you learn when programming with Processing is how to draw "primitive" shapes to the screen: rectangles, ellipses, lines, triangles, and more.
 
@@ -119,10 +116,9 @@ One of the nice things about the PShape object is that it can also store color i
 
 		rectangle.stroke = color(255)
 		rectangle.stroke_weight = 4
-		rectangle.fill = color(127)
+		rectangle._fill = color(127)
 
 These methods can be called during draw() as well if you want to change the color of the shape dynamically.
-
 
 .. image:: ./pshape-res/pshape2.png
    :align: center
@@ -188,20 +184,192 @@ Then all the vertices (and colors) can be specified by calling the functions on 
 		star = PShape()
 
 		with star.edit():
-			star.add_vertex(0, -50)
-			star.add_vertex(14, -20)
-			star.add_vertex(47, -15)
-			star.add_vertex(23, 7)
-			star.add_vertex(29, 40)
-			star.add_vertex(0, 25)
-			star.add_vertex(-29, 40)
-			star.add_vertex(-23, 7)
-			star.add_vertex(-47, -15)
-			star.add_vertex(-14, -20)
+			star.add_vertex((0, -50))
+			star.add_vertex((14, -20))
+			star.add_vertex((47, -15))
+			star.add_vertex((23, 7))
+			star.add_vertex((29, 40))
+			star.add_vertex((0, 25))
+			star.add_vertex((-29, 40))
+			star.add_vertex((-23, 7))
+			star.add_vertex((-47, -15))
+			star.add_vertex((-14, -20))
 
 
 Many PShapes
 ============
 
 As we mentioned earlier, one reason to use PShape is just to help you organize your geometry. However, there's another reason. Let's assume for a moment that you have a Star class, with a ``display()`` function that looks like so:
+
+.. code:: python
+
+	def display():
+	    with push_matrix():
+	        translate(x, y)
+	        fill(102)
+	        stroke(255)
+	        stroke_weight(2)
+
+	        begin_shape()
+	        vertex(0, -50)
+	        vertex(14, -20)
+	        vertex(47, -15)
+	        vertex(23, 7)
+	        vertex(29, 40)
+	        vertex(0, 25)
+	        vertex(-29, 40)
+	        vertex(-23, 7)
+	        vertex(-47, -15)
+	        vertex(-14, -20)
+	        endShape("CLOSE")
+
+and in `draw()`, you are iterating through an array of Star objects, displaying each one.
+
+.. image:: ./pshape-res/pshape4.png
+   :align: center
+
+.. code:: python
+	
+	def draw():
+		background(51)
+		for i in range(len(stars)):
+			stars[i].display()
+
+
+.. code:: python
+	
+	class Star:
+		def __init__(self):
+			self.s = PShape()
+			self.x = 0
+			self.y = 0
+
+That PShape then needs to be initialized in the constructor. This can be done directly, right there in the class.
+
+.. code:: python
+	
+	class Star:
+		def __init__(self):
+			#  First create the shape
+			self.s = PShape()
+			# You can set fill and stroke
+			self.s._fill(102)
+			self.s.stroke(Color(255))
+			self.s.stroke_weight(2)
+			# Here, we are hardcoding a series of vertices
+
+			with self.s.edit():
+				self.s.add_vertex((0, -50))
+				self.s.add_vertex((14, -20))
+				self.s.add_vertex((47, -15))
+				self.s.add_vertex((23, 7))
+				self.s.add_vertex((29, 40))
+				self.s.add_vertex((0, 25))
+				self.s.add_vertex((-29, 40))
+				self.s.add_vertex((-23, 7))
+				self.s.add_vertex((-47, -15))
+				self.s.add_vertex((-14, -20))
+
+This method makes sense if each object itself has its own geometry, generated via an algorithm. However, if each object is displaying the identical PShape, it likely makes more sense to pass in a reference to a PShape in the constructor itself. Let's take a look at how this might work. Let's say we create a generic class called "Polygon" which has a reference to a PShape (which is draws in a display method).
+
+.. code:: python
+
+	class Python:
+		def __init__(self, shape):
+			self.s = shape
+
+		def display():
+			shape(s)
+
+In the previous example, the shape was created right there in the object's constructor. Here we are going to demonstrate a different way to write the constructor where the shape is set via an argument.
+
+.. code:: python
+
+	from p5 import *
+
+	poly = None
+
+	class Polygon: 
+	    def __init__(self, shape):
+	        self.shape = shape
+
+	    def display(self):
+	        draw_shape(self.shape)
+
+	def setup():
+	    global poly
+	    size(640, 360)
+
+	    star = PShape()
+	    star._fill = Color(0, 127)
+	    with star.edit():
+	        star.add_vertex((0, -50))
+	        star.add_vertex((14, -20))
+	        star.add_vertex((47, -15))
+	        star.add_vertex((23, 7))
+	        star.add_vertex((29, 40))
+	        star.add_vertex((0, 25))
+	        star.add_vertex((-29, 40))
+	        star.add_vertex((-23, 7))
+	        star.add_vertex((-47, -15))
+	        star.add_vertex((-14, -20))
+
+	    poly = Polygon(star)
+
+	def draw():
+	    global poly
+	    background(255)
+	    poly.display()
+
+	if __name__ == '__main__':
+	    run()
+
+This is a very flexible approach. For example if you had an array of PShape objects, you could create new Polygon objects each one with a random PShape. 
+
+PShape Groups
+=============
+
+Another convenience of PShape is the ability to group shapes. For example, what if you wanted to create an alien creatures out of a set of circles, rectangles, and custom polygons. If the head were a circle and the body a rectangle, you might think you need:
+
+.. code:: python
+
+	from p5 import *
+
+	alien = None
+	head = None
+	body = None
+
+	def setup():
+	    global alien, head, body
+	    size(640, 360)
+	    alien = PShape([[0, 0]])
+	    head = PShape()
+	    body = PShape()
+
+	    with head.edit():
+	        head.add_vertex((-25, 0))
+	        head.add_vertex((25, 0))
+	        head.add_vertex((0, -50))
+
+
+	    with body.edit():
+	        body.add_vertex((-25, 0))
+	        body.add_vertex((25, 0))
+	        body.add_vertex((25, 100))
+	        body.add_vertex((-25, 100))
+
+	    alien.add_child(head)
+	    alien.add_child(body)
+	    no_loop()
+
+	def draw():
+	    global alien, body, head
+	    background(0)
+	    translate(width/2, height/2)
+	    draw_shape(alien)
+
+	if __name__ == '__main__':
+	    run()
+
+PShape groups allow you build a sophisticated hierarchy of shapes. This in turn allows you to set the color and attributes of the child shapes by calling the corresponding method at the parent level. Similarly, by calling the transformation functions at a given level of the hierarchy, you only affect the shapes below.
 
