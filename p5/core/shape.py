@@ -95,10 +95,10 @@ class PShape:
                  stroke_color='auto', stroke_weight="auto", 
                  stroke_join="auto", stroke_cap="auto", 
                  visible=False, attribs='closed',
-                 children=[], contour=[]):
+                 children=None, contour=None):
         # basic properties of the shape
         self._vertices = np.array([])
-        self.contour = np.array(contour)
+        self.contour = contour or np.array([])
         self._edges = None
         self._outline = None
         self._outline_vertices = None
@@ -135,7 +135,7 @@ class PShape:
         self.stroke_cap = stroke_cap
         self.stroke_join = stroke_join
 
-        self.children = children
+        self.children = children or []
         self.visible = visible
 
     def _set_color(self, name, value=None):
