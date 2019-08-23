@@ -3,7 +3,6 @@ PShape
 ******
 
 :Authors: Daniel Shiffman; Arihant Parsoya (p5 port)
-
 :Copyright: If you see any errors or have comments, please let us know.
 	The tutorial was ported to p5 by Arihant Parsoya. If
    	you see any errors or have comments, open an issue on either the
@@ -42,7 +41,7 @@ And you can build more complex shapes by grouping a set of drawing functions tog
 
 		# some functions
 
-		def display():
+		def display(self):
 			begin_shape()
 			vertex(x1,y1)
 			vertex(x2,y2)

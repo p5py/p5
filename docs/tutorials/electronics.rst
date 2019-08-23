@@ -3,7 +3,6 @@ Electronics
 ***********
 
 :Authors: Hernando Barragán; Casey Reas; Abhik Pal (p5 port)
-
 :Copyright: This tutorial is "Extension 5" from `Processing: A
    Programming Handbook for Visual Designers and Artists, Second
    Edition <https://processing.org/handbook>`_, published by MIT

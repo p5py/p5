@@ -3,16 +3,12 @@ Curves
 ******
 
 :Authors: J David Eisenberg; Arihant Parsoya (p5 port)
-
-:Copyright: This tutorial is "Extension 5" from `Processing: A
-   Programming Handbook for Visual Designers and Artists, Second
-   Edition <https://processing.org/handbook>`_, published by MIT
-   Press. © 2014 MIT Press. If you see any errors or have comments,
-   please let us know. The tutorial was ported to p5 by Arihant Parsoya. If
-   you see any errors or have comments, open an issue on either the
-   `p5 <https://github.com/p5py/p5/issues>`_ or `Processing
-   <https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
-   repositories.
+:Copyright: If you see any errors or have comments, please let us know. 
+	The tutorial was ported to p5 by Arihant Parsoya. If
+   	you see any errors or have comments, open an issue on either the
+   	`p5 <https://github.com/p5py/p5/issues>`_ or `Processing
+   	<https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
+   	repositories.
 
 This short tutorial introduces you to the three types of curves in Processing: arcs, spline curves, and Bézier curves.
 

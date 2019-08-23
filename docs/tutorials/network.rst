@@ -3,17 +3,15 @@ Network
 *******
 
 :Authors: Alexander R. Galloway; Abhik Pal (p5 port)
-:Copyright: This tutorial is adapted from `Processing: A Programming Handbook for 
-    Visual Designers and Artists, Second Edition
-    <https://processing.org/handbook/>`_ by  Casey Reas and Ben Fry. This work is
-    licensed under a `Creative Commons Attribution-NonCommercial 3.0
-    Unported License
-    <https://creativecommons.org/licenses/by-nc/3.0/>`_. The tutorial
-    was ported to p5 by Abhik Pal. If you see any errors or have
-    comments, open an issue on either the `p5
-    <https://github.com/p5py/p5/issues>`_ or `Processing
-    <https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
-    repositories.
+:Copyright: This tutorial is the "Extension 2" chapter from `Processing: A
+   Programming Handbook for Visual Designers and Artists, Second
+   Edition <https://processing.org/handbook>`_, published by MIT
+   Press. © 2014 MIT Press. If you see any errors or have comments,
+   please let us know. The tutorial was ported to p5 by Arihant Parsoya. If
+   you see any errors or have comments, open an issue on either the
+   `p5 <https://github.com/p5py/p5/issues>`_ or `Processing
+   <https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
+   repositories.
 
 Networks are complex organizational forms. They bring into association discrete entities or nodes, allowing these nodes to connect to other nodes and indeed to other networks. Networks exist in the world in a vast variety of forms and in even more contexts: political, social, biological, and otherwise. While artists have used networks in many ways–from postal networks used to disseminate work, to informal networks of artistic collaborators and larger aesthetic movements–this section looks specifically at a single instance of network technology, the Internet, and how artists have incorporated this technology into their work. There are two general trends: art-making where the Internet is used as a tool for quick and easy dissemination of the work, and art–making where the Internet is the actual medium of the work. These two trends are not mutually exclusive, however. Some of the most interesting online work weaves the two techniques together into exciting new forms that surpass the affordances of either technique.
 

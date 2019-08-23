@@ -3,7 +3,6 @@ Typography
 **********
 
 :Authors: Casey Reas and Ben Fry; Arihant Parsoya (p5 port)
-
 :Copyright: This tutorial is "Typography" from `Processing: A
    Programming Handbook for Visual Designers and Artists, Second
    Edition <https://processing.org/handbook>`_, published by MIT

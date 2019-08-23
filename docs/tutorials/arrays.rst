@@ -3,8 +3,7 @@ Arrays
 ******
 
 :Authors: Casey Reas, Ben Fry; Arihant Parsoya (p5 port)
-
-:Copyright: This tutorial is "Extension 5" from `Processing: A
+:Copyright: This tutorial is "Arrays" chapter from `Processing: A
    Programming Handbook for Visual Designers and Artists, Second
    Edition <https://processing.org/handbook>`_, published by MIT
    Press. © 2014 MIT Press. If you see any errors or have comments,

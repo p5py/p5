@@ -3,16 +3,12 @@
 ******************
 
 :Authors: J David Eisenberg; Arihant Parsoya (p5 port)
-
-:Copyright: This tutorial is from `Processing: A
-   Programming Handbook for Visual Designers and Artists, Second
-   Edition <https://processing.org/handbook>`_, published by MIT
-   Press. © 2014 MIT Press. If you see any errors or have comments,
-   please let us know. The tutorial was ported to p5 by Arihant Parsoya. If
-   you see any errors or have comments, open an issue on either the
-   `p5 <https://github.com/p5py/p5/issues>`_ or `Processing
-   <https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
-   repositories.
+:Copyright: If you see any errors or have comments, please let us know. 
+	The tutorial was ported to p5 by Arihant Parsoya. If
+   	you see any errors or have comments, open an issue on either the
+   	`p5 <https://github.com/p5py/p5/issues>`_ or `Processing
+   	<https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
+   	repositories.
 
 Processing has built-in functions that make it easy for you to have objects in a sketch move, spin, and grow or shrink. This tutorial will introduce you to the ``translate``, ``rotate``, and ``scale`` functions so that you can use them in your sketches.
 

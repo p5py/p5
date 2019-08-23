@@ -3,16 +3,14 @@ Trigonometry Primer
 *******************
 
 :Authors: Ira Greenberg; Arihant Parsoya (p5 port)
-
-:Copyright: This tutorial is "Extension 5" from `Processing: A
-   Programming Handbook for Visual Designers and Artists, Second
-   Edition <https://processing.org/handbook>`_, published by MIT
-   Press. © 2014 MIT Press. If you see any errors or have comments,
-   please let us know. The tutorial was ported to p5 by Arihant Parsoya. If
-   you see any errors or have comments, open an issue on either the
-   `p5 <https://github.com/p5py/p5/issues>`_ or `Processing
-   <https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
-   repositories.
+:Copyright: This tutorial is from the book ` Processing: Creative Coding 
+	and Computational Art <https://processing.org/books/#ira>`_,  Ira Greenberg, 
+	Friends of ED, © 2007. If you see any errors or have comments,
+   	please let us know. The tutorial was ported to p5 by Arihant Parsoya. If
+   	you see any errors or have comments, open an issue on either the
+   	`p5 <https://github.com/p5py/p5/issues>`_ or `Processing
+   	<https://github.com/processing/processing-docs/issues?q=is%3Aopen>`_
+   	repositories.
 
 Trigonometry (really just a couple of the trig functions) is central to graphics programming. That being said, if you're anything like me you probably have a hazy memory of trig. Perhaps you remember the mnemonic device soh-cah-toa to remember the relationships between the trig functions and a right triangle. Here's a diagram to awaken your memory.
 
