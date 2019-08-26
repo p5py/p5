@@ -15,9 +15,7 @@ of the project were:
 #. Adding test suit to p5.py modules
 #. Add 3D capabilities
 
-We met the goals 1-4 completely. The last goal was completed partially as
-we were facing issues with vispy depth testing. Examples and tutorials for all the modules is added and can be accessed at p5py documentation website. A detailed breakdown for every 
-goal is documented as a `Github milestone <https://github.com/p5py/p5/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Google+Summer+of+Code+2019%22>`_.
+We met the goals 1-4 completely. The last goal was completed partially as we were facing issues with vispy depth testing functionality. All the examples and tutorials for existing modules were imported from Processing `website <https://processing.org>`_ with live interactive sketch created using `p5.js <https://p5js.org>`_. Tests for all submodules are added using Pythons inbuilt `unittest` library. Additionally, bugs posted on github issue tracker are fixed.
 
 API Additions
 -------------
