@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,13 +29,23 @@ __all__ = [
     'bezier_point', 'bezier_tangent', 'bezier_detail',
 
     # CURVE METHODS
-    'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness'
+    'curve_point', 'curve_tangent', 'curve_detail', 'curve_tightness',
+
+    # QUADRATIC METHODS
+    'quadratic_point'
 ]
 
 curve_resolution = 20
 curve_tightness_amount = 0
 
 bezier_resolution = 20
+
+curve_basis_matrix = [
+    [-0.5, 1.5, -1.5, 0.5],
+    [1, -2.5, 2, -0.5],
+    [-0.5, 0, 0.5, 0],
+    [0, 1, 0, 0]
+]
 
 def typecast_arguments_as_points(func):
     """Typecast all but the last argument of the function as Points."""
@@ -181,7 +191,7 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
     basis = curve_basis_matrix
     P = [point_1, point_2, point_3, point_4]
 
-    coeffs = [sum(t**(3 - i) * basis[4*i + j] for i in range(4)) for j in range(4)]
+    coeffs = [sum(t**(3 - i) * basis[i][j] for i in range(4)) for j in range(4)]
 
     x = sum(pt.x * c for pt, c in zip(P, coeffs))
     y = sum(pt.y * c for pt, c in zip(P, coeffs))
@@ -219,9 +229,44 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     P = [point_1, point_2, point_3, point_4]
 
     coeffs = [
-        sum((3 - i)*(t**(2 - i)) * basis[4*i + j] for i in range(3))
+        sum((3 - i)*(t**(2 - i)) * basis[i][j] for i in range(3))
         for j in range(4)
     ]
+
+    x = sum(pt.x * c for pt, c in zip(P, coeffs))
+    y = sum(pt.y * c for pt, c in zip(P, coeffs))
+
+    return Point(x, y)
+
+@typecast_arguments_as_points
+def quadratic_point(start, control, stop, parameter):
+    """Return the coordinates of a point along a bezier curve.
+
+    :param point_1: The start point of the curve.
+    :type point_1: 3-tuple.
+
+    :param point_3: The control point of the curve.
+    :type point_3: 3-tuple.
+
+    :param point_4: The end point of the curve.
+    :type point_4: 3-tuple.
+
+    :param parameter: The parameter for the required point location
+        along the curve. Should be in the range [0.0, 1.0] where 0
+        indicates the start of the curve and 1 indicates the end of
+        the curve.
+    :type parameter: float
+
+    :returns: The coordinate of the point at the required location
+        along the curve.
+    :rtype: Point (namedtuple with x, y, z attributes)
+
+    """
+    t = parameter
+    t_ = 1 - parameter
+
+    P = [start, control, stop]
+    coeffs = [t_*t_, 2*t*t_, t*t]
 
     x = sum(pt.x * c for pt, c in zip(P, coeffs))
     y = sum(pt.y * c for pt, c in zip(P, coeffs))

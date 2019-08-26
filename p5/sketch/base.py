@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,68 +19,21 @@
 """Base module for a sketch."""
 
 import builtins
-from functools import wraps
-import time
 
 from PIL import Image
-import numpy as np
-import vispy
 from vispy import app
-from vispy import gloo
-from vispy import io
 
-from .. sketch import renderer
+from ..core import p5
 
 from .events import KeyEvent
 from .events import MouseEvent
 from .events import handler_names
 
-from .renderer import draw_loop
-from .renderer import initialize_renderer
-from .renderer import clear
-from .renderer import reset_view
-from .renderer import add_to_draw_queue
 
 def _dummy(*args, **kwargs):
     """Eat all arguments, do nothing.
     """
     pass
-
-def _transform_vertices(vertices, local_matrix, global_matrix):
-    return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
-
-def render(shape):
-    vertices = shape._draw_vertices
-    n, _ = vertices.shape
-    tverts = _transform_vertices(
-        np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-        shape._matrix,
-        renderer.transform_matrix)
-    fill = shape.fill.normalized if shape.fill else None
-    stroke = shape.stroke.normalized if shape.stroke else None
-
-    edges = shape._draw_edges
-    faces = shape._draw_faces
-
-    if edges is None:
-        print(vertices)
-        print("whale")
-        exit()
-
-    if 'open' in shape.attribs:
-        overtices = shape._draw_outline_vertices
-        no, _  = overtices.shape
-        toverts = _transform_vertices(
-            np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
-            shape._matrix,
-            renderer.transform_matrix)
-
-        add_to_draw_queue('path', toverts, shape._draw_outline_edges,
-                          None, None, stroke)
-        add_to_draw_queue('poly', tverts, edges, faces, fill, None)
-    else:
-        add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
-
 
 class Sketch(app.Canvas):
     """The main sketch instance.
@@ -115,8 +68,8 @@ class Sketch(app.Canvas):
         self.setup_method = setup_method
         self.draw_method = draw_method
 
-        self.looping = True
-        self.redraw = False
+        self.looping = None
+        self.redraw = None
         self.setup_done = False
         self.timer = app.Timer(1.0 / frame_rate, connect=self.on_timer)
 
@@ -130,25 +83,28 @@ class Sketch(app.Canvas):
         self._save_fname_num = 0
         self._save_flag = False
 
-        initialize_renderer()
-        clear()
+        p5.renderer.initialize_renderer()
+        p5.renderer.clear()
 
     def on_timer(self, event):
         self.measure_fps(callback=lambda _: None)
         builtins.frame_rate = round(self.fps, 2)
-        with draw_loop():
-            if self.looping or self.redraw:
-                builtins.frame_count += 1
-                if not self.setup_done:
-                    self.setup_method()
-                    self.setup_done = True
-                    self.show(visible=True)
-                    self.redraw = True
-                    self.looping = False
-                else:
-                    self.looping = True
-                    self.draw_method()
+
+        with p5.renderer.draw_loop():
+            builtins.frame_count += 1
+            if not self.setup_done:
+                self.setup_method()
+                self.setup_done = True
+                self.show(visible=True)
+                if self.redraw is None:
                     self.redraw = False
+                if self.looping is None:
+                    self.looping = True
+            elif self.looping:
+                self.draw_method()
+            elif self.redraw:
+                self.draw_method()
+                self.redraw = False
 
             while len(self.handler_queue) != 0:
                 function, event = self.handler_queue.pop(0)
@@ -162,14 +118,14 @@ class Sketch(app.Canvas):
     def _save_buffer(self):
         """Save the renderer buffer to the given file.
         """
-        img_data = renderer.fbuffer.read(mode='color', alpha=False)
+        img_data = p5.renderer.fbuffer.read(mode='color', alpha=False)
         img = Image.fromarray(img_data)
         img.save(self._save_fname)
         self._save_flag = False
 
     def screenshot(self, filename):
         self.queue_screenshot(filename)
-        renderer.flush_geometry()
+        p5.renderer.flush_geometry()
         self._save_buffer()
 
     def queue_screenshot(self, filename):
@@ -189,9 +145,9 @@ class Sketch(app.Canvas):
         pass
 
     def on_resize(self, event):
-        reset_view()
-        with draw_loop():
-            clear()
+        p5.renderer.reset_view()
+        with p5.renderer.draw_loop():
+            p5.renderer.clear()
 
     def _enqueue_event(self, handler_name, event):
         event._update_builtins()

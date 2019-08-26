@@ -61,3 +61,20 @@ translate()
 -----------
 
 .. autofunction:: translate()
+
+
+camera()
+---------
+
+.. autofunction:: camera()
+
+perspective()
+---------
+
+.. autofunction:: perspective()
+
+
+ortho()
+-----------
+
+.. autofunction:: ortho()

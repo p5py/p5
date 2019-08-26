@@ -176,3 +176,6 @@ texinfo_documents = [
      author, 'p5', 'p5 is a Python package based on the core ideas of Processing.',
      'Miscellaneous'),
 ]
+
+def setup(app):
+    app.add_javascript('p5.min.js')

@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,5 +19,3 @@ import vispy
 vispy.use('glfw')
 
 from .userspace import *
-from .base import render
-from .renderer import render_image

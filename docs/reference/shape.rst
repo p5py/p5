@@ -139,3 +139,100 @@ rect_mode()
 
 .. autofunction:: rect_mode
 
+
+3D Primitives
+=============
+
+box()
+-----------
+
+.. autofunction:: box
+
+
+plane()
+-----------
+
+.. autofunction:: plane
+
+
+sphere()
+-----------
+
+.. autofunction:: sphere
+
+
+ellipsoid()
+-----------
+
+.. autofunction:: ellipsoid
+
+
+cylinder()
+-----------
+
+.. autofunction:: cylinder
+
+
+cone()
+-----------
+
+.. autofunction:: cone
+
+
+torus()
+-----------
+
+.. autofunction:: torus
+
+
+
+Vertex
+======
+
+
+begin_shape()
+-------------
+
+.. autofunction:: begin_shape
+
+
+end_shape()
+-----------
+
+.. autofunction:: end_shape
+
+
+begin_contour()
+---------------
+
+.. autofunction:: begin_contour
+
+
+end_contour()
+-------------
+
+.. autofunction:: end_contour
+
+
+vertex()
+--------
+
+.. autofunction:: vertex
+
+
+curve_vertex()
+--------------
+
+.. autofunction:: curve_vertex
+
+
+bezier_vertex()
+---------------
+
+.. autofunction:: bezier_vertex
+
+
+quadratic_vertex()
+------------------
+
+.. autofunction:: quadratic_vertex

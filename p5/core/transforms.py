@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,35 +16,36 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import builtins
 from contextlib import contextmanager
-import math
 
 import numpy as np
 
-from ..sketch import renderer
-from ..pmath import Vector
 from ..pmath import matrix
 
-__all__ = ['push_matrix', 'reset_transforms', 'translate', 'rotate',
-           'rotate_x', 'rotate_y', 'rotate_z', 'scale', 'shear_x',
-           'shear_y', 'camera', 'frustum', 'ortho', 'perspective',
+from . import p5
+
+__all__ = ['push_matrix', 'pop_matrix', 'reset_transforms', 
+           'translate', 'rotate', 'rotate_x', 'rotate_y', 
+           'rotate_z', 'scale', 'shear_x', 'shear_y', 
+           'camera', 'frustum', 'ortho', 'perspective',
            'print_matrix', 'reset_matrix', 'apply_matrix']
 
 @contextmanager
 def push_matrix():
-    previous_matrix = renderer.transform_matrix.copy()
+    previous_matrix = p5.renderer.transform_matrix.copy()
     try:
         yield previous_matrix
     finally:
-        renderer.transform_matrix = previous_matrix
+        p5.renderer.transform_matrix = previous_matrix
+
+def pop_matrix():
+    push_matrix()
 
 def reset_transforms():
     """Reset all transformations to their default state.
 
     """
-    renderer.transform_matrix = np.identity(4)
-    # renderer.reset_view()
+    p5.renderer.transform_matrix = np.identity(4)
 
 def translate(x, y, z=0):
     """Translate the display origin to the given location.
@@ -69,7 +70,7 @@ def translate(x, y, z=0):
 
     """
     tmat = matrix.translation_matrix(x, y, z)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
     return tmat
 
 def rotate(theta, axis=np.array([0, 0, 1])):
@@ -87,7 +88,7 @@ def rotate(theta, axis=np.array([0, 0, 1])):
    """
     axis = np.array(axis[:])
     tmat = matrix.rotation_matrix(axis, theta)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
     return tmat
 
 def rotate_x(theta):
@@ -147,7 +148,7 @@ def scale(sx, sy=None, sz=None):
     elif not sz:
         sz = 1
     tmat = matrix.scale_transform(sx, sy, sz)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmat)
+    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
     return tmat
 
 def apply_matrix(transform_matrix):
@@ -157,17 +158,17 @@ def apply_matrix(transform_matrix):
     :type transform_matrix: np.ndarray (or a 4×4 list)
     """
     tmatrix = np.array(transform_matrix)
-    renderer.transform_matrix = renderer.transform_matrix.dot(tmatrix)
+    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmatrix)
 
 def reset_matrix():
     """Reset the current transform matrix.
     """
-    renderer.transform_matrix = np.identity(4)
+    p5.renderer.transform_matrix = np.identity(4)
 
 def print_matrix():
     """Print the transform matrix being used by the sketch.
     """
-    print(renderer.transform_matrix)
+    print(p5.renderer.transform_matrix)
 
 def shear_x(theta):
     """Shear display along the x-axis.
@@ -181,7 +182,7 @@ def shear_x(theta):
     """
     shear_mat = np.identity(4)
     shear_mat[0, 1] = np.tan(theta)
-    renderer.transform_matrix = renderer.transform_matrix.dot(shear_mat)
+    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
     return shear_mat
 
 def shear_y(theta):
@@ -196,17 +197,92 @@ def shear_y(theta):
     """
     shear_mat = np.identity(4)
     shear_mat[1, 0] = np.tan(theta)
-    renderer.transform_matrix = renderer.transform_matrix.dot(shear_mat)
+    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
     return shear_mat
 
-def camera():
-    raise NotImplementedError
+def camera(position, target_position, up_vector):
+    """Sets the camera position for a 3D sketch. 
+    Parameters for this function define the position for 
+    the camera, the center of the sketch (where the 
+    camera is pointing), and an up direction (the 
+    orientation of the camera).
+
+    When called with no arguments, this function 
+    creates a default camera equivalent to 
+    camera(
+        (0, 0, (height/2.0) / tan(PI*30.0 / 180.0)),
+        (0, 0, 0),
+        (0, 1, 0)
+        )
+
+    :param position: camera position coordinates
+    :type position: tuple
+
+    :param target_position: target position of camera in world coordinates 
+    :type target_position: tuple
+
+    :param up_vector: up direction vector for the camera
+    :type up_vector: tuple
+
+    """
+    p5.renderer.lookat_matrix = matrix.look_at(
+        np.array(position), 
+        np.array(target_position), 
+        np.array(up_vector))
+
+def perspective(fovy, aspect, near, far):
+    """
+    Sets a perspective projection for the camera in a 3D sketch.  
+
+    :param fovy: camera frustum vertical field of view, from bottom to top of view, in angleMode units
+    :type fovy: float
+
+    :param aspect: camera frustum aspect ratio
+    :type aspect: float
+
+    :param near: frustum near plane length
+    :type near: float
+
+    :param far: frustum far plane length
+    :type far: float   
+    """
+    p5.renderer.projection_matrix = matrix.perspective_matrix(
+            fovy,
+            aspect,
+            near,
+            far
+        )
+
+def ortho(left, right, bottom, top, near, far):
+    """
+    Sets an orthographic projection for the camera in
+    a 3D sketch and defines a box-shaped viewing frustum
+    within which objects are seen.
+
+    :param left: camera frustum left plane
+    :type left: float
+
+    :param right: camera frustum right plane
+    :type right: float
+
+    :param bottom: camera frustum bottom plane
+    :type bottom: float
+
+    :param top: camera frustum top plane
+    :type top: float
+
+    :param near: camera frustum near plane
+    :type near: float
+
+    :param far: camera frustum far plane
+    :type far: float   
+    """
+    p5.renderer.projection_matrix = np.array([
+        [2/(right - left), 0, 0, -(right + left)/(right - left)],
+        [0, 2/(top - bottom), 0, -(top + bottom)/(top - bottom)],
+        [0, 0, -2/(far - near), -(far + near)/(far - near)],
+        [0, 0, 0, 1],
+        ])
 
 def frustum():
-    raise NotImplementedError
-
-def ortho():
-    raise NotImplementedError
-
-def perspective():
     raise NotImplementedError

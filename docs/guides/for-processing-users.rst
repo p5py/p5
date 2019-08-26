@@ -167,7 +167,7 @@ Shapes, etc
      control_point_2 = Vector(324, 324)
      end_point = Vector(54, 288)
 
-     bezier(start_point, control_point_1, control_point, end_point)
+     bezier(start_point, control_point_1, control_point_2, end_point)
 
 * Functions like `bezier_point`, `bezier_tangent`, `curve_point`,
   `curve_tangent`, etc also need the coordinates as iterables.
@@ -250,10 +250,10 @@ Event System
          if event.key == 'A':
              # code to run when the <A> key is presesed.
 
-         elif event.key() == 'UP':
+         elif event.key == 'UP':
              # code to run when the <UP> key is presesed.
 
-         elif event.key() == 'SPACE':
+         elif event.key == 'SPACE':
              # code to run when the <SPACE> key is presesed.
 
          # ...etc

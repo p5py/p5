@@ -7,12 +7,25 @@ and advanced topics. Adapted from the tutorials on the `Processing
 website <https://processing.org/tutorials/>`_.
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   color
-   objects
-   electronics
-   vector
+    coordinate system and shapes
+    color
+    objects
+    interactivity
+    typography
+    strings and drawing text
+    arrays
+    images and pixels
+    curves
+    2D transformations
+    pshape
+    data
+    trigonometry primer
+    two dimensional arrays
+    electronics
+    network
+    vector
 
 .. rubric:: Beginner tutorials
 
@@ -21,45 +34,46 @@ website <https://processing.org/tutorials/>`_.
 * **Processing Overview b by Ben Fry and Casey Reasy:** A little more
   detailed introduction to the different features of Processing than
   the Getting Started tutorial.
-* **Coordinate System and Shapes by Daniel Shiffman:** Drawing simple
+* :doc:`Coordinate System and Shapes by Daniel Shiffman <coordinate 
+  system and shapes>`: Drawing simple
   shapes and using the coordinate system.
 * :doc:`Color by Daniel Shiffman <color>`: An introduction to digital
   color.
 * :doc:`Objects by Daniel Shiffman <objects>`: The basics of
   object-oriented programming.
-* **Interactivity by Casey Reas and Ben Fry:** Introduction to
-  interactivity with the mouse and keyboard.
-* **Typography by Casey Reas and Ben Fry:** Working with typefaces and
+* :doc:`Interactivity by Casey Reas and Ben Fry by Daniel Shiffman 
+  <interactivity>`: Introduction to interactivity with the mouse and keyboard.
+* :doc:`Typography by Casey Reas and Ben Fry <typography>`: Working with typefaces and
   text.
 
 .. rubric:: Intermediate tutorials
 
-* **Strings and Drawing Text by Daniel Shiffman:** Learn how use the
+* :doc:`Strings and Drawing Text by Daniel Shiffman <strings and drawing text>`: Learn how use the
   String class and display text onscreen.
-* **Arrays by Casey Reas and Ben Fry:** How to store and access data in
+* :doc:`Arrays by Casey Reas and Ben Fry <arrays>`: How to store and access data in
   array structures.
-* **Images and Pixels by Daniel Shiffman:** How to load and display
+* :doc:`Images and Pixels by Daniel Shiffman <images and pixels>`: How to load and display
   images as well as access their pixels.
-* **Curves by J David Eisenberg:** Learn how to draw arcs, spline
+* :doc:`Curves by J David Eisenberg <curves>`: Learn how to draw arcs, spline
   curves, and bezier curves.
-* **2D Transformations by J David Eisenberg:** Learn how to translate,
+* :doc:`2D Transformations by J David Eisenberg <2D transformations>`: Learn how to translate,
   rotate, and scale shapes using 2D transformations.
-* **PShape by Daniel Shiffman:** How to use the PShape class in
+* :doc:`PShape by Daniel Shiffman <pshape>`: How to use the PShape class in
   Processing.
-* **Data by Daniel Shiffman:** Learn the basics of working with data
+* :doc:`Data by Daniel Shiffman <data>`: Learn the basics of working with data
   feeds in Processing.
-* **Trigonometry Primer by Ira Greenberg:** An introduction to
+* :doc:`Trigonometry Primer by Ira Greenberg <trigonometry primer>`: An introduction to
   trigonometry.
 * **Render Techniques by Casey Reas and Ben Fry:** Tools for rendering
   geometries in Processing.
-* **Two-Dimensional Arrays by Daniel Shiffman:** Store and acess data
+* :doc:`Two-Dimensional Arrays by Daniel Shiffman <two dimensional arrays>`: Store and acess data
   in a matrix using a two-dimensional array.
 * **Sound by R. Luke DuBois and Wilm Thoben:** Learn how to play,
   analyze, and synthesize sound with the Sound Library.
 * :doc:`Electronics by Hernando Berragán and Casey Reas
   <electronics>`: Control physical media with Processing, Arduino, and
   Wiring.
-* **Network by Alexander R. Galloway:** An introduction to sending and
+* :doc:`Network by Alexander R. Galloway <network>`: An introduction to sending and
   receiving data with clients and servers
 * **Print by Casey Reas:** Use Processing to output print quality
   images and documents.

@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,16 @@
 """Shape class for p5.
 """
 
-import builtins
 import contextlib
 import functools
-import math
 
 import numpy as np
-from vispy import geometry
+import triangle as tr
 
 from .color import Color
-from .. import sketch
 from ..pmath import matrix
+
+from . import p5
 
 
 __all__ = ['PShape']
@@ -46,7 +45,6 @@ def _ensure_editable(func):
 
 def _apply_transform(func):
     """Apply the matrix transformation to the shape.
-
     """
     @functools.wraps(func)
     def mfunc(instance, *args, **kwargs):
@@ -57,7 +55,6 @@ def _apply_transform(func):
 
 def _call_on_children(func):
     """Call the method on all child shapes
-
     """
     @functools.wraps(func)
     def rfunc(instance, *args, **kwargs):
@@ -71,41 +68,37 @@ class PShape:
     """Custom shape class for p5.
 
     :param vertices: List of (polygonal) vertices for the shape.
-
     :type vertices: list | np.ndarray
 
     :param fill_color: Fill color of the shape (default: 'auto' i.e.,
         the current renderer fill)
-
     :type fill_color: 'auto' | None | tuple | p5.Color
 
     :param stroke_color: Stroke color of the shape (default: 'auto'
         i.e., the current renderer stroke color)
-
     :type stroke_color: 'auto' | None | tuple | p5.color
 
     :param visible: toggles shape visibility (default: False)
-
     :type visible: bool
-
 
     :param attribs: space-separated list of attributes that control
         shape drawing. Each attribute should be one of {'point',
         'path', 'open', 'closed'}. (default: 'closed')
-
     :type attribs: str
 
     :param children: List of sub-shapes for the current shape
         (default: [])
-
     :type children: list
 
     """
     def __init__(self, vertices=[], fill_color='auto',
-                 stroke_color='auto', visible=False, attribs='closed',
-                 children=[]):
+                 stroke_color='auto', stroke_weight="auto", 
+                 stroke_join="auto", stroke_cap="auto", 
+                 visible=False, attribs='closed',
+                 children=None, contour=None):
         # basic properties of the shape
         self._vertices = np.array([])
+        self.contour = contour or np.array([])
         self._edges = None
         self._outline = None
         self._outline_vertices = None
@@ -113,6 +106,9 @@ class PShape:
         self.attribs = set(attribs.lower().split())
         self._fill = None
         self._stroke = None
+        self._stroke_weight = None
+        self._stroke_cap = None
+        self._stroke_join = None
 
         self._matrix = np.identity(4)
         self._transform_matrix = np.identity(4)
@@ -133,31 +129,26 @@ class PShape:
         if len(vertices) > 0:
             self.vertices = vertices
 
-        # TODO: support different vertex types
-        self._vertex_types = ['P'] * len(vertices)
-
         self.fill = fill_color
         self.stroke = stroke_color
+        self.stroke_weight = stroke_weight
+        self.stroke_cap = stroke_cap
+        self.stroke_join = stroke_join
 
-        self.children = children
-
+        self.children = children or []
         self.visible = visible
 
     def _set_color(self, name, value=None):
         color = None
-        if value is None or value is 'auto':
-            color = None
-        elif isinstance(value, Color):
+
+        if isinstance(value, Color):
             color = value
         else:
-            color = Color(*value)
-
-        if value == 'auto':
-            if name == 'stroke' and sketch.renderer.stroke_enabled:
-                color = Color(*sketch.renderer.stroke_color,
+            if name == 'stroke' and p5.renderer.stroke_enabled:
+                color = Color(*p5.renderer.stroke_color,
                               color_mode='RGBA', normed=True)
-            if name == 'fill' and sketch.renderer.fill_enabled:
-                color = Color(*sketch.renderer.fill_color,
+            if name == 'fill' and p5.renderer.fill_enabled:
+                color = Color(*p5.renderer.fill_color,
                               color_mode='RGBA', normed=True)
 
         if name == 'stroke':
@@ -167,8 +158,6 @@ class PShape:
 
     @property
     def fill(self):
-        if isinstance(self._fill, Color):
-            return self._fill
         return self._fill
 
     @fill.setter
@@ -181,7 +170,40 @@ class PShape:
 
     @stroke.setter
     def stroke(self, new_color):
-       self._set_color('stroke', new_color)
+        self._set_color('stroke', new_color)
+
+    @property
+    def stroke_weight(self):
+        return self._stroke_weight
+
+    @stroke_weight.setter
+    def stroke_weight(self, stroke):
+        if stroke == "auto":
+            self._stroke_weight = p5.renderer.stroke_weight
+        else:
+            self._stroke_weight = stroke
+
+    @property
+    def stroke_join(self):
+        return self._stroke_join
+
+    @stroke_join.setter
+    def stroke_join(self, stroke):
+        if stroke == "auto":
+            self._stroke_join = p5.renderer.stroke_join
+        else:
+            self._stroke_join = stroke
+
+    @property
+    def stroke_cap(self):
+        return self._stroke_cap
+
+    @stroke_cap.setter
+    def stroke_cap(self, stroke):
+        if stroke == "auto":
+            self._stroke_cap = p5.renderer.stroke_cap
+        else:
+            self._stroke_cap = stroke
 
     @property
     def kind(self):
@@ -194,6 +216,7 @@ class PShape:
 
     def _sanitize_vertex_list(self, vertices, tdim=2, sdim=3):
         """Convert all vertices to the given dimensions.
+        Removes consecutive duplicates to prevent errors in triangulation.
 
         :param vertices: List of vertices
         :type vertices: list
@@ -213,8 +236,15 @@ class PShape:
 
         """
         sanitized = []
+        for i in range(len(vertices)):
+            if i < len(vertices) - 1:
+                if vertices[i] == vertices[i + 1]:
+                    continue
+            elif i == len(vertices) - 1 and i != 0:
+                if vertices[i] == vertices[0]:
+                    continue
 
-        for v in vertices:
+            v = vertices[i]
             if (len(v) > max(tdim, sdim)) or (len(v) < min(tdim, sdim)):
                 raise ValueError("unexpected vertex dimension")
 
@@ -233,8 +263,9 @@ class PShape:
 
     @vertices.setter
     def vertices(self, new_vertices):
-        n = len(new_vertices)
         self._vertices = self._sanitize_vertex_list(new_vertices)
+
+        n = len(self._vertices)
         self._outline_vertices = np.hstack([self._vertices, np.zeros((n, 1))])
         self._tri_vertices = None
         self._tri_edges = None
@@ -271,31 +302,48 @@ class PShape:
 
         return self._edges
 
+    def get_interior_point(self, shape_vertices):
+        # Returns a random point inside the shape
+        if len(shape_vertices) < 2:
+            return []
+
+        # Triangulate the shape
+        triangulate = tr.triangulate(dict(vertices=shape_vertices), "a5")
+        for vertex in triangulate["vertices"]:
+            if vertex not in shape_vertices:
+                return [vertex]
+
+        return []
+
     def _retriangulate(self):
         """Triangulate the shape
         """
-        self._tri = geometry.Triangulation(self.vertices, self.edges)
-        self._tri.triangulate()
-
-        if isinstance(self._tri.edges, np.ndarray):
-            self._tri_edges = self._tri.edges
-        else:
+        if len(self.vertices) < 2:
             self._tri_edges = np.array([])
-
-        self._tri_faces = self._tri.tris
-        self._tri_vertices = self._tri.pts
-
-        if isinstance(self._tri.edges, np.ndarray):
-            self._tri_edges = self._tri.edges
-        else:
-            self._tri_edges = np.array([])
-            
-        if isinstance(self._tri.tris, np.ndarray):
-            self._tri_faces = self._tri.tris
-        else:
             self._tri_faces = np.array([])
+            self._tri_vertices = self.vertices
+            return
 
-        self._tri_vertices = self._tri.pts
+        if len(self.contour) > 1:
+            n, _ = self.contour.shape
+            contour_edges = np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
+            triangulation_vertices = np.vstack([self.vertices, self.contour])
+            triangulation_segments = np.vstack([self.edges, contour_edges + len(self.edges)])
+            triangulate_parameters = dict(vertices=triangulation_vertices, 
+                segments=triangulation_segments, holes=self.get_interior_point(self.contour))
+
+            self._tri = tr.triangulate(triangulate_parameters, "p")
+        else:
+            triangulate_parameters = dict(vertices=self.vertices, segments=self.edges)
+            self._tri = tr.triangulate(triangulate_parameters, "p")
+
+        if "segments" in self._tri.keys():
+            self._tri_edges = self._tri["segments"]
+        else:
+            self._tri_edges = self.edges
+
+        self._tri_faces = self._tri["triangles"]
+        self._tri_vertices = self._tri["vertices"]
 
     @property
     def _draw_outline_vertices(self):
@@ -399,6 +447,9 @@ class PShape:
         """
         self.children.append(child)
 
+    def transform_matrix(self, mat):
+        self._transform_matrix = mat
+
     @property
     def child_count(self):
         """Number of children.
@@ -408,15 +459,17 @@ class PShape:
         """
         return len(self.children)
 
-    @_apply_transform
     def apply_matrix(self, mat):
         """Apply the given transformation matrix to the shape.
 
         :param mat: the 4x4 matrix to be applied to the current shape.
-
         :type mat: (4, 4) np.ndarray
 
         """
+        self._matrix = self._matrix.dot(mat)
+
+    @_call_on_children
+    def apply_transform_matrix(self, mat):
         self._matrix = self._matrix.dot(mat)
 
     @_call_on_children
@@ -433,23 +486,19 @@ class PShape:
 
         :param x: The displacement amount in the x-direction (controls
             the left/right displacement)
-
         :type x: int
 
         :param y: The displacement amount in the y-direction (controls
             the up/down displacement)
-
         :type y: int
 
         :param z: The displacement amount in the z-direction (0 by
             default). This controls the displacement away-from/towards
             the screen.
-
         :type z: int
 
         :returns: The translation matrix applied to the transform
             matrix.
-
         :rtype: np.ndarray
 
         """
@@ -462,17 +511,14 @@ class PShape:
         """Rotate the shape by the given angle along the given axis.
 
         :param theta: The angle by which to rotate (in radians)
-
         :type theta: float
 
         :param axis: The axis along which to rotate (defaults to the
             z-axis)
-
         :type axis: np.ndarray | list
 
         :returns: The rotation matrix used to apply the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -484,12 +530,10 @@ class PShape:
         """Rotate the shape along the x axis.
 
         :param theta: angle by which to rotate (in radians)
-
         :type theta: float
 
         :returns: The rotation matrix used to apply the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -499,12 +543,10 @@ class PShape:
         """Rotate the shape along the y axis.
 
         :param theta: angle by which to rotate (in radians)
-
         :type theta: float
 
         :returns: The rotation matrix used to apply the
              transformation.
-
         :rtype: np.ndarray
 
         """
@@ -514,12 +556,10 @@ class PShape:
         """Rotate the shape along the z axis.
 
         :param theta: angle by which to rotate (in radians)
-
         :type theta: float
 
         :returns: The rotation matrix used to apply the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -531,20 +571,16 @@ class PShape:
         """Scale the shape by the given factor.
 
         :param sx: scale factor along the x-axis.
-
         :type sx: float
 
         :param sy: scale factor along the y-axis (defaults to None)
-
         :type sy: float
 
         :param sz: scale factor along the z-axis (defaults to None)
-
         :type sz: float
 
         :returns: The transformation matrix used to appy the
             transformation.
-
         :rtype: np.ndarray
 
         """
@@ -562,11 +598,9 @@ class PShape:
         """Shear shape along the x-axis.
 
         :param theta: angle to shear by (in radians)
-
         :type theta: float
 
         :returns: The shear matrix used to apply the tranformation.
-
         :rtype: np.ndarray
 
         """
@@ -580,11 +614,9 @@ class PShape:
         """Shear shape along the y-axis.
 
         :param theta: angle to shear by (in radians)
-
         :type theta: float
 
         :returns: The shear matrix used to apply the transformation.
-
         :rtype: np.ndarray
 
         """

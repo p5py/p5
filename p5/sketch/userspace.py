@@ -1,6 +1,6 @@
 #
 # part of p5: a python package based on processing
-# copyright (c) 2017-2018 abhik pal
+# copyright (c) 2017-2019 abhik pal
 #
 # this program is free software: you can redistribute it and/or modify
 # it under the terms of the gnu general public license as published by
@@ -18,22 +18,26 @@
 """Userspace functions"""
 
 import __main__
-import builtins
-import os
 
+import math
+import numpy as np
+import builtins
 from functools import wraps
 
-import vispy
 from vispy import app
 
 from .base import Sketch
 from .events import handler_names
-from .renderer import initialize_renderer
+
+from ..core import p5
+from ..pmath import matrix
+
+from ..core.constants import *
+from .renderer2d import Renderer2D
+from .renderer3d import Renderer3D
 
 __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
            'cursor', 'exit', 'draw', 'setup', 'run', 'save_frame', 'save']
-
-default_sketch = None
 
 builtins.width = 360
 builtins.height = 360
@@ -56,6 +60,7 @@ builtins.key = None
 builtins.key_is_pressed = False
 
 builtins.pixels = None
+
 
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
@@ -92,7 +97,7 @@ def setup():
     """
     pass
 
-def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
+def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D"):
     """Run a sketch.
 
     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
@@ -110,7 +115,6 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
     :type frame_rate: int :math:`\geq 1`
 
     """
-    global default_sketch
 
     # get the user-defined setup(), draw(), and handler functions.
     if sketch_setup is not None:
@@ -133,15 +137,24 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60):
             hfunc = getattr(__main__, handler)
             handlers[handler] = _fix_interface(hfunc)
 
-    default_sketch = Sketch(setup_method, draw_method, handlers, frame_rate)
+    if mode == "P2D":
+        p5.renderer = Renderer2D()
+        p5.mode = 'P2D'
+    elif mode == "P3D":
+        p5.mode = 'P3D'
+        p5.renderer = Renderer3D()
+    else:
+        raise ValueError("Invalid Mode %s" % mode)
 
-    physical_width, physical_height = default_sketch.physical_size
-    width, height = default_sketch.size
+    p5.sketch = Sketch(setup_method, draw_method, handlers, frame_rate)
+
+    physical_width, physical_height = p5.sketch.physical_size
+    width, height = p5.sketch.size
 
     builtins.pixel_x_density = physical_width // width
     builtins.pixel_y_density = physical_height // height
 
-    default_sketch.timer.start()
+    p5.sketch.timer.start()
 
     app.run()
     exit()
@@ -154,7 +167,7 @@ def title(new_title):
 
     """
     builtins.title = new_title
-    default_sketch.title = new_title
+    p5.sketch.title = new_title
 
 def size(width, height):
     """Resize the sketch window.
@@ -168,7 +181,14 @@ def size(width, height):
     """
     builtins.width = int(width)
     builtins.height = int(height)
-    default_sketch.size = (builtins.width, builtins.height)
+    p5.sketch.size = (builtins.width, builtins.height)
+
+    # update the look at matrix coordinates according to sketch size
+    if p5.mode == "P3D":
+        p5.renderer.lookat_matrix = matrix.look_at(
+        np.array([0, 0, height/math.tan(math.pi/6)]), 
+        np.array([0, 0, 0]), 
+        np.array([0, 1, 0]))
 
 def no_loop():
     """Stop draw() from being continuously called.
@@ -180,7 +200,8 @@ def no_loop():
     event handlers like `mouse_pressed()`, etc.
 
     """
-    default_sketch.looping = False
+    p5.sketch.looping = False
+    p5.sketch.redraw = True
 
 def loop():
     """Make sure `draw()` is being called continuously.
@@ -189,7 +210,7 @@ def loop():
     be called continously again.
 
     """
-    default_sketch.looping = True
+    p5.sketch.looping = True
 
 def redraw():
     """Call `draw()` once.
@@ -198,8 +219,8 @@ def redraw():
     make sure that `draw()` is called *exactly* once.
 
     """
-    if not default_sketch.looping:
-        default_sketch.redraw = True
+    if not p5.sketch.looping:
+        p5.sketch.redraw = True
 
 def exit(*args, **kwargs):
     """Exit the sketch.
@@ -214,10 +235,10 @@ def exit(*args, **kwargs):
     :param kwargs: keyword-arguments to pass to Python's builtin
         `exit()` function.
     """
-    if not (default_sketch is None):
-        default_sketch.show(visible=False)
+    if not (p5.sketch is None):
+        p5.sketch.show(visible=False)
         app.quit()
-    builtins.exit(*args, **kwargs)
+    p5.exit(*args, **kwargs)
 
 def no_cursor():
     """Hide the mouse cursor.
@@ -268,7 +289,7 @@ def save(filename='screen.png'):
     """
     # TODO: images saved using ``save()`` should *not* be numbered.
     # --abhikpal (2018-08-14)
-    default_sketch.screenshot(filename)
+    p5.sketch.screenshot(filename)
 
 def save_frame(filename="screen.png"):
     """Save a numbered sequence of images whenever the function is run.
@@ -296,4 +317,4 @@ def save_frame(filename="screen.png"):
     # todo: allow setting the frame number in the file name of the
     # saved image (instead of using the default sequencing) --abhikpal
     # (2018-08-14)
-    default_sketch.queue_screenshot(filename)
+    p5.sketch.queue_screenshot(filename)

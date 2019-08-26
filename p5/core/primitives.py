@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,25 +16,18 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import builtins
-from collections import namedtuple
 import functools
 import math
-from math import sin
-from math import cos
-from math import radians
 
 import numpy as np
 
-from .. import sketch
-
 from ..pmath import Point
 from ..pmath import curves
-from ..pmath import remap
 from ..pmath.utils import SINCOS
-from ..pmath.utils import SINCOS_PRECISION
 
 from .shape import PShape
+
+from . import p5
 
 __all__ = ['point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
@@ -80,7 +73,9 @@ def _draw_on_return(func):
 
 class Arc(PShape):
     def __init__(self, center, radii, start_angle, stop_angle,
-                 attribs='open pie', **kwargs):
+                 attribs='open pie', fill_color='auto',
+                 stroke_color='auto', stroke_weight="auto", 
+                 stroke_join="auto", stroke_cap="auto", **kwargs):
         self._center = center
         self._radii = radii
         self._start_angle = start_angle
@@ -88,7 +83,9 @@ class Arc(PShape):
 
         self._faces = None
 
-        super().__init__(vertices=[], attribs=attribs, **kwargs)
+        super().__init__(vertices=[], attribs=attribs, fill_color=fill_color,
+                 stroke_color=stroke_color, stroke_weight=stroke_weight, 
+                 stroke_join=stroke_join, stroke_cap=stroke_cap, **kwargs)
         self._tessellate()
 
     @property
@@ -105,7 +102,7 @@ class Arc(PShape):
         e = self._compute_outline_edges()
         if 'chord' in self.attribs:
             return np.concatenate([e, [[1, n - 1]]])
-        return np.concatenate([e, [[0, 1]], [[0, n]]])
+        return np.concatenate([e, [[0, n - 1]]])
 
     @property
     def _draw_faces(self):
@@ -114,9 +111,6 @@ class Arc(PShape):
         n, _ = self._vertices.shape
         ar = np.arange(1, n - 1).reshape((n - 2, 1))
         f = np.hstack([np.zeros((n - 2, 1)), ar, ar + 1])
-
-        if 'open' in self.attribs or 'chord' in self.attribs:
-            return np.vstack([f, np.array([[0, n - 1, 1]])])
 
         return f
 
@@ -141,11 +135,11 @@ class Arc(PShape):
 
         c1x = self._center[0]
         c1y = self._center[1]
-        s1 = sketch.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
+        s1 = p5.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
 
         c2x = c1x + rx
         c2y = c1y + ry
-        s2 = sketch.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
+        s2 = p5.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
 
         sdiff = (s2 - s1)
         size_acc = (np.sqrt(np.sum(sdiff * sdiff)) * math.pi * 2) / POINT_ACCURACY_FACTOR
@@ -187,7 +181,7 @@ def point(x, y, z=0):
     :rtype: PShape
 
     """
-    return PShape([(x, y)], attribs='point')
+    return PShape([(x, y, z)], attribs='point')
 
 @_draw_on_return
 def line(p1, p2):
@@ -336,7 +330,7 @@ def rect(coordinate, *args, mode=None):
 
     :param mode: The drawing mode for the rectangle. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -393,7 +387,7 @@ def square(coordinate, side_length, mode=None):
 
     :param mode: The drawing mode for the square. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -411,7 +405,7 @@ def square(coordinate, side_length, mode=None):
     return rect(coordinate, side_length, side_length, mode=mode)
 
 def rect_mode(mode='CORNER'):
-    """Change the rect and square drawing mode for the sketch.
+    """Change the rect and square drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing rects. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
@@ -456,7 +450,7 @@ def arc(coordinate, width, height, start_angle, stop_angle,
 
     :param ellipse_mode: The drawing mode used for the ellipse. Should be one of
         {'CORNER', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -473,8 +467,8 @@ def arc(coordinate, width, height, start_angle, stop_angle,
 
     if emode == 'CORNER':
         corner = Point(*coordinate)
-        dim = Point(width, height)
-        center = (corner.x + (dim.x / 2), corner.y + (dim.y / 2), corner.z)
+        dim = Point(width/2, height/2)
+        center = (corner.x + dim.x, corner.y + dim.y, corner.z)
     elif emode == 'CENTER':
         center = Point(*coordinate)
         dim = Point(width / 2, height / 2)
@@ -504,7 +498,7 @@ def ellipse(coordinate, *args, mode=None):
 
     :param mode: The drawing mode for the ellipse. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -544,7 +538,7 @@ def circle(coordinate, radius, mode=None):
 
     :param mode: The drawing mode for the ellipse. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
-        mode being used by the sketch.)
+        mode being used by the p5.renderer.)
 
     :type mode: str
 
@@ -562,7 +556,7 @@ def circle(coordinate, radius, mode=None):
     return ellipse(coordinate, radius, radius, mode=mode)
 
 def ellipse_mode(mode='CENTER'):
-    """Change the ellipse and circle drawing mode for the sketch.
+    """Change the ellipse and circle drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing ellipses. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
@@ -584,9 +578,9 @@ def draw_shape(shape, pos=(0, 0, 0)):
     :type pos: tuple | Vector
 
     """
-    sketch.render(shape)
+    p5.renderer.render(shape)
     for child_shape in shape.children:
-        sketch.render(children)
+        draw_shape(child_shape)
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape

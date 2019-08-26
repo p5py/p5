@@ -1,0 +1,39 @@
+0.6.0
+=====
+
+p5 version 0.6.0 is the final release for the `Google Summer of Code
+2019 project
+<https://summerofcode.withgoogle.com/projects/#4911995556462592>`_ by
+`Arihant Parsoya <https://github.com/parsoyaarihant>`_. The project was supervised
+by `Abhik Pal <https://github.com/abhikpal>`_  and `Sam Lavigne <https://github.com/antiboredom>`_ of the
+`Processing Foundation <https://processingfoundation.org/>`_. The goals
+of the project were:
+
+#. Add tutorials and examples for Processing modules
+#. Complete typography module
+#. Improving the Shape Class
+#. Adding test suit to p5.py modules
+#. Add 3D capabilities
+
+We met the goals 1-4 completely. The last goal was completed partially as we were facing issues with vispy depth testing functionality. All the examples and tutorials for existing modules were imported from Processing `website <https://processing.org>`_ with live interactive sketch created using `p5.js <https://p5js.org>`_. Tests for all submodules are added using Pythons inbuilt `unittest` library. Additionally, bugs posted on github issue tracker are fixed.
+
+API Additions
+-------------
+
+* Typography methods :meth:`p5.text_align`, :meth:`p5.text_leading` and :meth:`p5.text_size` allows the user to control different position and size attributes of the text. Methods :meth:`p5.text_ascent`, :meth:`p5.text_descent` and :meth:`p5.text_width` can be used to obtain different dimensional attributes of text.
+
+* :func:`p5.load_shape` function allows the user to load an SVG file which can be rendered on the screen. The SVG shape is converted into PShape primitives and rendered on the screen using :func:`p5.shape` method.
+
+* The methods :func:`p5.begin_shape` and :func:`p5.end_shape` can be used to make custom shapes defined by different vertex types (:func:`p5.vertex`, :func:`p5.curve_vertex`, :func:`p5.bezier_vertex`, :func:`p5.quadratic_vertex`). Contours inside a shape can also be created using  :func:`p5.begin_contour` and :func:`p5.end_contour` methods.
+
+* Stroke methods allows the user to control the stroke width and styles:
+
+  - :func:`p5.stroke_weight`: allows for specifying the width of stroke
+  - :func:`p5.stroke_cap`: allows the user to set the style of line endings
+  - :func:`p5.stroke_join`: allows the user to set the style of joints which connect the line segments
+
+* This release introduces limited 3D support. New functions for :
+
+  - The :meth:`p5.camera` allows for specifying the camera coordinates in 3D space
+  - The projection functions :meth:`p5.ortho` and :meth:`p5.perspective` allow the user to control the type of projection system being used to render 3D objects on the screen
+  - New 3D shape primitives are added: :func:`p5.box`, :func:`p5.plane`, :func:`p5.sphere`, :func:`p5.ellipsoid`, :func:`p5.cylinder`, :func:`p5.cone`, :func:`p5.torus`

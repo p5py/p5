@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 """
 
 import math
-
-from collections import namedtuple
 from math import ceil, floor, exp, log, sqrt
 from math import degrees, radians
 from math import sin, cos, tan

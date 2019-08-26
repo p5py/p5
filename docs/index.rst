@@ -46,13 +46,15 @@ The p5 documentation is structured into:
 p5 is free and open source software and has been `released under the
 GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE>`_. To
 report a bug / make a feature request use the `issues page
-<https://github.com/p5py/p5/issues>`_ on the `main repository``
+<https://github.com/p5py/p5/issues>`_ on the `main repository
+<https://github.com/p5py/p5>`_.
 
 .. toctree::
    :maxdepth: 2
 
    install
    tutorials/index
+   examples/index
    guides/index
    reference/index
    releasenotes/index

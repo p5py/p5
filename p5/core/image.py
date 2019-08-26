@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,20 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import builtins
 import contextlib
 import functools
 
+import builtins
+
 import numpy as np
-import PIL
 from PIL import Image
 from PIL import ImageFilter
 from PIL import ImageChops
 from PIL import ImageOps
 from vispy import gloo
+from . import p5
 
 from . import color
-from .. import sketch
 from ..pmath import constrain
 from ..pmath.utils import _is_numeric
 from .structure import push_style
@@ -467,7 +467,7 @@ class PImage:
         elif mode == 'burn':
             raise NotImplementedError
         else:
-            raise KeyError("'{}' blend mode not found".format(mdoe.upper()))
+            raise KeyError("'{}' blend mode not found".format(mode.upper()))
 
         self._reload = True
         return self
@@ -519,7 +519,7 @@ def image(img, location, size=None):
         sx = sx - lx
         sy = sy - ly
 
-    sketch.render_image(img, (lx, ly), (sx, sy))
+    p5.renderer.render_image(img, (lx, ly), (sx, sy))
 
 def image_mode(mode):
     """Modify the locaton from which the images are drawn.
@@ -590,8 +590,8 @@ def load_pixels():
 
     """
     pixels = PImage(builtins.width, builtins.height, 'RGB')
-    sketch.renderer.flush_geometry()
-    pixel_data = sketch.renderer.fbuffer.read(mode='color', alpha=False)
+    #sketch.renderer.flush_geometry()
+    pixel_data = p5.renderer.fbuffer.read(mode='color', alpha=False)
 
     pixels._img = Image.fromarray(pixel_data)
     builtins.pixels = pixels
@@ -602,7 +602,7 @@ def load_pixels():
 
     with push_style():
         image_mode('corner')
-        sketch.renderer.tint_enabled = False
+        p5.renderer.tint_enabled = False
         image(builtins.pixels, (0, 0))
 
     builtins.pixels = None

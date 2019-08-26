@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ def _normalize(arry):
     mag = _magnitude(arry)
     return arry / mag
 
-def scale_transform(x, y, z):
+def scale_transform(x, y, z=1):
     """Return a scale transformation matrix.
 
     :param x: Scale factor in the x direction.
@@ -65,7 +65,7 @@ def scale_transform(x, y, z):
     scale_matrix[2, 2] = z
     return scale_matrix
 
-def translation_matrix(x, y, z):
+def translation_matrix(x, y, z=0):
    """Return a new translation matrix.
 
    :param x: translation in the x-direction.
@@ -165,17 +165,17 @@ def look_at(eye, at, up):
     :rtype: np.ndarray
     """
     z = _normalize(eye - at)
-    x = _normalize(up.cross(z))
-    y = z.cross(x)
+    x = _normalize(np.cross(up, z))
+    y = np.cross(z, x)
 
     mat = triple_axis_rotation_matrix(x, y, z)
     mat.transpose()
 
-    m[0, 3] = (-1) * x.dot(eye)
-    m[1, 3] = (-1) * y.dot(eye)
-    m[2, 3] = (-1) * z.dot(eye)
+    mat[0, 3] = (-1) * x.dot(eye)
+    mat[1, 3] = (-1) * y.dot(eye)
+    mat[2, 3] = (-1) * z.dot(eye)
 
-    return m
+    return mat
 
 def perspective_matrix(field_of_view, aspect_ratio, near_plane, far_plane):
     """Return a perspective matrix.

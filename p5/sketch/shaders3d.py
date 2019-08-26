@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@ attribute vec4 color;
 
 varying vec4 frag_color;
 
-uniform mat4 modelview;
 uniform mat4 projection;
+uniform mat4 perspective_matrix;
 
 void main()
 {
-    gl_Position = projection * modelview * vec4(position, 1.0);
+    gl_Position = projection * perspective_matrix * vec4(position, 1.0);
     frag_color = color;
 }
 """
@@ -47,36 +47,6 @@ void main()
 }
 """
 
-# texture vertex shader
-texture_vertex_source = """
-attribute vec2 position;
-attribute vec2 texcoord;
-
-uniform mat4 transform;
-uniform mat4 modelview;
-uniform mat4 projection;
-
-varying vec4 vertex_texcoord;
-
-void main()
-{
-    gl_Position = projection * modelview * transform * vec4(position, 0.0, 1.0);
-    vertex_texcoord = vec4(texcoord, 1.0, 1.0);
-}
-"""
-
-# texture fragment shader
-texture_fragment_source = """
-uniform vec4 fill_color;
-uniform sampler2D texture;
-
-varying vec4 vertex_texcoord;
-
-void main()
-{
-    gl_FragColor = texture2D(texture, vertex_texcoord.st) * fill_color;
-}
-"""
 
 # Shader sources to draw framebuffers textues.
 fbuffer_vertex_source = """
@@ -101,5 +71,4 @@ void main() {
 """
 
 src_default = ShaderSource(default_vertex_source, default_fragment_source)
-src_texture = ShaderSource(texture_vertex_source, texture_fragment_source)
 src_fbuffer = ShaderSource(fbuffer_vertex_source, fbuffer_fragment_source)

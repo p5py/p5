@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,12 +16,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import builtins
 import colorsys
 import math
 
 from ..pmath import lerp
 from ..pmath import constrain
+
+from .constants import colour_codes
 
 __all__ = ['color_mode', 'Color']
 
@@ -76,6 +77,8 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     - h, s, v
     - r, g, b, a
     - h, s, v, a
+    - hex
+    - colour name
 
     - gray = ...
     - gray = ..., alpha = ...
@@ -110,8 +113,28 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     rgb = None
 
     if len(args) == 1:
-        gray = args[0]
-        rgb = gray, gray, gray
+        if isinstance(args[0], int) or isinstance(args[0], float):
+            gray = args[0]
+            rgb = gray, gray, gray
+        elif isinstance(args[0], str):
+            name = args[0].lower()
+            if name == "none":
+                alpha = 0
+                rgb = (0, 0, 0)
+            else:
+                if name[0] == "#":
+                    hexadecimal = args[0]                
+                elif name in colour_codes.keys():
+                    hexadecimal = colour_codes[name]
+                else:
+                    raise ValueError("Invalid colour name %s" %name)
+
+                alpha = 255
+                _r = int(hexadecimal[1:3], 16)
+                _g = int(hexadecimal[3:5], 16)
+                _b = int(hexadecimal[5:7], 16)
+                rgb = (_r, _g, _b)
+
     elif len(args) == 2:
         gray, alpha = args
         rgb =  gray, gray, gray
@@ -170,6 +193,7 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
 
     if not normed:
         alpha = constrain(alpha / color_range[3], 0, 1)
+
     return red, green, blue, alpha
 
 
@@ -180,10 +204,15 @@ class Color:
             color_mode = color_parse_mode
 
         if (len(args) == 1) and isinstance(args[0], Color):
-           r = args[0]._red
-           g = args[0]._green
-           b = args[0]._blue
-           a = args[0]._alpha
+            r = args[0]._red
+            g = args[0]._green
+            b = args[0]._blue
+            a = args[0]._alpha
+        elif len(args) == 2 and isinstance(args[0], Color):
+            r = args[0]._red
+            g = args[0]._green
+            b = args[0]._blue
+            a = args[1]
         else:
             r, g, b, a = parse_color(*args, color_mode=color_mode,
                                      normed=normed, **kwargs)

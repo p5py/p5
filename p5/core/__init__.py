@@ -1,6 +1,6 @@
 #
 # Part of p5: A Python package based on Processing
-# Copyright (C) 2017-2018 Abhik Pal
+# Copyright (C) 2017-2019 Abhik Pal
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 from .structure import *
 from .shape import *
 from .primitives import *
+from .primitives3d import *
 from .transforms import *
 from .color import *
 from .attribs import *
 from .image import *
 from .font import *
+from .constants import *
+from .vertex import *
+from .svg import *
