@@ -100,10 +100,8 @@ def no_stroke():
     p5.renderer.stroke_enabled = False
 
 def stroke_cap(c):
-    """Sets the style of the joints which connect line segments. 
-    These joints are either mitered, beveled, or rounded and 
-    specified with the corresponding parameters MITER, BEVEL, 
-    and ROUND. The default joint is MITER.
+    """Sets the style of line endings. The ends are SQUARE, 
+    PROJECT, and ROUND. The default cap is ROUND.
 
     :param c: either 'SQUARE', 'PROJECT' or 'ROUND'
     :type c: string

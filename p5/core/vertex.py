@@ -34,16 +34,15 @@ is_contour = False
 
 
 __all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
-           'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']           
+		   'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']
+
 def begin_shape(kind=None):
 	"""
-	Begin shape drawing.  This is a helpful way of generating
-	custom shapes quickly.
+	Begin shape drawing.  This is a helpful way of generating custom shapes quickly.
 
 	:param kind: POINTS, LINES, TRIANGLES, TRIANGLE_FAN TRIANGLE_STRIP, QUADS, or QUAD_STRIP
-    :type kind: str
-
-    """
+	:type kind: str
+	"""
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
 	if (
 		kind == "POINTS" or
@@ -77,14 +76,14 @@ def curve_vertex(x, y, z=0):
 	Catmull-Rom splines.
 
 	:param x: x-coordinate of the vertex
-    :type x: float
+	:type x: float
 
 	:param y: y-coordinate of the vertex
-    :type y: float
+	:type y: float
 
-    :param z: z-coordinate of the vertex
-    :type z: float
-    """
+	:param z: z-coordinate of the vertex
+	:type z: float
+	"""
 
 	global is_curve, vertices, contour_vertices, is_contour
 	global vertices_types, contour_vertices_types
@@ -105,23 +104,23 @@ def bezier_vertex(x2, y2, x3, y3, x4, y4):
 	Specifies vertex coordinates for Bezier curves
 
 	:param x2: x-coordinate of the first control point
-    :type x2: float
+	:type x2: float
 
 	:param y2: y-coordinate of the first control point
-    :type y2: float
+	:type y2: float
 
 	:param x3: x-coordinate of the second control point
-    :type x3: float
+	:type x3: float
 
 	:param y3: y-coordinate of the second control point
-    :type y3: float
+	:type y3: float
 
-    :param x4: x-coordinate of the anchor point
-    :type x4: float
+	:param x4: x-coordinate of the anchor point
+	:type x4: float
 
 	:param y4: y-coordinate of the anchor point
-    :type y4: float
-    """
+	:type y4: float
+	"""
 	global is_bezier, vertices, contour_vertices
 	global vertices_types, contour_vertices_types, is_contour
 	is_bezier = True
@@ -141,18 +140,18 @@ def quadratic_vertex(cx, cy, x3, y3):
 	Specifies vertex coordinates for quadratic Bezier curves
 
 	:param cx: x-coordinate of the control point
-    :type cx: float
+	:type cx: float
 
 	:param cy: y-coordinate of the control point
-    :type cy: float
+	:type cy: float
 
 	:param x3: x-coordinate of the anchor point
-    :type x3: float
+	:type x3: float
 
 	:param y3: y-coordinate of the anchor point
-    :type y3: float
+	:type y3: float
 
-    """
+	"""
 	global is_quadratic, vertices, contour_vertices
 	global vertices_types, contour_vertices_types, is_contour
 	is_quadratic = True
@@ -176,14 +175,14 @@ def vertex(x, y, z=0):
 	beginShape() and endShape() functions.
 
 	:param x: x-coordinate of the vertex
-    :type x: float
+	:type x: float
 
 	:param y: y-coordinate of the vertex
-    :type y: float
+	:type y: float
 
-    :param z: z-coordinate of the vertex
-    :type z: float
-    """
+	:param z: z-coordinate of the vertex
+	:type z: float
+	"""
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
 	global is_contour
 	if p5.mode == "3D":
@@ -298,9 +297,9 @@ def end_shape(mode=""):
 	to beginShape() is rendered.
 
 	:param mode: use CLOSE to close the shape
-    :type mode: str
+	:type mode: str
 
-    """
+	"""
 	global vertices, vertices_types, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
 
 	if len(vertices) == 0:

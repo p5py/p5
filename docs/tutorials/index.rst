@@ -7,24 +7,25 @@ and advanced topics. Adapted from the tutorials on the `Processing
 website <https://processing.org/tutorials/>`_.
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-  coordinate system and shapes
-  color
-  objects
-  interactivity
-  strings and drawing text
-  arrays
-  images and pixels
-  curves
-  2D transformations
-  pshape
-  data
-  trigonometry primer
-  two dimensional arrays
-  electronics
-  network
-  vector
+    coordinate system and shapes
+    color
+    objects
+    interactivity
+    typography
+    strings and drawing text
+    arrays
+    images and pixels
+    curves
+    2D transformations
+    pshape
+    data
+    trigonometry primer
+    two dimensional arrays
+    electronics
+    network
+    vector
 
 .. rubric:: Beginner tutorials
 

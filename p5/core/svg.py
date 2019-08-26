@@ -217,7 +217,6 @@ def shape(shape, x=0, y=0):
     :param y: y-coordinate of the shape
     :type y: float
 	"""
-	transforms.push_matrix()
-	transforms.translate(x, y)
-	primitives.draw_shape(shape)
-	transforms.pop_matrix()
+	with transforms.push_matrix():
+		transforms.translate(x, y)
+		primitives.draw_shape(shape)

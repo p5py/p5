@@ -80,7 +80,7 @@ Form
 .. toctree::
    :maxdepth: 1
 
-   form/point and lines
+   form/points and lines
    form/shape primitives
    form/pie chart
    form/regular polygon

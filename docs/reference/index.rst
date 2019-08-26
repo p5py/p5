@@ -6,6 +6,7 @@ Reference
 
    structure
    environment
+   attributes
    shape
    input
    output
@@ -14,3 +15,4 @@ Reference
    image
    typography
    math
+   svg
