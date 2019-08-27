@@ -841,7 +841,7 @@ The following example example uses an XML tree of bubble objects to render on th
 	            text(self.name, self.x, self.y + self.diameter/2 + 20)
 
 	if __name__ == '__main__':
-	    run(mode="P3D")
+	    run()
 	    
 JSON
 ====

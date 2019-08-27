@@ -328,4 +328,4 @@ We can now take a look at the same sketch with multiple object instances, each w
 	            self.xpos = 0
 
 	if __name__ == '__main__':
-	    run(mode="P3D")
+	    run()
