@@ -44,14 +44,14 @@ Python code for the sketch looks like:
    run()
 
 Documentation
-------------
+-------------
 The p5py documentation can be found here `p5 documentation
 <http://p5.readthedocs.io>`_
 
 Installation
 ------------
 
-Take a look at the installation steps here in the `p5 documentation
+Take a look at the installation steps here in the `p5 installation page
 <http://p5.readthedocs.io/en/latest/install.html>`_
 
 License

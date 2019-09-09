@@ -30,6 +30,7 @@ setup(
     version=meta_data['__version__'],
     description=meta_data['__description__'],
     long_description=readme,
+    long_description_content_type="text/x-rst",
     author=meta_data['__author__'],
     url=meta_data['__url__'],
     author_email=meta_data['__author_email__'],

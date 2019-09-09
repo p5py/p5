@@ -555,7 +555,7 @@ Knowing where the data starts and ends, I can use giveMeTextBetween() to pull ou
 
 The following code retrieves both the running time and movie poster iamge from IMDb and displays it onscreen.
 
-**Parsing IMDb Manually **
+**Parsing IMDb Manually**
 
 .. image:: ./data-res/fig_18_11_parsing_imdb.png
    :align: center
@@ -653,7 +653,7 @@ Values can be paired with their keys using the following syntax:
 	inventory["paper clips"] = 128
 	inventory["pens"] = 16
 
-**Text Concordance Using IntDict **
+**Text Concordance Using IntDict**
 
 
 
@@ -741,9 +741,192 @@ and some have attributes (formatted by Attribute Name equals Attribute Value in 
 Using the Processing XML Class
 ==============================
 
-Since the syntax of XML is standardized, I could certainly use split(), indexof(), and substring() to find the pieces I want in the XML source. The point here, however, is that because XML is a standard format, I don't have to do this. Rather, I can use an XML parser. In Processing, XML can be parsed using the built-in Processing class XML.
+Since the syntax of XML is standardized, I could certainly use split(), indexof(), and substring() to find the pieces I want in the XML source. The point here, however, is that because XML is a standard format, I don't have to do this. Rather, I can use an XML parser. In Processing, XML can be parsed using the built-in Python's `xml` library.
+
+.. code:: python
+
+	import xml.etree.ElementTree as ET
+	xml = ET.parse("filename.xml")
+
+I'm now calling `ET.parse()` and passing the file of the XML document. An XML object represents one element of an XML tree. When a document is first loaded, that XML object is always the root element. 
+
+**Using Processing's XML Class**
+
+The following example example uses an XML tree of bubble objects to render on the screen:
 
 .. code:: XML
 
-	xml = loadXML("http://xml.weather.yahoo.com/forecastrss?p=10003")
+	<?xml version="1.0" encoding="UTF-8"?>
+	<bubbles>
+	  <bubble>
+	    <position x="160" y="103"/>
+	    <diameter>43.19838</diameter>
+	    <label>Happy</label>
+	  </bubble>
+	  <bubble>
+	    <position x="372" y="137"/>
+	    <diameter>52.42526</diameter>
+	    <label>Sad</label>
+	  </bubble>
+	  <bubble>
+	    <position x="273" y="235"/>
+	    <diameter>61.14072</diameter>
+	    <label>Joyous</label>
+	  </bubble>
+	  <bubble>
+	    <position x="121" y="179"/>
+	    <diameter>44.758068</diameter>
+	    <label>Melancholy</label>
+	  </bubble>
+	</bubbles>
 
+.. image:: ./data-res/fig_18_07_tablebubbles.png
+   :align: center
+
+.. code:: python
+
+	import xml.etree.ElementTree as ET
+	from p5 import *
+
+	# An Array of Bubble objects
+	bubbles = []
+
+	def setup():
+	    size(480, 360)
+	    loadData()
+
+	def loadData():
+	    global bubbles
+	    # Load XML file
+	    xml = ET.parse("bubbles.xml")
+	    root = xml.getroot()
+	    for child in root:
+	        diameter = float(child.find("diameter").text)
+	        label = child.find("label").text
+	        x = int(child.find("position").attrib["x"])
+	        y = int(child.find("position").attrib["y"])
+	        bubbles.append(Bubble(x, y, diameter, label))
+
+	def draw():
+	    global bubbles
+	    background(255)
+
+	    # display all bubbles
+	    for i in range(len(bubbles)):
+	        bubbles[i].display()
+	        bubbles[i].rollover(mouse_x, mouse_y)
+
+	class Bubble:
+	    def __init__(self, tempX, tempY, tempD, s):
+	        self.x = tempX
+	        self.y = tempY
+	        self.diameter = tempD
+	        self.name = s
+
+	    def rollover(self, px, py):
+	        d = dist((px, py), (self.x, self.y))
+	        if d < self.diameter / 2:
+	            return True
+	        else:
+	            return False
+
+	    def display(self):
+	        stroke(0)
+	        stroke_weight(2)
+	        no_fill()
+	        ellipse((self.x, self.y), self.diameter, self.diameter)
+	        if self.rollover(self.x, self.y):
+	            fill(0)
+	            text_align("CENTER")
+	            text(self.name, self.x, self.y + self.diameter/2 + 20)
+
+	if __name__ == '__main__':
+	    run()
+	    
+JSON
+====
+
+Another increasingly popular data exchange format is JSON (pronounced like the name Jason), which stands for JavaScript Object Notation. Its design was based on the syntax for objects in the JavaScript programming language (and is most commonly used to pass data between web applications) but has become rather ubiquitous and language-agnostic. While you don't need to know anything about JavaScript to work in Processing, it won't hurt to get a sense of some basic JavaScript syntax while learning it.
+
+JSON is an alternative to XML and the data can be looked at in a similarly tree-like manner. All JSON data comes in the following two ways: an object or an array. Luckily, you already know about these two concepts and only need to learn a new syntax for encoding them.
+
+Let's take a look at a JSON object first. A JSON object is like a Processing object only with no functions. It’s simply a collection of variables with a name and a value (or "name/value pair"). For example, following is JSON data describing a person:
+
+.. code:: javascript
+
+	{
+		"name":"Olympia",
+		// Each name/value pair is separated by a comma.
+		"age":3,
+		"height":96.5,
+		"state":"giggling"
+	}
+
+Notice how this maps closely to classes in Processing.
+
+.. code:: javascript
+
+	{
+		"name":"Olympia",
+		"age":3,
+		"height":96.5,
+		"state":"giggling",
+		// The value of “brother” is an object containing two name/value pairs.
+		"brother":{
+			"name":"Elias",
+			"age":6
+		}
+	}
+
+Multiple JSON objects can appear in the data as an array. Just like the arrays you use in Processing, a JSON array is simply a list of values (primitives or objects). The syntax, however, is different with square brackets indicating the use of an array rather than curly ones. Here is a simple JSON array of integers:
+
+.. code:: python
+	
+	[1, 7, 8, 9, 10, 13, 15]
+
+You might find an array as part of an object.
+
+.. code:: javascript
+
+	{
+		"name":"Olympia",
+		// The value of “favorite colors” is an array of strings.
+		"favorite colors":[
+			"purple",
+			"blue",
+			"pink"
+		]
+	}
+
+Or an array of objects themselves. For example, here is what the bubbles would look like in JSON. Notice how this JSON data is organized as a single JSON object "bubbles," which contains a JSON array of JSON objects, the bubbles. Flip back to compare to the CSV and XML versions of the same data.
+
+.. code:: javascript
+
+	{
+	  "bubbles":[
+	    {
+	      "position":{
+	        "x":160,
+	        "y":103
+	      },
+	      "diameter":43.19838,
+	      "label":"Happy"
+	    },
+	    {
+	      "position":{
+	        "x":372,
+	        "y":137
+	      },
+	      "diameter":52.42526,
+	      "label":"Sad"
+	    },
+	    {
+	      "position":{
+	        "x":273,
+	        "y":235
+	      },
+	      "diameter":61.14072,
+	      "label":"Joyous"
+	    }
+	  ]
+	}
