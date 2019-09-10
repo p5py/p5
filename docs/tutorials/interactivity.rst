@@ -166,7 +166,7 @@ Draw a line from the previous mouse position to the current position to show the
 
    def draw():
       background(204)
-      line(mouse_x, mouse_y, pmouse_x, pmouse_y)
+      line((mouse_x, mouse_y), (pmouse_x, pmouse_y))
 
    if __name__ == '__main__':
       run()
