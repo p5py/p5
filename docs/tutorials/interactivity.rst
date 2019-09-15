@@ -143,7 +143,7 @@ To invert the value of the mouse, subtract the mouse_x value from the width of t
    if __name__ == '__main__':
       run()
 
-The Processing variables ``pmouse_x`` and ``pmouse_y` store the mouse values from the previous frame. If the mouse does not move, the values will be the same, but if the mouse is moving quickly there can be large differences between the values. To see the difference, run the following program and alternate moving the mouse slowly and quickly. Watch the values print to the console.
+The Processing variables ``pmouse_x`` and ``pmouse_y`` store the mouse values from the previous frame. If the mouse does not move, the values will be the same, but if the mouse is moving quickly there can be large differences between the values. To see the difference, run the following program and alternate moving the mouse slowly and quickly. Watch the values print to the console.
 
 .. code:: python
 
