@@ -148,8 +148,11 @@ The Processing variables ``pmouse_x`` and ``pmouse_y`` store the mouse values fr
 .. code:: python
 
    def draw():
-      frame_rate(12)
-      print(pmouse_y - mouse_x)
+      # Your draw goes here 
+      print(mouse_x, " : ", mouse_y) # Use this at the end of the draw to
+                                     # print in console the mouse x and y
+        
+   run(frame_rate=12) # Use this to control the frame rate
 
 Draw a line from the previous mouse position to the current position to show the changing position in one frame and reveal the speed and direction of the mouse. When the mouse is not moving, a point is drawn, but quick mouse movements create long lines.
 
