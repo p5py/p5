@@ -257,8 +257,8 @@ Use the logical operator ``and`` with an ``if`` structure to select a rectangula
 
    def draw():
       background(204)
-      if ((mouse_x > 40) and (mouse_x < 80) and
-         (mouse_y > 20) and (mouse_y < 80)):
+      if (mouse_x > 40) and (mouse_x < 80) and
+         (mouse_y > 20) and (mouse_y < 80):
          fill(255)
       else:
          fill(0)
