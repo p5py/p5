@@ -584,7 +584,7 @@ In addition to reading key values for numbers, letters, and symbols, Processing 
 
    from p5 import *
 
-   y = 35
+   y = 0
 
    def setup():
        size(100, 100)
