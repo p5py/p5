@@ -557,7 +557,7 @@ Because each character has a numeric value as defined by the ASCII table (p. 605
 
       global angle
       if key_is_pressed:
-         if (key >= 32) and (key <= 126):
+         if (ord(str(key)) >= 32) and (ord(str(key)) <= 126):
             #  If the key is alphanumeric, use its value as an angle
             angle = (ord(str(key)) - 32) * 3
 
