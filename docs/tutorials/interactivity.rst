@@ -28,9 +28,12 @@ The Processing variables ``mouse_x`` and ``mouse_y`` store the x-coordinate and 
 
 .. code:: python
 
-	def draw():
-		frame_rate(12)
-		print(mouse_x, " : ", mouse_y)
+   def draw():
+      # Your draw goes here 
+      print(mouse_x, " : ", mouse_y) # Use this at the end of the draw to
+                                     # print in console the mouse x and y
+        
+   run(frame_rate=12) # Use this to control the frame rate  
 
 When a program starts, the ``mouse_x`` and ``mouse_y`` values are 0. If the cursor moves into the display window, the values are set to the current position of the cursor. If the cursor is at the left, the ``mouse_x`` value is 0 and the value increases as the cursor moves to the right. If the cursor is at the top, the ``mouse_y`` value is 0 and the value increases as the cursor moves down. If ``mouse_x`` and ``mouse_y`` are used in programs without a ``draw()`` or if ``no_loop()`` is run in ``setup()``, the values will always be 0.
 
