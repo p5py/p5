@@ -390,15 +390,14 @@ Drawing letters to the screen becomes more engaging when used in combination wit
    from p5 import *
 
    letters = ""
-   back = 102
-   fil = 0
+   back = 102 # Background color
+   fil = 0 # Letters color
 
 
    def setup():
       size(100, 100)
       text_align("CENTER")
-      # text_size(16)
-
+      
 
    def draw():
       fill(fil)
@@ -407,7 +406,7 @@ Drawing letters to the screen becomes more engaging when used in combination wit
 
 
    def key_pressed():
-      global letters, back, fil
+      global letters, back, fil # Declared global variables so you can use them
       if key == "ENTER" or key == "RETURN":
          letters = letters.lower()
          print(letters)
