@@ -717,8 +717,11 @@ The code inside the ``mouse_moved()`` and ``mouse_dragged()`` event functions ar
 
    from p5 import *
 
-   dragX = dragY = moveX = moveY = 0
-
+   dragX = 0
+   dragY = 0
+   moveX = 0
+   moveY = 0
+         
    def setup():
       size(100, 100)
       no_stroke()
