@@ -161,7 +161,7 @@ The examples in this chapter are the first to load external media into a sketch.
 
 Before external media can be used in a Processing sketch, it needs to be loaded each time the program is run. Media can be loaded directly from a sketch’s folder, another location on the computer, or though the Internet. Most typically, the media is loaded directly from the sketch’s folder.
 
-To make media files accessible from anywhere in a program, they are typically declared as globally available variables outside of ``setup()`` and ``draw()``. Files are usually loaded inside ``setup()`` because they need only be loaded once and because it takes time to load them. Loading a file inside draw() reduces the frame rate of a program because it causes the file to reload each frame. Once a file is loaded in ``setup()``, it may be utilized anywhere in the program. In most Processing programs, all files are loaded when the program starts.
+To make media files accessible from anywhere in a program, they are typically declared as globally available variables outside of ``setup()`` and ``draw()``. Files are usually loaded inside ``setup()`` because they need only be loaded once and because it takes time to load them. Loading a file inside ``draw()`` reduces the frame rate of a program because it causes the file to reload each frame. Once a file is loaded in ``setup()``, it may be utilized anywhere in the program. In most Processing programs, all files are loaded when the program starts.
 
 Vector Fonts
 ============
@@ -218,7 +218,7 @@ To ensure a font will load on all computers, regardless if the font is installed
    if __name__ == '__main__':
       run()
 
-To use two fonts in one program, create two PFont variables and use the textFont() function to change the current font. Based on the prior two examples, the Ziggurat-Black font loads from its location on the local computer and Source Code Pro loads from the data folder.
+To use two fonts in one program, create two PFont variables and use the ``text_font()`` function to change the current font. Based on the prior two examples, the Ziggurat-Black font loads from its location on the local computer and Source Code Pro loads from the data folder.
 
 .. image:: ./typography-res/12_10.png
    :align: left
