@@ -231,10 +231,10 @@ To use two fonts in one program, create two PFont variables and use the ``text_f
    zigBlack = None
 
    def setup():
+      global sourceLight, zigBlack
       size(100, 100)
       sourceLight = create_font("SourceCodePro-Light.otf", 34)
       zigBlack = create_font("SourceCodePro-Light.otf", 44)
-      text_font(sourceLight)
       fill(0)
 
    def draw():
