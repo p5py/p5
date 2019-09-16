@@ -388,25 +388,32 @@ Drawing letters to the screen becomes more engaging when used in combination wit
 
    letters = ""
    back = 102
+   fil = 0
+
 
    def setup():
       size(100, 100)
       text_align("CENTER")
-      text_size(16)
+      # text_size(16)
+
 
    def draw():
+      fill(fil)
       background(back)
       text(letters, (50, 50))
 
+
    def key_pressed():
-      global letters
+      global letters, back, fil
       if key == "ENTER" or key == "RETURN":
          letters = letters.lower()
          print(letters)
          if letters == "black":
             back = 0
-         elif letters == "gray":
+            fil = 255  # this changes the color of the letters so you can see
+        elif letters == "gray":
             back = 204
+            fil = 0  # this changes the color of the letters so you can see
 
          letters = ""
       elif ord(str(key)) > 31 and key != "CODED":
