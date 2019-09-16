@@ -174,8 +174,10 @@ Before a font is used in a program, it must be converted and set as the current 
 .. code:: python
 
    from p5 import *
+   
 
    def setup():
+      global zigBlack # declare zigBlack "global" in setup, should be accessible later if you want
       size(100, 100)
       zigBlack = create_font("Ziggurat-Black.otf", 32)
       text_font(zigBlack)
@@ -200,6 +202,7 @@ To ensure a font will load on all computers, regardless if the font is installed
    from p5 import *
 
    def setup():
+      global sourceLight # declare sourceLight "global" in setup, should be accessible later if you want
       size(100, 100)
       sourceLight = create_font("SourceCodePro-Light.otf", 34)
       text_font(sourceLight)
@@ -224,7 +227,7 @@ To use two fonts in one program, create two PFont variables and use the ``text_f
    from p5 import *
 
    def setup():
-      global sourceLight, zigBlack
+      global sourceLight, zigBlack # declare sourceLight / zigBlack "global" in setup, should be accessible later draw()
       size(100, 100)
       sourceLight = create_font("SourceCodePro-Light.otf", 34)
       zigBlack = create_font("SourceCodePro-Light.otf", 44)
