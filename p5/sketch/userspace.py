@@ -22,6 +22,7 @@ import __main__
 import math
 import numpy as np
 import builtins
+import datetime
 from functools import wraps
 
 from vispy import app
@@ -60,7 +61,7 @@ builtins.key = None
 builtins.key_is_pressed = False
 
 builtins.pixels = None
-
+builtins.start_time = 0
 
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
@@ -153,6 +154,7 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D"):
 
     builtins.pixel_x_density = physical_width // width
     builtins.pixel_y_density = physical_height // height
+    builtins.start_time = datetime.datetime.now()
 
     p5.sketch.timer.start()
 

@@ -17,6 +17,7 @@
 #
 
 import datetime
+import builtins
 
 def day():
 	return datetime.datetime.now().day
@@ -25,7 +26,7 @@ def hour():
 	return datetime.datetime.now().hour
 
 def millis():
-	return datetime.datetime.now().microsecond
+	return (datetime.datetime.now() - builtins.start_time).total_seconds()*1000
 
 def minute():
 	return datetime.datetime.now().minute
