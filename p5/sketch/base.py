@@ -62,7 +62,7 @@ class Sketch(app.Canvas):
             title=builtins.title,
             size=(builtins.width, builtins.height),
             keys='interactive',
-            resizable=False,
+            resizable=True,
         )
 
         self.setup_method = setup_method
@@ -145,6 +145,9 @@ class Sketch(app.Canvas):
         pass
 
     def on_resize(self, event):
+        builtins.width = int(self.size[0])
+        builtins.height = int(self.size[1])
+
         p5.renderer.reset_view()
         with p5.renderer.draw_loop():
             p5.renderer.clear()
