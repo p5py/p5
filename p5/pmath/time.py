@@ -16,24 +16,24 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import datetime
+import time
 import builtins
 
-def day():
-	return datetime.datetime.now().day
-
-def hour():
-	return datetime.datetime.now().hour
 
 def millis():
-	return (datetime.datetime.now() - builtins.start_time).total_seconds()*1000
+	return int((time.perf_counter() - builtins.start_time)*1000)
+
+def day():
+	return int(time.strftime("%d"))
+
+def hour():
+	return int(time.strftime("%H"))
 
 def minute():
-	return datetime.datetime.now().minute
+	return int(time.strftime("%M"))
 
 def second():
-	return datetime.datetime.now().second
+	return int(time.strftime("%S"))
 
 def year():
-	return datetime.datetime.now().year
-
+	return int(time.strftime("%Y"))

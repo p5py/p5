@@ -22,7 +22,7 @@ import __main__
 import math
 import numpy as np
 import builtins
-import datetime
+import time
 from functools import wraps
 
 from vispy import app
@@ -154,7 +154,7 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D"):
 
     builtins.pixel_x_density = physical_width // width
     builtins.pixel_y_density = physical_height // height
-    builtins.start_time = datetime.datetime.now()
+    builtins.start_time = time.perf_counter()
 
     p5.sketch.timer.start()
 
