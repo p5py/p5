@@ -117,7 +117,7 @@ This should be done only once, usually in ``setup()``. Just as with loading an i
 
 .. code:: python
 
-	f = create_font("Arial.tiff", 16,) # Arial, 16 point, anti-aliasing on
+	f = create_font("Arial.ttf", 16,) # Arial, 16 point, anti-aliasing on
 
 **3. Specify the font using text_font()**
 
