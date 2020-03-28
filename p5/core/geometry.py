@@ -55,6 +55,8 @@ class Geometry:
 		self.stroke_indices = []
 
 		self.matrix = np.identity(4)
+		
+		self.children = []
 
 	def reset(self):
 		"""
