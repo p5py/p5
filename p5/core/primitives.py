@@ -26,6 +26,7 @@ from ..pmath import curves
 from ..pmath.utils import SINCOS
 
 from .shape import PShape
+from .geometry import Geometry
 
 from . import p5
 
@@ -579,6 +580,10 @@ def draw_shape(shape, pos=(0, 0, 0)):
 
     """
     p5.renderer.render(shape)
+
+    if isinstance(shape, Geometry):
+        return
+
     for child_shape in shape.children:
         draw_shape(child_shape)
 
