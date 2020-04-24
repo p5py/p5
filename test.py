@@ -27,7 +27,6 @@ def draw():
         with push_matrix():
                 segment(x, y, angle1)
                 segment(segLength, 0, angle2)
-                pop_matrix()
 
 def segment(x, y, a):
         translate(x, y)
