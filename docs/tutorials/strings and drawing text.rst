@@ -538,19 +538,18 @@ The character by character method also allows us to display text along a curve. 
 			# Angle in radians is the arclength divided by the radius
 			theta = arclength / r
 
-			push_matrix()
-			# Polar to cartesian coordinate conversion
-			translate(r*cos(theta), r*sin(theta))
+			with push_matrix():
+				# Polar to cartesian coordinate conversion
+				translate(r*cos(theta), r*sin(theta))
 
-			# Rotate the box
-			rotate(theta)
+				# Rotate the box
+				rotate(theta)
 
-			# Display the box
-			fill(0, 100)
+				# Display the box
+				fill(0, 100)
 
-			rect_mode("CENTER")
-			rect((0,0),w,h)
-			pop_matrix()
+				rect_mode("CENTER")
+				rect((0,0),w,h)
 
 			# Move halfway again
 			arclength += w/2
@@ -619,18 +618,17 @@ What we need to do is replace each box with a character from a String that fits 
 			# Starting on the left side of the circle by adding PI
 			theta = PI + arclength / r
 
-			push_matrix()
-			# Polar to cartesian coordinate conversion
-			translate(r*cos(theta), r*sin(theta))
+			with push_matrix():
+				# Polar to cartesian coordinate conversion
+				translate(r*cos(theta), r*sin(theta))
 
-			# Rotate the box
-			rotate(theta)
+				# Rotate the box
+				rotate(theta)
 
-			# Display the box
-			fill(0, 100)
+				# Display the box
+				fill(0, 100)
 
-			text(currentChar, (0,0)) 
-			pop_matrix()
+				text(currentChar, (0,0)) 
 
 			# Move halfway again
 			arclength += w/2
