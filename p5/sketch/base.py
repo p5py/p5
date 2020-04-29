@@ -91,8 +91,8 @@ class Sketch(app.Canvas):
         builtins.frame_rate = round(self.fps, 2)
 
         with p5.renderer.draw_loop():
-            builtins.frame_count += 1
             if not self.setup_done:
+                builtins.frame_count += 1
                 self.setup_method()
                 self.setup_done = True
                 self.show(visible=True)
@@ -101,7 +101,10 @@ class Sketch(app.Canvas):
                 if self.looping is None:
                     self.looping = True
             elif self.looping:
+                builtins.frame_count += 1
                 self.draw_method()
+            elif not self.looping:
+                pass
             elif self.redraw:
                 self.draw_method()
                 self.redraw = False
