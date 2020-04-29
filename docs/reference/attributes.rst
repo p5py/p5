@@ -1,6 +1,6 @@
-===========
-Environment
-===========
+==========
+Attributes
+==========
 
 .. automodule:: p5
 
