@@ -606,3 +606,10 @@ def load_pixels():
         image(builtins.pixels, (0, 0))
 
     builtins.pixels = None
+
+
+def save_frame(filename=None):
+    if filename:
+        p5.sketch.screenshot(filename)
+    else:
+        p5.sketch.screenshot("Screen.png")
