@@ -24,7 +24,7 @@ from ..pmath import matrix
 
 from . import p5
 
-__all__ = ['push_matrix', 'pop_matrix', 'reset_transforms', 
+__all__ = ['push_matrix', 'reset_transforms', 
            'translate', 'rotate', 'rotate_x', 'rotate_y', 
            'rotate_z', 'scale', 'shear_x', 'shear_y', 
            'camera', 'frustum', 'ortho', 'perspective',
@@ -37,9 +37,6 @@ def push_matrix():
         yield previous_matrix
     finally:
         p5.renderer.transform_matrix = previous_matrix
-
-def pop_matrix():
-    push_matrix()
 
 def reset_transforms():
     """Reset all transformations to their default state.

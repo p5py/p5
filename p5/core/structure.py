@@ -84,6 +84,3 @@ def push_style():
 
     color.prev_color_parse_mode = prev_color_mode
     color.prev_color_range = prev_color_range
-
-def pop_style():
-    push_style()

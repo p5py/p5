@@ -55,17 +55,16 @@ Here is code that draws the rectangle in red by changing its coordinates, then d
 
 		# draw a translucent blue rectangle by translating the grid
 		fill(0, 0, 255, 128)
-		push_matrix()
-		translate(60, 80)
-		rect((20, 20), 40, 40)
-		pop_matrix()
+		with push_matrix():
+		    translate(60, 80)
+		    rect((20, 20), 40, 40)
 
 	if __name__ == '__main__':
 	  run()
 
-Let’s look at the translation code in more detail. ``push_matrix()`` is a built-in function that saves the current position of the coordinate system. The ``translate(60, 80)`` moves the coordinate system 60 units right and 80 units down. The ``rect((20, 20), 40, 40)`` draws the rectangle at the same place it was originally. Remember, the things you draw don’t move—the grid moves instead. Finally, ``pop_matrix()`` restores the coordinate system to the way it was before you did the translate.
+Let’s look at the translation code in more detail. ``push_matrix()`` is a built-in function that saves the current position of the coordinate system. The ``translate(60, 80)`` moves the coordinate system 60 units right and 80 units down. The ``rect((20, 20), 40, 40)`` draws the rectangle at the same place it was originally. Remember, the things you draw don’t move—the grid moves instead. Finally, when the ``with`` context ends, it "pops" and restores the coordinate system to the way it was before you did the translate.
 
-Yes, you could have done a ``translate(-60, -80)`` to move the grid back to its original position. However, when you start doing more sophisticated operations with the coordinate system, it’s easier to use ``push_matrix()`` and ``pop_matrix()`` to save and restore the status rather than having to undo all your operations. Later on in this tutorial, you will find out why those functions seem to have such strange names.
+Yes, you could have done a ``translate(-60, -80)`` to move the grid back to its original position. However, when you start doing more sophisticated operations with the coordinate system, it’s easier to use ``with push_matrix():`` to save and then later restore the status rather than having to undo all your operations. Later on in this tutorial, you will find out why those functions seem to have such strange names.
 
 What’s the Advantage?
 =====================
@@ -100,12 +99,11 @@ Compare that to the version of the function that uses translate(). In this case,
 .. code:: python
 
 	def house(x, y):
-		push_matrix()
-		translate(x, y)
-		triangle((15, 0), (0, 15), (30, 15))
-		rect((0, 15), 30, 30)
-		rect((12, 30), 10, 15)
-		pop_matrix()
+		with push_matrix():
+			translate(x, y)
+			triangle((15, 0), (0, 15), (30, 15))
+			rect((0, 15), 30, 30)
+			rect((12, 30), 10, 15)
 
 Rotation
 ========
@@ -134,11 +132,10 @@ Since most people think in degrees, Processing has a built-in ``radians()`` func
 		no_stroke()
 		rect((40, 40), 40, 40)
 
-		push_matrix()
-		rotate(radians(45))
-		fill(0)
-		rect((40, 40), 40, 40)
-		pop_matrix()
+		with push_matrix():
+			rotate(radians(45))
+			fill(0)
+			rect((40, 40), 40, 40)
 
 	if __name__ == '__main__':
 	  run()
@@ -179,17 +176,16 @@ And here is the code and its result, without the grid marks.
 		no_stroke()
 		rect((40, 40), 40, 40)
 
-		push_matrix()
-		# move the origin to the pivot point
-		translate(40, 40)
+		with push_matrix():
+			# move the origin to the pivot point
+			translate(40, 40)
 
-		# then pivot the grid
-		rotate(radians(45))
+			# then pivot the grid
+			rotate(radians(45))
 
-		# and draw the square at the origin
-		fill(0)
-		rect((0, 0), 40, 40)
-		pop_matrix()
+			# and draw the square at the origin
+			fill(0)
+			rect((0, 0), 40, 40)
 
 	if __name__ == '__main__':
 	  run()
@@ -214,11 +210,10 @@ And here is a program that generates a wheel of colors by using rotation. The sc
 				frame_count * 5 % 255, 
 				frame_count * 7 % 255)
 
-		push_matrix()
-		translate(100, 100)
-		rotate(radians(frame_count * 2  % 360))
-		rect((0, 0), 80, 20)
-		pop_matrix()
+		with push_matrix():
+			translate(100, 100)
+			rotate(radians(frame_count * 2  % 360))
+			rect((0, 0), 80, 20)
 
 	if __name__ == '__main__':
 	  run()
@@ -244,10 +239,9 @@ The final coordinate system transformation is scaling, which changes the size of
 		rect((20, 20), 40, 40)
 
 		stroke(0)
-		push_matrix()
-		scale(2.0)
-		rect((20, 20), 40, 40)
-		pop_matrix()
+		with push_matrix():
+			scale(2.0)
+			rect((20, 20), 40, 40)
 
 	if __name__ == '__main__':
 	  run()
@@ -279,21 +273,19 @@ When you do multiple transformations, the order makes a difference. A rotation f
 		line((0, 0), (200, 0)) # draw axes
 		line((0, 0), (0, 200))
 
-		push_matrix()
-		fill(255, 0, 0) # red square
-		rotate(radians(30))
-		translate(70, 70)
-		scale(2.0)
-		rect((0, 0), 20, 20)
-		pop_matrix()
+		with push_matrix():
+			fill(255, 0, 0) # red square
+			rotate(radians(30))
+			translate(70, 70)
+			scale(2.0)
+			rect((0, 0), 20, 20)
 
-		push_matrix()
-		fill(255) # white square
-		translate(70, 70)
-		rotate(radians(30))
-		scale(2.0)
-		rect((0, 0), 20, 20)
-		pop_matrix()
+		with push_matrix():
+			fill(255) # white square
+			translate(70, 70)
+			rotate(radians(30))
+			scale(2.0)
+			rect((0, 0), 20, 20)
 
 	if __name__ == '__main__':
 	  run()
@@ -301,14 +293,14 @@ When you do multiple transformations, the order makes a difference. A rotation f
 The Transformation Matrix
 =========================
 
-Every time you do a rotation, translation, or scaling, the information required to do the transformation is accumulated into a table of numbers. This table, or matrix has only a few rows and columns, yet, through the miracle of mathematics, it contains all the information needed to do any series of transformations. And that’s why the ``push_matrix()` and ``pop_matrix()`` have that word in their name.
+Every time you do a rotation, translation, or scaling, the information required to do the transformation is accumulated into a table of numbers. This table, or matrix has only a few rows and columns, yet, through the miracle of mathematics, it contains all the information needed to do any series of transformations. And that’s why ``push_matrix()`` has that word in their name.
 
-Push and Pop
+Push (and Pop)
 ============
 
-What about the push and pop part of the names? These come from a computer concept known as a stack, which works like a spring-loaded tray dispenser in a cafeteria. When someone returns a tray to the stack, its weight pushes the platform down. When someone needs a tray, he takes it from the top of the stack, and the remaining trays pop up a little bit.
+What about the push part of the name? It comes from a computer concept known as a stack, which works like a spring-loaded tray dispenser in a cafeteria. When someone returns a tray to the stack, its weight pushes the platform down. When someone needs a tray, he takes it from the top of the stack, and the remaining trays pop up a little bit.
 
-In a similar manner, ``push_matrix()`` puts the current status of the coordinate system at the top of a memory area, and ``pop_matrix()`` pulls that status back out. The preceding example used ``push_matrix()`` and ``pop_matrix()`` to make sure that the coordinate system was “clean” before each part of the drawing. In all of the other examples, the calls to those two functions weren’t really necessary, but it doesn’t hurt anything to save and restore the grid status.
+In a similar manner, ``push_matrix()`` puts the current status of the coordinate system at the top of a memory area. When the `with` exits the context automatically "pops" and pulls that status back out. The preceding example used ``push_matrix()`` to make sure that the coordinate system was “clean” before each part of the drawing. In all of the other examples, the calls to those two functions weren’t really necessary, but it doesn’t hurt anything to save and restore the grid status.
 
 Note: in Processing, the coordinate system is restored to its original state (origin at the upper left of the window, no rotation, and no scaling) every time that the ``draw()`` function is executed.
 
@@ -381,16 +373,14 @@ Now, separate the code for drawing the left and right arms, and move the center 
 		ellipse((47, 12), 12, 12) # right eye
 
 	def drawLeftArm():
-		push_matrix()
-		translate(12, 32)
-		rect((-12, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(12, 32)
+			rect((-12, 0), 12, 37)
 
 	def drawRightArm():
-		push_matrix()
-		translate(66, 32)
-		rect((0, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(66, 32)
+			rect((0, 0), 12, 37)
 
 Now test to see if the arms rotate properly. Rather than attempt a full animation, we will just rotate the left side arm 135 degrees and the right side arm -45 degrees as a test. Here is the code that needs to be added, and the result. The left side arm is cut off because of the window boundaries, but we’ll fix that in the final animation.
 
@@ -400,18 +390,16 @@ Now test to see if the arms rotate properly. Rather than attempt a full animatio
 .. code:: python
 
 	def drawLeftArm():
-		push_matrix()
-		translate(12, 32)
-		rotate(radians(135))
-		rect((-12, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(12, 32)
+			rotate(radians(135))
+			rect((-12, 0), 12, 37)z
 
 	def drawRightArm():
-		push_matrix()
-		translate(66, 32)
-		rotate(radians(-45))
-		rect((0, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(66, 32)
+			rotate(radians(-45))
+			rect((0, 0), 12, 37)
 
 Now we complete the program by putting in the animation. The left arm has to rotate from 0° to 135° and back. Since the arm-waving is symmetric, the right-arm angle will always be the negative value of the left-arm angle. To make things simple, we will go in increments of 5 degrees.
 
@@ -431,18 +419,16 @@ Now we complete the program by putting in the animation. The left arm has to rot
 		global armAngle, angleChange, ANGLE_LIMIT
 		background(255)
 
-		push_matrix()
-		translate(50, 50) # place robot so arms are always on screen
-		drawRobot()
-		armAngle += angleChange
+		with push_matrix():
+			translate(50, 50) # place robot so arms are always on screen
+			drawRobot()
+			armAngle += angleChange
 
-		# if the arm has moved past its limit,
-		# reverse direction and set within limits.
-		if armAngle > ANGLE_LIMIT or armAngle < 0:
-	  		angleChange = -angleChange
-	  		armAngle += angleChange
-
-		pop_matrix()
+			# if the arm has moved past its limit,
+			# reverse direction and set within limits.
+			if armAngle > ANGLE_LIMIT or armAngle < 0:
+				angleChange = -angleChange
+				armAngle += angleChange
 
 	def drawRobot():
 		no_stroke()
@@ -461,18 +447,16 @@ Now we complete the program by putting in the animation. The left arm has to rot
 		ellipse((47, 12), 12, 12) # right eye
 
 	def drawLeftArm():
-		push_matrix()
-		translate(12, 32)
-		rotate(radians(armAngle))
-		rect((-12, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(12, 32)
+			rotate(radians(armAngle))
+			rect((-12, 0), 12, 37)
 
 	def drawRightArm():
-		push_matrix()
-		translate(66, 32)
-		rotate(radians(-armAngle))
-		rect((0, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(66, 32)
+			rotate(radians(-armAngle))
+			rect((0, 0), 12, 37)
 
 	if __name__ == '__main__':
 	  run()
@@ -505,11 +489,10 @@ Because this is a new concept, rather than integrate it into the robot program, 
 		angle = atan2(mouse_y - 100, mouse_x - 100)
 
 		background(255)
-		push_matrix()
-		translate(100, 100)
-		rotate(angle)
-		rect((0, 0), 50, 10)
-		pop_matrix()
+		with push_matrix():
+			translate(100, 100)
+			rotate(angle)
+			rect((0, 0), 50, 10)
 
 	if __name__ == '__main__':
 	  run()
@@ -549,20 +532,19 @@ At this point, we can write the final version of the arm-tracking program. We st
 
 		background(255)
 
-		push_matrix()
-		translate(ROBOT_X, ROBOT_Y) # place robot so arms are always on screen
-		if mouse_is_pressed:
-			mX = mouse_x - ROBOT_X
-			mY = mouse_y - ROBOT_Y
+		with push_matrix():
+			translate(ROBOT_X, ROBOT_Y) # place robot with arms always on screen
+			if mouse_is_pressed:
+				mX = mouse_x - ROBOT_X
+				mY = mouse_y - ROBOT_Y
 
-			if mx < MIDPOINT_X: # left side of robot
-				leftArmAngle = atan2(mY - PIVOT_Y, mX - LEFT_PIVOT_X) - HALF_PI
-			else:
-				rightArmAngle = atan2(mY - PIVOT_Y, mX - RIGHT_PIVOT_X) - HALF_PI
+				if mx < MIDPOINT_X: # left side of robot
+					leftArmAngle = atan2(mY - PIVOT_Y, mX - LEFT_PIVOT_X) - HALF_PI
+				else:
+					rightArmAngle = atan2(mY - PIVOT_Y, mX - RIGHT_PIVOT_X) - HALF_PI
 
 
-		drawRobot()
-		pop_matrix()
+			drawRobot()
 
 The ``drawRobot()`` function remains unchanged, but a minor change to ``drawLeftArm()`` and ``drawRightArm()`` is now necessary. Because ``leftArmAngle`` and ``rightArmAngle`` are now computed in radians, the functions don’t have to do any conversion. The changes to the two functions are in bold.
 
@@ -570,16 +552,14 @@ The ``drawRobot()`` function remains unchanged, but a minor change to ``drawLeft
 
 	def drawLeftArm():
 		global leftArmAngle
-		push_matrix()
-		translate(12, 32)
-		rotate(leftArmAngle)
-		rect((-12, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(12, 32)
+			rotate(leftArmAngle)
+			rect((-12, 0), 12, 37)
 
 	def drawRightArm():
 		global rightArmAngle
-		push_matrix()
-		translate(66, 32)
-		rotate(rightArmAngle)
-		rect((0, 0), 12, 37)
-		pop_matrix()
+		with push_matrix():
+			translate(66, 32)
+			rotate(rightArmAngle)
+			rect((0, 0), 12, 37)
