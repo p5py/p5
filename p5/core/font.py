@@ -106,16 +106,16 @@ def text(text_string, position, wrap_at=None):
 
     is_stroke_valid = False # True when stroke_weight != 0
     is_min_filter = False   # True when stroke_weight <0
-    stroke_weight = p5.renderer.stroke_weight
+    if p5.renderer.stroke_enabled:
+        stroke_weight = p5.renderer.stroke_weight
+        if stroke_weight < 0:
+            stroke_weight = abs(stroke_weight)
+            is_min_filter = True
 
-    if stroke_weight < 0:
-        stroke_weight = abs(stroke_weight)
-        is_min_filter = True
-
-    if stroke_weight > 0:
-        if stroke_weight % 2 == 0:
-            stroke_weight += 1
-        is_stroke_valid = True
+        if stroke_weight > 0:
+            if stroke_weight % 2 == 0:
+                stroke_weight += 1
+            is_stroke_valid = True
 
     if is_stroke_valid:
         new_size = list(map(lambda x:x+2*stroke_weight, size))
@@ -124,7 +124,6 @@ def text(text_string, position, wrap_at=None):
     else:
         new_size = size
         text_xy = (0,0)
-
 
     canvas = Image.new("RGBA", new_size, color=(0, 0, 0, 0))
     canvas_draw = ImageDraw.Draw(canvas)
@@ -136,7 +135,6 @@ def text(text_string, position, wrap_at=None):
 
     text_image = PImage(*new_size)
     text_image._img = canvas
-    print(canvas.size)
 
     if is_stroke_valid:
         if is_min_filter:
