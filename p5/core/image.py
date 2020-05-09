@@ -512,7 +512,8 @@ def image(img, location, size=None):
     #   or it will take much time to render large image,
     #   even when small size is specified to the image
     else:
-        img.size = size
+        if size != img.size:
+            img.size = size
 
     lx, ly = location
     sx, sy = size
