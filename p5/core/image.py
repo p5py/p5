@@ -19,6 +19,7 @@ import contextlib
 import functools
 
 import builtins
+import time
 
 import numpy as np
 from PIL import Image
@@ -507,6 +508,11 @@ def image(img, location, size=None):
     """
     if size is None:
         size = img.size
+    # Add else statement below to resize the img._img first,
+    #   or it will take much time to render large image,
+    #   even when small size is specified to the image
+    else:
+        img.size = size
 
     lx, ly = location
     sx, sy = size
@@ -578,6 +584,7 @@ def load_image(filename):
     w, h = img.size
     pimg = PImage(w, h)
     pimg._img = img
+
     return pimg
 
 @contextlib.contextmanager
@@ -606,10 +613,3 @@ def load_pixels():
         image(builtins.pixels, (0, 0))
 
     builtins.pixels = None
-
-
-def save_frame(filename=None):
-    if filename:
-        p5.sketch.screenshot(filename)
-    else:
-        p5.sketch.screenshot("Screen.png")
