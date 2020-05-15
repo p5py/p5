@@ -726,10 +726,12 @@ The code inside the ``mouse_moved()`` and ``mouse_dragged()`` event functions ar
       ellipse((moveX, moveY), 33, 33) # Gray circle
 
    def mouse_moved():
+      global moveX, moveY
       moveX = mouse_x
       moveY = mouse_y
 
    def mouse_dragged():
+      global dragX, dragY
       dragX = mouse_x
       dragY = mouse_y
 
