@@ -31,7 +31,3 @@ Create Image
 
 
 The ``create_image()`` function provides a fresh buffer of pixels to play with. This example creates an image gradient.
-
-
-.. code:: python
-
