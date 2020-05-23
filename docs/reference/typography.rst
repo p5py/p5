@@ -35,13 +35,13 @@ Text Attributes
 
 
 text_align()
------------
+------------
 
 .. autofunction:: text_align
 
 
 text_leading()
------------
+--------------
 
 .. autofunction:: text_leading
 
@@ -56,18 +56,18 @@ Metrics
 =======
 
 text_ascent()
------------
+-------------
 
 .. autofunction:: text_ascent
 
 
 text_descent()
------------
+---------------
 
 .. autofunction:: text_descent
 
 
 text_width()
------------
+------------
 
 .. autofunction:: text_width

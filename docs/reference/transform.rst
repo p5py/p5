@@ -69,7 +69,7 @@ camera()
 .. autofunction:: camera()
 
 perspective()
----------
+-------------
 
 .. autofunction:: perspective()
 

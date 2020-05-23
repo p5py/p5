@@ -296,7 +296,7 @@ The Transformation Matrix
 Every time you do a rotation, translation, or scaling, the information required to do the transformation is accumulated into a table of numbers. This table, or matrix has only a few rows and columns, yet, through the miracle of mathematics, it contains all the information needed to do any series of transformations. And that’s why ``push_matrix()`` has that word in their name.
 
 Push (and Pop)
-============
+==============
 
 What about the push part of the name? It comes from a computer concept known as a stack, which works like a spring-loaded tray dispenser in a cafeteria. When someone returns a tray to the stack, its weight pushes the platform down. When someone needs a tray, he takes it from the top of the stack, and the remaining trays pop up a little bit.
 
