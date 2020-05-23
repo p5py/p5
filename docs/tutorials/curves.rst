@@ -60,7 +60,7 @@ Arcs are fine, but they’re plain. The next function, ``curve()``, lets you dra
 
 	curve((cpx1, cpy1), (x1, y1), (x2, y2), (cpx2, cpy2))
 
-.. code:: python
+.. code:: none
 
 	cpx1, cpy1	Coordinates of the first control point
 	x1, y1		Coordinates of the curve’s starting point
@@ -153,7 +153,7 @@ Bézier Curves
 
 Though better than arcs, spline curves don’t seem to have those graceful, swooping curves that say “art.” For those, you need to draw Bézier curves with the ``bezier()`` function. As with spline curves, the ``bezier()`` function has eight parameters, but the order is different:
 
-.. code:: python
+.. code:: none
 
 	bezier((x1, y1), (cpx1, cpy1), (cpx2, cpy2), (x2, y2))
 	x1, y1		Coordinates of the curve’s starting point
@@ -289,5 +289,5 @@ Summary
 
 * Use ``arc()`` when you need a segment of a circle or an ellipse. You can’t make continuous arcs or use them as part of a shape.
 * Use ``curve()`` when you need a small curve between two points. Use curveVertex() to make a continuous series of curves as part of a shape.
-* Use ``bezier()`` when you need long, smooth curves. Use ``bezier_vertex()` to make a continuous series of Bézier curves as part of a shape.
+* Use ``bezier()`` when you need long, smooth curves. Use ``bezier_vertex()`` to make a continuous series of Bézier curves as part of a shape.
 
