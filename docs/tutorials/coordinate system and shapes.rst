@@ -56,7 +56,7 @@ A ``point()`` is the easiest of the shapes and a good place to start. To draw a 
 	:align: center
 	:width: 50%
 
-A ``line()``isn't terribly difficult either and simply requires two points: (x1,y1) and (x2,y2): 
+A ``line()`` isn't terribly difficult either and simply requires two points: (x1,y1) and (x2,y2):
 
 .. image:: ./coordinate_system_and_shapes-res/drawing-06.svg
 	:align: center

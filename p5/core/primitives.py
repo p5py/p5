@@ -378,7 +378,7 @@ def square(coordinate, side_length, mode=None):
         'CENTER' and 'RADIUS' the coordinate represents the center of
         the square.
 
-    :type coordinate: tuple | list |p5.Vector
+    :type coordinate: tuple | list | p5.Vector
 
     :param side_length: The side_length of the square (for modes
         'CORNER' and 'CENTER') or hald of the side length (for the
