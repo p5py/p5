@@ -3,6 +3,7 @@ Environment
 ===========
 
 .. automodule:: p5
+   :noindex:
 
 size()
 ======

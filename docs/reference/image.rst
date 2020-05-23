@@ -3,6 +3,7 @@ Image
 =====
 
 .. module:: p5
+   :noindex:
 
 PImage
 ======

@@ -2,7 +2,7 @@ Color
 =====
 
 .. automodule:: p5
-
+   :noindex:
 
 Color
 -----

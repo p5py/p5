@@ -3,7 +3,7 @@ Typography
 ==========
 
 .. automodule:: p5
-
+    :noindex:
 
 Loading and displaying
 ======================
