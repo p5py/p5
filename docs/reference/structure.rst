@@ -3,6 +3,7 @@ Structure
 =========
 
 .. module:: p5
+    :noindex:
 
 setup()
 =======

@@ -3,6 +3,7 @@ Math
 ====
 
 .. automodule:: p5
+   :noindex:
 
 .. note::
 

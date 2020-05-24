@@ -2,7 +2,7 @@ SVG
 ===
 
 .. module:: p5
-
+    :noindex:
 
 load_shape()
 ------------

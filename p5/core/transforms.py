@@ -205,12 +205,11 @@ def camera(position, target_position, up_vector):
     orientation of the camera).
 
     When called with no arguments, this function 
-    creates a default camera equivalent to 
-    camera(
-        (0, 0, (height/2.0) / tan(PI*30.0 / 180.0)),
-        (0, 0, 0),
-        (0, 1, 0)
-        )
+    creates a default camera equivalent to::
+
+        camera((0, 0, (height/2.0) / tan(PI*30.0 / 180.0)),
+               (0, 0, 0),
+               (0, 1, 0))
 
     :param position: camera position coordinates
     :type position: tuple

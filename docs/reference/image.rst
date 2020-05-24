@@ -3,6 +3,7 @@ Image
 =====
 
 .. module:: p5
+   :noindex:
 
 PImage
 ======
@@ -34,12 +35,13 @@ tint()
 ------
 
 .. autofunction:: tint
+   :noindex:
 
 no_tint()
 ---------
 
 .. autofunction:: no_tint
-
+   :noindex:
 
 Pixels
 ======

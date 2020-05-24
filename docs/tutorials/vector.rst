@@ -272,7 +272,6 @@ Let's say I have the following two vectors:
 
 .. figure:: ./vector-res/v.svg
    :align: right
-   :scale: 50%
 
 .. math::
 
@@ -1554,12 +1553,12 @@ then have:
    direction = mouse - self.location
 
 
- We now have a Vector that points from the mover's location all the
- way to the mouse. If the object were to actually accelerate using
- that vector, it would instantaneously appear at the mouse location.
- This does not make for good animation, of course, and what we want to
- do is now decide how fast that object should accelerate towards the
- mouse.
+We now have a Vector that points from the mover's location all the
+way to the mouse. If the object were to actually accelerate using
+that vector, it would instantaneously appear at the mouse location.
+This does not make for good animation, of course, and what we want to
+do is now decide how fast that object should accelerate towards the
+mouse.
 
 
 In order to set the magnitude (whatever it may be) of our acceleration
@@ -1571,7 +1570,7 @@ anything equals anything.
 
 .. code:: python
 
-   anything = ???
+   anything = some_number
    direction.normalize()
    direction = direction * anything
    

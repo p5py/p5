@@ -296,7 +296,7 @@ The Transformation Matrix
 Every time you do a rotation, translation, or scaling, the information required to do the transformation is accumulated into a table of numbers. This table, or matrix has only a few rows and columns, yet, through the miracle of mathematics, it contains all the information needed to do any series of transformations. And that’s why ``push_matrix()`` has that word in their name.
 
 Push (and Pop)
-============
+==============
 
 What about the push part of the name? It comes from a computer concept known as a stack, which works like a spring-loaded tray dispenser in a cafeteria. When someone returns a tray to the stack, its weight pushes the platform down. When someone needs a tray, he takes it from the top of the stack, and the remaining trays pop up a little bit.
 
@@ -497,7 +497,7 @@ Because this is a new concept, rather than integrate it into the robot program, 
 	if __name__ == '__main__':
 	  run()
 
-That works great. What happens if we draw the rectangle so it is taller than it is wide? Change the preceding code to read ``rect((0, 0), 10, 50)`. How come it doesn’t seem to follow the mouse any more? The answer is that the rectangle really is still following the mouse, but it’s the short side of the rectangle that does the following. Our eyes are trained to want the long side to be tracked. Because the long side is at a 90 degree angle to the short side, you have to subtract 90° (or π/2 radians) to get the desired effect. Change the preceding code to read rotate(angle - HALF_PI) and try it again. Since Processing deals almost exclusively in radians, the language has defined the constants PI (180°), HALF_PI (90°), QUARTER_PI (45°) and TWO_PI (360°) for your convenience.
+That works great. What happens if we draw the rectangle so it is taller than it is wide? Change the preceding code to read ``rect((0, 0), 10, 50)``. How come it doesn’t seem to follow the mouse any more? The answer is that the rectangle really is still following the mouse, but it’s the short side of the rectangle that does the following. Our eyes are trained to want the long side to be tracked. Because the long side is at a 90 degree angle to the short side, you have to subtract 90° (or π/2 radians) to get the desired effect. Change the preceding code to read rotate(angle - HALF_PI) and try it again. Since Processing deals almost exclusively in radians, the language has defined the constants PI (180°), HALF_PI (90°), QUARTER_PI (45°) and TWO_PI (360°) for your convenience.
 
 At this point, we can write the final version of the arm-tracking program. We start off with definitions of constants and variables. The number 39 in the definition of MIDPOINT_X comes from the fact that the body of the robot starts at x-coordinate 14 and is 50 pixels wide, so 39 (14 + 25) is the horizontal midpoint of the robot’s body.
 

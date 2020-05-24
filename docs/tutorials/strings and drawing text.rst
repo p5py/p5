@@ -60,7 +60,7 @@ Another useful method is ``len()``. This is easy to confuse with the length prop
 	message = "This String is 34 characters long."
 	print(len(message))
 
-We can also change a String to all uppercase using the ``upper()` method:
+We can also change a String to all uppercase using the ``upper()`` method:
 
 .. code:: python
 

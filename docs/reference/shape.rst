@@ -3,6 +3,7 @@ Shape
 =====
 
 .. automodule:: p5
+   :noindex:
 
 PShape
 ======

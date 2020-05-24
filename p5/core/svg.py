@@ -150,7 +150,7 @@ def load_shape(filename):
 	PShape object.
 
 	:param filename: link to .svg file
-    :type filename: str
+	:type filename: str
 
 	"""
 	tree = etree.parse(filename)
@@ -209,13 +209,13 @@ def shape(shape, x=0, y=0):
 	Draws shapes to the display window
 
 	:param shape: shape object
-    :type shape: PShape
+	:type shape: PShape
 
 	:param x: x-coordinate of the shape
-    :type x: float
+	:type x: float
 
-    :param y: y-coordinate of the shape
-    :type y: float
+	:param y: y-coordinate of the shape
+	:type y: float
 	"""
 	with transforms.push_matrix():
 		transforms.translate(x, y)

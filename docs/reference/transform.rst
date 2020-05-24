@@ -2,6 +2,7 @@ Transform
 =========
 
 .. automodule:: p5
+    :noindex:
 
 push_matrix()
 -------------
@@ -69,7 +70,7 @@ camera()
 .. autofunction:: camera()
 
 perspective()
----------
+-------------
 
 .. autofunction:: perspective()
 
