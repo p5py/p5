@@ -2,6 +2,7 @@ Transform
 =========
 
 .. automodule:: p5
+    :noindex:
 
 push_matrix()
 -------------

@@ -26,21 +26,22 @@ fill()
 ------
 
 .. autofunction:: fill
-
+   :noindex:
 
 no_fill()
 ---------
 
 .. autofunction:: no_fill
-
+   :noindex:
 
 stroke()
 --------
 
 .. autofunction:: stroke
-
+   :noindex:
 
 no_stroke()
 -----------
 
 .. autofunction:: no_stroke
+   :noindex:

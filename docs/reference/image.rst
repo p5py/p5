@@ -35,12 +35,13 @@ tint()
 ------
 
 .. autofunction:: tint
+   :noindex:
 
 no_tint()
 ---------
 
 .. autofunction:: no_tint
-
+   :noindex:
 
 Pixels
 ======
