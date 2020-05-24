@@ -178,4 +178,4 @@ texinfo_documents = [
 ]
 
 def setup(app):
-    app.add_javascript('p5.min.js')
+    app.add_js_file('p5.min.js')
