@@ -188,11 +188,33 @@ def point(x, y, z=0):
 def line(p1, p2):
     """Returns a line.
 
+    :Syntax: * line(p1, p2)
+             * line(x1, y1, x2, y2)
+             * line(x1, y1, z1, x2, y2, z2)
+
     :param p1: Coordinates of the starting point of the line.
     :type p1: tuple
 
     :param p2: Coordinates of the end point of the line.
     :type p2: tuple
+
+    :param x1: x-coordinate of the first point
+    :type x1: float
+
+    :param y1: y-coordinate of the first point
+    :type y1: float
+
+    :param z1: z-coordinate of the first point
+    :type z1: float
+
+    :param x2: x-coordinate of the second point
+    :type x2: float
+
+    :param y2: y-coordinate of the second point
+    :type y2: float
+
+    :param z2: z-coordinate of the second point
+    :type z2: float
 
     :returns: A line PShape.
     :rtype: PShape
