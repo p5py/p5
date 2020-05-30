@@ -95,10 +95,10 @@ class PShape:
                  stroke_color='auto', stroke_weight="auto", 
                  stroke_join="auto", stroke_cap="auto", 
                  visible=False, attribs='closed',
-                 children=None, contour=None):
+                 children=None, contour=[]):
         # basic properties of the shape
         self._vertices = np.array([])
-        self.contour = contour or np.array([])
+        self._contour = np.array([])
         self._edges = None
         self._outline = None
         self._outline_vertices = None
@@ -128,6 +128,9 @@ class PShape:
 
         if len(vertices) > 0:
             self.vertices = vertices
+
+        if len(contour) > 0:
+            self.contour = contour
 
         self.fill = fill_color
         self.stroke = stroke_color
@@ -271,6 +274,14 @@ class PShape:
         self._tri_edges = None
         self._tri_faces = None
 
+    @property
+    def contour(self):
+        return self._contour
+
+    @contour.setter
+    def contour(self, contour_vertices):
+        self._contour = np.array(contour_vertices)
+
     def _compute_poly_edges(self):
         n, _ = self._vertices.shape
         return np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
@@ -324,13 +335,13 @@ class PShape:
             self._tri_vertices = self.vertices
             return
 
-        if len(self.contour) > 1:
-            n, _ = self.contour.shape
+        if len(self._contour) > 1:
+            n, _ = self._contour.shape
             contour_edges = np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
-            triangulation_vertices = np.vstack([self.vertices, self.contour])
+            triangulation_vertices = np.vstack([self.vertices, self._contour])
             triangulation_segments = np.vstack([self.edges, contour_edges + len(self.edges)])
             triangulate_parameters = dict(vertices=triangulation_vertices, 
-                segments=triangulation_segments, holes=self.get_interior_point(self.contour))
+                segments=triangulation_segments, holes=self.get_interior_point(self._contour))
 
             self._tri = tr.triangulate(triangulate_parameters, "p")
         else:
