@@ -150,6 +150,8 @@ class Renderer3D:
 			with self.fbuffer:
 				self.clear()
 
+		self.fbuffer.depth_buffer = gloo.RenderBuffer((builtins.height, builtins.width))
+
 	def clear(self, color=True, depth=True):
 		"""Clear the renderer background."""
 		gloo.set_state(clear_color=self.background_color)
@@ -161,7 +163,6 @@ class Renderer3D:
 
 		if state:
 			gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
-			gloo.set_state(depth_func='equal')
 
 	@contextmanager
 	def draw_loop(self):
