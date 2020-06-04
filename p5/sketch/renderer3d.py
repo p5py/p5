@@ -163,6 +163,7 @@ class Renderer3D:
 
 		if state:
 			gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
+			gloo.set_state(depth_func='lequal')
 
 	@contextmanager
 	def draw_loop(self):
