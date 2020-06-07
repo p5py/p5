@@ -1,7 +1,8 @@
+import cProfile
 from p5 import *
 
 frames = 0
-FRAME_MAX = 100
+FRAME_MAX = 1000
 
 
 def setup():
@@ -12,7 +13,7 @@ def setup():
 def draw():
     global frames
     if frames >= FRAME_MAX:
-        exit(0)
+        exit()
     else:
         frames += 1
 
@@ -39,4 +40,11 @@ def draw():
 
 
 if __name__ == '__main__':
-    run()
+    pr = cProfile.Profile()
+    pr.enable()
+    try:
+        run()
+    except:
+        pass
+    pr.disable()
+    pr.dump_stats("basic_shapes.prof")
