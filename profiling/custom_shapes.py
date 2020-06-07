@@ -14,6 +14,7 @@ def draw():
         exit()
 
     transform = lambda p, a, b: p * a + b
+    # Points adapted from https://github.com/processing/p5.js/issues/3672
     points = np.asarray(((0, 0), (4, 0), (4, 1), (1, 1), (1, 2), (4, 2), (4, 3), (0, 3)))
     shapes_to_draw = 10
     for _ in range(shapes_to_draw):
