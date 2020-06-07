@@ -273,7 +273,7 @@ This method makes sense if each object itself has its own geometry, generated vi
 
 .. code:: python
 
-	class Python:
+	class Polygon:
 		def __init__(self, shape):
 			self.s = shape
 
