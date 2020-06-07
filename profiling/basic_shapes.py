@@ -1,14 +1,13 @@
+# Adapted from https://p5.readthedocs.io/en/latest/examples/form/shape%20primitives.html
 import cProfile
 from p5 import *
 
 frames = 0
 FRAME_MAX = 1000
 
-
 def setup():
     # Sets the screen to be 720 pixels wide and 400 pixels high
     size(720, 400)
-
 
 def draw():
     global frames
