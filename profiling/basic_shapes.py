@@ -2,7 +2,6 @@
 import cProfile
 from p5 import *
 
-frames = 0
 FRAME_MAX = 1000
 
 def setup():
@@ -11,10 +10,8 @@ def setup():
 
 def draw():
     global frames
-    if frames >= FRAME_MAX:
+    if frame_count >= FRAME_MAX:
         exit()
-    else:
-        frames += 1
 
     background(0)
     no_stroke()
