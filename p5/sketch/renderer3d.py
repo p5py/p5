@@ -17,6 +17,7 @@
 #
 
 import numpy as np
+from numpy.linalg import inv
 import math
 from ..pmath import matrix
 
@@ -38,6 +39,8 @@ from .shaders3d import src_fbuffer
 
 from ..core.geometry import Geometry
 from ..core.shape import PShape
+
+from ..pmath.matrix import translation_matrix
 
 class Renderer3D:
 	def __init__(self):
@@ -150,6 +153,8 @@ class Renderer3D:
 			with self.fbuffer:
 				self.clear()
 
+		self.fbuffer.depth_buffer = gloo.RenderBuffer((builtins.height, builtins.width))
+
 	def clear(self, color=True, depth=True):
 		"""Clear the renderer background."""
 		gloo.set_state(clear_color=self.background_color)
@@ -161,7 +166,7 @@ class Renderer3D:
 
 		if state:
 			gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
-			gloo.set_state(depth_func='equal')
+			gloo.set_state(depth_func='lequal')
 
 	@contextmanager
 	def draw_loop(self):
@@ -217,7 +222,7 @@ class Renderer3D:
 				np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
 				shape._matrix,
 				self.transform_matrix)
-			
+
 			fill = shape.fill.normalized if shape.fill else None
 			stroke = shape.stroke.normalized if shape.stroke else None
 			edges = shape._draw_edges
@@ -293,11 +298,19 @@ class Renderer3D:
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
 		"""
-		current_shape = None
 		current_queue = []
 		for index, shape in enumerate(self.draw_queue):
-			current_shape = self.draw_queue[index][0]
-			current_queue.append(self.draw_queue[index][1])
+			current_shape, current_obj = self.draw_queue[index][0], self.draw_queue[index][1]
+			# If current_shape is lines, bring it to the front by epsilon
+			# to resolve z-fighting
+			if current_shape == 'lines':
+				# line_transform is used whenever we render lines to break ties in depth
+				# We transform the points to camera space, move them by Z_EPSILON, and them move them back to world space
+				line_transform = inv(self.lookat_matrix).dot(translation_matrix(0, 0, Z_EPSILON).dot(self.lookat_matrix))
+				vertices = current_obj[0]
+				current_obj = (np.hstack([vertices, np.ones((vertices.shape[0], 1))]).dot(line_transform.T)[:, :3],
+								current_obj[1], current_obj[2])
+			current_queue.append(current_obj)
 
 			if index < len(self.draw_queue) - 1:
 				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
