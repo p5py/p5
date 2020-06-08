@@ -299,14 +299,14 @@ class Renderer3D:
 		"""Flush all the shape geometry from the draw queue to the GPU.
 		"""
 		current_queue = []
-		# line_transform is used whenever we render lines to break ties in depth
-		# We transform the points to camera space, move them by Z_EPSILON, and them move them back to world space
-		line_transform = inv(self.lookat_matrix).dot(translation_matrix(0, 0, Z_EPSILON).dot(self.lookat_matrix))
 		for index, shape in enumerate(self.draw_queue):
 			current_shape, current_obj = self.draw_queue[index][0], self.draw_queue[index][1]
 			# If current_shape is lines, bring it to the front by epsilon
 			# to resolve z-fighting
 			if current_shape == 'lines':
+				# line_transform is used whenever we render lines to break ties in depth
+				# We transform the points to camera space, move them by Z_EPSILON, and them move them back to world space
+				line_transform = inv(self.lookat_matrix).dot(translation_matrix(0, 0, Z_EPSILON).dot(self.lookat_matrix))
 				vertices = current_obj[0]
 				current_obj = (np.hstack([vertices, np.ones((vertices.shape[0], 1))]).dot(line_transform.T)[:, :3],
 								current_obj[1], current_obj[2])
