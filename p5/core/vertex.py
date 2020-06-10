@@ -22,6 +22,8 @@ from .shape import PShape
 
 from ..pmath import curves
 
+from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
+
 shape_kind = None
 vertices = [] # stores the vertex coordinates
 vertices_types = [] # stores the type of vertex. Eg: bezier, curve, etc
@@ -44,6 +46,8 @@ def begin_shape(kind=None):
 	:type kind: str
 	"""
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
+	gluTessBeginPolygon(p5.tess, None)
+	gluTessBeginContour(p5.tess)
 	if (
 		kind == "POINTS" or
 		kind == "LINES" or
@@ -185,6 +189,7 @@ def vertex(x, y, z=0):
 	"""
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
 	global is_contour
+	gluTessVertex(p5.tess, (x, y, 0), (x, y, 0))
 	if p5.mode == "3D":
 		return
 	else:
@@ -300,6 +305,8 @@ def end_shape(mode=""):
 	:type mode: str
 
 	"""
+	gluTessEndContour(p5.tess)
+	gluTessEndPolygon(p5.tess)
 	global vertices, vertices_types, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
 
 	if len(vertices) == 0:

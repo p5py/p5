@@ -17,8 +17,15 @@
 #
 
 """Environment Variables for P5 sketches"""
+from OpenGL.GLU import gluNewTess, gluTessCallback, GLU_TESS_VERTEX, GLU_TESS_BEGIN, GLU_TESS_END, GLU_TESS_ERROR, gluErrorString
 
 sketch = None
 renderer = None
 
-
+# Tessellation
+tess_callback_factory = lambda y: lambda x: print(y, x)
+tess = gluNewTess()
+gluTessCallback(tess, GLU_TESS_VERTEX, tess_callback_factory("Vertex"))
+gluTessCallback(tess, GLU_TESS_END, lambda: print("End"))
+gluTessCallback(tess, GLU_TESS_ERROR, lambda x: print("Error", gluErrorString(x)))
+gluTessCallback(tess, GLU_TESS_BEGIN, tess_callback_factory("Begin"))
