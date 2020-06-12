@@ -46,8 +46,8 @@ def begin_shape(kind=None):
 	:type kind: str
 	"""
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
-	gluTessBeginPolygon(p5.tess, None)
-	gluTessBeginContour(p5.tess)
+	gluTessBeginPolygon(p5.tess.tess, None)
+	gluTessBeginContour(p5.tess.tess)
 	if (
 		kind == "POINTS" or
 		kind == "LINES" or
@@ -189,7 +189,8 @@ def vertex(x, y, z=0):
 	"""
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
 	global is_contour
-	gluTessVertex(p5.tess, (x, y, 0), (x, y, 0))
+	print("calling vertex", (x, y))
+	gluTessVertex(p5.tess.tess, (x, y, 0), (x, y, 0))
 	if p5.mode == "3D":
 		return
 	else:
@@ -305,8 +306,8 @@ def end_shape(mode=""):
 	:type mode: str
 
 	"""
-	gluTessEndContour(p5.tess)
-	gluTessEndPolygon(p5.tess)
+	gluTessEndContour(p5.tess.tess)
+	gluTessEndPolygon(p5.tess.tess)
 	global vertices, vertices_types, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
 
 	if len(vertices) == 0:
@@ -379,5 +380,5 @@ def end_shape(mode=""):
 	is_curve = False
 	is_quadratic = False
 	is_contour = False
-	
+
 	return shape
