@@ -215,15 +215,33 @@ class Renderer2D:
 	def _transform_vertices(self, vertices, local_matrix, global_matrix):
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
+	# Adds shape of stype to draw queue
+	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill):
+		self.draw_queue.append((stype, (vertices, idx, fill)))
+
 	def render(self, shape):
+		fill = shape.fill.normalized if shape.fill else None
+		# If shape comes with prepackaged vertices, use that instead
+		if shape.overriden_draw_queue is not None:
+			for obj in shape.overriden_draw_queue:
+				stype, vertices, idx = obj
+				# Transform vertices
+				n = len(vertices)
+				vertices = self._transform_vertices(
+					np.hstack([vertices, np.ones((n, 1))]),
+					shape._matrix,
+					self.transform_matrix)
+				# Add to draw queue
+				self._add_to_draw_queue_simple(stype, vertices, idx, fill)
+			return
+
 		vertices = shape._draw_vertices
 		n, _ = vertices.shape
 		tverts = self._transform_vertices(
 			np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
 			shape._matrix,
 			self.transform_matrix)
-		
-		fill = shape.fill.normalized if shape.fill else None
+
 		stroke = shape.stroke.normalized if shape.stroke else None
 		stroke_weight = shape.stroke_weight
 		stroke_cap = shape.stroke_cap
@@ -305,10 +323,10 @@ class Renderer2D:
 				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
 					continue
 
-			if current_shape == "points" or current_shape == "triangles":
-				self.render_default(current_shape, current_queue)
-			elif current_shape == "lines":
+			if current_shape == "lines":
 				self.render_line(current_queue)
+			else:
+				self.render_default(current_shape, current_queue)
 
 			current_queue = []
 

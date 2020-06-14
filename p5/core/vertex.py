@@ -16,6 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import numpy as np
+
 from . import p5
 from . import primitives
 from .shape import PShape
@@ -46,6 +48,7 @@ def begin_shape(kind=None):
 	:type kind: str
 	"""
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
+	global all_vertices, vert_idx
 	gluTessBeginPolygon(p5.tess.tess, None)
 	gluTessBeginContour(p5.tess.tess)
 	if (
@@ -66,6 +69,8 @@ def begin_shape(kind=None):
 	contour_vertices = []
 	vertices_types = []
 	contour_vertices_types = []
+	all_vertices = []
+	vert_idx = 0
 
 def curve_vertex(x, y, z=0):
 	"""
@@ -189,8 +194,10 @@ def vertex(x, y, z=0):
 	"""
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
 	global is_contour
-	print("calling vertex", (x, y))
-	gluTessVertex(p5.tess.tess, (x, y, 0), (x, y, 0))
+	global all_vertices, vert_idx
+	all_vertices.append((x, y, z))
+	gluTessVertex(p5.tess.tess, (x, y, 0), vert_idx)
+	vert_idx += 1
 	if p5.mode == "3D":
 		return
 	else:
@@ -309,6 +316,7 @@ def end_shape(mode=""):
 	gluTessEndContour(p5.tess.tess)
 	gluTessEndPolygon(p5.tess.tess)
 	global vertices, vertices_types, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
+	global all_vertices
 
 	if len(vertices) == 0:
 		return
@@ -374,7 +382,9 @@ def end_shape(mode=""):
 				for i in range(0, len(vertices) - 2, 2):
 					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 3], vertices[i + 2]]))
 		else:
-			shape.add_child(PShape(vertices, contour=contour_vertices, attribs=attribs))
+			draw_queue = [[obj[0], np.asarray(all_vertices), np.asarray(obj[1], dtype=np.uint32)] for obj in p5.tess.process_draw_queue()]
+			shape.add_child(PShape(vertices, contour=contour_vertices, attribs=attribs,
+								   overriden_draw_queue=draw_queue))
 
 	is_bezier = False
 	is_curve = False
