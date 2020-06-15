@@ -21,10 +21,8 @@ import numpy as np
 from . import p5
 from . import primitives
 from .shape import PShape
-
+from .constants import *
 from ..pmath import curves
-
-from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
 
 shape_kind = None
 vertices = [] # stores the vertex coordinates
@@ -35,7 +33,7 @@ is_bezier = False
 is_curve = False
 is_quadratic = False
 is_contour = False
-
+temp_curr_shape = None
 
 __all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
 		   'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']
@@ -48,9 +46,7 @@ def begin_shape(kind=None):
 	:type kind: str
 	"""
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
-	global all_vertices, vert_idx
-	gluTessBeginPolygon(p5.tess.tess, None)
-	gluTessBeginContour(p5.tess.tess)
+	global temp_curr_shape
 	if kind in (t.name for t in SType):
 		shape_kind = kind
 	else:
@@ -61,8 +57,7 @@ def begin_shape(kind=None):
 	contour_vertices = []
 	vertices_types = []
 	contour_vertices_types = []
-	all_vertices = []
-	vert_idx = 0
+	temp_curr_shape = PShape(temp_stype=kind)
 
 def curve_vertex(x, y, z=0):
 	"""
@@ -186,10 +181,8 @@ def vertex(x, y, z=0):
 	"""
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
 	global is_contour
-	global all_vertices, vert_idx
-	all_vertices.append((x, y, z))
-	gluTessVertex(p5.tess.tess, (x, y, 0), vert_idx)
-	vert_idx += 1
+	global temp_curr_shape
+	temp_curr_shape.temp_add_vertex_unsafe((x, y, z))
 	if p5.mode == "3D":
 		return
 	else:
@@ -305,10 +298,8 @@ def end_shape(mode=""):
 	:type mode: str
 
 	"""
-	gluTessEndContour(p5.tess.tess)
-	gluTessEndPolygon(p5.tess.tess)
 	global vertices, vertices_types, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
-	global all_vertices
+	global temp_curr_shape
 
 	if len(vertices) == 0:
 		return
@@ -374,9 +365,8 @@ def end_shape(mode=""):
 				for i in range(0, len(vertices) - 2, 2):
 					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 3], vertices[i + 2]]))
 		else:
-			draw_queue = [[obj[0], np.asarray(all_vertices), np.asarray(obj[1], dtype=np.uint32)] for obj in p5.tess.process_draw_queue()]
-			shape.add_child(PShape(vertices, contour=contour_vertices, attribs=attribs,
-								   overriden_draw_queue=draw_queue))
+			temp_curr_shape.temp_triangulate()
+			shape.add_child(temp_curr_shape)
 
 	is_bezier = False
 	is_curve = False

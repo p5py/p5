@@ -28,6 +28,7 @@ from .color import Color
 from ..pmath import matrix
 
 from . import p5
+from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
 
 
 __all__ = ['PShape']
@@ -92,10 +93,10 @@ class PShape:
 
     """
     def __init__(self, vertices=[], fill_color='auto',
-                 stroke_color='auto', stroke_weight="auto", 
-                 stroke_join="auto", stroke_cap="auto", 
+                 stroke_color='auto', stroke_weight="auto",
+                 stroke_join="auto", stroke_cap="auto",
                  visible=False, attribs='closed',
-                 children=None, contour=[], overriden_draw_queue=None):
+                 children=None, contour=[], temp_overriden_draw_queue=None, temp_stype='TESS'):
         # basic properties of the shape
         self._vertices = np.array([])
         self._contour = np.array([])
@@ -141,7 +142,9 @@ class PShape:
         self.children = children or []
         self.visible = visible
 
-        self.overriden_draw_queue = overriden_draw_queue
+        self.temp_overriden_draw_queue = temp_overriden_draw_queue
+        self.temp_vertices = []
+        self.temp_stype = temp_stype
 
     def _set_color(self, name, value=None):
         color = None
@@ -422,6 +425,9 @@ class PShape:
         self._in_edit_mode = False
         self._edges = None
 
+    def temp_add_vertex_unsafe(self, vertex):
+        self.temp_vertices.append(vertex)
+
     @_ensure_editable
     def add_vertex(self, vertex):
         """Add a vertex to the current shape
@@ -637,3 +643,12 @@ class PShape:
         shear_mat[1, 0] = np.tan(theta)
         return shear_mat
 
+    def temp_triangulate(self):
+        gluTessBeginPolygon(p5.tess.tess, None)
+        gluTessBeginContour(p5.tess.tess)
+        for i, v in enumerate(self.temp_vertices):
+            gluTessVertex(p5.tess.tess, v, i)
+        gluTessEndContour(p5.tess.tess)
+        gluTessEndPolygon(p5.tess.tess)
+        self.temp_overriden_draw_queue = [[obj[0], np.asarray(self.temp_vertices), np.asarray(obj[1], dtype=np.uint32)]
+                                          for obj in p5.tess.process_draw_queue()]

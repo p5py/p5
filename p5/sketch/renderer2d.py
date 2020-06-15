@@ -216,14 +216,14 @@ class Renderer2D:
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
 	# Adds shape of stype to draw queue
-	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill):
+	def _temp_add_to_draw_queue_simple(self, stype, vertices, idx, fill):
 		self.draw_queue.append((stype, (vertices, idx, fill)))
 
 	def render(self, shape):
 		fill = shape.fill.normalized if shape.fill else None
 		# If shape comes with prepackaged vertices, use that instead
-		if shape.overriden_draw_queue is not None:
-			for obj in shape.overriden_draw_queue:
+		if shape.temp_overriden_draw_queue is not None:
+			for obj in shape.temp_overriden_draw_queue:
 				stype, vertices, idx = obj
 				# Transform vertices
 				n = len(vertices)
@@ -232,7 +232,7 @@ class Renderer2D:
 					shape._matrix,
 					self.transform_matrix)
 				# Add to draw queue
-				self._add_to_draw_queue_simple(stype, vertices, idx, fill)
+				self._temp_add_to_draw_queue_simple(stype, vertices, idx, fill)
 			return
 
 		vertices = shape._draw_vertices
