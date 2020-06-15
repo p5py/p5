@@ -25,11 +25,11 @@ import numpy as np
 import triangle as tr
 
 from .color import Color
+from .constants import *
 from ..pmath import matrix
 
 from . import p5
 from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
-
 
 __all__ = ['PShape']
 
@@ -96,7 +96,7 @@ class PShape:
                  stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto",
                  visible=False, attribs='closed',
-                 children=None, contour=[], temp_overriden_draw_queue=None, temp_stype='TESS'):
+                 children=None, contour=[], temp_overriden_draw_queue=[], temp_stype='TESS'):
         # basic properties of the shape
         self._vertices = np.array([])
         self._contour = np.array([])
@@ -644,11 +644,18 @@ class PShape:
         return shear_mat
 
     def temp_triangulate(self):
-        gluTessBeginPolygon(p5.tess.tess, None)
-        gluTessBeginContour(p5.tess.tess)
-        for i, v in enumerate(self.temp_vertices):
-            gluTessVertex(p5.tess.tess, v, i)
-        gluTessEndContour(p5.tess.tess)
-        gluTessEndPolygon(p5.tess.tess)
-        self.temp_overriden_draw_queue = [[obj[0], np.asarray(self.temp_vertices), np.asarray(obj[1], dtype=np.uint32)]
-                                          for obj in p5.tess.process_draw_queue()]
+        # Add meshes
+        if p5.renderer.fill_enabled and self.temp_stype not in [SType.POINTS.name, SType.LINES.name]:
+            gluTessBeginPolygon(p5.tess.tess, None)
+            gluTessBeginContour(p5.tess.tess)
+            for i, v in enumerate(self.temp_vertices):
+                gluTessVertex(p5.tess.tess, v, i)
+            gluTessEndContour(p5.tess.tess)
+            gluTessEndPolygon(p5.tess.tess)
+            self.temp_overriden_draw_queue += [[obj[0], np.asarray(self.temp_vertices), np.asarray(obj[1], dtype=np.uint32)]
+                                              for obj in p5.tess.process_draw_queue()]
+        # Add borders
+        if p5.renderer.stroke_enabled and self.temp_stype not in [SType.POINTS.name]:
+            self.temp_overriden_draw_queue += [['lines', np.asarray(self.temp_vertices),
+                                               np.hstack((np.vstack(np.arange(0, len(self.temp_vertices) - 1)),
+                                                         np.vstack(np.arange(1, len(self.temp_vertices)))))]]

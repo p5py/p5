@@ -216,13 +216,21 @@ class Renderer2D:
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
 	# Adds shape of stype to draw queue
-	def _temp_add_to_draw_queue_simple(self, stype, vertices, idx, fill):
-		self.draw_queue.append((stype, (vertices, idx, fill)))
+	def _temp_add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke=None, stroke_weight=None, stroke_cap=None, stroke_join=None):
+		if stype == 'lines':
+			self.draw_queue.append(["lines", (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)])
+		else:
+			self.draw_queue.append((stype, (vertices, idx, fill)))
 
 	def render(self, shape):
 		fill = shape.fill.normalized if shape.fill else None
+		stroke = shape.stroke.normalized if shape.stroke else None
+		stroke_weight = shape.stroke_weight
+		stroke_cap = shape.stroke_cap
+		stroke_join = shape.stroke_join
+
 		# If shape comes with prepackaged vertices, use that instead
-		if shape.temp_overriden_draw_queue is not None:
+		if shape.temp_overriden_draw_queue:
 			for obj in shape.temp_overriden_draw_queue:
 				stype, vertices, idx = obj
 				# Transform vertices
@@ -232,7 +240,7 @@ class Renderer2D:
 					shape._matrix,
 					self.transform_matrix)
 				# Add to draw queue
-				self._temp_add_to_draw_queue_simple(stype, vertices, idx, fill)
+				self._temp_add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 			return
 
 		vertices = shape._draw_vertices
@@ -242,18 +250,8 @@ class Renderer2D:
 			shape._matrix,
 			self.transform_matrix)
 
-		stroke = shape.stroke.normalized if shape.stroke else None
-		stroke_weight = shape.stroke_weight
-		stroke_cap = shape.stroke_cap
-		stroke_join = shape.stroke_join
-
 		edges = shape._draw_edges
 		faces = shape._draw_faces
-		
-		if edges is None:
-			print(vertices)
-			print("whale")
-			exit()
 
 		if 'open' in shape.attribs:
 			self.add_to_draw_queue('poly', tverts, edges[:-1], faces, fill, stroke, 
