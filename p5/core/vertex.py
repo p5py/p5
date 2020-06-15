@@ -309,6 +309,9 @@ def end_shape(mode=""):
 
 	close_shape = mode == "CLOSE"
 
+	if close_shape:
+		vertex(*temp_curr_shape.temp_vertices[0])
+
 	# if the shape is closed, the first element is also the last element
 	if close_shape:
 		attribs = "closed"
