@@ -51,18 +51,10 @@ def begin_shape(kind=None):
 	global all_vertices, vert_idx
 	gluTessBeginPolygon(p5.tess.tess, None)
 	gluTessBeginContour(p5.tess.tess)
-	if (
-		kind == "POINTS" or
-		kind == "LINES" or
-		kind == "TRIANGLES" or
-		kind == "TRIANGLE_FAN" or
-		kind == "TRIANGLE_STRIP" or 
-		kind == "QUADS" or 
-		kind == "QUAD_STRIP"
-		):
+	if kind in (t.name for t in SType):
 		shape_kind = kind
 	else:
-		shape_kind = None
+		shape_kind = SType.TESS.name
 
 	is_contour = False
 	vertices = []

@@ -16,6 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from enum import Enum
+
 """Constants Variables for P5 sketches"""
 
 # Environment modes
@@ -184,3 +186,15 @@ colour_codes = {
 	'darkslategray': '#2F4F4F',
 	'black': '#000000',
 }
+
+# Shape types / kinds
+# POINTS, LINES, TRIANGLES, TRIANGLE_FAN TRIANGLE_STRIP, QUADS, or QUAD_STRIP
+class SType(Enum):
+	POINTS = 'POINTS'
+	LINES = 'LINES'
+	TRIANGLES = 'TRIANGLES'
+	TRIANGLE_FAN = 'TRIANGLE_FAN'
+	TRIANGLE_STRIP = 'TRIANGLE_STRIP'
+	QUADS = 'QUADS'
+	QUAD_STRIP = 'QUAD_STRIP'
+	TESS = 'TESS'
