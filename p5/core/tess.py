@@ -46,8 +46,10 @@ class Tessellator:
         gluTessCallback(self.tess, GLU_TESS_ERROR, lambda x: print("Error", gluErrorString(x)))
         gluTessCallback(self.tess, GLU_TESS_BEGIN, begin_shape_handler)
 
-    # Returns the current draw_queue and clears it
     def process_draw_queue(self):
+        """Returns the current draw_queue and clears it
+        For the format of the draw queue, see the definition of self.draw_queue in `__init__`
+        """
         res = self.draw_queue
         self.draw_queue = []
         return res

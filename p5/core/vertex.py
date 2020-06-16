@@ -182,7 +182,11 @@ def vertex(x, y, z=0):
 	global vertices, contour_vertices, vertices_types, contour_vertices_types
 	global is_contour
 	global temp_curr_shape
-	temp_curr_shape.temp_add_vertex_unsafe((x, y, z))
+	if not is_contour:
+		temp_curr_shape.temp_add_vertex_unsafe((x, y, z))
+	else:
+		temp_curr_shape.temp_add_contour_vertex_unsafe((x, y, z))
+
 	if p5.mode == "3D":
 		return
 	else:
@@ -206,13 +210,17 @@ def begin_contour():
 
 	"""
 	global is_contour, contour_vertices, contour_vertices_types
+	global temp_curr_shape
 	is_contour = True
 	contour_vertices = []
 	contour_vertices_types = []
+	temp_curr_shape.begin_contour()
 
 def end_contour():
 	global is_contour
+	global temp_curr_shape
 	is_contour = False
+	temp_curr_shape.end_contour()
 
 def get_curve_vertices(verts):
 	if len(verts) == 0:

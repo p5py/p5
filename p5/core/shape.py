@@ -145,6 +145,9 @@ class PShape:
         self.temp_overriden_draw_queue = temp_overriden_draw_queue
         self.temp_vertices = []
         self.temp_stype = temp_stype
+        self.temp_contours = [] # List of all contours
+        self.temp_curr_contour = None # The contour currently being edited
+        self.temp_all_vertices = set() # Set of all vertices (plus ones from contours)
 
     def _set_color(self, name, value=None):
         color = None
@@ -426,7 +429,12 @@ class PShape:
         self._edges = None
 
     def temp_add_vertex_unsafe(self, vertex):
+        self.temp_all_vertices.add(vertex)
         self.temp_vertices.append(vertex)
+
+    def temp_add_contour_vertex_unsafe(self, vertex):
+        self.temp_all_vertices.add(vertex)
+        self.temp_curr_contour.append(vertex)
 
     @_ensure_editable
     def add_vertex(self, vertex):
@@ -643,19 +651,54 @@ class PShape:
         shear_mat[1, 0] = np.tan(theta)
         return shear_mat
 
+    # Given the number of vertices, return a numpy array of edges that connects those vertices sequentially
+    def _get_sequential_edges(self, n):
+        return np.hstack((np.vstack(np.arange(0, n - 1)),
+                          np.vstack(np.arange(1, n))))
+
+    # Given a list of vertices, return a line object that's ready to be inserted to draw queue
+    def _get_line(self, vertices):
+        return ['lines', np.asarray(vertices), self._get_sequential_edges(len(vertices))]
+
+    # Given a list of vertices, evoke gluTess to create a contour
+    # vertex_map is the map of every possible vertex to its index in a list of all vertices
+    def _tess_new_contour(self, vertices, vertex_map):
+        gluTessBeginContour(p5.tess.tess)
+        for v in vertices:
+            gluTessVertex(p5.tess.tess, v, vertex_map[v])
+        gluTessEndContour(p5.tess.tess)
+
+    # Returns a list of vertices and a map of vertex to its index
+    def _gen_vertex_mapping(self, vertices):
+        vertex_list = list(vertices)
+        return vertex_list, { v: i for i, v in enumerate(vertex_list) }
+
     def temp_triangulate(self):
         # Add meshes
         if p5.renderer.fill_enabled and self.temp_stype not in [SType.POINTS.name, SType.LINES.name]:
+            vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
             gluTessBeginPolygon(p5.tess.tess, None)
-            gluTessBeginContour(p5.tess.tess)
-            for i, v in enumerate(self.temp_vertices):
-                gluTessVertex(p5.tess.tess, v, i)
-            gluTessEndContour(p5.tess.tess)
+            self._tess_new_contour(self.temp_vertices, vertex_map)
+            if len(self.temp_contours) > 0:
+                for i, contour in enumerate(self.temp_contours):
+                    self._tess_new_contour(contour, vertex_map)
             gluTessEndPolygon(p5.tess.tess)
-            self.temp_overriden_draw_queue += [[obj[0], np.asarray(self.temp_vertices), np.asarray(obj[1], dtype=np.uint32)]
+            self.temp_overriden_draw_queue += [[obj[0], np.asarray(vertex_list), np.asarray(obj[1], dtype=np.uint32)]
                                               for obj in p5.tess.process_draw_queue()]
+
         # Add borders
         if p5.renderer.stroke_enabled and self.temp_stype not in [SType.POINTS.name]:
-            self.temp_overriden_draw_queue += [['lines', np.asarray(self.temp_vertices),
-                                               np.hstack((np.vstack(np.arange(0, len(self.temp_vertices) - 1)),
-                                                         np.vstack(np.arange(1, len(self.temp_vertices)))))]]
+            self.temp_overriden_draw_queue.append(self._get_line(self.temp_vertices))
+            for contour in self.temp_contours:
+                self.temp_overriden_draw_queue.append(self._get_line(contour))
+
+    def begin_contour(self):
+        self.temp_curr_contour = []
+
+    def end_contour(self):
+        # Unlike end_shape, end_contour does not take the optional 'CLOSE'
+        # Just in case, we manually close the contour
+        self.temp_curr_contour.append(self.temp_curr_contour[-1])
+        # Add current contour to canonical list
+        self.temp_contours.append(self.temp_curr_contour)
+        self.temp_curr_contour = None
