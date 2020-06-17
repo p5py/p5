@@ -33,37 +33,47 @@ from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolyg
 
 __all__ = ['PShape']
 
+
 def _ensure_editable(func):
     """A decorater that ensures that a shape is in 'edit' mode.
 
     """
+
     @functools.wraps(func)
     def editable_method(instance, *args, **kwargs):
         if not instance._in_edit_mode:
             raise ValueError('{} only works in edit mode'.format(func.__name__))
         return func(instance, *args, **kwargs)
+
     return editable_method
+
 
 def _apply_transform(func):
     """Apply the matrix transformation to the shape.
     """
+
     @functools.wraps(func)
     def mfunc(instance, *args, **kwargs):
         tmat = func(instance, *args, **kwargs)
         instance._matrix = instance._matrix.dot(tmat)
         return tmat
+
     return mfunc
+
 
 def _call_on_children(func):
     """Call the method on all child shapes
     """
+
     @functools.wraps(func)
     def rfunc(instance, *args, **kwargs):
         rval = func(instance, *args, **kwargs)
         for child in instance.children:
             rfunc(child, *args, **kwargs)
         return rval
+
     return rfunc
+
 
 class PShape:
     """Custom shape class for p5.
@@ -92,11 +102,12 @@ class PShape:
     :type children: list
 
     """
+
     def __init__(self, vertices=[], fill_color='auto',
                  stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto",
                  visible=False, attribs='closed',
-                 children=None, contour=[], temp_overriden_draw_queue=[], temp_stype='TESS'):
+                 children=None, contour=[], temp_overriden_draw_queue=None, temp_stype='TESS'):
         # basic properties of the shape
         self._vertices = np.array([])
         self._contour = np.array([])
@@ -142,12 +153,12 @@ class PShape:
         self.children = children or []
         self.visible = visible
 
-        self.temp_overriden_draw_queue = temp_overriden_draw_queue
+        self.temp_overriden_draw_queue = temp_overriden_draw_queue if temp_overriden_draw_queue else []
         self.temp_vertices = []
         self.temp_stype = temp_stype
-        self.temp_contours = [] # List of all contours
-        self.temp_curr_contour = None # The contour currently being edited
-        self.temp_all_vertices = set() # Set of all vertices (plus ones from contours)
+        self.temp_contours = []  # List of all contours
+        self.temp_curr_contour = None  # The contour currently being edited
+        self.temp_all_vertices = set()  # Set of all vertices (plus ones from contours)
 
     def _set_color(self, name, value=None):
         color = None
@@ -348,8 +359,8 @@ class PShape:
             contour_edges = np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
             triangulation_vertices = np.vstack([self.vertices, self._contour])
             triangulation_segments = np.vstack([self.edges, contour_edges + len(self.edges)])
-            triangulate_parameters = dict(vertices=triangulation_vertices, 
-                segments=triangulation_segments, holes=self.get_interior_point(self._contour))
+            triangulate_parameters = dict(vertices=triangulation_vertices,
+                                          segments=triangulation_segments, holes=self.get_interior_point(self._contour))
 
             self._tri = tr.triangulate(triangulate_parameters, "p")
         else:
@@ -460,7 +471,7 @@ class PShape:
         """
         if len(vertex) != 2:
             raise ValueError("Wrong vertex dimension")
-        self._vertices[idx] =  np.array(vertex)
+        self._vertices[idx] = np.array(vertex)
         self._tri_vertices = None
         self._tri_edges = None
         self._tri_faces = None
@@ -671,26 +682,38 @@ class PShape:
     # Returns a list of vertices and a map of vertex to its index
     def _gen_vertex_mapping(self, vertices):
         vertex_list = list(vertices)
-        return vertex_list, { v: i for i, v in enumerate(vertex_list) }
+        return vertex_list, {v: i for i, v in enumerate(vertex_list)}
 
     def temp_triangulate(self):
-        # Add meshes
-        if p5.renderer.fill_enabled and self.temp_stype not in [SType.POINTS.name, SType.LINES.name]:
-            vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
-            gluTessBeginPolygon(p5.tess.tess, None)
-            self._tess_new_contour(self.temp_vertices, vertex_map)
-            if len(self.temp_contours) > 0:
-                for i, contour in enumerate(self.temp_contours):
-                    self._tess_new_contour(contour, vertex_map)
-            gluTessEndPolygon(p5.tess.tess)
-            self.temp_overriden_draw_queue += [[obj[0], np.asarray(vertex_list), np.asarray(obj[1], dtype=np.uint32)]
-                                              for obj in p5.tess.process_draw_queue()]
+        if self.temp_stype == SType.TESS.name:
+            # Add meshes
+            if p5.renderer.fill_enabled:
+                vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
+                gluTessBeginPolygon(p5.tess.tess, None)
+                self._tess_new_contour(self.temp_vertices, vertex_map)
+                if len(self.temp_contours) > 0:
+                    for i, contour in enumerate(self.temp_contours):
+                        self._tess_new_contour(contour, vertex_map)
+                gluTessEndPolygon(p5.tess.tess)
+                self.temp_overriden_draw_queue += [
+                    [obj[0], np.asarray(vertex_list), np.asarray(obj[1], dtype=np.uint32)]
+                    for obj in p5.tess.process_draw_queue()]
 
-        # Add borders
-        if p5.renderer.stroke_enabled and self.temp_stype not in [SType.POINTS.name]:
-            self.temp_overriden_draw_queue.append(self._get_line(self.temp_vertices))
-            for contour in self.temp_contours:
-                self.temp_overriden_draw_queue.append(self._get_line(contour))
+            # Add borders
+            if p5.renderer.stroke_enabled:
+                self.temp_overriden_draw_queue.append(self._get_line(self.temp_vertices))
+                for contour in self.temp_contours:
+                    self.temp_overriden_draw_queue.append(self._get_line(contour))
+        elif self.temp_stype == SType.TRIANGLE_STRIP.name:
+            if p5.renderer.fill_enabled:
+                self.temp_overriden_draw_queue.append(['triangle_strip', np.asarray(self.temp_vertices),
+                                                       np.arange(len(self.temp_vertices), dtype=np.uint32)])
+
+            if p5.renderer.stroke_enabled:
+                n_vert = len(self.temp_vertices)
+                self.temp_overriden_draw_queue.append(['lines', np.asarray(self.temp_vertices),
+                                                       np.hstack((np.vstack(np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))),
+                                                                  np.vstack(np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert))))))])
 
     def begin_contour(self):
         self.temp_curr_contour = []

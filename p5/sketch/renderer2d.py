@@ -218,7 +218,7 @@ class Renderer2D:
 	# Adds shape of stype to draw queue
 	def _temp_add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke=None, stroke_weight=None, stroke_cap=None, stroke_join=None):
 		if stype == 'lines':
-			self.draw_queue.append(["lines", (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)])
+			self.draw_queue.append((stype, (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)))
 		else:
 			self.draw_queue.append((stype, (vertices, idx, fill)))
 

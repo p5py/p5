@@ -57,7 +57,7 @@ def begin_shape(kind=None):
 	contour_vertices = []
 	vertices_types = []
 	contour_vertices_types = []
-	temp_curr_shape = PShape(temp_stype=kind)
+	temp_curr_shape = PShape(temp_stype=shape_kind)
 
 def curve_vertex(x, y, z=0):
 	"""
@@ -315,13 +315,8 @@ def end_shape(mode=""):
 	if (not p5.renderer.stroke_enabled) and (not p5.renderer.fill_enabled):
 		return
 
-	close_shape = mode == "CLOSE"
-
-	if close_shape:
-		vertex(*temp_curr_shape.temp_vertices[0])
-
 	# if the shape is closed, the first element is also the last element
-	if close_shape:
+	if mode == 'CLOSED':
 		attribs = "closed"
 		if not is_contour:
 			vertices.append(vertices[0])		
@@ -350,12 +345,6 @@ def end_shape(mode=""):
 				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
 			else:
 				for i in range(0, len(vertices) - 2, 3):
-					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 2]]))
-		elif shape_kind == "TRIANGLE_STRIP":
-			if len(vertices) < 3:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices) - 2, 1):
 					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 2]]))
 		elif shape_kind == "TRIANGLE_FAN":
 			if len(vertices) < 3:
