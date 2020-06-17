@@ -698,7 +698,7 @@ class PShape:
     def end_contour(self):
         # Unlike end_shape, end_contour does not take the optional 'CLOSE'
         # Just in case, we manually close the contour
-        self.temp_curr_contour.append(self.temp_curr_contour[-1])
+        self.temp_curr_contour.append(self.temp_curr_contour[0])
         # Add current contour to canonical list
         self.temp_contours.append(self.temp_curr_contour)
         self.temp_curr_contour = None
