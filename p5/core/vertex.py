@@ -48,9 +48,9 @@ def begin_shape(kind=None):
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
 	global temp_curr_shape
 	if kind in (t.name for t in SType):
-		shape_kind = kind
+		shape_kind = SType[kind]
 	else:
-		shape_kind = SType.TESS.name
+		shape_kind = SType.TESS
 
 	is_contour = False
 	vertices = []

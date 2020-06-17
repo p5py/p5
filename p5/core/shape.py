@@ -685,7 +685,7 @@ class PShape:
         return vertex_list, {v: i for i, v in enumerate(vertex_list)}
 
     def temp_triangulate(self):
-        if self.temp_stype == SType.TESS.name:
+        if self.temp_stype == SType.TESS:
             # Add meshes
             if p5.renderer.fill_enabled:
                 vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
@@ -704,11 +704,11 @@ class PShape:
                 self.temp_overriden_draw_queue.append(self._get_line(self.temp_vertices))
                 for contour in self.temp_contours:
                     self.temp_overriden_draw_queue.append(self._get_line(contour))
-        elif self.temp_stype == SType.TRIANGLE_STRIP.name:
-            if p5.renderer.fill_enabled:
-                self.temp_overriden_draw_queue.append(['triangle_strip', np.asarray(self.temp_vertices),
+        if p5.renderer.fill_enabled:
+            if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN]:
+                self.temp_overriden_draw_queue.append([self.temp_stype.name.lower(), np.asarray(self.temp_vertices),
                                                        np.arange(len(self.temp_vertices), dtype=np.uint32)])
-
+        if self.temp_stype == SType.TRIANGLE_STRIP:
             if p5.renderer.stroke_enabled:
                 n_vert = len(self.temp_vertices)
                 self.temp_overriden_draw_queue.append(['lines', np.asarray(self.temp_vertices),
