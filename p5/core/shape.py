@@ -667,9 +667,23 @@ class PShape:
         return np.hstack((np.vstack(np.arange(0, n - 1)),
                           np.vstack(np.arange(1, n))))
 
-    # Given a list of vertices, return a line object that's ready to be inserted to draw queue
-    def _get_line(self, vertices):
+    # Given a list of vertices, return a line object that's ready for draw queue
+    def _get_line_from_verts(self, vertices):
         return ['lines', np.asarray(vertices), self._get_sequential_edges(len(vertices))]
+
+    def _get_line_from_indices(self, vertices, start, end):
+        """Given two columns of indices that represent edges, return a line object that's ready for draw queue
+            :param vertices: List of vertices
+            :type vertices: list
+
+            :param start: Array of start positions of edges in vertex indices
+            :type start: np.ndarray
+
+            :param end: Array of end positions fo edges in vertex indices
+            :type end: np.ndarray
+        """
+        return ['lines', np.asarray(vertices),
+            np.hstack((np.vstack(start), np.vstack(end)))]
 
     # Given a list of vertices, evoke gluTess to create a contour
     # vertex_map is the map of every possible vertex to its index in a list of all vertices
@@ -685,9 +699,11 @@ class PShape:
         return vertex_list, {v: i for i, v in enumerate(vertex_list)}
 
     def temp_triangulate(self):
-        if self.temp_stype == SType.TESS:
-            # Add meshes
-            if p5.renderer.fill_enabled:
+        if p5.renderer.fill_enabled:
+            if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN]:
+                self.temp_overriden_draw_queue.append([self.temp_stype.name.lower(), np.asarray(self.temp_vertices),
+                                                       np.arange(len(self.temp_vertices), dtype=np.uint32)])
+            elif self.temp_stype == SType.TESS:
                 vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
                 gluTessBeginPolygon(p5.tess.tess, None)
                 self._tess_new_contour(self.temp_vertices, vertex_map)
@@ -698,22 +714,21 @@ class PShape:
                 self.temp_overriden_draw_queue += [
                     [obj[0], np.asarray(vertex_list), np.asarray(obj[1], dtype=np.uint32)]
                     for obj in p5.tess.process_draw_queue()]
-
-            # Add borders
-            if p5.renderer.stroke_enabled:
-                self.temp_overriden_draw_queue.append(self._get_line(self.temp_vertices))
+        if p5.renderer.stroke_enabled:
+            n_vert = len(self.temp_vertices)
+            if self.temp_stype == SType.TRIANGLES:
+                assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
+                start = np.arange(n_vert)
+                end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
+                self.temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
+            elif self.temp_stype == SType.TRIANGLE_STRIP:
+                start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
+                end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
+                self.temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
+            elif self.temp_stype == SType.TESS:
+                self.temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
                 for contour in self.temp_contours:
-                    self.temp_overriden_draw_queue.append(self._get_line(contour))
-        if p5.renderer.fill_enabled:
-            if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN]:
-                self.temp_overriden_draw_queue.append([self.temp_stype.name.lower(), np.asarray(self.temp_vertices),
-                                                       np.arange(len(self.temp_vertices), dtype=np.uint32)])
-        if self.temp_stype == SType.TRIANGLE_STRIP:
-            if p5.renderer.stroke_enabled:
-                n_vert = len(self.temp_vertices)
-                self.temp_overriden_draw_queue.append(['lines', np.asarray(self.temp_vertices),
-                                                       np.hstack((np.vstack(np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))),
-                                                                  np.vstack(np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert))))))])
+                    self.temp_overriden_draw_queue.append(self._get_line_from_verts(contour))
 
     def begin_contour(self):
         self.temp_curr_contour = []
