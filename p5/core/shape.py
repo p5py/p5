@@ -662,28 +662,38 @@ class PShape:
         shear_mat[1, 0] = np.tan(theta)
         return shear_mat
 
-    # Given the number of vertices, return a numpy array of edges that connects those vertices sequentially
-    def _get_sequential_edges(self, n):
-        return np.hstack((np.vstack(np.arange(0, n - 1)),
-                          np.vstack(np.arange(1, n))))
-
-    # Given a list of vertices, return a line object that's ready for draw queue
     def _get_line_from_verts(self, vertices):
-        return ['lines', np.asarray(vertices), self._get_sequential_edges(len(vertices))]
+        """Given a list of vertices, return a line object that's ready for draw queue
+        """
+        n_vert = len(vertices)
+        start, end = np.arange(0, n_vert - 1), np.arange(1, n_vert)
+        return self._get_line_from_indices(vertices, start, end)
 
     def _get_line_from_indices(self, vertices, start, end):
         """Given two columns of indices that represent edges, return a line object that's ready for draw queue
-            :param vertices: List of vertices
-            :type vertices: list
 
-            :param start: Array of start positions of edges in vertex indices
-            :type start: np.ndarray
+        :param vertices: List of vertices
+        :type vertices: list
 
-            :param end: Array of end positions fo edges in vertex indices
-            :type end: np.ndarray
+        :param start: Array of start positions of edges in vertex indices
+        :type start: np.ndarray
+
+        :param end: Array of end positions fo edges in vertex indices
+        :type end: np.ndarray
         """
         return ['lines', np.asarray(vertices),
             np.hstack((np.vstack(start), np.vstack(end)))]
+
+    def _add_edges_to_draw_queue(self, start, end):
+        """Adds edges to draw_queue, given their start and end positions (in vertex indices)
+
+        :param start: Array of start positions of edges in vertex indices
+        :type start: np.ndarray
+
+        :param end: Array of end positions fo edges in vertex indices
+        :type end: np.ndarray
+        """
+        self.temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
 
     # Given a list of vertices, evoke gluTess to create a contour
     # vertex_map is the map of every possible vertex to its index in a list of all vertices
@@ -720,11 +730,11 @@ class PShape:
                 assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
                 start = np.arange(n_vert)
                 end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
-                self.temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
+                self._add_edges_to_draw_queue(start, end)
             elif self.temp_stype == SType.TRIANGLE_STRIP:
                 start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
                 end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
-                self.temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
+                self._add_edges_to_draw_queue(start, end)
             elif self.temp_stype == SType.TESS:
                 self.temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
                 for contour in self.temp_contours:
