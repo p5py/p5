@@ -340,12 +340,6 @@ def end_shape(mode=""):
 			else:
 				for i in range(0, len(vertices), 2):
 					shape.add_child(PShape([vertices[i], vertices[i + 1]], attribs='path'))
-		elif shape_kind == "TRIANGLE_FAN":
-			if len(vertices) < 3:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(1, len(vertices) - 1):
-					shape.add_child(PShape([vertices[0], vertices[i], vertices[i + 1]]))
 		elif shape_kind == "QUADS":
 			if len(vertices) < 4:
 				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))

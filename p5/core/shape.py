@@ -709,6 +709,7 @@ class PShape:
         return vertex_list, {v: i for i, v in enumerate(vertex_list)}
 
     def temp_triangulate(self):
+        # Render meshes
         if p5.renderer.fill_enabled:
             if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN]:
                 self.temp_overriden_draw_queue.append([self.temp_stype.name.lower(), np.asarray(self.temp_vertices),
@@ -718,12 +719,13 @@ class PShape:
                 gluTessBeginPolygon(p5.tess.tess, None)
                 self._tess_new_contour(self.temp_vertices, vertex_map)
                 if len(self.temp_contours) > 0:
-                    for i, contour in enumerate(self.temp_contours):
+                    for contour in self.temp_contours:
                         self._tess_new_contour(contour, vertex_map)
                 gluTessEndPolygon(p5.tess.tess)
                 self.temp_overriden_draw_queue += [
                     [obj[0], np.asarray(vertex_list), np.asarray(obj[1], dtype=np.uint32)]
                     for obj in p5.tess.process_draw_queue()]
+        # Render borders
         if p5.renderer.stroke_enabled:
             n_vert = len(self.temp_vertices)
             if self.temp_stype == SType.TRIANGLES:
@@ -733,6 +735,10 @@ class PShape:
                 self._add_edges_to_draw_queue(start, end)
             elif self.temp_stype == SType.TRIANGLE_STRIP:
                 start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
+                end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
+                self._add_edges_to_draw_queue(start, end)
+            elif self.temp_stype == SType.TRIANGLE_FAN:
+                start = np.concatenate((np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
                 end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
                 self._add_edges_to_draw_queue(start, end)
             elif self.temp_stype == SType.TESS:
