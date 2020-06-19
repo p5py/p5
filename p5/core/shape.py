@@ -107,7 +107,7 @@ class PShape:
                  stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto",
                  visible=False, attribs='closed',
-                 children=None, contour=[], temp_overriden_draw_queue=None, temp_stype='TESS'):
+                 children=None, contour=[], temp_overriden_draw_queue=None, temp_stype=SType.TESS):
         # basic properties of the shape
         self._vertices = np.array([])
         self._contour = np.array([])
@@ -709,11 +709,20 @@ class PShape:
         return vertex_list, {v: i for i, v in enumerate(vertex_list)}
 
     def temp_triangulate(self):
+        n_vert = len(self.temp_vertices)
         # Render meshes
         if p5.renderer.fill_enabled:
-            if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN]:
-                self.temp_overriden_draw_queue.append([self.temp_stype.name.lower(), np.asarray(self.temp_vertices),
+            if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
+                gl_name = self.temp_stype.name.lower()
+                if gl_name == 'quad_strip':
+                    gl_name = 'triangle_strip'
+                self.temp_overriden_draw_queue.append([gl_name, np.asarray(self.temp_vertices),
                                                        np.arange(len(self.temp_vertices), dtype=np.uint32)])
+            elif self.temp_stype == SType.QUADS:
+                n_quad = len(self.temp_vertices) // 4
+                self.temp_overriden_draw_queue.append(['triangles', np.asarray(self.temp_vertices),
+                                                       np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
+                                                       np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
             elif self.temp_stype == SType.TESS:
                 vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
                 gluTessBeginPolygon(p5.tess.tess, None)
@@ -727,7 +736,6 @@ class PShape:
                     for obj in p5.tess.process_draw_queue()]
         # Render borders
         if p5.renderer.stroke_enabled:
-            n_vert = len(self.temp_vertices)
             if self.temp_stype == SType.TRIANGLES:
                 assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
                 start = np.arange(n_vert)
@@ -740,6 +748,14 @@ class PShape:
             elif self.temp_stype == SType.TRIANGLE_FAN:
                 start = np.concatenate((np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
                 end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
+                self._add_edges_to_draw_queue(start, end)
+            elif self.temp_stype == SType.QUADS:
+                start = np.arange(n_vert)
+                end = np.arange(n_vert) + np.tile([1, 1, 1, -3], n_vert // 4)
+                self._add_edges_to_draw_queue(start, end)
+            elif self.temp_stype == SType.QUAD_STRIP:
+                start = np.concatenate((np.arange(0, n_vert, 2), np.arange(n_vert - 2)))
+                end = np.concatenate((np.arange(1, n_vert, 2), np.arange(2, n_vert)))
                 self._add_edges_to_draw_queue(start, end)
             elif self.temp_stype == SType.TESS:
                 self.temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))

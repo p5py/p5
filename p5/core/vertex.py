@@ -340,18 +340,6 @@ def end_shape(mode=""):
 			else:
 				for i in range(0, len(vertices), 2):
 					shape.add_child(PShape([vertices[i], vertices[i + 1]], attribs='path'))
-		elif shape_kind == "QUADS":
-			if len(vertices) < 4:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices) - 3, 4):
-					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 2], vertices[i + 3]]))
-		elif shape_kind == "QUAD_STRIP":
-			if len(vertices) < 4:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices) - 2, 2):
-					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 3], vertices[i + 2]]))
 		else:
 			temp_curr_shape.temp_triangulate()
 			shape.add_child(temp_curr_shape)
