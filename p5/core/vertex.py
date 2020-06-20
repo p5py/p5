@@ -332,15 +332,8 @@ def end_shape(mode=""):
 	elif is_quadratic and (shape_kind == "POLYGON" or shape_kind == None):
 		shape.add_child(PShape(get_quadratic_vertices(vertices, vertices_types), contour=get_bezier_vertices(contour_vertices, contour_vertices_types), attribs=attribs))
 	else:
-		if shape_kind == "LINES":
-			if len(vertices) < 2:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices), 2):
-					shape.add_child(PShape([vertices[i], vertices[i + 1]], attribs='path'))
-		else:
-			temp_curr_shape.temp_triangulate()
-			shape.add_child(temp_curr_shape)
+		temp_curr_shape.temp_triangulate()
+		shape.add_child(temp_curr_shape)
 
 	is_bezier = False
 	is_curve = False

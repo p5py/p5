@@ -722,8 +722,8 @@ class PShape:
         if p5.renderer.fill_enabled:
             if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
                 gl_name = self.temp_stype.name.lower()
-                if gl_name == 'quad_strip':
-                    gl_name = 'triangle_strip'
+                if gl_name == 'quad_strip': # vispy does not support quad_strip
+                    gl_name = 'triangle_strip' # but it can be drawn using triangle_strip
                 self._add_vertices_to_draw_queue(gl_name, self.temp_vertices)
             elif self.temp_stype == SType.QUADS:
                 n_quad = len(self.temp_vertices) // 4
@@ -743,6 +743,7 @@ class PShape:
                     for obj in p5.tess.process_draw_queue()]
         # Render borders
         if p5.renderer.stroke_enabled:
+            # TODO: Check for the minimum number of vertices
             if self.temp_stype == SType.TRIANGLES:
                 assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
                 start = np.arange(n_vert)
@@ -763,6 +764,10 @@ class PShape:
             elif self.temp_stype == SType.QUAD_STRIP:
                 start = np.concatenate((np.arange(0, n_vert, 2), np.arange(n_vert - 2)))
                 end = np.concatenate((np.arange(1, n_vert, 2), np.arange(2, n_vert)))
+                self._add_edges_to_draw_queue(start, end)
+            elif self.temp_stype == SType.LINES:
+                start = np.arange(0, n_vert, 2)
+                end = np.arange(1, n_vert, 2)
                 self._add_edges_to_draw_queue(start, end)
             elif self.temp_stype == SType.TESS:
                 self.temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
