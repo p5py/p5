@@ -230,8 +230,8 @@ class Renderer2D:
 		stroke_join = shape.stroke_join
 
 		# If shape comes with prepackaged vertices, use that instead
-		if shape.temp_overriden_draw_queue:
-			for obj in shape.temp_overriden_draw_queue:
+		if shape._temp_overriden_draw_queue:
+			for obj in shape._temp_overriden_draw_queue:
 				stype, vertices, idx = obj
 				# Transform vertices
 				n = len(vertices)

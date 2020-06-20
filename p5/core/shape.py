@@ -107,7 +107,7 @@ class PShape:
                  stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto",
                  visible=False, attribs='closed',
-                 children=None, contour=[], temp_overriden_draw_queue=None, temp_stype=SType.TESS):
+                 children=None, contour=[], temp_stype=SType.TESS):
         # basic properties of the shape
         self._vertices = np.array([])
         self._contour = np.array([])
@@ -153,7 +153,7 @@ class PShape:
         self.children = children or []
         self.visible = visible
 
-        self.temp_overriden_draw_queue = temp_overriden_draw_queue if temp_overriden_draw_queue else []
+        self._temp_overriden_draw_queue = []
         self.temp_vertices = []
         self.temp_stype = temp_stype
         self.temp_contours = []  # List of all contours
@@ -693,7 +693,7 @@ class PShape:
         :param end: Array of end positions fo edges in vertex indices
         :type end: np.ndarray
         """
-        self.temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
+        self._temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
 
     # Given a list of vertices, evoke gluTess to create a contour
     # vertex_map is the map of every possible vertex to its index in a list of all vertices
@@ -710,8 +710,8 @@ class PShape:
 
     # Adds an object of type gl_name with vertices in sequential order to the draw queue
     def _add_vertices_to_draw_queue(self, gl_name, vertices):
-        self.temp_overriden_draw_queue.append([gl_name, np.asarray(vertices),
-                np.arange(len(vertices), dtype=np.uint32)])
+        self._temp_overriden_draw_queue.append([gl_name, np.asarray(vertices),
+                                                np.arange(len(vertices), dtype=np.uint32)])
 
     def temp_triangulate(self):
         n_vert = len(self.temp_vertices)
@@ -727,9 +727,9 @@ class PShape:
                 self._add_vertices_to_draw_queue(gl_name, self.temp_vertices)
             elif self.temp_stype == SType.QUADS:
                 n_quad = len(self.temp_vertices) // 4
-                self.temp_overriden_draw_queue.append(['triangles', np.asarray(self.temp_vertices),
-                                                       np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
-                                                       np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
+                self._temp_overriden_draw_queue.append(['triangles', np.asarray(self.temp_vertices),
+                                                        np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
+                                                        np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
             elif self.temp_stype == SType.TESS:
                 vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
                 gluTessBeginPolygon(p5.tess.tess, None)
@@ -738,7 +738,7 @@ class PShape:
                     for contour in self.temp_contours:
                         self._tess_new_contour(contour, vertex_map)
                 gluTessEndPolygon(p5.tess.tess)
-                self.temp_overriden_draw_queue += [
+                self._temp_overriden_draw_queue += [
                     [obj[0], np.asarray(vertex_list), np.asarray(obj[1], dtype=np.uint32)]
                     for obj in p5.tess.process_draw_queue()]
         # Render borders
@@ -770,9 +770,9 @@ class PShape:
                 end = np.arange(1, n_vert, 2)
                 self._add_edges_to_draw_queue(start, end)
             elif self.temp_stype == SType.TESS:
-                self.temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
+                self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
                 for contour in self.temp_contours:
-                    self.temp_overriden_draw_queue.append(self._get_line_from_verts(contour))
+                    self._temp_overriden_draw_queue.append(self._get_line_from_verts(contour))
 
     def begin_contour(self):
         self.temp_curr_contour = []
