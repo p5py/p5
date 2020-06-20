@@ -27,6 +27,7 @@ from ..pmath.utils import SINCOS
 
 from .shape import PShape
 from .geometry import Geometry
+from .constants import SType
 
 from . import p5
 
@@ -202,7 +203,7 @@ def line(p1, p2):
         Point(*p1),
         Point(*p2)
     ]
-    return PShape(path, attribs='path')
+    return PShape(temp_vertices=path, temp_stype=SType.LINES)
 
 @_draw_on_return
 def bezier(start, control_point_1, control_point_2, stop):

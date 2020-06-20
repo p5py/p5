@@ -107,7 +107,7 @@ class PShape:
                  stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto",
                  visible=False, attribs='closed',
-                 children=None, contour=[], temp_stype=SType.TESS):
+                 children=None, contour=[], temp_vertices=None, temp_stype=SType.TESS):
         # basic properties of the shape
         self._vertices = np.array([])
         self._contour = np.array([])
@@ -154,11 +154,13 @@ class PShape:
         self.visible = visible
 
         self._temp_overriden_draw_queue = []
-        self.temp_vertices = []
+        self.temp_vertices = temp_vertices[:] if temp_vertices else []
         self.temp_stype = temp_stype
         self.temp_contours = []  # List of all contours
         self.temp_curr_contour = None  # The contour currently being edited
-        self.temp_all_vertices = set()  # Set of all vertices (plus ones from contours)
+        self.temp_all_vertices = set(self.temp_vertices)  # Set of all vertices (plus ones from contours)
+        if self.temp_vertices:
+            self.temp_triangulate()
 
     def _set_color(self, name, value=None):
         color = None
