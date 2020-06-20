@@ -160,7 +160,7 @@ class PShape:
         self.temp_curr_contour = None  # The contour currently being edited
         self.temp_all_vertices = set(self.temp_vertices)  # Set of all vertices (plus ones from contours)
         if self.temp_vertices:
-            self.temp_triangulate()
+            self.temp_update_draw_queue()
 
     def _set_color(self, name, value=None):
         color = None
@@ -715,7 +715,7 @@ class PShape:
         self._temp_overriden_draw_queue.append([gl_name, np.asarray(vertices),
                                                 np.arange(len(vertices), dtype=np.uint32)])
 
-    def temp_triangulate(self):
+    def temp_update_draw_queue(self):
         n_vert = len(self.temp_vertices)
         # Render points
         if self.temp_stype == SType.POINTS:
