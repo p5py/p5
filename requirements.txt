@@ -2,3 +2,4 @@ numpy
 glfw
 vispy
 triangle
+Pillow
