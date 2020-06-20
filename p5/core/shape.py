@@ -708,16 +708,23 @@ class PShape:
         vertex_list = list(vertices)
         return vertex_list, {v: i for i, v in enumerate(vertex_list)}
 
+    # Adds an object of type gl_name with vertices in sequential order to the draw queue
+    def _add_vertices_to_draw_queue(self, gl_name, vertices):
+        self.temp_overriden_draw_queue.append([gl_name, np.asarray(vertices),
+                np.arange(len(vertices), dtype=np.uint32)])
+
     def temp_triangulate(self):
         n_vert = len(self.temp_vertices)
+        # Render points
+        if self.temp_stype == SType.POINTS:
+            self._add_vertices_to_draw_queue('points', self.temp_vertices)
         # Render meshes
         if p5.renderer.fill_enabled:
             if self.temp_stype in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
                 gl_name = self.temp_stype.name.lower()
                 if gl_name == 'quad_strip':
                     gl_name = 'triangle_strip'
-                self.temp_overriden_draw_queue.append([gl_name, np.asarray(self.temp_vertices),
-                                                       np.arange(len(self.temp_vertices), dtype=np.uint32)])
+                self._add_vertices_to_draw_queue(gl_name, self.temp_vertices)
             elif self.temp_stype == SType.QUADS:
                 n_quad = len(self.temp_vertices) // 4
                 self.temp_overriden_draw_queue.append(['triangles', np.asarray(self.temp_vertices),

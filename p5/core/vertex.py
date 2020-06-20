@@ -332,9 +332,7 @@ def end_shape(mode=""):
 	elif is_quadratic and (shape_kind == "POLYGON" or shape_kind == None):
 		shape.add_child(PShape(get_quadratic_vertices(vertices, vertices_types), contour=get_bezier_vertices(contour_vertices, contour_vertices_types), attribs=attribs))
 	else:
-		if shape_kind == "POINTS":
-			shape.add_child(PShape(vertices, attribs='point'))
-		elif shape_kind == "LINES":
+		if shape_kind == "LINES":
 			if len(vertices) < 2:
 				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
 			else:
