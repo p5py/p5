@@ -461,7 +461,7 @@ class PShape:
         self._vertex_cache.append(vertex)
 
     def update_vertex(self, idx, vertex):
-        """Edit an indicidual vertex.
+        """Edit an individual vertex.
 
         :param idx: index of the vertex to be edited
         :type idx: int
@@ -771,6 +771,8 @@ class PShape:
                 start = np.arange(0, n_vert, 2)
                 end = np.arange(1, n_vert, 2)
                 self._add_edges_to_draw_queue(start, end)
+            elif self.temp_stype == SType.LINE_STRIP:
+                self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
             elif self.temp_stype == SType.TESS:
                 self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
                 for contour in self.temp_contours:

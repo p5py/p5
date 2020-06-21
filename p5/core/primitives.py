@@ -235,7 +235,7 @@ def bezier(start, control_point_1, control_point_2, stop):
                                 control_point_2, stop, t)
         vertices.append(p[:3])
 
-    return PShape(vertices, attribs='path')
+    return PShape(temp_vertices=vertices, temp_stype=SType.LINE_STRIP)
 
 @_draw_on_return
 def curve(point_1, point_2, point_3, point_4):
@@ -264,7 +264,7 @@ def curve(point_1, point_2, point_3, point_4):
         p = curves.curve_point(point_1, point_2, point_3, point_4, t)
         vertices.append(p[:3])
 
-    return PShape(vertices, attribs='path')
+    return PShape(temp_vertices=vertices, temp_stype=SType.LINE_STRIP)
 
 @_draw_on_return
 def triangle(p1, p2, p3):
