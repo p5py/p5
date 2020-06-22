@@ -282,11 +282,12 @@ def triangle(p1, p2, p3):
     :returns: A triangle.
     :rtype: p5.PShape
     """
-    tr = PShape()
-    with tr.edit():
-        for pt in [p1, p2, p3]:
-            tr.add_vertex(pt)
-    return tr
+    path = [
+        Point(*p1),
+        Point(*p2),
+        Point(*p3)
+    ]
+    return PShape(temp_vertices=path, temp_stype=SType.TRIANGLES)
 
 @_draw_on_return
 def quad(p1, p2, p3, p4):
@@ -307,11 +308,13 @@ def quad(p1, p2, p3, p4):
     :returns: A quad.
     :rtype: PShape
     """
-    qd = PShape()
-    with qd.edit():
-        for pt in [p1, p2, p3, p4]:
-            qd.add_vertex(pt)
-    return qd
+    path = [
+        Point(*p1),
+        Point(*p2),
+        Point(*p3),
+        Point(*p4)
+    ]
+    return PShape(temp_vertices=path, temp_stype=SType.QUADS)
 
 def rect(coordinate, *args, mode=None):
     """Return a rectangle.
