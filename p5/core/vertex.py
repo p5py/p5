@@ -332,6 +332,8 @@ def end_shape(mode=""):
 	elif is_quadratic and (shape_kind == "POLYGON" or shape_kind == None):
 		shape.add_child(PShape(get_quadratic_vertices(vertices, vertices_types), contour=get_bezier_vertices(contour_vertices, contour_vertices_types), attribs=attribs))
 	else:
+		if mode == 'CLOSED':
+			temp_curr_shape.temp_add_vertex_unsafe(temp_curr_shape.temp_vertices[0])
 		temp_curr_shape.temp_update_draw_queue()
 		shape.add_child(temp_curr_shape)
 

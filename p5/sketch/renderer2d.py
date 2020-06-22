@@ -229,7 +229,7 @@ class Renderer2D:
 		stroke_cap = shape.stroke_cap
 		stroke_join = shape.stroke_join
 
-		# If shape comes with prepackaged vertices, use that instead
+		# If shape comes with prepackaged objects, use these instead
 		if shape._temp_overriden_draw_queue:
 			for obj in shape._temp_overriden_draw_queue:
 				stype, vertices, idx = obj
