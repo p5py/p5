@@ -87,7 +87,7 @@ class Arc(PShape):
 
         super().__init__(vertices=[], attribs=attribs, fill_color=fill_color,
                  stroke_color=stroke_color, stroke_weight=stroke_weight, 
-                 stroke_join=stroke_join, stroke_cap=stroke_cap, **kwargs)
+                 stroke_join=stroke_join, stroke_cap=stroke_cap, temp_stype=SType.TRIANGLE_FAN, **kwargs)
         self._tessellate()
 
     @property
@@ -129,6 +129,10 @@ class Arc(PShape):
         e = np.vstack([np.arange(1, n - 1), np.arange(2, n)]).transpose()
         return e
 
+    def temp_update_draw_queue(self):
+        # TODO: Implement this function
+        PShape.temp_update_draw_queue(self)
+
     def _tessellate(self):
         """Generate vertex and face data using radii.
         """
@@ -153,18 +157,21 @@ class Arc(PShape):
         start_index = int((self._start_angle / (math.pi * 2)) * sclen)
         end_index = int((self._stop_angle / (math.pi * 2)) * sclen)
 
-        vertices = [(c1x, c1y)]
+        vertices = [(c1x, c1y, 0)]
         for idx in range(start_index, end_index, inc):
             i = idx % sclen
             vertices.append((
                 c1x + rx * SINCOS[i][1],
                 c1y + ry * SINCOS[i][0],
+                0
             ))
         vertices.append((
             c1x + rx * SINCOS[end_index % sclen][1],
             c1y + ry * SINCOS[end_index % sclen][0],
+            0
         ))
-        self._vertices = np.array(vertices)
+        self.temp_vertices = vertices
+        self.temp_update_draw_queue()
 
 @_draw_on_return
 def point(x, y, z=0):

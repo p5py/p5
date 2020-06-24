@@ -25,7 +25,7 @@ def draw():
             transformed_pts = transform(points, np.asarray((20, 20)), np.asarray((width / 2, height / 2)))
             for p in transformed_pts:
                 vertex(*p)
-            end_shape("CLOSE")
+            end_shape("CLOSED")
 
 
 if __name__ == '__main__':
