@@ -309,7 +309,7 @@ def end_shape(mode=""):
 		return
 
 	# if the shape is closed, the first element is also the last element
-	if mode == 'CLOSED':
+	if mode == 'CLOSE':
 		vertices.append(vertices[0])
 		vertices_types.append(vertices_types[0])
 
