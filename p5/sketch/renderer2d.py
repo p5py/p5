@@ -234,9 +234,8 @@ class Renderer2D:
 			for obj in shape._temp_overriden_draw_queue:
 				stype, vertices, idx = obj
 				# Transform vertices
-				n = len(vertices)
 				vertices = self._transform_vertices(
-					np.hstack([vertices, np.ones((n, 1))]),
+					np.hstack([vertices, np.ones((len(vertices), 1))]),
 					shape._matrix,
 					self.transform_matrix)
 				# Add to draw queue
