@@ -1,14 +1,14 @@
 from OpenGL.GLU import gluNewTess, gluTessCallback, GLU_TESS_VERTEX, GLU_TESS_BEGIN, GLU_TESS_END, GLU_TESS_ERROR, \
-    gluErrorString
+    gluErrorString, GLU_TESS_COMBINE
 from OpenGL.GL import GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, GL_TRIANGLES, GL_LINE_LOOP
-
+import numpy as np
 
 class Tessellator:
     def __init__(self):
         self.tess = gluNewTess()
-        self.draw_queue = []  # [[shape_type, [i1, i2, ...]], [shape_type, [i1, i2, ...]], ...]
-        self.idx = []
-        self.type = None
+        self.draw_queue = []  # [[gl_type, vertices, idx]...]
+        self.vertices = []    # Vertices for the current shape
+        self.type = None      # Type for the current shape
 
         gl_mode_map = {GL_TRIANGLE_FAN: 'triangle_fan',
                        GL_TRIANGLE_STRIP: 'triangle_strip',
@@ -26,25 +26,25 @@ class Tessellator:
                 return "GL_TRIANGLES"
 
         def end_shape_handler():
-            print("End")
-            curr_obj = [gl_mode_map[self.type], self.idx]
+            curr_obj = [gl_mode_map[self.type], self.vertices, np.arange(len(self.vertices), dtype=np.uint32)]
             self.draw_queue.append(curr_obj)
-            self.idx = []
-            print(self.draw_queue[-1])
 
         def begin_shape_handler(x):
-            print("Begin", to_tess_string(x))
             self.type = x
+            self.vertices = []
 
         def vertex_handler(v):
-            print("Vertex", v)
-            self.idx.append(v)
+            self.vertices.append(v)
+
+        def combine_handler(new_vert, _, __):
+            return new_vert
 
         # Register Callbacks
         gluTessCallback(self.tess, GLU_TESS_VERTEX, vertex_handler)
         gluTessCallback(self.tess, GLU_TESS_END, end_shape_handler)
         gluTessCallback(self.tess, GLU_TESS_ERROR, lambda x: print("Error", gluErrorString(x)))
         gluTessCallback(self.tess, GLU_TESS_BEGIN, begin_shape_handler)
+        gluTessCallback(self.tess, GLU_TESS_COMBINE, combine_handler)
 
     def process_draw_queue(self):
         """Returns the current draw_queue and clears it

@@ -311,15 +311,10 @@ class Renderer2D:
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
 		"""
-		current_shape = None
 		current_queue = []
 		for index, shape in enumerate(self.draw_queue):
 			current_shape = self.draw_queue[index][0]
 			current_queue.append(self.draw_queue[index][1])
-
-			if index < len(self.draw_queue) - 1:
-				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
-					continue
 
 			if current_shape == "lines":
 				self.render_line(current_queue)

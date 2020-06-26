@@ -107,7 +107,7 @@ class PShape:
                  stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto",
                  visible=False, attribs='closed',
-                 children=None, contour=[], temp_vertices=None, temp_stype=SType.TESS):
+                 children=None, contour=[], temp_contours=tuple(), temp_vertices=tuple(), temp_stype=SType.TESS):
         # basic properties of the shape
         self._vertices = np.array([])
         self._contour = np.array([])
@@ -154,11 +154,9 @@ class PShape:
         self.visible = visible
 
         self._temp_overriden_draw_queue = []
-        self.temp_vertices = temp_vertices[:] if temp_vertices else []
+        self.temp_vertices = list(temp_vertices)
         self.temp_stype = temp_stype
-        self.temp_contours = []  # List of all contours
-        self.temp_curr_contour = None  # The contour currently being edited
-        self.temp_all_vertices = set(self.temp_vertices)  # Set of all vertices (plus ones from contours)
+        self.temp_contours = [list(c) for c in temp_contours]  # List of all contours
         if self.temp_vertices:
             self.temp_update_draw_queue()
 
@@ -441,14 +439,6 @@ class PShape:
         self._in_edit_mode = False
         self._edges = None
 
-    def temp_add_vertex_unsafe(self, vertex):
-        self.temp_all_vertices.add(vertex)
-        self.temp_vertices.append(vertex)
-
-    def temp_add_contour_vertex_unsafe(self, vertex):
-        self.temp_all_vertices.add(vertex)
-        self.temp_curr_contour.append(vertex)
-
     @_ensure_editable
     def add_vertex(self, vertex):
         """Add a vertex to the current shape
@@ -547,7 +537,7 @@ class PShape:
 
     @_call_on_children
     @_apply_transform
-    def rotate(self, theta, axis=[0, 0, 1]):
+    def rotate(self, theta, axis=(0, 0, 1)):
         """Rotate the shape by the given angle along the given axis.
 
         :param theta: The angle by which to rotate (in radians)
@@ -698,17 +688,11 @@ class PShape:
         self._temp_overriden_draw_queue.append(self._get_line_from_indices(self.temp_vertices, start, end))
 
     # Given a list of vertices, evoke gluTess to create a contour
-    # vertex_map is the map of every possible vertex to its index in a list of all vertices
-    def _tess_new_contour(self, vertices, vertex_map):
+    def _tess_new_contour(self, vertices):
         gluTessBeginContour(p5.tess.tess)
         for v in vertices:
-            gluTessVertex(p5.tess.tess, v, vertex_map[v])
+            gluTessVertex(p5.tess.tess, v, v)
         gluTessEndContour(p5.tess.tess)
-
-    # Returns a list of vertices and a map of vertex to its index
-    def _gen_vertex_mapping(self, vertices):
-        vertex_list = list(vertices)
-        return vertex_list, {v: i for i, v in enumerate(vertex_list)}
 
     # Adds an object of type gl_name with vertices in sequential order to the draw queue
     def _add_vertices_to_draw_queue(self, gl_name, vertices):
@@ -733,16 +717,14 @@ class PShape:
                                                         np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
                                                         np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
             elif self.temp_stype == SType.TESS:
-                vertex_list, vertex_map = self._gen_vertex_mapping(self.temp_all_vertices)
                 gluTessBeginPolygon(p5.tess.tess, None)
-                self._tess_new_contour(self.temp_vertices, vertex_map)
+                self._tess_new_contour(self.temp_vertices)
                 if len(self.temp_contours) > 0:
                     for contour in self.temp_contours:
-                        self._tess_new_contour(contour, vertex_map)
+                        self._tess_new_contour(contour)
                 gluTessEndPolygon(p5.tess.tess)
-                self._temp_overriden_draw_queue += [
-                    [obj[0], np.asarray(vertex_list), np.asarray(obj[1], dtype=np.uint32)]
-                    for obj in p5.tess.process_draw_queue()]
+                self._temp_overriden_draw_queue += p5.tess.process_draw_queue()
+
         # Render borders
         if p5.renderer.stroke_enabled:
             # TODO: Check for the minimum number of vertices
@@ -777,14 +759,3 @@ class PShape:
                 self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
                 for contour in self.temp_contours:
                     self._temp_overriden_draw_queue.append(self._get_line_from_verts(contour))
-
-    def begin_contour(self):
-        self.temp_curr_contour = []
-
-    def end_contour(self):
-        # Unlike end_shape, end_contour does not take the optional 'CLOSE'
-        # Just in case, we manually close the contour
-        self.temp_curr_contour.append(self.temp_curr_contour[0])
-        # Add current contour to canonical list
-        self.temp_contours.append(self.temp_curr_contour)
-        self.temp_curr_contour = None
