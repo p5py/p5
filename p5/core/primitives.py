@@ -75,63 +75,31 @@ def _draw_on_return(func):
 
 class Arc(PShape):
     def __init__(self, center, radii, start_angle, stop_angle,
-                 attribs='open pie', fill_color='auto',
-                 stroke_color='auto', stroke_weight="auto", 
+                 mode=None, fill_color='auto',
+                 stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto", **kwargs):
         self._center = center
         self._radii = radii
         self._start_angle = start_angle
         self._stop_angle = stop_angle
+        self._mode = mode
 
-        self._faces = None
-
-        super().__init__(vertices=[], attribs=attribs, fill_color=fill_color,
+        gl_type = SType.TESS if mode in ['OPEN', 'CHORD'] else SType.TRIANGLE_FAN
+        super().__init__(fill_color=fill_color,
                  stroke_color=stroke_color, stroke_weight=stroke_weight, 
-                 stroke_join=stroke_join, stroke_cap=stroke_cap, temp_stype=SType.TRIANGLE_FAN, **kwargs)
+                 stroke_join=stroke_join, stroke_cap=stroke_cap, temp_stype=gl_type, **kwargs)
         self._tessellate()
 
-    @property
-    def _draw_vertices(self):
-        if self._vertices is None:
-            self._tessellate()
-        return self._vertices
-
-    @property
-    def _draw_edges(self):
-        if self._vertices is None:
-            self._tessellate()
-        n, _ = self._vertices.shape
-        e = self._compute_outline_edges()
-        if 'chord' in self.attribs:
-            return np.concatenate([e, [[1, n - 1]]])
-        return np.concatenate([e, [[0, n - 1]]])
-
-    @property
-    def _draw_faces(self):
-        if self._vertices is None:
-            self._tessellate()
-        n, _ = self._vertices.shape
-        ar = np.arange(1, n - 1).reshape((n - 2, 1))
-        f = np.hstack([np.zeros((n - 2, 1)), ar, ar + 1])
-
-        return f
-
-    @property
-    def _draw_outline_vertices(self):
-        return self._compute_outline_edges()
-
-    @property
-    def _draw_outline_edges(self):
-        return self._compute_outline_edges()
-
-    def _compute_outline_edges(self):
-        n, _ = self._vertices.shape
-        e = np.vstack([np.arange(1, n - 1), np.arange(2, n)]).transpose()
-        return e
-
     def temp_update_draw_queue(self):
-        # TODO: Implement this function
+        stroke_state = p5.renderer.stroke_enabled
+        if self._mode in [None, 'PIE']:
+            p5.renderer.stroke_enabled = False
         PShape.temp_update_draw_queue(self)
+        if self._mode is None:
+            self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices[1:]))
+        if self._mode == 'PIE':
+            self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
+        p5.renderer.stroke_enabled = stroke_state
 
     def _tessellate(self):
         """Generate vertex and face data using radii.
@@ -157,7 +125,7 @@ class Arc(PShape):
         start_index = int((self._start_angle / (math.pi * 2)) * sclen)
         end_index = int((self._stop_angle / (math.pi * 2)) * sclen)
 
-        vertices = [(c1x, c1y, 0)]
+        vertices = [(c1x, c1y, 0)] if self._mode in ['PIE', None] else []
         for idx in range(start_index, end_index, inc):
             i = idx % sclen
             vertices.append((
@@ -170,6 +138,8 @@ class Arc(PShape):
             c1y + ry * SINCOS[end_index % sclen][0],
             0
         ))
+        if self._mode == 'CHORD' or self._mode == 'PIE':
+            vertices.append(vertices[0])
         self.temp_vertices = vertices
         self.temp_update_draw_queue()
 
@@ -431,7 +401,7 @@ def rect_mode(mode='CORNER'):
 
 @_draw_on_return
 def arc(coordinate, width, height, start_angle, stop_angle,
-        mode='OPEN PIE', ellipse_mode=None):
+        mode=None, ellipse_mode=None):
     """Return a ellipse.
 
     :param coordinate: Represents the center of the arc when mode
@@ -454,9 +424,7 @@ def arc(coordinate, width, height, start_angle, stop_angle,
 
     :type height: float
 
-    :param mode: The mode used to draw an arc can be some combination
-        of {'OPEN', 'CHORD', 'PIE'} separated by spaces. For instance,
-        'OPEN PIE', etc (defaults to 'OPEN PIE')
+    :param mode: The mode used to draw an arc can be any of {None, 'OPEN', 'CHORD', 'PIE'}.
 
     :type mode: str
 
@@ -470,7 +438,6 @@ def arc(coordinate, width, height, start_angle, stop_angle,
     :rtype: Arc
 
     """
-    amode = mode
 
     if ellipse_mode is None:
         emode = _ellipse_mode
@@ -489,7 +456,7 @@ def arc(coordinate, width, height, start_angle, stop_angle,
         dim = Point(width, height)
     else:
         raise ValueError("Unknown arc mode {}".format(emode))
-    return Arc(center, dim, start_angle, stop_angle, attribs=amode)
+    return Arc(center, dim, start_angle, stop_angle, mode)
 
 def ellipse(coordinate, *args, mode=None):
     """Return a ellipse.
