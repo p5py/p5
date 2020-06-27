@@ -95,10 +95,11 @@ class Arc(PShape):
         if self._mode in [None, 'PIE']:
             p5.renderer.stroke_enabled = False
         PShape.temp_update_draw_queue(self)
-        if self._mode is None:
-            self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices[1:]))
-        if self._mode == 'PIE':
-            self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
+        if stroke_state:  # If stroke was enabled
+            if self._mode is None:
+                self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices[1:]))
+            if self._mode == 'PIE':
+                self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
         p5.renderer.stroke_enabled = stroke_state
 
     def _tessellate(self):
