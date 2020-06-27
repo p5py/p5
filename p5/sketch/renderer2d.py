@@ -240,24 +240,8 @@ class Renderer2D:
 					self.transform_matrix)
 				# Add to draw queue
 				self._temp_add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
-			return
-
-		vertices = shape._draw_vertices
-		n, _ = vertices.shape
-		tverts = self._transform_vertices(
-			np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-			shape._matrix,
-			self.transform_matrix)
-
-		edges = shape._draw_edges
-		faces = shape._draw_faces
-
-		if 'open' in shape.attribs:
-			self.add_to_draw_queue('poly', tverts, edges[:-1], faces, fill, stroke, 
-					stroke_weight, stroke_cap, stroke_join)
 		else:
-			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke, 
-					stroke_weight, stroke_cap, stroke_join)
+			assert False, "Overridden draw queue unimplemented"
 
 	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None,
 			stroke_weight=None, stroke_cap=None, stroke_join=None):

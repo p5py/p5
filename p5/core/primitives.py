@@ -161,7 +161,7 @@ def point(x, y, z=0):
     :rtype: PShape
 
     """
-    return PShape([(x, y, z)], attribs='point')
+    return PShape([(x, y, z)])
 
 @_draw_on_return
 def line(p1, p2):

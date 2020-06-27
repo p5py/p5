@@ -92,30 +92,18 @@ class PShape:
     :param visible: toggles shape visibility (default: False)
     :type visible: bool
 
-    :param attribs: space-separated list of attributes that control
-        shape drawing. Each attribute should be one of {'point',
-        'path', 'open', 'closed'}. (default: 'closed')
-    :type attribs: str
-
     :param children: List of sub-shapes for the current shape
         (default: [])
     :type children: list
 
     """
 
-    def __init__(self, vertices=[], fill_color='auto',
+    def __init__(self, fill_color='auto',
                  stroke_color='auto', stroke_weight="auto",
                  stroke_join="auto", stroke_cap="auto",
-                 visible=False, attribs='closed',
-                 children=None, contour=[], temp_contours=tuple(), temp_vertices=tuple(), temp_stype=SType.TESS):
+                 visible=False,
+                 children=None, temp_contours=tuple(), temp_vertices=tuple(), temp_stype=SType.TESS):
         # basic properties of the shape
-        self._vertices = np.array([])
-        self._contour = np.array([])
-        self._edges = None
-        self._outline = None
-        self._outline_vertices = None
-
-        self.attribs = set(attribs.lower().split())
         self._fill = None
         self._stroke = None
         self._stroke_weight = None
@@ -128,21 +116,6 @@ class PShape:
 
         # a flag to check if the shape is being edited right now.
         self._in_edit_mode = False
-        self._vertex_cache = None
-
-        # The triangulation used to render the shapes.
-        self._tri = None
-        self._tri_required = not ('point' in self.attribs) and \
-                             not ('path' in self.attribs)
-        self._tri_vertices = None
-        self._tri_edges = None
-        self._tri_faces = None
-
-        if len(vertices) > 0:
-            self.vertices = vertices
-
-        if len(contour) > 0:
-            self.contour = contour
 
         self.fill = fill_color
         self.stroke = stroke_color
@@ -227,191 +200,6 @@ class PShape:
         else:
             self._stroke_cap = stroke
 
-    @property
-    def kind(self):
-        if 'point' in self.attribs:
-            return 'point'
-        elif 'path' in self.attribs:
-            return 'path'
-        else:
-            return 'poly'
-
-    def _sanitize_vertex_list(self, vertices, tdim=2, sdim=3):
-        """Convert all vertices to the given dimensions.
-        Removes consecutive duplicates to prevent errors in triangulation.
-
-        :param vertices: List of vertices
-        :type vertices: list
-
-        :param tdim: Target dimension for sanitization (default: 3)
-        :type tdim: int
-
-        :param sdim: Source dimension for the points (default: 2).
-            Whenever sdim > tdim, the last (sdim - tdim) components will
-            be discarded.
-        :type sdim: int
-
-        :raises ValueError: when the point dimension is between sdim and tdim
-
-        :returns: A sanitized array of vertices.
-        :type: np.ndarray
-
-        """
-        sanitized = []
-        for i in range(len(vertices)):
-            if i < len(vertices) - 1:
-                if vertices[i] == vertices[i + 1]:
-                    continue
-            elif i == len(vertices) - 1 and i != 0:
-                if vertices[i] == vertices[0]:
-                    continue
-
-            v = vertices[i]
-            if (len(v) > max(tdim, sdim)) or (len(v) < min(tdim, sdim)):
-                raise ValueError("unexpected vertex dimension")
-
-            if tdim > sdim:
-                sanitized.append(list(v) + [0] * (tdim - sdim))
-            elif tdim < sdim:
-                sanitized.append(list(v)[:tdim])
-            else:
-                sanitized.append(list(v))
-
-        return np.array(sanitized)
-
-    @property
-    def vertices(self):
-        return self._vertices
-
-    @vertices.setter
-    def vertices(self, new_vertices):
-        self._vertices = self._sanitize_vertex_list(new_vertices)
-
-        n = len(self._vertices)
-        self._outline_vertices = np.hstack([self._vertices, np.zeros((n, 1))])
-        self._tri_vertices = None
-        self._tri_edges = None
-        self._tri_faces = None
-
-    @property
-    def contour(self):
-        return self._contour
-
-    @contour.setter
-    def contour(self, contour_vertices):
-        self._contour = np.array(contour_vertices)
-
-    def _compute_poly_edges(self):
-        n, _ = self._vertices.shape
-        return np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
-
-    def _compute_outline_edges(self):
-        n, _ = self._vertices.shape
-        return np.vstack([np.arange(n - 1),
-                          (np.arange(n - 1) + 1) % n]).transpose()
-
-    @property
-    def edges(self):
-        if 'point' in self.attribs:
-            return np.array([])
-
-        if self._edges is None:
-            n, _ = self._vertices.shape
-
-            if 'point' in self.attribs:
-                self._edges = np.array([])
-            elif 'path' in self.attribs:
-                self._edges = self._compute_outline_edges()
-            else:
-                self._edges = self._compute_poly_edges()
-
-            if 'open' in self.attribs:
-                self._outline = self._compute_outline_edges()
-            else:
-                self._outline = self._edges
-
-        return self._edges
-
-    def get_interior_point(self, shape_vertices):
-        # Returns a random point inside the shape
-        if len(shape_vertices) < 2:
-            return []
-
-        # Triangulate the shape
-        triangulate = tr.triangulate(dict(vertices=shape_vertices), "a5")
-        for vertex in triangulate["vertices"]:
-            if vertex not in shape_vertices:
-                return [vertex]
-
-        return []
-
-    def _retriangulate(self):
-        """Triangulate the shape
-        """
-        if len(self.vertices) < 2:
-            self._tri_edges = np.array([])
-            self._tri_faces = np.array([])
-            self._tri_vertices = self.vertices
-            return
-
-        if len(self._contour) > 1:
-            n, _ = self._contour.shape
-            contour_edges = np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
-            triangulation_vertices = np.vstack([self.vertices, self._contour])
-            triangulation_segments = np.vstack([self.edges, contour_edges + len(self.edges)])
-            triangulate_parameters = dict(vertices=triangulation_vertices,
-                                          segments=triangulation_segments, holes=self.get_interior_point(self._contour))
-
-            self._tri = tr.triangulate(triangulate_parameters, "p")
-        else:
-            triangulate_parameters = dict(vertices=self.vertices, segments=self.edges)
-            self._tri = tr.triangulate(triangulate_parameters, "p")
-
-        if "segments" in self._tri.keys():
-            self._tri_edges = self._tri["segments"]
-        else:
-            self._tri_edges = self.edges
-
-        self._tri_faces = self._tri["triangles"]
-        self._tri_vertices = self._tri["vertices"]
-
-    @property
-    def _draw_outline_vertices(self):
-        if 'open' in self.attribs:
-            return self._draw_vertices
-        return self.vertices
-
-    @property
-    def _draw_outline_edges(self):
-        if 'open' in self.attribs:
-            return self._outline
-        return self._edges
-
-    @property
-    def _draw_vertices(self):
-        if self._tri_required and (self._tri_vertices is None):
-            self._retriangulate()
-
-        if self._tri_required:
-            return self._tri_vertices
-        return self._vertices
-
-    @property
-    def _draw_edges(self):
-        if self._tri_required:
-            if self._tri_edges is None:
-                self._retriangulate()
-            return self._tri_edges
-        return self.edges
-
-    @property
-    def _draw_faces(self):
-        if self._tri_required:
-            if self._tri_faces is None:
-                self._retriangulate()
-            return self._tri_faces
-
-        return np.array([])
 
     @contextlib.contextmanager
     def edit(self, reset=True):
