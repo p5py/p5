@@ -108,3 +108,6 @@ ENV/
 # VisualStudioCode Patch
 # Ignore all local history of files
 .history
+
+# Profiling results
+profiling/*.prof
