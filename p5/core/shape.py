@@ -443,11 +443,9 @@ class PShape:
         return shear_mat
 
     def _get_line_from_verts(self, vertices):
-        """Given a list of vertices, return a line object that's ready for draw queue
+        """Given a list of vertices, chain them sequentially in a line object that's ready for draw queue
         """
-        n_vert = len(vertices)
-        start, end = np.arange(0, n_vert - 1), np.arange(1, n_vert)
-        return self._get_line_from_indices(vertices, start, end)
+        return ['lines', np.asarray(vertices), [np.arange(len(vertices))]]
 
     def _get_line_from_indices(self, vertices, start, end):
         """Given two columns of indices that represent edges, return a line object that's ready for draw queue
