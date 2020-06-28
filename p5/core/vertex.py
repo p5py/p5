@@ -35,7 +35,6 @@ is_bezier = False
 is_curve = False
 is_quadratic = False
 is_contour = False
-temp_curr_shape = None
 
 __all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
 		   'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']
@@ -316,21 +315,21 @@ def end_shape(mode=""):
 	shape = None
 	if is_curve:
 		if len(vertices) > 3:
-			shape = PShape(temp_vertices=get_curve_vertices(vertices),
-						   temp_contours=[get_curve_vertices(c) for c in contour_vertices],
-						   temp_stype=SType.TESS)
+			shape = PShape(vertices=get_curve_vertices(vertices),
+						   contours=[get_curve_vertices(c) for c in contour_vertices],
+						   shape_type=SType.TESS)
 	elif is_bezier:
-		shape = PShape(temp_vertices=get_bezier_vertices(vertices, vertices_types),
-					   temp_contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
-									  for i in range(len(contour_vertices))],
-					   temp_stype=SType.TESS)
+		shape = PShape(vertices=get_bezier_vertices(vertices, vertices_types),
+					   contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
+                                 for i in range(len(contour_vertices))],
+					   shape_type=SType.TESS)
 	elif is_quadratic:
-		shape = PShape(temp_vertices=get_quadratic_vertices(vertices, vertices_types),
-					   temp_contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
-						   for i in range(len(contour_vertices))],
-					   temp_stype=SType.TESS)
+		shape = PShape(vertices=get_quadratic_vertices(vertices, vertices_types),
+					   contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
+                                 for i in range(len(contour_vertices))],
+					   shape_type=SType.TESS)
 	else:
-		shape = PShape(temp_vertices=vertices, temp_contours=contour_vertices, temp_stype=shape_kind)
+		shape = PShape(vertices=vertices, contours=contour_vertices, shape_type=shape_kind)
 
 	is_bezier = False
 	is_curve = False

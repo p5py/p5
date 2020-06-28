@@ -216,7 +216,7 @@ class Renderer2D:
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
 	# Adds shape of stype to draw queue
-	def _temp_add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke=None, stroke_weight=None, stroke_cap=None, stroke_join=None):
+	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke=None, stroke_weight=None, stroke_cap=None, stroke_join=None):
 		if stype == 'lines':
 			self.draw_queue.append((stype, (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)))
 		else:
@@ -230,8 +230,8 @@ class Renderer2D:
 		stroke_join = shape.stroke_join
 
 		# If shape comes with prepackaged objects, use these instead
-		if shape._temp_overriden_draw_queue:
-			for obj in shape._temp_overriden_draw_queue:
+		if shape.overriden_draw_queue:
+			for obj in shape.overriden_draw_queue:
 				stype, vertices, idx = obj
 				# Transform vertices
 				vertices = self._transform_vertices(
@@ -239,7 +239,7 @@ class Renderer2D:
 					shape._matrix,
 					self.transform_matrix)
 				# Add to draw queue
-				self._temp_add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
+				self._add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 		else:
 			assert False, "Overridden draw queue unimplemented"
 

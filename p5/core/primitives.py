@@ -86,20 +86,20 @@ class Arc(PShape):
 
         gl_type = SType.TESS if mode in ['OPEN', 'CHORD'] else SType.TRIANGLE_FAN
         super().__init__(fill_color=fill_color,
-                 stroke_color=stroke_color, stroke_weight=stroke_weight, 
-                 stroke_join=stroke_join, stroke_cap=stroke_cap, temp_stype=gl_type, **kwargs)
+                         stroke_color=stroke_color, stroke_weight=stroke_weight,
+                         stroke_join=stroke_join, stroke_cap=stroke_cap, shape_type=gl_type, **kwargs)
         self._tessellate()
 
-    def temp_update_draw_queue(self):
+    def update_draw_queue(self):
         stroke_state = p5.renderer.stroke_enabled
         if self._mode in [None, 'PIE']:
             p5.renderer.stroke_enabled = False
-        PShape.temp_update_draw_queue(self)
+        PShape.update_draw_queue(self)
         if stroke_state:  # If stroke was enabled
             if self._mode is None:
-                self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices[1:]))
+                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices[1:]))
             if self._mode == 'PIE':
-                self._temp_overriden_draw_queue.append(self._get_line_from_verts(self.temp_vertices))
+                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices))
         p5.renderer.stroke_enabled = stroke_state
 
     def _tessellate(self):
@@ -141,8 +141,8 @@ class Arc(PShape):
         ))
         if self._mode == 'CHORD' or self._mode == 'PIE':
             vertices.append(vertices[0])
-        self.temp_vertices = vertices
-        self.temp_update_draw_queue()
+        self.vertices = vertices
+        self.update_draw_queue()
 
 @_draw_on_return
 def point(x, y, z=0):
@@ -181,7 +181,7 @@ def line(p1, p2):
         Point(*p1),
         Point(*p2)
     ]
-    return PShape(temp_vertices=path, temp_stype=SType.LINES)
+    return PShape(vertices=path, shape_type=SType.LINES)
 
 @_draw_on_return
 def bezier(start, control_point_1, control_point_2, stop):
@@ -213,7 +213,7 @@ def bezier(start, control_point_1, control_point_2, stop):
                                 control_point_2, stop, t)
         vertices.append(p[:3])
 
-    return PShape(temp_vertices=vertices, temp_stype=SType.LINE_STRIP)
+    return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
 
 @_draw_on_return
 def curve(point_1, point_2, point_3, point_4):
@@ -242,7 +242,7 @@ def curve(point_1, point_2, point_3, point_4):
         p = curves.curve_point(point_1, point_2, point_3, point_4, t)
         vertices.append(p[:3])
 
-    return PShape(temp_vertices=vertices, temp_stype=SType.LINE_STRIP)
+    return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
 
 @_draw_on_return
 def triangle(p1, p2, p3):
@@ -265,7 +265,7 @@ def triangle(p1, p2, p3):
         Point(*p2),
         Point(*p3)
     ]
-    return PShape(temp_vertices=path, temp_stype=SType.TRIANGLES)
+    return PShape(vertices=path, shape_type=SType.TRIANGLES)
 
 @_draw_on_return
 def quad(p1, p2, p3, p4):
@@ -292,7 +292,7 @@ def quad(p1, p2, p3, p4):
         Point(*p3),
         Point(*p4)
     ]
-    return PShape(temp_vertices=path, temp_stype=SType.QUADS)
+    return PShape(vertices=path, shape_type=SType.QUADS)
 
 def rect(coordinate, *args, mode=None):
     """Return a rectangle.
