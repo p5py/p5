@@ -3,7 +3,7 @@ import time
 import cProfile
 import p5
 
-filenames = ['arcs', 'primitives', 'triangle_strip', 'custom_shapes', 'custom_shapes2']
+filenames = ['arcs', 'primitives', 'triangle_strip', 'custom_shapes', 'custom_shapes2', 'curves']
 max_frames = 100
 e = SystemExit()
 
