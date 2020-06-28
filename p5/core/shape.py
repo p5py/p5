@@ -215,17 +215,7 @@ class PShape:
         :raises ValueError: if the shape is already being edited.
 
         """
-        if self._in_edit_mode:
-            raise ValueError("Shape is being edited already")
-
-        self._in_edit_mode = True
-        if reset:
-            self._vertices = np.array([])
-        self._vertex_cache = []
-        yield
-        self.vertices = self._vertex_cache
-        self._in_edit_mode = False
-        self._edges = None
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     @_ensure_editable
     def add_vertex(self, vertex):
@@ -236,7 +226,7 @@ class PShape:
 
         :raises ValueError:  when the vertex is of the wrong dimension
         """
-        self._vertex_cache.append(vertex)
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     def update_vertex(self, idx, vertex):
         """Edit an individual vertex.
@@ -249,13 +239,7 @@ class PShape:
 
         :raises ValueError:  when the vertex is of the wrong dimension
         """
-        if len(vertex) != 2:
-            raise ValueError("Wrong vertex dimension")
-        self._vertices[idx] = np.array(vertex)
-        self._tri_vertices = None
-        self._tri_edges = None
-        self._tri_faces = None
-        self._edges = None
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     def add_child(self, child):
         """Add a child shape to the current shape
