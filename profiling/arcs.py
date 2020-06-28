@@ -14,30 +14,5 @@ def draw():
         x += QUARTER_PI
         offset += 50
 
-    # no_fill()
-    # begin_shape()
-    # curve_vertex(84, 91)
-    # curve_vertex(84, 91)
-    # curve_vertex(68, 19)
-    # curve_vertex(21, 17)
-    # curve_vertex(32, 100)
-    # curve_vertex(32, 100)
-    # end_shape()
-
-# Bezier_vertex 1
-#     no_fill()
-#     begin_shape()
-#     vertex(30, 20)
-#     bezier_vertex(80, 0, 80, 75, 30, 75)
-#     end_shape()
-
-# Bezier vertex 2
-#     begin_shape()
-#     vertex(30, 20)
-#     bezier_vertex(80, 0, 80, 75, 30, 75)
-#     bezier_vertex(50, 80, 60, 25, 30, 20)
-#     end_shape()
-#     no_loop()
-
 if __name__ == '__main__':
     run()
