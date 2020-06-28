@@ -232,9 +232,10 @@ def truncated_cone(bottom_radius, top_radius, height, detail_x, detail_y, bottom
     cos_slant = math.cos(slant)
 
     for yy in range(start, end + 1):
+        # for the middle
         v = yy / detail_y
         y = height * v 
-        ring_radius = 0 
+        ring_radius = bottom_radius + (top_radius - bottom_radius) * v
 
         if yy < 0:
             # for the bottomCap edge
@@ -246,15 +247,12 @@ def truncated_cone(bottom_radius, top_radius, height, detail_x, detail_y, bottom
             y = height
             v = 1
             ring_radius = top_radius
-        else:
-            # for the middle
-            ring_radius = bottom_radius + (top_radius - bottom_radius) * v
 
         if yy == -2 or yy == detail_y + 2:
             # center of bottom or top caps
             ring_radius = 0
 
-        y -= height/2 # shift coordiate origin to the center of object
+        y -= height/2  # shift coordinate origin to the center of object
         for ii in range(detail_x):
             u = ii / detail_x
             ur = 2*math.pi*u

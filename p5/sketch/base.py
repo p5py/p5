@@ -100,14 +100,17 @@ class Sketch(app.Canvas):
                     self.redraw = False
                 if self.looping is None:
                     self.looping = True
+
+            elif self.redraw:
+                builtins.frame_count += 1
+                self.draw_method()
+                self.redraw = False
             elif self.looping:
                 builtins.frame_count += 1
                 self.draw_method()
+                self.redraw = False
             elif not self.looping:
                 pass
-            elif self.redraw:
-                self.draw_method()
-                self.redraw = False
 
             while len(self.handler_queue) != 0:
                 function, event = self.handler_queue.pop(0)

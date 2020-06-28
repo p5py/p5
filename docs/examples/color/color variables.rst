@@ -52,30 +52,33 @@ This example creates variables for colors that may be referred to in the program
 
 	def setup():
 		size(640, 360)
-		no_stroke()
-		background(51, 0, 0)
 
-		inside = Color(204, 102, 0)
-		middle = Color(204, 153, 0)
-		outside = Color(13, 51, 0)
+	def draw():
+	    no_stroke()
 
-		with push_matrix():
-			translate(80, 80)
-			fill(outside)
-			rect((0, 0), 200, 200)
-			fill(middle)
-			rect((40, 60), 120, 120)
-			fill(inside)
-			rect((60, 90), 80, 80)
+	    bg_col = Color(51, 0, 0)
+	    col_1 = Color(204, 102, 0)
+	    col_2 = Color(204, 153, 0)
+	    col_3 = Color(153, 51, 0)
 
-		with push_matrix():
-			translate(80, 80)
-			fill(outside)
-			rect((0, 0), 200, 200)
-			fill(middle)
-			rect((40, 60), 120, 120)
-			fill(inside)
-			rect((60, 90), 80, 80)
+	    background(bg_col)
+
+	    translate(50, 50)
+	    fill(col_3)
+	    rect((0, 0), 200, 200)
+	    fill(col_2)
+	    rect((40, 60), 120, 120)
+	    fill(col_1)
+	    rect((60, 90), 80, 80)
+
+	    translate(250, 0)
+	    fill(col_1)
+	    rect((0, 0), 200, 200)
+	    fill(col_3)
+	    rect((40, 60), 120, 120)
+	    fill(col_2)
+	    rect((60, 90), 80, 80)
 
 	if __name__ == '__main__':
 	  run()
+

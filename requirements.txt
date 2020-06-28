@@ -1,4 +1,6 @@
-numpy
-glfw
-vispy
-triangle
+freetype-py==2.1.0.post1
+glfw==1.11.2
+numpy==1.18.5
+Pillow==7.1.2
+triangle==20200424
+vispy==0.6.4

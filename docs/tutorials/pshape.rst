@@ -220,7 +220,7 @@ As we mentioned earlier, one reason to use PShape is just to help you organize y
 	        vertex(-23, 7)
 	        vertex(-47, -15)
 	        vertex(-14, -20)
-	        endShape("CLOSE")
+	        end_shape("CLOSE")
 
 and in `draw()`, you are iterating through an array of Star objects, displaying each one.
 
@@ -273,7 +273,7 @@ This method makes sense if each object itself has its own geometry, generated vi
 
 .. code:: python
 
-	class Python:
+	class Polygon:
 		def __init__(self, shape):
 			self.s = shape
 

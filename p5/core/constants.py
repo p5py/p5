@@ -199,3 +199,7 @@ class SType(Enum):
 	QUADS = 'QUADS'
 	QUAD_STRIP = 'QUAD_STRIP'
 	TESS = 'TESS'
+
+# Z_EPSILON for meshes and lines in 3D mode
+Z_EPSILON = 2
+
