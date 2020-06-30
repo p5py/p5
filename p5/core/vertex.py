@@ -19,19 +19,20 @@
 from . import p5
 from . import primitives
 from .shape import PShape
-
+from .constants import SType
 from ..pmath import curves
 
 shape_kind = None
 vertices = [] # stores the vertex coordinates
 vertices_types = [] # stores the type of vertex. Eg: bezier, curve, etc
-contour_vertices = []
-contour_vertices_types = []
+curr_contour_vertices = []
+curr_contour_vertices_types = []
+contour_vertices = [] # list of all contours [[v1, v2, ...], [v1, v2, ...]]
+contour_vertices_types = [] # list of all vertex types [[t1, t2, ...], [t1, t2, ...]]
 is_bezier = False
 is_curve = False
 is_quadratic = False
 is_contour = False
-
 
 __all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
 		   'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']
@@ -44,24 +45,20 @@ def begin_shape(kind=None):
 	:type kind: str
 	"""
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
-	if (
-		kind == "POINTS" or
-		kind == "LINES" or
-		kind == "TRIANGLES" or
-		kind == "TRIANGLE_FAN" or
-		kind == "TRIANGLE_STRIP" or 
-		kind == "QUADS" or 
-		kind == "QUAD_STRIP"
-		):
-		shape_kind = kind
+	global curr_contour_vertices, curr_contour_vertices_types
+
+	if kind in (t.name for t in SType):
+		shape_kind = SType[kind]
 	else:
-		shape_kind = None
+		shape_kind = SType.TESS
 
 	is_contour = False
 	vertices = []
-	contour_vertices = []
 	vertices_types = []
+	contour_vertices = []
 	contour_vertices_types = []
+	curr_contour_vertices = []
+	curr_contour_vertices_types = []
 
 def curve_vertex(x, y, z=0):
 	"""
@@ -85,18 +82,17 @@ def curve_vertex(x, y, z=0):
 	:type z: float
 	"""
 
-	global is_curve, vertices, contour_vertices, is_contour
-	global vertices_types, contour_vertices_types
+	global is_curve
 	is_curve = True
 
 	if p5.mode == "3D":
 		return
 	else:
 		if is_contour:
-			contour_vertices.append((x, y, z))
-			contour_vertices_types.append(2)
+			curr_contour_vertices.append((x, y, z))
+			curr_contour_vertices_types.append(2)
 		else:
-			vertices.append((x, y, z)) # False attribute if the vertex is 
+			vertices.append((x, y, z)) # False attribute if the vertex is
 			vertices_types.append(2)
 
 def bezier_vertex(x2, y2, x3, y3, x4, y4):
@@ -121,18 +117,17 @@ def bezier_vertex(x2, y2, x3, y3, x4, y4):
 	:param y4: y-coordinate of the anchor point
 	:type y4: float
 	"""
-	global is_bezier, vertices, contour_vertices
-	global vertices_types, contour_vertices_types, is_contour
+	global is_bezier
 	is_bezier = True
 
 	if p5.mode == "3D":
 		return
 	else:
 		if is_contour:
-			contour_vertices.append((x2, y2, x3, y3, x4, y4))
-			contour_vertices_types.append(3)
+			curr_contour_vertices.append((x2, y2, x3, y3, x4, y4))
+			curr_contour_vertices_types.append(3)
 		else:
-			vertices.append((x2, y2, x3, y3, x4, y4)) 
+			vertices.append((x2, y2, x3, y3, x4, y4))
 			vertices_types.append(3)
 
 def quadratic_vertex(cx, cy, x3, y3):
@@ -152,18 +147,17 @@ def quadratic_vertex(cx, cy, x3, y3):
 	:type y3: float
 
 	"""
-	global is_quadratic, vertices, contour_vertices
-	global vertices_types, contour_vertices_types, is_contour
+	global is_quadratic
 	is_quadratic = True
 
 	if p5.mode == "3D":
 		return
 	else:
 		if is_contour:
-			contour_vertices.append((cx, cy, x3, y3))
-			contour_vertices_types.append(4)
+			curr_contour_vertices.append((cx, cy, x3, y3))
+			curr_contour_vertices_types.append(4)
 		else:
-			vertices.append((cx, cy, x3, y3)) 
+			vertices.append((cx, cy, x3, y3))
 			vertices_types.append(3)
 
 def vertex(x, y, z=0):
@@ -183,16 +177,14 @@ def vertex(x, y, z=0):
 	:param z: z-coordinate of the vertex
 	:type z: float
 	"""
-	global vertices, contour_vertices, vertices_types, contour_vertices_types
-	global is_contour
 	if p5.mode == "3D":
 		return
 	else:
 		if is_contour:
-			contour_vertices.append((x, y))
-			contour_vertices_types.append(1)
+			curr_contour_vertices.append((x, y, z))
+			curr_contour_vertices_types.append(1)
 		else:
-			vertices.append((x, y))
+			vertices.append((x, y, z))
 			vertices_types.append(1)
 
 def begin_contour():
@@ -213,8 +205,11 @@ def begin_contour():
 	contour_vertices_types = []
 
 def end_contour():
-	global is_contour
+	global is_contour, curr_contour_vertices, curr_contour_vertices_types
 	is_contour = False
+	contour_vertices.append(curr_contour_vertices)
+	contour_vertices_types.append(curr_contour_vertices_types)
+	curr_contour_vertices, curr_contour_vertices_types = [], []
 
 def get_curve_vertices(verts):
 	if len(verts) == 0:
@@ -237,7 +232,7 @@ def get_curve_vertices(verts):
 			verts[i + 1][1] + (s * verts[i][1] - s * verts[i + 2][1]) / 6
 		]
 		stop = [verts[i + 1][0], verts[i + 1][1]]
-		
+
 		for i in range(steps + 1):
 			t = i / steps
 			p = curves.bezier_point(start, c1, c2, stop, t)
@@ -264,7 +259,6 @@ def get_bezier_vertices(verts, vert_types):
 					t = i / steps
 					p = curves.bezier_point(start, c1, c2, stop, t)
 					shape_vertices.append(p[:3])
-
 	return shape_vertices
 
 def get_quadratic_vertices(verts, vert_types):
@@ -300,7 +294,10 @@ def end_shape(mode=""):
 	:type mode: str
 
 	"""
-	global vertices, vertices_types, is_bezier, is_curve, is_quadratic, is_contour, shape_kind
+	global is_bezier, is_curve, is_quadratic, is_contour
+	assert not is_contour, "begin_contour called without calling end_contour"
+	if is_curve or is_bezier or is_quadratic:
+		assert shape_kind == SType.TESS, "Should not specify primitive type for a curve"
 
 	if len(vertices) == 0:
 		return
@@ -308,69 +305,33 @@ def end_shape(mode=""):
 	if (not p5.renderer.stroke_enabled) and (not p5.renderer.fill_enabled):
 		return
 
-	close_shape = mode == "CLOSE"
-
 	# if the shape is closed, the first element is also the last element
-	if close_shape:
-		attribs = "closed"
-		if not is_contour:
-			vertices.append(vertices[0])		
-	else:
-		attribs = "open"
+	if mode == 'CLOSE':
+		vertices.append(vertices[0])
+		vertices_types.append(vertices_types[0])
 
-	shape = PShape([(0,0)], children=[])
-	if is_curve and (shape_kind == "POLYGON" or shape_kind == None):
+	shape = None
+	if is_curve:
 		if len(vertices) > 3:
-			shape.add_child(PShape(get_curve_vertices(vertices), contour=get_curve_vertices(contour_vertices), attribs=attribs))
-	elif is_bezier and (shape_kind == "POLYGON" or shape_kind == None):
-		shape.add_child(PShape(get_bezier_vertices(vertices, vertices_types), contour=get_bezier_vertices(contour_vertices, contour_vertices_types), attribs=attribs))
-	elif is_quadratic and (shape_kind == "POLYGON" or shape_kind == None):
-		shape.add_child(PShape(get_quadratic_vertices(vertices, vertices_types), contour=get_bezier_vertices(contour_vertices, contour_vertices_types), attribs=attribs))
+			shape = PShape(vertices=get_curve_vertices(vertices),
+						   contours=[get_curve_vertices(c) for c in contour_vertices],
+						   shape_type=SType.TESS)
+	elif is_bezier:
+		shape = PShape(vertices=get_bezier_vertices(vertices, vertices_types),
+					   contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
+                                 for i in range(len(contour_vertices))],
+					   shape_type=SType.TESS)
+	elif is_quadratic:
+		shape = PShape(vertices=get_quadratic_vertices(vertices, vertices_types),
+					   contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
+                                 for i in range(len(contour_vertices))],
+					   shape_type=SType.TESS)
 	else:
-		if shape_kind == "POINTS":
-			shape.add_child(PShape(vertices, attribs='point'))
-		elif shape_kind == "LINES":
-			if len(vertices) < 2:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices), 2):
-					shape.add_child(PShape([vertices[i], vertices[i + 1]], attribs='path'))
-		elif shape_kind == "TRIANGLES":
-			if len(vertices) < 3:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices) - 2, 3):
-					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 2]]))
-		elif shape_kind == "TRIANGLE_STRIP":
-			if len(vertices) < 3:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices) - 2, 1):
-					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 2]]))
-		elif shape_kind == "TRIANGLE_FAN":
-			if len(vertices) < 3:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(1, len(vertices) - 1):
-					shape.add_child(PShape([vertices[0], vertices[i], vertices[i + 1]]))
-		elif shape_kind == "QUADS":
-			if len(vertices) < 4:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices) - 3, 4):
-					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 2], vertices[i + 3]]))
-		elif shape_kind == "QUAD_STRIP":
-			if len(vertices) < 4:
-				raise ValueError("Insufficient number of vertices %s" % (len(vertices)))
-			else:
-				for i in range(0, len(vertices) - 2, 2):
-					shape.add_child(PShape([vertices[i], vertices[i + 1], vertices[i + 3], vertices[i + 2]]))
-		else:
-			shape.add_child(PShape(vertices, contour=contour_vertices, attribs=attribs))
+		shape = PShape(vertices=vertices, contours=contour_vertices, shape_type=shape_kind)
 
 	is_bezier = False
 	is_curve = False
 	is_quadratic = False
 	is_contour = False
-	
+
 	return shape

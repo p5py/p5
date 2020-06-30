@@ -31,8 +31,6 @@ from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
 
-from ..core.constants import *
-
 from .shaders2d import src_default
 from .shaders2d import src_fbuffer
 from .shaders2d import src_texture
@@ -215,34 +213,33 @@ class Renderer2D:
 	def _transform_vertices(self, vertices, local_matrix, global_matrix):
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
+	# Adds shape of stype to draw queue
+	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke=None, stroke_weight=None, stroke_cap=None, stroke_join=None):
+		if stype == 'lines':
+			self.draw_queue.append((stype, (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)))
+		else:
+			self.draw_queue.append((stype, (vertices, idx, fill)))
+
 	def render(self, shape):
-		vertices = shape._draw_vertices
-		n, _ = vertices.shape
-		tverts = self._transform_vertices(
-			np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-			shape._matrix,
-			self.transform_matrix)
-		
 		fill = shape.fill.normalized if shape.fill else None
 		stroke = shape.stroke.normalized if shape.stroke else None
 		stroke_weight = shape.stroke_weight
 		stroke_cap = shape.stroke_cap
 		stroke_join = shape.stroke_join
 
-		edges = shape._draw_edges
-		faces = shape._draw_faces
-		
-		if edges is None:
-			print(vertices)
-			print("whale")
-			exit()
-
-		if 'open' in shape.attribs:
-			self.add_to_draw_queue('poly', tverts, edges[:-1], faces, fill, stroke, 
-					stroke_weight, stroke_cap, stroke_join)
+		# If shape comes with prepackaged objects, use these instead
+		if shape.overriden_draw_queue:
+			for obj in shape.overriden_draw_queue:
+				stype, vertices, idx = obj
+				# Transform vertices
+				vertices = self._transform_vertices(
+					np.hstack([vertices, np.ones((len(vertices), 1))]),
+					shape._matrix,
+					self.transform_matrix)
+				# Add to draw queue
+				self._add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 		else:
-			self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke, 
-					stroke_weight, stroke_cap, stroke_join)
+			assert False, "Overridden draw queue unimplemented"
 
 	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None,
 			stroke_weight=None, stroke_cap=None, stroke_join=None):
@@ -295,20 +292,15 @@ class Renderer2D:
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
 		"""
-		current_shape = None
 		current_queue = []
 		for index, shape in enumerate(self.draw_queue):
 			current_shape = self.draw_queue[index][0]
 			current_queue.append(self.draw_queue[index][1])
 
-			if index < len(self.draw_queue) - 1:
-				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
-					continue
-
-			if current_shape == "points" or current_shape == "triangles":
-				self.render_default(current_shape, current_queue)
-			elif current_shape == "lines":
+			if current_shape == "lines":
 				self.render_line(current_queue)
+			else:
+				self.render_default(current_shape, current_queue)
 
 			current_queue = []
 

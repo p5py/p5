@@ -22,47 +22,57 @@ import contextlib
 import functools
 
 import numpy as np
-import triangle as tr
 
 from .color import Color
+from .constants import SType
 from ..pmath import matrix
 
 from . import p5
-
+from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
 
 __all__ = ['PShape']
+
 
 def _ensure_editable(func):
     """A decorater that ensures that a shape is in 'edit' mode.
 
     """
+
     @functools.wraps(func)
     def editable_method(instance, *args, **kwargs):
         if not instance._in_edit_mode:
             raise ValueError('{} only works in edit mode'.format(func.__name__))
         return func(instance, *args, **kwargs)
+
     return editable_method
+
 
 def _apply_transform(func):
     """Apply the matrix transformation to the shape.
     """
+
     @functools.wraps(func)
     def mfunc(instance, *args, **kwargs):
         tmat = func(instance, *args, **kwargs)
         instance._matrix = instance._matrix.dot(tmat)
         return tmat
+
     return mfunc
+
 
 def _call_on_children(func):
     """Call the method on all child shapes
     """
+
     @functools.wraps(func)
     def rfunc(instance, *args, **kwargs):
         rval = func(instance, *args, **kwargs)
         for child in instance.children:
             rfunc(child, *args, **kwargs)
         return rval
+
     return rfunc
+
 
 class PShape:
     """Custom shape class for p5.
@@ -81,29 +91,18 @@ class PShape:
     :param visible: toggles shape visibility (default: False)
     :type visible: bool
 
-    :param attribs: space-separated list of attributes that control
-        shape drawing. Each attribute should be one of {'point',
-        'path', 'open', 'closed'}. (default: 'closed')
-    :type attribs: str
-
     :param children: List of sub-shapes for the current shape
         (default: [])
     :type children: list
 
     """
-    def __init__(self, vertices=[], fill_color='auto',
-                 stroke_color='auto', stroke_weight="auto", 
-                 stroke_join="auto", stroke_cap="auto", 
-                 visible=False, attribs='closed',
-                 children=None, contour=[]):
-        # basic properties of the shape
-        self._vertices = np.array([])
-        self._contour = np.array([])
-        self._edges = None
-        self._outline = None
-        self._outline_vertices = None
 
-        self.attribs = set(attribs.lower().split())
+    def __init__(self, fill_color='auto',
+                 stroke_color='auto', stroke_weight="auto",
+                 stroke_join="auto", stroke_cap="auto",
+                 visible=False,
+                 children=None, contours=tuple(), vertices=tuple(), shape_type=SType.TESS):
+        # basic properties of the shape
         self._fill = None
         self._stroke = None
         self._stroke_weight = None
@@ -116,21 +115,6 @@ class PShape:
 
         # a flag to check if the shape is being edited right now.
         self._in_edit_mode = False
-        self._vertex_cache = None
-
-        # The triangulation used to render the shapes.
-        self._tri = None
-        self._tri_required = not ('point' in self.attribs) and \
-                             not ('path' in self.attribs)
-        self._tri_vertices = None
-        self._tri_edges = None
-        self._tri_faces = None
-
-        if len(vertices) > 0:
-            self.vertices = vertices
-
-        if len(contour) > 0:
-            self.contour = contour
 
         self.fill = fill_color
         self.stroke = stroke_color
@@ -140,6 +124,13 @@ class PShape:
 
         self.children = children or []
         self.visible = visible
+
+        self.overriden_draw_queue = []
+        self.vertices = list(vertices)
+        self.shape_type = shape_type
+        self.contours = [list(c) for c in contours]  # List of all contours
+        if self.vertices:
+            self.update_draw_queue()
 
     def _set_color(self, name, value=None):
         color = None
@@ -208,191 +199,6 @@ class PShape:
         else:
             self._stroke_cap = stroke
 
-    @property
-    def kind(self):
-        if 'point' in self.attribs:
-            return 'point'
-        elif 'path' in self.attribs:
-            return 'path'
-        else:
-            return 'poly'
-
-    def _sanitize_vertex_list(self, vertices, tdim=2, sdim=3):
-        """Convert all vertices to the given dimensions.
-        Removes consecutive duplicates to prevent errors in triangulation.
-
-        :param vertices: List of vertices
-        :type vertices: list
-
-        :param tdim: Target dimension for sanitization (default: 3)
-        :type tdim: int
-
-        :param sdim: Source dimension for the points (default: 2).
-            Whenever sdim > tdim, the last (sdim - tdim) components will
-            be discarded.
-        :type sdim: int
-
-        :raises ValueError: when the point dimension is between sdim and tdim
-
-        :returns: A sanitized array of vertices.
-        :type: np.ndarray
-
-        """
-        sanitized = []
-        for i in range(len(vertices)):
-            if i < len(vertices) - 1:
-                if vertices[i] == vertices[i + 1]:
-                    continue
-            elif i == len(vertices) - 1 and i != 0:
-                if vertices[i] == vertices[0]:
-                    continue
-
-            v = vertices[i]
-            if (len(v) > max(tdim, sdim)) or (len(v) < min(tdim, sdim)):
-                raise ValueError("unexpected vertex dimension")
-
-            if tdim > sdim:
-                sanitized.append(list(v) + [0] * (tdim - sdim))
-            elif tdim < sdim:
-                sanitized.append(list(v)[:tdim])
-            else:
-                sanitized.append(list(v))
-
-        return np.array(sanitized)
-
-    @property
-    def vertices(self):
-        return self._vertices
-
-    @vertices.setter
-    def vertices(self, new_vertices):
-        self._vertices = self._sanitize_vertex_list(new_vertices)
-
-        n = len(self._vertices)
-        self._outline_vertices = np.hstack([self._vertices, np.zeros((n, 1))])
-        self._tri_vertices = None
-        self._tri_edges = None
-        self._tri_faces = None
-
-    @property
-    def contour(self):
-        return self._contour
-
-    @contour.setter
-    def contour(self, contour_vertices):
-        self._contour = np.array(contour_vertices)
-
-    def _compute_poly_edges(self):
-        n, _ = self._vertices.shape
-        return np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
-
-    def _compute_outline_edges(self):
-        n, _ = self._vertices.shape
-        return np.vstack([np.arange(n - 1),
-                          (np.arange(n - 1) + 1) % n]).transpose()
-
-    @property
-    def edges(self):
-        if 'point' in self.attribs:
-            return np.array([])
-
-        if self._edges is None:
-            n, _ = self._vertices.shape
-
-            if 'point' in self.attribs:
-                self._edges = np.array([])
-            elif 'path' in self.attribs:
-                self._edges = self._compute_outline_edges()
-            else:
-                self._edges = self._compute_poly_edges()
-
-            if 'open' in self.attribs:
-                self._outline = self._compute_outline_edges()
-            else:
-                self._outline = self._edges
-
-        return self._edges
-
-    def get_interior_point(self, shape_vertices):
-        # Returns a random point inside the shape
-        if len(shape_vertices) < 2:
-            return []
-
-        # Triangulate the shape
-        triangulate = tr.triangulate(dict(vertices=shape_vertices), "a5")
-        for vertex in triangulate["vertices"]:
-            if vertex not in shape_vertices:
-                return [vertex]
-
-        return []
-
-    def _retriangulate(self):
-        """Triangulate the shape
-        """
-        if len(self.vertices) < 2:
-            self._tri_edges = np.array([])
-            self._tri_faces = np.array([])
-            self._tri_vertices = self.vertices
-            return
-
-        if len(self._contour) > 1:
-            n, _ = self._contour.shape
-            contour_edges = np.vstack([np.arange(n), (np.arange(n) + 1) % n]).transpose()
-            triangulation_vertices = np.vstack([self.vertices, self._contour])
-            triangulation_segments = np.vstack([self.edges, contour_edges + len(self.edges)])
-            triangulate_parameters = dict(vertices=triangulation_vertices, 
-                segments=triangulation_segments, holes=self.get_interior_point(self._contour))
-
-            self._tri = tr.triangulate(triangulate_parameters, "p")
-        else:
-            triangulate_parameters = dict(vertices=self.vertices, segments=self.edges)
-            self._tri = tr.triangulate(triangulate_parameters, "p")
-
-        if "segments" in self._tri.keys():
-            self._tri_edges = self._tri["segments"]
-        else:
-            self._tri_edges = self.edges
-
-        self._tri_faces = self._tri["triangles"]
-        self._tri_vertices = self._tri["vertices"]
-
-    @property
-    def _draw_outline_vertices(self):
-        if 'open' in self.attribs:
-            return self._draw_vertices
-        return self.vertices
-
-    @property
-    def _draw_outline_edges(self):
-        if 'open' in self.attribs:
-            return self._outline
-        return self._edges
-
-    @property
-    def _draw_vertices(self):
-        if self._tri_required and (self._tri_vertices is None):
-            self._retriangulate()
-
-        if self._tri_required:
-            return self._tri_vertices
-        return self._vertices
-
-    @property
-    def _draw_edges(self):
-        if self._tri_required:
-            if self._tri_edges is None:
-                self._retriangulate()
-            return self._tri_edges
-        return self.edges
-
-    @property
-    def _draw_faces(self):
-        if self._tri_required:
-            if self._tri_faces is None:
-                self._retriangulate()
-            return self._tri_faces
-
-        return np.array([])
 
     @contextlib.contextmanager
     def edit(self, reset=True):
@@ -408,17 +214,7 @@ class PShape:
         :raises ValueError: if the shape is already being edited.
 
         """
-        if self._in_edit_mode:
-            raise ValueError("Shape is being edited already")
-
-        self._in_edit_mode = True
-        if reset:
-            self._vertices = np.array([])
-        self._vertex_cache = []
-        yield
-        self.vertices = self._vertex_cache
-        self._in_edit_mode = False
-        self._edges = None
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     @_ensure_editable
     def add_vertex(self, vertex):
@@ -429,10 +225,10 @@ class PShape:
 
         :raises ValueError:  when the vertex is of the wrong dimension
         """
-        self._vertex_cache.append(vertex)
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     def update_vertex(self, idx, vertex):
-        """Edit an indicidual vertex.
+        """Edit an individual vertex.
 
         :param idx: index of the vertex to be edited
         :type idx: int
@@ -442,13 +238,7 @@ class PShape:
 
         :raises ValueError:  when the vertex is of the wrong dimension
         """
-        if len(vertex) != 2:
-            raise ValueError("Wrong vertex dimension")
-        self._vertices[idx] =  np.array(vertex)
-        self._tri_vertices = None
-        self._tri_edges = None
-        self._tri_faces = None
-        self._edges = None
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     def add_child(self, child):
         """Add a child shape to the current shape
@@ -518,7 +308,7 @@ class PShape:
 
     @_call_on_children
     @_apply_transform
-    def rotate(self, theta, axis=[0, 0, 1]):
+    def rotate(self, theta, axis=(0, 0, 1)):
         """Rotate the shape by the given angle along the given axis.
 
         :param theta: The angle by which to rotate (in radians)
@@ -635,3 +425,106 @@ class PShape:
         shear_mat[1, 0] = np.tan(theta)
         return shear_mat
 
+    def _get_line_from_verts(self, vertices):
+        """Given a list of vertices, chain them sequentially in a line object that's ready for draw queue
+        """
+        return ['lines', np.asarray(vertices), [np.arange(len(vertices))]]
+
+    def _get_line_from_indices(self, vertices, start, end):
+        """Given two columns of indices that represent edges, return a line object that's ready for draw queue
+
+        :param vertices: List of vertices
+        :type vertices: list
+
+        :param start: Array of start positions of edges in vertex indices
+        :type start: np.ndarray
+
+        :param end: Array of end positions fo edges in vertex indices
+        :type end: np.ndarray
+        """
+        return ['lines', np.asarray(vertices),
+            np.hstack((np.vstack(start), np.vstack(end)))]
+
+    def _add_edges_to_draw_queue(self, start, end):
+        """Adds edges to draw_queue, given their start and end positions (in vertex indices)
+
+        :param start: Array of start positions of edges in vertex indices
+        :type start: np.ndarray
+
+        :param end: Array of end positions fo edges in vertex indices
+        :type end: np.ndarray
+        """
+        self.overriden_draw_queue.append(self._get_line_from_indices(self.vertices, start, end))
+
+    # Given a list of vertices, evoke gluTess to create a contour
+    def _tess_new_contour(self, vertices):
+        gluTessBeginContour(p5.tess.tess)
+        for v in vertices:
+            gluTessVertex(p5.tess.tess, v, v)
+        gluTessEndContour(p5.tess.tess)
+
+    # Adds an object of type gl_name with vertices in sequential order to the draw queue
+    def _add_vertices_to_draw_queue(self, gl_name, vertices):
+        self.overriden_draw_queue.append([gl_name, np.asarray(vertices),
+                                          np.arange(len(vertices), dtype=np.uint32)])
+
+    def update_draw_queue(self):
+        n_vert = len(self.vertices)
+        # Render points
+        if self.shape_type == SType.POINTS:
+            self._add_vertices_to_draw_queue('points', self.vertices)
+        # Render meshes
+        if p5.renderer.fill_enabled:
+            if self.shape_type in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
+                gl_name = self.shape_type.name.lower()
+                if gl_name == 'quad_strip': # vispy does not support quad_strip
+                    gl_name = 'triangle_strip' # but it can be drawn using triangle_strip
+                self._add_vertices_to_draw_queue(gl_name, self.vertices)
+            elif self.shape_type == SType.QUADS:
+                n_quad = len(self.vertices) // 4
+                self.overriden_draw_queue.append(['triangles', np.asarray(self.vertices),
+                                                  np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
+                                                  np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
+            elif self.shape_type == SType.TESS:
+                gluTessBeginPolygon(p5.tess.tess, None)
+                self._tess_new_contour(self.vertices)
+                if len(self.contours) > 0:
+                    for contour in self.contours:
+                        self._tess_new_contour(contour)
+                gluTessEndPolygon(p5.tess.tess)
+                self.overriden_draw_queue += p5.tess.process_draw_queue()
+
+        # Render borders
+        if p5.renderer.stroke_enabled:
+            # TODO: Check for the minimum number of vertices
+            if self.shape_type == SType.TRIANGLES:
+                assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
+                start = np.arange(n_vert)
+                end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
+                self._add_edges_to_draw_queue(start, end)
+            elif self.shape_type == SType.TRIANGLE_STRIP:
+                start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
+                end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
+                self._add_edges_to_draw_queue(start, end)
+            elif self.shape_type == SType.TRIANGLE_FAN:
+                start = np.concatenate((np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
+                end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
+                self._add_edges_to_draw_queue(start, end)
+            elif self.shape_type == SType.QUADS:
+                start = np.arange(n_vert)
+                end = np.arange(n_vert) + np.tile([1, 1, 1, -3], n_vert // 4)
+                self._add_edges_to_draw_queue(start, end)
+            elif self.shape_type == SType.QUAD_STRIP:
+                start = np.concatenate((np.arange(0, n_vert, 2), np.arange(n_vert - 2)))
+                end = np.concatenate((np.arange(1, n_vert, 2), np.arange(2, n_vert)))
+                self._add_edges_to_draw_queue(start, end)
+            elif self.shape_type == SType.LINES:
+                start = np.arange(0, n_vert, 2)
+                end = np.arange(1, n_vert, 2)
+                self._add_edges_to_draw_queue(start, end)
+            elif self.shape_type == SType.LINE_STRIP:
+                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices))
+            elif self.shape_type == SType.TESS:
+                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices))
+                for contour in self.contours:
+                    self.overriden_draw_queue.append(self._get_line_from_verts(contour))
