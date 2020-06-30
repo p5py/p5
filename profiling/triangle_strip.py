@@ -23,7 +23,7 @@ def draw():
 
         begin_shape("TRIANGLE_STRIP")
 
-        for i in range(numPoints):
+        for i in range(numPoints + 1):
                 px = x + cos(radians(angle)) * outsideRadius
                 py = y + sin(radians(angle)) * outsideRadius
                 angle += angleStep
