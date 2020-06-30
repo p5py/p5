@@ -16,14 +16,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import functools
 import math
 
-from . import p5
 from .geometry import Geometry
 
 from ..pmath import matrix
-from .primitives import draw_shape, _draw_on_return
+from .primitives import _draw_on_return
 
 # We use these in ellipse tessellation. The algorithm is similar to
 # the one used in Processing and the we compute the number of

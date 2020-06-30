@@ -22,10 +22,9 @@ import contextlib
 import functools
 
 import numpy as np
-import triangle as tr
 
 from .color import Color
-from .constants import *
+from .constants import SType
 from ..pmath import matrix
 
 from . import p5

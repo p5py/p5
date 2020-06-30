@@ -32,7 +32,7 @@ from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
 
-from ..core.constants import *
+from ..core.constants import Z_EPSILON
 
 from .shaders3d import src_default
 from .shaders3d import src_fbuffer

@@ -19,7 +19,6 @@ import contextlib
 import functools
 
 import builtins
-import time
 
 import numpy as np
 from PIL import Image
@@ -275,7 +274,7 @@ class PImage:
             # don't unpack it.
             try:
                 point_color = color.Color(*point)
-            except TypeError as te:
+            except TypeError:
                 point_color = color.Color(point)
 
         # finally, write the color value to the image based on the

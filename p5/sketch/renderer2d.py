@@ -31,8 +31,6 @@ from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
 
-from ..core.constants import *
-
 from .shaders2d import src_default
 from .shaders2d import src_fbuffer
 from .shaders2d import src_texture

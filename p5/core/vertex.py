@@ -16,12 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import numpy as np
-
 from . import p5
 from . import primitives
 from .shape import PShape
-from .constants import *
+from .constants import SType
 from ..pmath import curves
 
 shape_kind = None

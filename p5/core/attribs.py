@@ -24,7 +24,6 @@ from .image import image_mode
 from .image import PImage
 from .structure import push_style
 from .transforms import push_matrix
-from .constants import *
 
 from . import p5
 

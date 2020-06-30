@@ -169,7 +169,7 @@ class Sketch(app.Canvas):
     def on_key_release(self, event):
         kev = KeyEvent(event)
         self._enqueue_event('key_released', kev)
-        if not (event.text is ''):
+        if not (event.text == ''):
             self._enqueue_event('key_typed', kev)
 
     def on_mouse_press(self, event):

@@ -20,8 +20,6 @@
 """
 
 from functools import wraps
-import math
-
 from ..pmath import Point
 
 __all__ = [
