@@ -213,8 +213,9 @@ class Renderer2D:
 	def _transform_vertices(self, vertices, local_matrix, global_matrix):
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
-	# Adds shape of stype to draw queue
-	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke=None, stroke_weight=None, stroke_cap=None, stroke_join=None):
+	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join):
+		"""Adds shape of stype to draw queue
+		"""
 		if stype == 'lines':
 			self.draw_queue.append((stype, (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)))
 		else:
@@ -240,54 +241,6 @@ class Renderer2D:
 				self._add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 		else:
 			assert False, "Overridden draw queue unimplemented"
-
-	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None,
-			stroke_weight=None, stroke_cap=None, stroke_join=None):
-		"""Add the given vertex data to the draw queue.
-
-		:param stype: type of shape to be added. Should be one of {'poly',
-			'path', 'point'}
-		:type stype: str
-
-		:param vertices: (N, 3) array containing the vertices to be drawn.
-		:type vertices: np.ndarray
-
-		:param edges: (N, 2) array containing edges as tuples of indices
-			into the vertex array. This can be None when not appropriate
-			(eg. for points)
-		:type edges: None | np.ndarray
-
-		:param faces: (N, 3) array containing faces as tuples of indices
-			into the vertex array. For 'point' and 'path' shapes, this can
-			be None
-		:type faces: np.ndarray
-
-		:param fill: Fill color of the shape as a normalized RGBA tuple.
-			When set to `None` the shape doesn't get a fill (default: None)
-		:type fill: None | tuple
-
-		:param stroke: Stroke color of the shape as a normalized RGBA
-			tuple. When set to `None` the shape doesn't get stroke
-			(default: None)
-		:type stroke: None | tuple
-
-		"""
-
-		fill_shape = self.fill_enabled and not (fill is None)
-		stroke_shape = self.stroke_enabled and not (stroke is None)
-
-		if fill_shape and stype not in ['point', 'path']:
-			idx = np.array(faces, dtype=np.uint32).ravel()
-			self.draw_queue.append(["triangles", (vertices, idx, fill)])
-
-		if stroke_shape:
-			if stype == 'point':
-				idx = np.arange(0, len(vertices), dtype=np.uint32)
-				self.draw_queue.append(["points", (vertices, idx, stroke)])
-			else:
-				self.draw_queue.append(["lines", (
-					vertices, edges, stroke, stroke_weight, stroke_cap, stroke_join
-					)])
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
