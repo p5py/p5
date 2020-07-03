@@ -26,7 +26,6 @@ import numpy as np
 from .color import Color
 from .constants import SType
 from ..pmath import matrix
-from ..pmath.vector import Point
 
 from . import p5
 
@@ -211,14 +210,7 @@ class PShape:
         :raises ValueError: if the shape is already being edited.
 
         """
-        if self._in_edit_mode:
-            raise ValueError("Shape is being edited already")
-        if reset:
-            self.vertices = []
-            self.contours = []
-        self._in_edit_mode = True
-        yield
-        self._in_edit_mode = False
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     @_ensure_editable
     def add_vertex(self, vertex):
@@ -226,10 +218,11 @@ class PShape:
 
         :param vertex: The (next) vertex to add to the current shape.
         :type vertex: tuple | list | p5.Vector | np.ndarray
-        """
-        self.vertices.append(Point(*vertex))
 
-    @_ensure_editable
+        :raises ValueError:  when the vertex is of the wrong dimension
+        """
+        raise NotImplementedError("Need to adapt to new pipeline")
+
     def update_vertex(self, idx, vertex):
         """Edit an individual vertex.
 
@@ -238,8 +231,10 @@ class PShape:
 
         :param vertex: The (next) vertex to add to the current shape.
         :type vertex: tuple | list | p5.Vector | np.ndarray
+
+        :raises ValueError:  when the vertex is of the wrong dimension
         """
-        self.vertices[idx] = Point(*vertex)
+        raise NotImplementedError("Need to adapt to new pipeline")
 
     def add_child(self, child):
         """Add a child shape to the current shape
