@@ -90,18 +90,6 @@ class Arc(PShape):
                          stroke_join=stroke_join, stroke_cap=stroke_cap, shape_type=gl_type, **kwargs)
         self._tessellate()
 
-    def update_draw_queue(self):
-        stroke_state = p5.renderer.stroke_enabled
-        if self._mode in [None, 'PIE']:
-            p5.renderer.stroke_enabled = False
-        PShape.update_draw_queue(self)
-        if stroke_state:  # If stroke was enabled
-            if self._mode is None:
-                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices[1:]))
-            if self._mode == 'PIE':
-                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices))
-        p5.renderer.stroke_enabled = stroke_state
-
     def _tessellate(self):
         """Generate vertex and face data using radii.
         """
@@ -142,7 +130,6 @@ class Arc(PShape):
         if self._mode == 'CHORD' or self._mode == 'PIE':
             vertices.append(vertices[0])
         self.vertices = vertices
-        self.update_draw_queue()
 
 @_draw_on_return
 def point(x, y, z=0):
