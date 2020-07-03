@@ -47,8 +47,8 @@ class Tessellator:
         gluTessCallback(self.tess, GLU_TESS_COMBINE, combine_handler)
 
     def process_draw_queue(self):
-        """Returns the current draw_queue and clears it
-        For the format of the draw queue, see the definition of self.draw_queue in `__init__`
+        """Returns the current primitive_list and clears it
+        For the format of the draw queue, see the definition of self.primitive_list in `__init__`
         """
         res = self.draw_queue
         self.draw_queue = []

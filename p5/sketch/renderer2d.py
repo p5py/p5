@@ -51,21 +51,18 @@ def _tess_new_contour(vertices):
 	gluTessEndContour(p5.tess.tess)
 
 
-def _add_vertices_to_draw_queue(draw_queue, gl_name, vertices):
-	"""Adds an object of type gl_name with vertices in sequential order to the draw queue
+def _vertices_to_render_primitive(gl_name, vertices):
+	"""Returns a render primitive of gl_type with vertices in sequential order
 	"""
-	draw_queue.append([gl_name, np.asarray(vertices),
-									  np.arange(len(vertices), dtype=np.uint32)])
-
+	return [gl_name, np.asarray(vertices), np.arange(len(vertices), dtype=np.uint32)]
 
 def _get_line_from_verts(vertices):
-	"""Given a list of vertices, chain them sequentially in a line object that's ready for draw queue
+	"""Given a list of vertices, chain them sequentially in a line rendering primitive
 	"""
 	return ['lines', np.asarray(vertices), [np.arange(len(vertices))]]
 
-
 def _get_line_from_indices(vertices, start, end):
-	"""Given two columns of indices that represent edges, return a line object that's ready for draw queue
+	"""Given two columns of indices that represent edges, return a line rendering primitive
 
 	:param vertices: List of vertices
 	:type vertices: list
@@ -80,8 +77,8 @@ def _get_line_from_indices(vertices, start, end):
 			np.hstack((np.vstack(start), np.vstack(end)))]
 
 
-def _add_edges_to_draw_queue(draw_queue, vertices, start, end):
-	"""Adds edges to draw_queue, given their start and end positions (in vertex indices)
+def _add_edges_to_primitive_list(primitive_list, vertices, start, end):
+	"""Adds edges to a list of render primitives, given their start and end positions (in vertex indices)
 
 	:param start: Array of start positions of edges in vertex indices
 	:type start: np.ndarray
@@ -89,57 +86,65 @@ def _add_edges_to_draw_queue(draw_queue, vertices, start, end):
 	:param end: Array of end positions fo edges in vertex indices
 	:type end: np.ndarray
 	"""
-	draw_queue.append(_get_line_from_indices(vertices, start, end))
+	primitive_list.append(_get_line_from_indices(vertices, start, end))
 
 
 def get_borders(shape):
-	draw_q = []
+	"""Generates the render primitives for the borders of a given shape
+
+	:returns: ['lines', vertices, idx]
+	"""
+	render_primitives = []
 	n_vert = len(shape.vertices)
 	if shape.shape_type == SType.TRIANGLES:
 		assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
 		start = np.arange(n_vert)
 		end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
-		_add_edges_to_draw_queue(draw_q, shape.vertices, start, end)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
 	elif shape.shape_type == SType.TRIANGLE_STRIP:
 		start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
 		end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
-		_add_edges_to_draw_queue(draw_q, shape.vertices, start, end)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
 	elif shape.shape_type == SType.TRIANGLE_FAN:
 		start = np.concatenate((np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
 		end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
-		_add_edges_to_draw_queue(draw_q, shape.vertices, start, end)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
 	elif shape.shape_type == SType.QUADS:
 		start = np.arange(n_vert)
 		end = np.arange(n_vert) + np.tile([1, 1, 1, -3], n_vert // 4)
-		_add_edges_to_draw_queue(draw_q, shape.vertices, start, end)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
 	elif shape.shape_type == SType.QUAD_STRIP:
 		start = np.concatenate((np.arange(0, n_vert, 2), np.arange(n_vert - 2)))
 		end = np.concatenate((np.arange(1, n_vert, 2), np.arange(2, n_vert)))
-		_add_edges_to_draw_queue(draw_q, shape.vertices, start, end)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
 	elif shape.shape_type == SType.LINES:
 		start = np.arange(0, n_vert, 2)
 		end = np.arange(1, n_vert, 2)
-		_add_edges_to_draw_queue(draw_q, shape.vertices, start, end)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
 	elif shape.shape_type == SType.LINE_STRIP:
-		draw_q.append(_get_line_from_verts(shape.vertices))
+		render_primitives.append(_get_line_from_verts(shape.vertices))
 	elif shape.shape_type == SType.TESS:
-		draw_q.append(_get_line_from_verts(shape.vertices))
+		render_primitives.append(_get_line_from_verts(shape.vertices))
 		for contour in shape.contours:
-			draw_q.append(_get_line_from_verts(contour))
-	return draw_q
+			render_primitives.append(_get_line_from_verts(contour))
+	return render_primitives
 
 
 def get_meshes(shape):
-	draw_q = []
+	"""Generates the rendering primitives for the meshes of a given shape
+
+	:returns: [shape_type, vertices, idx]
+	"""
+	render_primitives = []
 	n_vert = len(shape.vertices)
 	if shape.shape_type in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
 		gl_name = shape.shape_type.name.lower()
 		if gl_name == 'quad_strip':  # vispy does not support quad_strip
 			gl_name = 'triangle_strip'  # but it can be drawn using triangle_strip
-		_add_vertices_to_draw_queue(draw_q, gl_name, shape.vertices)
+		render_primitives.append(_vertices_to_render_primitive(gl_name, shape.vertices))
 	elif shape.shape_type == SType.QUADS:
 		n_quad = len(shape.vertices) // 4
-		draw_q.append(['triangles', np.asarray(shape.vertices),
+		render_primitives.append(['triangles', np.asarray(shape.vertices),
 					   np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
 					   np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
 	elif shape.shape_type == SType.TESS:
@@ -149,35 +154,37 @@ def get_meshes(shape):
 			for contour in shape.contours:
 				_tess_new_contour(contour)
 		gluTessEndPolygon(p5.tess.tess)
-		draw_q += p5.tess.process_draw_queue()
-	return draw_q
+		render_primitives += p5.tess.process_draw_queue()
+	return render_primitives
 
 
-def update_draw_queue(shape):
-	draw_q = []
+def get_render_primitives(shape):
+	"""Given a shape, return a list of render primitives in the form of [type, vertices, indices]
+	"""
+	render_primitives = []
 	if isinstance(shape, Arc):
 		# Render meshes
 		if p5.renderer.fill_enabled:
-			draw_q.extend(get_meshes(shape))
+			render_primitives.extend(get_meshes(shape))
 		# Render borders
 		if p5.renderer.stroke_enabled:
 			if shape._mode in ['CHORD', 'OPEN']:  # Implies shape.shape_type == TESS
-				draw_q.extend(get_borders(shape))
+				render_primitives.extend(get_borders(shape))
 			elif shape._mode is None:             # Implies shape.shape_type == TRIANGLE_FAN
-				draw_q.append(_get_line_from_verts(shape.vertices[1:]))
+				render_primitives.append(_get_line_from_verts(shape.vertices[1:]))
 			elif shape._mode == 'PIE':            # Implies shape.shape_type == TRIANGLE_FAN
-				draw_q.append(_get_line_from_verts(shape.vertices))
+				render_primitives.append(_get_line_from_verts(shape.vertices))
 	else:
 		# Render points
 		if shape.shape_type == SType.POINTS:
-			_add_vertices_to_draw_queue(draw_q, 'points', shape.vertices)
+			render_primitives.append(_vertices_to_render_primitive(render_primitives, 'points'))
 		# Render meshes
 		if p5.renderer.fill_enabled:
-			draw_q.extend(get_meshes(shape))
+			render_primitives.extend(get_meshes(shape))
 		# Render borders
 		if p5.renderer.stroke_enabled:
-			draw_q.extend(get_borders(shape))
-	return draw_q
+			render_primitives.extend(get_borders(shape))
+	return render_primitives
 
 class Renderer2D:
 	def __init__(self):
@@ -371,7 +378,7 @@ class Renderer2D:
 		stroke_cap = shape.stroke_cap
 		stroke_join = shape.stroke_join
 
-		obj_list = update_draw_queue(shape)
+		obj_list = get_render_primitives(shape)
 		for obj in obj_list:
 			stype, vertices, idx = obj
 			# Transform vertices
