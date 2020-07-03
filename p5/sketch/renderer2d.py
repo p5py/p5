@@ -19,6 +19,9 @@
 import numpy as np
 import math
 from ..pmath import matrix
+from ..core import p5
+from ..core.constants import SType
+from ..core.primitives import Arc
 
 import builtins
 
@@ -35,6 +38,155 @@ from .shaders2d import src_default
 from .shaders2d import src_fbuffer
 from .shaders2d import src_texture
 from .shaders2d import src_line
+
+from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
+
+
+def _tess_new_contour(vertices):
+	"""Given a list of vertices, evoke gluTess to create a contour
+	"""
+	gluTessBeginContour(p5.tess.tess)
+	for v in vertices:
+		gluTessVertex(p5.tess.tess, v, v)
+	gluTessEndContour(p5.tess.tess)
+
+
+def _vertices_to_render_primitive(gl_name, vertices):
+	"""Returns a render primitive of gl_type with vertices in sequential order
+	"""
+	return [gl_name, np.asarray(vertices), np.arange(len(vertices), dtype=np.uint32)]
+
+
+def _get_line_from_verts(vertices):
+	"""Given a list of vertices, chain them sequentially in a line rendering primitive
+	"""
+	return ['lines', np.asarray(vertices), [np.arange(len(vertices))]]
+
+
+def _get_line_from_indices(vertices, start, end):
+	"""Given two columns of indices that represent edges, return a line rendering primitive
+
+	:param vertices: List of vertices
+	:type vertices: list
+
+	:param start: Array of start positions of edges in vertex indices
+	:type start: np.ndarray
+
+	:param end: Array of end positions fo edges in vertex indices
+	:type end: np.ndarray
+	"""
+	return ['lines', np.asarray(vertices),
+			np.hstack((np.vstack(start), np.vstack(end)))]
+
+
+def _add_edges_to_primitive_list(primitive_list, vertices, start, end):
+	"""Adds edges to a list of render primitives, given their start and end positions (in vertex indices)
+
+	:param start: Array of start positions of edges in vertex indices
+	:type start: np.ndarray
+
+	:param end: Array of end positions fo edges in vertex indices
+	:type end: np.ndarray
+	"""
+	primitive_list.append(_get_line_from_indices(vertices, start, end))
+
+
+def _get_borders(shape):
+	"""Generates the render primitives for the borders of a given shape
+
+	:returns: ['lines', vertices, idx]
+	"""
+	render_primitives = []
+	n_vert = len(shape.vertices)
+	if shape.shape_type == SType.TRIANGLES:
+		assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
+		start = np.arange(n_vert)
+		end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+	elif shape.shape_type == SType.TRIANGLE_STRIP:
+		start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
+		end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+	elif shape.shape_type == SType.TRIANGLE_FAN:
+		start = np.concatenate((np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
+		end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+	elif shape.shape_type == SType.QUADS:
+		start = np.arange(n_vert)
+		end = np.arange(n_vert) + np.tile([1, 1, 1, -3], n_vert // 4)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+	elif shape.shape_type == SType.QUAD_STRIP:
+		start = np.concatenate((np.arange(0, n_vert, 2), np.arange(n_vert - 2)))
+		end = np.concatenate((np.arange(1, n_vert, 2), np.arange(2, n_vert)))
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+	elif shape.shape_type == SType.LINES:
+		start = np.arange(0, n_vert, 2)
+		end = np.arange(1, n_vert, 2)
+		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+	elif shape.shape_type == SType.LINE_STRIP:
+		render_primitives.append(_get_line_from_verts(shape.vertices))
+	elif shape.shape_type == SType.TESS:
+		render_primitives.append(_get_line_from_verts(shape.vertices))
+		for contour in shape.contours:
+			render_primitives.append(_get_line_from_verts(contour))
+	return render_primitives
+
+
+def _get_meshes(shape):
+	"""Generates the rendering primitives for the meshes of a given shape
+
+	:returns: [shape_type, vertices, idx]
+	"""
+	render_primitives = []
+	n_vert = len(shape.vertices)
+	if shape.shape_type in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
+		gl_name = shape.shape_type.name.lower()
+		if gl_name == 'quad_strip':  # vispy does not support quad_strip
+			gl_name = 'triangle_strip'  # but it can be drawn using triangle_strip
+		render_primitives.append(_vertices_to_render_primitive(gl_name, shape.vertices))
+	elif shape.shape_type == SType.QUADS:
+		n_quad = len(shape.vertices) // 4
+		render_primitives.append(['triangles', np.asarray(shape.vertices),
+					   np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
+					   np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
+	elif shape.shape_type == SType.TESS:
+		gluTessBeginPolygon(p5.tess.tess, None)
+		_tess_new_contour(shape.vertices)
+		if len(shape.contours) > 0:
+			for contour in shape.contours:
+				_tess_new_contour(contour)
+		gluTessEndPolygon(p5.tess.tess)
+		render_primitives += p5.tess.get_result()
+	return render_primitives
+
+
+def get_render_primitives(shape):
+	"""Given a shape, return a list of render primitives in the form of [type, vertices, indices]
+	"""
+	render_primitives = []
+	if isinstance(shape, Arc):
+		# Render meshes
+		if p5.renderer.fill_enabled:
+			render_primitives.extend(_get_meshes(shape))
+		# Render borders
+		if p5.renderer.stroke_enabled:
+			if shape.arc_mode in ['CHORD', 'OPEN']:  # Implies shape.shape_type == TESS
+				render_primitives.extend(_get_borders(shape))
+			elif shape.arc_mode is None:             # Implies shape.shape_type == TRIANGLE_FAN
+				render_primitives.append(_get_line_from_verts(shape.vertices[1:]))
+			elif shape.arc_mode == 'PIE':            # Implies shape.shape_type == TRIANGLE_FAN
+				render_primitives.append(_get_line_from_verts(shape.vertices))
+	else:
+		# Render points
+		if shape.shape_type == SType.POINTS:
+			render_primitives.append(_vertices_to_render_primitive(render_primitives, 'points'))
+		# Render meshes
+		if p5.renderer.fill_enabled:
+			render_primitives.extend(_get_meshes(shape))
+		# Render borders
+		if p5.renderer.stroke_enabled:
+			render_primitives.extend(_get_borders(shape))
+	return render_primitives
 
 class Renderer2D:
 	def __init__(self):
@@ -213,8 +365,9 @@ class Renderer2D:
 	def _transform_vertices(self, vertices, local_matrix, global_matrix):
 		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
 
-	# Adds shape of stype to draw queue
-	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke=None, stroke_weight=None, stroke_cap=None, stroke_join=None):
+	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join):
+		"""Adds shape of stype to draw queue
+		"""
 		if stype == 'lines':
 			self.draw_queue.append((stype, (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)))
 		else:
@@ -227,67 +380,16 @@ class Renderer2D:
 		stroke_cap = shape.stroke_cap
 		stroke_join = shape.stroke_join
 
-		# If shape comes with prepackaged objects, use these instead
-		if shape.overriden_draw_queue:
-			for obj in shape.overriden_draw_queue:
-				stype, vertices, idx = obj
-				# Transform vertices
-				vertices = self._transform_vertices(
-					np.hstack([vertices, np.ones((len(vertices), 1))]),
-					shape._matrix,
-					self.transform_matrix)
-				# Add to draw queue
-				self._add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
-		else:
-			assert False, "Overridden draw queue unimplemented"
-
-	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None,
-			stroke_weight=None, stroke_cap=None, stroke_join=None):
-		"""Add the given vertex data to the draw queue.
-
-		:param stype: type of shape to be added. Should be one of {'poly',
-			'path', 'point'}
-		:type stype: str
-
-		:param vertices: (N, 3) array containing the vertices to be drawn.
-		:type vertices: np.ndarray
-
-		:param edges: (N, 2) array containing edges as tuples of indices
-			into the vertex array. This can be None when not appropriate
-			(eg. for points)
-		:type edges: None | np.ndarray
-
-		:param faces: (N, 3) array containing faces as tuples of indices
-			into the vertex array. For 'point' and 'path' shapes, this can
-			be None
-		:type faces: np.ndarray
-
-		:param fill: Fill color of the shape as a normalized RGBA tuple.
-			When set to `None` the shape doesn't get a fill (default: None)
-		:type fill: None | tuple
-
-		:param stroke: Stroke color of the shape as a normalized RGBA
-			tuple. When set to `None` the shape doesn't get stroke
-			(default: None)
-		:type stroke: None | tuple
-
-		"""
-
-		fill_shape = self.fill_enabled and not (fill is None)
-		stroke_shape = self.stroke_enabled and not (stroke is None)
-
-		if fill_shape and stype not in ['point', 'path']:
-			idx = np.array(faces, dtype=np.uint32).ravel()
-			self.draw_queue.append(["triangles", (vertices, idx, fill)])
-
-		if stroke_shape:
-			if stype == 'point':
-				idx = np.arange(0, len(vertices), dtype=np.uint32)
-				self.draw_queue.append(["points", (vertices, idx, stroke)])
-			else:
-				self.draw_queue.append(["lines", (
-					vertices, edges, stroke, stroke_weight, stroke_cap, stroke_join
-					)])
+		obj_list = get_render_primitives(shape)
+		for obj in obj_list:
+			stype, vertices, idx = obj
+			# Transform vertices
+			vertices = self._transform_vertices(
+				np.hstack([vertices, np.ones((len(vertices), 1))]),
+				shape._matrix,
+				self.transform_matrix)
+			# Add to draw queue
+			self._add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
@@ -403,7 +505,7 @@ class Renderer2D:
 					color.extend([line[2]]*6)
 
 		if len(pos) == 0:
-			return 
+			return
 
 		posPrev = np.array(posPrev, np.float32)
 		posCurr = np.array(posCurr, np.float32)

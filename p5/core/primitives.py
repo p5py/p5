@@ -31,7 +31,7 @@ from .constants import SType
 
 from . import p5
 
-__all__ = ['point', 'line', 'arc', 'triangle', 'quad',
+__all__ = ['Arc', 'point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
            'rect_mode', 'bezier', 'curve', 'create_shape', 'draw_shape']
 
@@ -82,25 +82,13 @@ class Arc(PShape):
         self._radii = radii
         self._start_angle = start_angle
         self._stop_angle = stop_angle
-        self._mode = mode
+        self.arc_mode = mode
 
         gl_type = SType.TESS if mode in ['OPEN', 'CHORD'] else SType.TRIANGLE_FAN
         super().__init__(fill_color=fill_color,
                          stroke_color=stroke_color, stroke_weight=stroke_weight,
                          stroke_join=stroke_join, stroke_cap=stroke_cap, shape_type=gl_type, **kwargs)
         self._tessellate()
-
-    def update_draw_queue(self):
-        stroke_state = p5.renderer.stroke_enabled
-        if self._mode in [None, 'PIE']:
-            p5.renderer.stroke_enabled = False
-        PShape.update_draw_queue(self)
-        if stroke_state:  # If stroke was enabled
-            if self._mode is None:
-                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices[1:]))
-            if self._mode == 'PIE':
-                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices))
-        p5.renderer.stroke_enabled = stroke_state
 
     def _tessellate(self):
         """Generate vertex and face data using radii.
@@ -126,7 +114,7 @@ class Arc(PShape):
         start_index = int((self._start_angle / (math.pi * 2)) * sclen)
         end_index = int((self._stop_angle / (math.pi * 2)) * sclen)
 
-        vertices = [(c1x, c1y, 0)] if self._mode in ['PIE', None] else []
+        vertices = [(c1x, c1y, 0)] if self.arc_mode in ['PIE', None] else []
         for idx in range(start_index, end_index, inc):
             i = idx % sclen
             vertices.append((
@@ -139,10 +127,9 @@ class Arc(PShape):
             c1y + ry * SINCOS[end_index % sclen][0],
             0
         ))
-        if self._mode == 'CHORD' or self._mode == 'PIE':
+        if self.arc_mode == 'CHORD' or self.arc_mode == 'PIE':
             vertices.append(vertices[0])
         self.vertices = vertices
-        self.update_draw_queue()
 
 @_draw_on_return
 def point(x, y, z=0):

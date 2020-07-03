@@ -28,7 +28,6 @@ from .constants import SType
 from ..pmath import matrix
 
 from . import p5
-from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
 
 __all__ = ['PShape']
 
@@ -125,12 +124,9 @@ class PShape:
         self.children = children or []
         self.visible = visible
 
-        self.overriden_draw_queue = []
         self.vertices = list(vertices)
         self.shape_type = shape_type
         self.contours = [list(c) for c in contours]  # List of all contours
-        if self.vertices:
-            self.update_draw_queue()
 
     def _set_color(self, name, value=None):
         color = None
@@ -424,107 +420,3 @@ class PShape:
         shear_mat = np.identity(4)
         shear_mat[1, 0] = np.tan(theta)
         return shear_mat
-
-    def _get_line_from_verts(self, vertices):
-        """Given a list of vertices, chain them sequentially in a line object that's ready for draw queue
-        """
-        return ['lines', np.asarray(vertices), [np.arange(len(vertices))]]
-
-    def _get_line_from_indices(self, vertices, start, end):
-        """Given two columns of indices that represent edges, return a line object that's ready for draw queue
-
-        :param vertices: List of vertices
-        :type vertices: list
-
-        :param start: Array of start positions of edges in vertex indices
-        :type start: np.ndarray
-
-        :param end: Array of end positions fo edges in vertex indices
-        :type end: np.ndarray
-        """
-        return ['lines', np.asarray(vertices),
-            np.hstack((np.vstack(start), np.vstack(end)))]
-
-    def _add_edges_to_draw_queue(self, start, end):
-        """Adds edges to draw_queue, given their start and end positions (in vertex indices)
-
-        :param start: Array of start positions of edges in vertex indices
-        :type start: np.ndarray
-
-        :param end: Array of end positions fo edges in vertex indices
-        :type end: np.ndarray
-        """
-        self.overriden_draw_queue.append(self._get_line_from_indices(self.vertices, start, end))
-
-    # Given a list of vertices, evoke gluTess to create a contour
-    def _tess_new_contour(self, vertices):
-        gluTessBeginContour(p5.tess.tess)
-        for v in vertices:
-            gluTessVertex(p5.tess.tess, v, v)
-        gluTessEndContour(p5.tess.tess)
-
-    # Adds an object of type gl_name with vertices in sequential order to the draw queue
-    def _add_vertices_to_draw_queue(self, gl_name, vertices):
-        self.overriden_draw_queue.append([gl_name, np.asarray(vertices),
-                                          np.arange(len(vertices), dtype=np.uint32)])
-
-    def update_draw_queue(self):
-        n_vert = len(self.vertices)
-        # Render points
-        if self.shape_type == SType.POINTS:
-            self._add_vertices_to_draw_queue('points', self.vertices)
-        # Render meshes
-        if p5.renderer.fill_enabled:
-            if self.shape_type in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
-                gl_name = self.shape_type.name.lower()
-                if gl_name == 'quad_strip': # vispy does not support quad_strip
-                    gl_name = 'triangle_strip' # but it can be drawn using triangle_strip
-                self._add_vertices_to_draw_queue(gl_name, self.vertices)
-            elif self.shape_type == SType.QUADS:
-                n_quad = len(self.vertices) // 4
-                self.overriden_draw_queue.append(['triangles', np.asarray(self.vertices),
-                                                  np.repeat(np.arange(0, n_vert, 4, dtype=np.uint32), 6) +
-                                                  np.tile(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32), n_quad)])
-            elif self.shape_type == SType.TESS:
-                gluTessBeginPolygon(p5.tess.tess, None)
-                self._tess_new_contour(self.vertices)
-                if len(self.contours) > 0:
-                    for contour in self.contours:
-                        self._tess_new_contour(contour)
-                gluTessEndPolygon(p5.tess.tess)
-                self.overriden_draw_queue += p5.tess.process_draw_queue()
-
-        # Render borders
-        if p5.renderer.stroke_enabled:
-            # TODO: Check for the minimum number of vertices
-            if self.shape_type == SType.TRIANGLES:
-                assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
-                start = np.arange(n_vert)
-                end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
-                self._add_edges_to_draw_queue(start, end)
-            elif self.shape_type == SType.TRIANGLE_STRIP:
-                start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
-                end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
-                self._add_edges_to_draw_queue(start, end)
-            elif self.shape_type == SType.TRIANGLE_FAN:
-                start = np.concatenate((np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
-                end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
-                self._add_edges_to_draw_queue(start, end)
-            elif self.shape_type == SType.QUADS:
-                start = np.arange(n_vert)
-                end = np.arange(n_vert) + np.tile([1, 1, 1, -3], n_vert // 4)
-                self._add_edges_to_draw_queue(start, end)
-            elif self.shape_type == SType.QUAD_STRIP:
-                start = np.concatenate((np.arange(0, n_vert, 2), np.arange(n_vert - 2)))
-                end = np.concatenate((np.arange(1, n_vert, 2), np.arange(2, n_vert)))
-                self._add_edges_to_draw_queue(start, end)
-            elif self.shape_type == SType.LINES:
-                start = np.arange(0, n_vert, 2)
-                end = np.arange(1, n_vert, 2)
-                self._add_edges_to_draw_queue(start, end)
-            elif self.shape_type == SType.LINE_STRIP:
-                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices))
-            elif self.shape_type == SType.TESS:
-                self.overriden_draw_queue.append(self._get_line_from_verts(self.vertices))
-                for contour in self.contours:
-                    self.overriden_draw_queue.append(self._get_line_from_verts(contour))
