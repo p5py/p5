@@ -56,10 +56,12 @@ def _vertices_to_render_primitive(gl_name, vertices):
 	"""
 	return [gl_name, np.asarray(vertices), np.arange(len(vertices), dtype=np.uint32)]
 
+
 def _get_line_from_verts(vertices):
 	"""Given a list of vertices, chain them sequentially in a line rendering primitive
 	"""
 	return ['lines', np.asarray(vertices), [np.arange(len(vertices))]]
+
 
 def _get_line_from_indices(vertices, start, end):
 	"""Given two columns of indices that represent edges, return a line rendering primitive
@@ -89,7 +91,7 @@ def _add_edges_to_primitive_list(primitive_list, vertices, start, end):
 	primitive_list.append(_get_line_from_indices(vertices, start, end))
 
 
-def get_borders(shape):
+def _get_borders(shape):
 	"""Generates the render primitives for the borders of a given shape
 
 	:returns: ['lines', vertices, idx]
@@ -130,7 +132,7 @@ def get_borders(shape):
 	return render_primitives
 
 
-def get_meshes(shape):
+def _get_meshes(shape):
 	"""Generates the rendering primitives for the meshes of a given shape
 
 	:returns: [shape_type, vertices, idx]
@@ -154,7 +156,7 @@ def get_meshes(shape):
 			for contour in shape.contours:
 				_tess_new_contour(contour)
 		gluTessEndPolygon(p5.tess.tess)
-		render_primitives += p5.tess.process_draw_queue()
+		render_primitives += p5.tess.get_result()
 	return render_primitives
 
 
@@ -165,14 +167,14 @@ def get_render_primitives(shape):
 	if isinstance(shape, Arc):
 		# Render meshes
 		if p5.renderer.fill_enabled:
-			render_primitives.extend(get_meshes(shape))
+			render_primitives.extend(_get_meshes(shape))
 		# Render borders
 		if p5.renderer.stroke_enabled:
-			if shape._mode in ['CHORD', 'OPEN']:  # Implies shape.shape_type == TESS
-				render_primitives.extend(get_borders(shape))
-			elif shape._mode is None:             # Implies shape.shape_type == TRIANGLE_FAN
+			if shape.arc_mode in ['CHORD', 'OPEN']:  # Implies shape.shape_type == TESS
+				render_primitives.extend(_get_borders(shape))
+			elif shape.arc_mode is None:             # Implies shape.shape_type == TRIANGLE_FAN
 				render_primitives.append(_get_line_from_verts(shape.vertices[1:]))
-			elif shape._mode == 'PIE':            # Implies shape.shape_type == TRIANGLE_FAN
+			elif shape.arc_mode == 'PIE':            # Implies shape.shape_type == TRIANGLE_FAN
 				render_primitives.append(_get_line_from_verts(shape.vertices))
 	else:
 		# Render points
@@ -180,10 +182,10 @@ def get_render_primitives(shape):
 			render_primitives.append(_vertices_to_render_primitive(render_primitives, 'points'))
 		# Render meshes
 		if p5.renderer.fill_enabled:
-			render_primitives.extend(get_meshes(shape))
+			render_primitives.extend(_get_meshes(shape))
 		# Render borders
 		if p5.renderer.stroke_enabled:
-			render_primitives.extend(get_borders(shape))
+			render_primitives.extend(_get_borders(shape))
 	return render_primitives
 
 class Renderer2D:
@@ -503,7 +505,7 @@ class Renderer2D:
 					color.extend([line[2]]*6)
 
 		if len(pos) == 0:
-			return 
+			return
 
 		posPrev = np.array(posPrev, np.float32)
 		posCurr = np.array(posCurr, np.float32)

@@ -82,7 +82,7 @@ class Arc(PShape):
         self._radii = radii
         self._start_angle = start_angle
         self._stop_angle = stop_angle
-        self._mode = mode
+        self.arc_mode = mode
 
         gl_type = SType.TESS if mode in ['OPEN', 'CHORD'] else SType.TRIANGLE_FAN
         super().__init__(fill_color=fill_color,
@@ -114,7 +114,7 @@ class Arc(PShape):
         start_index = int((self._start_angle / (math.pi * 2)) * sclen)
         end_index = int((self._stop_angle / (math.pi * 2)) * sclen)
 
-        vertices = [(c1x, c1y, 0)] if self._mode in ['PIE', None] else []
+        vertices = [(c1x, c1y, 0)] if self.arc_mode in ['PIE', None] else []
         for idx in range(start_index, end_index, inc):
             i = idx % sclen
             vertices.append((
@@ -127,7 +127,7 @@ class Arc(PShape):
             c1y + ry * SINCOS[end_index % sclen][0],
             0
         ))
-        if self._mode == 'CHORD' or self._mode == 'PIE':
+        if self.arc_mode == 'CHORD' or self.arc_mode == 'PIE':
             vertices.append(vertices[0])
         self.vertices = vertices
 
