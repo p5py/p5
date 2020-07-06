@@ -91,6 +91,34 @@ def _add_edges_to_primitive_list(primitive_list, vertices, start, end):
 	primitive_list.append(_get_line_from_indices(vertices, start, end))
 
 
+def _not_enough_vertices(shape, n):
+	"""Returns an error string that describes how many vertices are needed
+	"""
+	return "Need at least {} vertices for {}".format(n, shape)
+
+
+def _wrong_multiple(shape, n):
+	"""Returns an error string that describes the # of vertices is not a multiple of n
+	"""
+	return "{} requires the number of vertices to be a multiple of {}".format(shape.shape_type, n)
+
+
+def _check_shape(shape):
+	"""Checks if the shape is valid using assertions
+	"""
+	n_vert = len(shape.vertices)
+	if shape.shape_type in [SType.TRIANGLES, SType.TRIANGLE_FAN, SType.TRIANGLE_STRIP]:
+		assert n_vert >= 3, _not_enough_vertices(shape, 3)
+	elif shape.shape_type in [SType.LINES, SType.LINE_STRIP]:
+		assert n_vert >= 2, _not_enough_vertices(shape, 2)
+	elif shape.shape_type in [SType.QUADS, SType.QUAD_STRIP]:
+		assert n_vert >= 4, _not_enough_vertices(shape, 4)
+
+	if shape.shape_type == SType.TRIANGLES:
+		assert n_vert % 3 == 0, _wrong_multiple(shape, 3)
+	if shape.shape_type == SType.QUADS:
+		assert n_vert % 4 == 0, _wrong_multiple(shape, 4)
+
 def _get_borders(shape):
 	"""Generates the render primitives for the borders of a given shape
 
@@ -99,7 +127,6 @@ def _get_borders(shape):
 	render_primitives = []
 	n_vert = len(shape.vertices)
 	if shape.shape_type == SType.TRIANGLES:
-		assert n_vert % 3 == 0, "TRIANGLES requires the number of vertices to be a multiple of 3"
 		start = np.arange(n_vert)
 		end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
 		_add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
@@ -163,6 +190,7 @@ def _get_meshes(shape):
 def get_render_primitives(shape):
 	"""Given a shape, return a list of render primitives in the form of [type, vertices, indices]
 	"""
+	_check_shape(shape)
 	render_primitives = []
 	if isinstance(shape, Arc):
 		# Render meshes
