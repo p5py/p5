@@ -219,52 +219,10 @@ def get_render_primitives(shape):
 
 class Renderer2D(OpenGLRenderer):
 	def __init__(self):
-		self.default_prog = None
-		self.fbuffer_prog = None
+		super().__init__()
 		self.texture_prog = None
 		self.line_prog = None
-
-		self.fbuffer = None
-		self.fbuffer_tex_front = None
-		self.fbuffer_tex_back = None
-
-		self.vertex_buffer = None
-		self.index_buffer = None
-
-		## Renderer Globals: USEFUL CONSTANTS
-		self.COLOR_WHITE = (1, 1, 1, 1)
-		self.COLOR_BLACK = (0, 0, 0, 1)
-		self.COLOR_DEFAULT_BG = (0.8, 0.8, 0.8, 1.0)
-
-		## Renderer Globals: STYLE/MATERIAL PROPERTIES
-		##
-		self.background_color = self.COLOR_DEFAULT_BG
-
-		self.fill_color = self.COLOR_WHITE
-		self.fill_enabled = True
-
-		self.stroke_color = self.COLOR_BLACK
-		self.stroke_enabled = True
-
-		self.tint_color = self.COLOR_BLACK
-		self.tint_enabled = False
-
-		## Renderer Globals: Curves
-		self.stroke_weight = 1
-		self.stroke_cap = 2
-		self.stroke_join = 0
-
-		## Renderer Globals
-		## VIEW MATRICES, ETC
-		##
-		self.viewport = None
-		self.texture_viewport = None
-		self.transform_matrix = np.identity(4)
 		self.modelview_matrix = np.identity(4)
-		self.projection_matrix = np.identity(4)
-
-		## Renderer Globals: RENDERING
-		self.draw_queue = []
 
 	def initialize_renderer(self):
 		self.fbuffer = FrameBuffer()
