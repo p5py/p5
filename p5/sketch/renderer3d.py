@@ -200,9 +200,6 @@ class Renderer3D(OpenGLRenderer):
 
 		self.fbuffer_tex_front, self.fbuffer_tex_back = self.fbuffer_tex_back, self.fbuffer_tex_front
 
-	def _transform_vertices(self, vertices, local_matrix, global_matrix):
-		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
-
 	def render(self, shape):
 		if isinstance(shape, Geometry):
 			n = len(shape.vertices)

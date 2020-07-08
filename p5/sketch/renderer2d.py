@@ -390,10 +390,6 @@ class Renderer2D(OpenGLRenderer):
 
 		self.fbuffer_tex_front, self.fbuffer_tex_back = self.fbuffer_tex_back, self.fbuffer_tex_front
 
-
-	def _transform_vertices(self, vertices, local_matrix, global_matrix):
-		return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
-
 	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join):
 		"""Adds shape of stype to draw queue
 		"""

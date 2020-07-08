@@ -59,3 +59,6 @@ class OpenGLRenderer(ABC):
         self.default_prog.delete()
         self.fbuffer_prog.delete()
         self.fbuffer.delete()
+
+    def _transform_vertices(self, vertices, local_matrix, global_matrix):
+        return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
