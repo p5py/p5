@@ -38,6 +38,7 @@ from .shaders2d import src_default
 from .shaders2d import src_fbuffer
 from .shaders2d import src_texture
 from .shaders2d import src_line
+from .openglrenderer import OpenGLRenderer
 
 from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
 
@@ -216,7 +217,7 @@ def get_render_primitives(shape):
 			render_primitives.extend(_get_borders(shape))
 	return render_primitives
 
-class Renderer2D:
+class Renderer2D(OpenGLRenderer):
 	def __init__(self):
 		self.default_prog = None
 		self.fbuffer_prog = None
@@ -435,52 +436,6 @@ class Renderer2D:
 			current_queue = []
 
 		self.draw_queue = []
-
-	def render_default(self, draw_type, draw_queue):
-		# 1. Get the maximum number of vertices persent in the shapes
-		# in the draw queue.
-		#
-		if len(draw_queue) == 0:
-			return
-
-		num_vertices = 0
-		for vertices, _, _ in draw_queue:
-			num_vertices = num_vertices + len(vertices)
-
-		# 2. Create empty buffers based on the number of vertices.
-		#
-		data = np.zeros(num_vertices,
-						dtype=[('position', np.float32, 3),
-							   ('color', np.float32, 4)])
-
-		# 3. Loop through all the shapes in the geometry queue adding
-		# it's information to the buffer.
-		#
-		sidx = 0
-		draw_indices = []
-		for vertices, idx, color in draw_queue:
-			num_shape_verts = len(vertices)
-
-			data['position'][sidx:(sidx + num_shape_verts),] = vertices
-
-			color_array = np.array([color] * num_shape_verts)
-			data['color'][sidx:sidx + num_shape_verts, :] = color_array
-
-			draw_indices.append(sidx + idx)
-
-			sidx += num_shape_verts
-
-		self.vertex_buffer.set_data(data)
-		self.index_buffer.set_data(np.hstack(draw_indices))
-
-		# 4. Bind the buffer to the shader.
-		#
-		self.default_prog.bind(self.vertex_buffer)
-
-		# 5. Draw the shape using the proper shape type and get rid of
-		# the buffers.
-		#
-		self.default_prog.draw(draw_type, indices=self.index_buffer)
 
 	def render_line(self, queue):
 		'''
