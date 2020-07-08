@@ -559,8 +559,6 @@ class Renderer2D(OpenGLRenderer):
 		program is about to exit.
 
 		"""
-		self.default_prog.delete()
-		self.fbuffer_prog.delete()
+		OpenGLRenderer.cleanup()
 		self.line_prog.delete()
-		self.fbuffer.delete()
 

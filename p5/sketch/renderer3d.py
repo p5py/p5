@@ -321,15 +321,3 @@ class Renderer3D(OpenGLRenderer):
 			current_queue = []
 
 		self.draw_queue = []
-
-	def cleanup(self):
-		"""Run the clean-up routine for the renderer.
-
-		This method is called when all drawing has been completed and the
-		program is about to exit.
-
-		"""
-		self.default_prog.delete()
-		self.fbuffer_prog.delete()
-		self.fbuffer.delete()
-
