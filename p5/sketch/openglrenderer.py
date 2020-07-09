@@ -1,6 +1,9 @@
 from abc import ABC
 import numpy as np
 
+from vispy.gloo import Program, VertexBuffer, FrameBuffer, IndexBuffer
+from .shaders2d import src_default, src_fbuffer
+
 
 # Abstract class that contains common code for OpenGL renderers
 class OpenGLRenderer(ABC):
@@ -48,6 +51,32 @@ class OpenGLRenderer(ABC):
 
         # Renderer Globals: RENDERING
         self.draw_queue = []
+
+    def initialize_renderer(self):
+        self.fbuffer = FrameBuffer()
+
+        vertices = np.array([[-1.0, -1.0],
+                             [+1.0, -1.0],
+                             [-1.0, +1.0],
+                             [+1.0, +1.0]],
+                            np.float32)
+        texcoords = np.array([[0.0, 0.0],
+                              [1.0, 0.0],
+                              [0.0, 1.0],
+                              [1.0, 1.0]],
+                             dtype=np.float32)
+
+        self.fbuf_vertices = VertexBuffer(data=vertices)
+        self.fbuf_texcoords = VertexBuffer(data=texcoords)
+
+        self.fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
+        self.fbuffer_prog['texcoord'] = self.fbuf_texcoords
+        self.fbuffer_prog['position'] = self.fbuf_vertices
+
+        self.vertex_buffer = VertexBuffer()
+        self.index_buffer = IndexBuffer()
+
+        self.default_prog = Program(src_default.vert, src_default.frag)
 
     def render_default(self, draw_type, draw_queue):
         # 1. Get the maximum number of vertices persent in the shapes

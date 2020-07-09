@@ -24,19 +24,11 @@ from ..pmath import matrix
 import builtins
 
 from vispy import gloo
-from vispy.gloo import FrameBuffer
-from vispy.gloo import IndexBuffer
-from vispy.gloo import Program
 from vispy.gloo import Texture2D
-from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
 
 from ..core.constants import Z_EPSILON
-
-from .shaders3d import src_default
-from .shaders3d import src_fbuffer
-
 from ..core.geometry import Geometry
 from ..core.shape import PShape
 
@@ -49,31 +41,7 @@ class Renderer3D(OpenGLRenderer):
 		self.lookat_matrix = np.identity(4)
 
 	def initialize_renderer(self):
-		self.fbuffer = FrameBuffer()
-
-		vertices = np.array([[-1.0, -1.0],
-							 [+1.0, -1.0],
-							 [-1.0, +1.0],
-							 [+1.0, +1.0]],
-							np.float32)
-		texcoords = np.array([[0.0, 0.0],
-							  [1.0, 0.0],
-							  [0.0, 1.0],
-							  [1.0, 1.0]],
-							 dtype=np.float32)
-
-		self.fbuf_vertices = VertexBuffer(data=vertices)
-		self.fbuf_texcoords = VertexBuffer(data=texcoords)
-
-		self.fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
-		self.fbuffer_prog['texcoord'] = self.fbuf_texcoords
-		self.fbuffer_prog['position'] = self.fbuf_vertices
-
-		self.vertex_buffer = VertexBuffer()
-		self.index_buffer = IndexBuffer()
-
-		self.default_prog = Program(src_default.vert, src_default.frag)
-
+		super().initialize_renderer()
 		self.reset_view()
 
 	def reset_view(self):

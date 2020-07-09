@@ -26,16 +26,11 @@ from ..core.primitives import Arc
 import builtins
 
 from vispy import gloo
-from vispy.gloo import FrameBuffer
-from vispy.gloo import IndexBuffer
 from vispy.gloo import Program
 from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
-
-from .shaders2d import src_default
-from .shaders2d import src_fbuffer
 from .shaders2d import src_texture
 from .shaders2d import src_line
 from .openglrenderer import OpenGLRenderer
@@ -225,33 +220,9 @@ class Renderer2D(OpenGLRenderer):
 		self.modelview_matrix = np.identity(4)
 
 	def initialize_renderer(self):
-		self.fbuffer = FrameBuffer()
-
-		vertices = np.array([[-1.0, -1.0],
-							 [+1.0, -1.0],
-							 [-1.0, +1.0],
-							 [+1.0, +1.0]],
-							np.float32)
-		texcoords = np.array([[0.0, 0.0],
-							  [1.0, 0.0],
-							  [0.0, 1.0],
-							  [1.0, 1.0]],
-							 dtype=np.float32)
-
-		self.fbuf_vertices = VertexBuffer(data=vertices)
-		self.fbuf_texcoords = VertexBuffer(data=texcoords)
-
-		self.fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
-		self.fbuffer_prog['texcoord'] = self.fbuf_texcoords
-		self.fbuffer_prog['position'] = self.fbuf_vertices
-
-		self.vertex_buffer = VertexBuffer()
-		self.index_buffer = IndexBuffer()
-
-		self.default_prog = Program(src_default.vert, src_default.frag)
+		super().initialize_renderer()
 		self.texture_prog = Program(src_texture.vert, src_texture.frag)
 		self.texture_prog['texcoord'] = self.fbuf_texcoords
-
 		self.reset_view()
 
 	def reset_view(self):
