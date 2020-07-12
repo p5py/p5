@@ -485,6 +485,6 @@ class Renderer2D(OpenGLRenderer):
 		program is about to exit.
 
 		"""
-		OpenGLRenderer.cleanup()
+		OpenGLRenderer.cleanup(self)
 		self.line_prog.delete()
 
