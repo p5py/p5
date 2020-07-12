@@ -22,6 +22,7 @@ from ..pmath import matrix
 from ..core import p5
 from ..core.constants import SType
 from ..core.primitives import Arc
+from .shaders2d import src_default, src_fbuffer
 
 import builtins
 
@@ -214,7 +215,7 @@ def get_render_primitives(shape):
 
 class Renderer2D(OpenGLRenderer):
 	def __init__(self):
-		super().__init__()
+		super().__init__(src_fbuffer, src_default)
 		self.texture_prog = None
 		self.line_prog = None
 		self.modelview_matrix = np.identity(4)

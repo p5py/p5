@@ -34,10 +34,11 @@ from ..core.shape import PShape
 
 from ..pmath.matrix import translation_matrix
 from .openglrenderer import OpenGLRenderer
+from .shaders3d import src_default, src_fbuffer
 
 class Renderer3D(OpenGLRenderer):
 	def __init__(self):
-		super().__init__()
+		super().__init__(src_fbuffer, src_default)
 		self.lookat_matrix = np.identity(4)
 
 	def initialize_renderer(self):
