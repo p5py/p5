@@ -207,6 +207,10 @@ def begin_contour():
 def end_contour():
 	global is_contour, curr_contour_vertices, curr_contour_vertices_types
 	is_contour = False
+	# Close contour
+	curr_contour_vertices.append(curr_contour_vertices[0])
+	curr_contour_vertices_types.append(curr_contour_vertices_types[0])
+	# Save contour
 	contour_vertices.append(curr_contour_vertices)
 	contour_vertices_types.append(curr_contour_vertices_types)
 	curr_contour_vertices, curr_contour_vertices_types = [], []
