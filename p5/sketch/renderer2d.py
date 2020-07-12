@@ -320,7 +320,7 @@ class Renderer2D(OpenGLRenderer):
 
 		self.fbuffer_tex_front, self.fbuffer_tex_back = self.fbuffer_tex_back, self.fbuffer_tex_front
 
-	def _add_to_draw_queue_simple(self, stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join):
+	def _add_to_draw_queue(self, stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join):
 		"""Adds shape of stype to draw queue
 		"""
 		if stype == 'lines':
@@ -344,7 +344,7 @@ class Renderer2D(OpenGLRenderer):
 				shape._matrix,
 				self.transform_matrix)
 			# Add to draw queue
-			self._add_to_draw_queue_simple(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
+			self._add_to_draw_queue(stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join)
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
