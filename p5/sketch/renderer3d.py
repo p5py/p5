@@ -75,13 +75,13 @@ class Renderer3D(OpenGLRenderer):
 
 		self.fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
 		self.fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
+		self.fbuffer.depth_buffer = gloo.RenderBuffer((builtins.height, builtins.width))
 
 		for buf in [self.fbuffer_tex_front, self.fbuffer_tex_back]:
 			self.fbuffer.color_buffer = buf
 			with self.fbuffer:
 				self.clear()
 
-		self.fbuffer.depth_buffer = gloo.RenderBuffer((builtins.height, builtins.width))
 
 	def clear(self, color=True, depth=True):
 		"""Clear the renderer background."""
@@ -113,6 +113,7 @@ class Renderer3D(OpenGLRenderer):
 			self._comm_toggles()
 			self.fbuffer_prog['texture'] = self.fbuffer_tex_front
 			self.fbuffer_prog.draw('triangle_strip')
+			self.clear(color=False, depth=True)
 
 			yield
 
