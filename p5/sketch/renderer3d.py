@@ -33,11 +33,12 @@ from ..core.geometry import Geometry
 from ..core.shape import PShape
 
 from ..pmath.matrix import translation_matrix
-from .openglrenderer import OpenGLRenderer
+from .openglrenderer import OpenGLRenderer, get_render_primitives
+from .shaders3d import src_default, src_fbuffer
 
 class Renderer3D(OpenGLRenderer):
 	def __init__(self):
-		super().__init__()
+		super().__init__(src_fbuffer, src_default)
 		self.lookat_matrix = np.identity(4)
 
 	def initialize_renderer(self):
@@ -75,13 +76,13 @@ class Renderer3D(OpenGLRenderer):
 
 		self.fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
 		self.fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
+		self.fbuffer.depth_buffer = gloo.RenderBuffer((builtins.height, builtins.width))
 
 		for buf in [self.fbuffer_tex_front, self.fbuffer_tex_back]:
 			self.fbuffer.color_buffer = buf
 			with self.fbuffer:
 				self.clear()
 
-		self.fbuffer.depth_buffer = gloo.RenderBuffer((builtins.height, builtins.width))
 
 	def clear(self, color=True, depth=True):
 		"""Clear the renderer background."""
@@ -113,6 +114,7 @@ class Renderer3D(OpenGLRenderer):
 			self._comm_toggles()
 			self.fbuffer_prog['texture'] = self.fbuffer_tex_front
 			self.fbuffer_prog.draw('triangle_strip')
+			self.clear(color=False, depth=True)
 
 			yield
 
@@ -126,6 +128,11 @@ class Renderer3D(OpenGLRenderer):
 		self.fbuffer_prog.draw('triangle_strip')
 
 		self.fbuffer_tex_front, self.fbuffer_tex_back = self.fbuffer_tex_back, self.fbuffer_tex_front
+
+	def _add_to_draw_queue_simple(self, stype, vertices, idx, color):
+		"""Adds shape of stype to draw queue
+		"""
+		self.draw_queue.append((stype, (vertices, idx, color)))
 
 	def render(self, shape):
 		if isinstance(shape, Geometry):
@@ -141,38 +148,19 @@ class Renderer3D(OpenGLRenderer):
 			self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color)
 
 		elif isinstance(shape, PShape):
-			vertices = shape._draw_vertices
-			n, _ = vertices.shape
-			tverts = self._transform_vertices(
-				np.hstack([vertices, np.zeros((n, 1)), np.ones((n, 1))]),
-				shape._matrix,
-				self.transform_matrix)
-
 			fill = shape.fill.normalized if shape.fill else None
 			stroke = shape.stroke.normalized if shape.stroke else None
-			edges = shape._draw_edges
-			faces = shape._draw_faces
 
-
-			if edges is None:
-				print(vertices)
-				print("whale")
-				exit()
-
-			if 'open' in shape.attribs:
-				overtices = shape._draw_outline_vertices
-				no, _  = overtices.shape
-				toverts = self._transform_vertices(
-					np.hstack([overtices, np.zeros((no, 1)), np.ones((no, 1))]),
+			obj_list = get_render_primitives(shape)
+			for obj in obj_list:
+				stype, vertices, idx = obj
+				# Transform vertices
+				vertices = self._transform_vertices(
+					np.hstack([vertices, np.ones((len(vertices), 1))]),
 					shape._matrix,
 					self.transform_matrix)
-
-				self.add_to_draw_queue('poly', tverts, edges, faces, fill, None)
-				self.add_to_draw_queue('path', toverts, edges[:-1],
-								  None, None, stroke)
-			else:
-				self.add_to_draw_queue(shape.kind, tverts, edges, faces, fill, stroke)
-
+				# Add to draw queue
+				self._add_to_draw_queue_simple(stype, vertices, idx, stroke if stype == 'lines' else fill)
 
 	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None):
 		"""Add the given vertex data to the draw queue.
@@ -236,10 +224,6 @@ class Renderer3D(OpenGLRenderer):
 				current_obj = (np.hstack([vertices, np.ones((vertices.shape[0], 1))]).dot(line_transform.T)[:, :3],
 								current_obj[1], current_obj[2])
 			current_queue.append(current_obj)
-
-			if index < len(self.draw_queue) - 1:
-				if self.draw_queue[index][0] == self.draw_queue[index + 1][0]:
-					continue
 
 			self.render_default(current_shape, current_queue)
 			current_queue = []
