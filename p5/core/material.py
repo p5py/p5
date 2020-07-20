@@ -1,6 +1,9 @@
 from . import p5
 from ..sketch.renderer3d import Shader
 
+__all__ = ['normal_material', 'basic_material']
+
+
 def ensure_p3d(name):
     assert p5.mode == 'P3D', name + "is only available in P3D renderer"
 
