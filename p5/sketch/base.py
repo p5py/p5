@@ -19,6 +19,8 @@
 """Base module for a sketch."""
 
 import builtins
+import pkgutil
+import os
 
 from PIL import Image
 from vispy import app
@@ -200,3 +202,8 @@ class Sketch(app.Canvas):
 
     # def on_stylus(self, event):
     #     self._enqueue_event('stylus', event)
+
+def read_shader(filename):
+    """Reads a shader in string mode and returns the content
+    """
+    return pkgutil.get_data('p5', os.path.join('sketch/shaders/',filename)).decode()
