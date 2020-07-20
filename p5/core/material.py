@@ -16,3 +16,4 @@ def normal_material():
 def basic_material(r, g, b):
     ensure_p3d("basic_material")
     p5.renderer.shader = Shader.BASIC
+    raise NotImplementedError
