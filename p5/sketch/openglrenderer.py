@@ -9,6 +9,12 @@ from vispy.gloo import Program, VertexBuffer, FrameBuffer, IndexBuffer
 from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
 
 
+def to_3x3(mat):
+    """Returns the upper left 3x3 corner of an np.array
+    """
+    return mat[:3, :3]
+
+
 def _tess_new_contour(vertices):
     """Given a list of vertices, evoke gluTess to create a contour
     """
@@ -29,6 +35,7 @@ def _get_line_from_verts(vertices):
     """
     n_vert = len(vertices)
     return _get_line_from_indices(vertices, np.arange(n_vert - 1, dtype=np.uint32), np.arange(1, n_vert, dtype=np.uint32))
+
 
 def _get_line_from_indices(vertices, start, end):
     """Given two columns of indices that represent edges, return a line rendering primitive
@@ -260,7 +267,6 @@ class OpenGLRenderer(ABC):
 
         self.vertex_buffer = VertexBuffer()
         self.index_buffer = IndexBuffer()
-
 
     def render_default(self, draw_type, draw_queue):
         # 1. Get the maximum number of vertices persent in the shapes
