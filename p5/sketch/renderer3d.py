@@ -227,14 +227,15 @@ class Renderer3D(OpenGLRenderer):
 				idx = np.array(edges, dtype=np.uint32).ravel()
 				self.draw_queue.append(["lines", (vertices, idx, stroke, normals)])
 
-	def render_default(self, draw_type, draw_queue):
-		# If shader does not need normals, strip them out and use the method from superclass
+	def render_with_shaders(self, draw_type, draw_queue):
+		"""Like render_default but is aware of shaders other than the basic one"""
+		# 0. If shader does not need normals, strip them out and use the method from superclass
 		if self.shader == Shader.BASIC or draw_type in ['points', 'lines']:
 			OpenGLRenderer.render_default(self, draw_type, [obj[:3] for obj in draw_queue])
 			return
-		# 1. Get the maximum number of vertices persent in the shapes
+
+		# 1. Get the maximum number of vertices present in the shapes
 		# in the draw queue.
-		#
 		if len(draw_queue) == 0:
 			return
 		num_vertices = 0
@@ -254,18 +255,10 @@ class Renderer3D(OpenGLRenderer):
 		draw_indices = []
 		for vertices, idx, color, normals in draw_queue:
 			num_shape_verts = len(vertices)
-
 			data['position'][sidx:(sidx + num_shape_verts), ] = np.array(vertices)
-
-			# color_array = np.array([color] * num_shape_verts)
-			# data['color'][sidx:sidx + num_shape_verts, :] = color_array
-
 			draw_indices.append(sidx + idx)
-
 			data['normal'][sidx:(sidx + num_shape_verts), ] = np.array(normals)
-
 			sidx += num_shape_verts
-
 		self.vertex_buffer.set_data(data)
 		self.index_buffer.set_data(np.hstack(draw_indices))
 
@@ -298,7 +291,7 @@ class Renderer3D(OpenGLRenderer):
 								current_obj[1], current_obj[2])
 			current_queue.append(current_obj)
 
-			self.render_default(current_shape, current_queue)
+			self.render_with_shaders(current_shape, current_queue)
 			current_queue = []
 
 		self.draw_queue = []
