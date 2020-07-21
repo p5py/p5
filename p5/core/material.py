@@ -1,5 +1,6 @@
 from . import p5
 from ..sketch.renderer3d import Shader
+from . import fill
 
 __all__ = ['normal_material', 'basic_material']
 
@@ -16,4 +17,4 @@ def normal_material():
 def basic_material(r, g, b):
     ensure_p3d("basic_material")
     p5.renderer.shader = Shader.BASIC
-    raise NotImplementedError
+    fill(r, g, b)
