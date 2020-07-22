@@ -152,6 +152,13 @@ class Renderer3D(OpenGLRenderer):
 		"""
 		self.draw_queue.append((stype, (vertices, idx, color)))
 
+	def tnormals(self, shape):
+		"""Obtain a list of vertex normals in world coordinates
+		"""
+		if self.shader == Shader.BASIC:  # Basic shader doesn't need this
+			return None
+		return shape.vertex_normals @ np.linalg.inv(to_3x3(self.transform_matrix) @ to_3x3(shape.matrix))
+
 	def render(self, shape):
 		if isinstance(shape, Geometry):
 			n = len(shape.vertices)
@@ -159,7 +166,7 @@ class Renderer3D(OpenGLRenderer):
 				np.hstack([shape.vertices, np.ones((n, 1))]),
 				shape.matrix,
 				self.transform_matrix)
-			tnormals = shape.vertex_normals @ np.linalg.inv(to_3x3(self.transform_matrix) @ to_3x3(shape.matrix))
+			tnormals = self.tnormals(shape)
 
 			edges = shape.edges
 			faces = shape.faces
