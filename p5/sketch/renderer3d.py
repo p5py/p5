@@ -51,6 +51,12 @@ class Renderer3D(OpenGLRenderer):
 		self.lookat_matrix = np.identity(4)
 		self.shader = Shader.BASIC
 
+		# Blinn-Phong Parameters
+		self.ambient = np.array([0.05]*3)
+		self.diffuse = np.array([0.6]*3)
+		self.specular = np.array([0.8]*3)
+		self.shininess = 0.6
+
 	def initialize_renderer(self):
 		super().initialize_renderer()
 		self.reset_view()

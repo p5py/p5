@@ -5,6 +5,15 @@ from . import fill
 __all__ = ['normal_material', 'basic_material']
 
 
+class BlinnPhong:
+    def __init__(self, color, ambient, diffuse, specular, shininess):
+        self.color = color
+        self.ambient = ambient
+        self.diffuse = diffuse
+        self.specular = specular
+        self.shininess = shininess
+
+
 def ensure_p3d(name):
     assert p5.mode == 'P3D', name + "is only available in P3D renderer"
 
