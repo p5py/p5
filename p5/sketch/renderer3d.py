@@ -18,13 +18,14 @@
 
 import numpy as np
 from numpy.linalg import inv
+from enum import Enum
 import math
 from ..pmath import matrix
 
 import builtins
 
 from vispy import gloo
-from vispy.gloo import Texture2D
+from vispy.gloo import Texture2D, Program
 
 from contextlib import contextmanager
 
@@ -33,13 +34,22 @@ from ..core.geometry import Geometry
 from ..core.shape import PShape
 
 from ..pmath.matrix import translation_matrix
-from .openglrenderer import OpenGLRenderer, get_render_primitives
-from .shaders3d import src_default, src_fbuffer
+from .openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3
+from .shaders3d import src_default, src_fbuffer, src_normal
+
+
+class Shader(Enum):
+	BASIC = 'BASIC'
+	NORMAL = 'NORMAL'
+	BLINN_PHONG = 'BLINN_PHONG'
+
 
 class Renderer3D(OpenGLRenderer):
 	def __init__(self):
 		super().__init__(src_fbuffer, src_default)
+		self.normal_prog = Program(src_normal.vert, src_normal.frag)
 		self.lookat_matrix = np.identity(4)
+		self.shader = Shader.BASIC
 
 	def initialize_renderer(self):
 		super().initialize_renderer()
@@ -70,9 +80,7 @@ class Renderer3D(OpenGLRenderer):
 		)
 
 		self.transform_matrix = np.identity(4)
-
-		self.default_prog['projection'] = self.projection_matrix.T.flatten()
-		self.default_prog['perspective_matrix'] = self.lookat_matrix.T.flatten()
+		self._update_shader_transforms()
 
 		self.fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
 		self.fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
@@ -97,16 +105,26 @@ class Renderer3D(OpenGLRenderer):
 			gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
 			gloo.set_state(depth_func='lequal')
 
+	def _update_shader_transforms(self):
+		self.default_prog['projection'] = self.projection_matrix.T.flatten()
+		self.default_prog['perspective_matrix'] = self.lookat_matrix.T.flatten()
+		if self.shader == Shader.NORMAL:
+			self.normal_prog['projection'] = self.projection_matrix.T.flatten()
+			self.normal_prog['perspective'] = self.lookat_matrix.T.flatten()
+			# This is a no-op, meaning that the normals stay in world space, which matches the behavior in p5.js
+			normal_transform = np.identity(3)
+			# I think the transformation below takes the vertices to camera space, but
+			# the results are funky, so it's probably incorrect? - ziyaointl, 2020/07/20
+			# normal_transform = np.linalg.inv(self.projection_matrix[:3, :3] @ self.lookat_matrix[:3, :3])
+			self.normal_prog['normal_transform'] = normal_transform.flatten()
+
 	@contextmanager
 	def draw_loop(self):
 		"""The main draw loop context manager.
 		"""
 
 		self.transform_matrix = np.identity(4)
-
-		self.default_prog['projection'] = self.projection_matrix.T.flatten()
-		self.default_prog['perspective_matrix'] = self.lookat_matrix.T.flatten()
-
+		self._update_shader_transforms()
 		self.fbuffer.color_buffer = self.fbuffer_tex_back
 
 		with self.fbuffer:
@@ -134,6 +152,13 @@ class Renderer3D(OpenGLRenderer):
 		"""
 		self.draw_queue.append((stype, (vertices, idx, color)))
 
+	def tnormals(self, shape):
+		"""Obtain a list of vertex normals in world coordinates
+		"""
+		if self.shader == Shader.BASIC:  # Basic shader doesn't need this
+			return None
+		return shape.vertex_normals @ np.linalg.inv(to_3x3(self.transform_matrix) @ to_3x3(shape.matrix))
+
 	def render(self, shape):
 		if isinstance(shape, Geometry):
 			n = len(shape.vertices)
@@ -141,11 +166,12 @@ class Renderer3D(OpenGLRenderer):
 				np.hstack([shape.vertices, np.ones((n, 1))]),
 				shape.matrix,
 				self.transform_matrix)
+			tnormals = self.tnormals(shape)
 
 			edges = shape.edges
 			faces = shape.faces
 
-			self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color)
+			self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color, tnormals)
 
 		elif isinstance(shape, PShape):
 			fill = shape.fill.normalized if shape.fill else None
@@ -162,7 +188,7 @@ class Renderer3D(OpenGLRenderer):
 				# Add to draw queue
 				self._add_to_draw_queue_simple(stype, vertices, idx, stroke if stype == 'lines' else fill)
 
-	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None):
+	def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None, normals=None):
 		"""Add the given vertex data to the draw queue.
 
 		:param stype: type of shape to be added. Should be one of {'poly',
@@ -198,15 +224,62 @@ class Renderer3D(OpenGLRenderer):
 
 		if fill_shape and stype not in ['point', 'path']:
 			idx = np.array(faces, dtype=np.uint32).ravel()
-			self.draw_queue.append(["triangles", (vertices, idx, fill)])
+			self.draw_queue.append(["triangles", (vertices, idx, fill, normals)])
 
 		if stroke_shape:
 			if stype == 'point':
 				idx = np.arange(0, len(vertices), dtype=np.uint32)
-				self.draw_queue.append(["points", (vertices, idx, stroke)])
+				self.draw_queue.append(["points", (vertices, idx, stroke, normals)])
 			else:
 				idx = np.array(edges, dtype=np.uint32).ravel()
-				self.draw_queue.append(["lines", (vertices, idx, stroke)])
+				self.draw_queue.append(["lines", (vertices, idx, stroke, normals)])
+
+	def render_with_shaders(self, draw_type, draw_queue):
+		"""Like render_default but is aware of shaders other than the basic one"""
+		# 0. If shader does not need normals, strip them out and use the method from superclass
+		if self.shader == Shader.BASIC or draw_type in ['points', 'lines']:
+			OpenGLRenderer.render_default(self, draw_type, [obj[:3] for obj in draw_queue])
+			return
+
+		# 1. Get the maximum number of vertices present in the shapes
+		# in the draw queue.
+		if len(draw_queue) == 0:
+			return
+		num_vertices = 0
+		for vertices, _, _, _ in draw_queue:
+			num_vertices = num_vertices + len(vertices)
+
+		# 2. Create empty buffers based on the number of vertices.
+		#
+		data = np.zeros(num_vertices,
+						dtype=[('position', np.float32, 3),
+							   ('normal', np.float32, 3)])
+
+		# 3. Loop through all the shapes in the geometry queue adding
+		# it's information to the buffer.
+		#
+		sidx = 0
+		draw_indices = []
+		for vertices, idx, color, normals in draw_queue:
+			num_shape_verts = len(vertices)
+			data['position'][sidx:(sidx + num_shape_verts), ] = np.array(vertices)
+			draw_indices.append(sidx + idx)
+			data['normal'][sidx:(sidx + num_shape_verts), ] = np.array(normals)
+			sidx += num_shape_verts
+		self.vertex_buffer.set_data(data)
+		self.index_buffer.set_data(np.hstack(draw_indices))
+
+		if self.shader == Shader.NORMAL:
+			# 4. Bind the buffer to the shader.
+			#
+			self.normal_prog.bind(self.vertex_buffer)
+
+			# 5. Draw the shape using the proper shape type and get rid of
+			# the buffers.
+			#
+			self.normal_prog.draw(draw_type, indices=self.index_buffer)
+		else:
+			raise NotImplementedError("Other shaders are not implemented")
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
@@ -225,7 +298,11 @@ class Renderer3D(OpenGLRenderer):
 								current_obj[1], current_obj[2])
 			current_queue.append(current_obj)
 
-			self.render_default(current_shape, current_queue)
+			self.render_with_shaders(current_shape, current_queue)
 			current_queue = []
 
 		self.draw_queue = []
+
+	def cleanup(self):
+		super(Renderer3D, self).cleanup()
+		self.normal_prog.delete()

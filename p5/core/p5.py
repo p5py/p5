@@ -22,4 +22,5 @@ from .tess import Tessellator
 
 sketch = None
 renderer = None
+mode = None
 tess = Tessellator()

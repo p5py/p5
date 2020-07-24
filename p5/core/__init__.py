@@ -27,3 +27,4 @@ from .font import *
 from .constants import *
 from .vertex import *
 from .svg import *
+from .material import *
