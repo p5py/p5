@@ -132,9 +132,9 @@ class PShape:
     def _set_color(self, name, value=None):
         color = None
 
-        if isinstance(value, Color):
+        if isinstance(value, Color):  # Is Color, no need to parse
             color = value
-        else:
+        else:  # Not Color, attempt to parse it
             if name == 'stroke' and p5.renderer.stroke_enabled:
                 color = Color(*p5.renderer.stroke_color,
                               color_mode='RGBA', normed=True)
