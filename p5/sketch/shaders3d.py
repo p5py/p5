@@ -22,55 +22,6 @@ from .util import read_shader
 
 ShaderSource = namedtuple('ShaderSource', 'vert frag')
 
-# vertex shader
-default_vertex_source = """
-attribute vec3 position;
-attribute vec4 color;
-
-varying vec4 frag_color;
-
-uniform mat4 projection;
-uniform mat4 perspective_matrix;
-
-void main()
-{
-    gl_Position = projection * perspective_matrix * vec4(position, 1.0);
-    frag_color = color;
-}
-"""
-
-default_fragment_source = """
-varying vec4 frag_color;
-
-void main()
-{
-    gl_FragColor = frag_color;
-}
-"""
-
-
-# Shader sources to draw framebuffers textues.
-fbuffer_vertex_source = """
-attribute vec2 position;
-attribute vec2 texcoord;
-
-varying vec2 vert_tex_coord;
-
-void main() {
-    gl_Position = vec4(position, 0, 1);
-    vert_tex_coord = texcoord;
-}
-"""
-
-fbuffer_fragment_source = """
-uniform sampler2D texture;
-varying vec2 vert_tex_coord;
-
-void main() {
-    gl_FragColor = texture2D(texture, vert_tex_coord.st);
-}
-"""
-
-src_default = ShaderSource(default_vertex_source, default_fragment_source)
-src_fbuffer = ShaderSource(fbuffer_vertex_source, fbuffer_fragment_source)
-src_normal = ShaderSource(read_shader('normal.vert'), read_shader('normal.frag'))
+src_default = ShaderSource(read_shader('3d/default3d.vert'), read_shader('common/default.frag'))
+src_fbuffer = ShaderSource(read_shader('common/fbuffer.vert'), read_shader('common/fbuffer.frag')) # Shader sources to draw framebuffers textues.
+src_normal = ShaderSource(read_shader('3d/normal.vert'), read_shader('3d/normal.frag'))
