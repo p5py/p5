@@ -241,7 +241,7 @@ class Renderer3D(OpenGLRenderer):
 		vertices, idx, color, normals, material = draw_obj
 		"""Like render_default but is aware of shaders other than the basic one"""
 		# 0. If material does not need normals nor extra info, strip them out and use the method from superclass
-		if isinstance(material, BasicMaterial) or draw_type in ['points', 'lines']:
+		if material is None or isinstance(material, BasicMaterial) or draw_type in ['points', 'lines']:
 			OpenGLRenderer.render_default(self, draw_type, [draw_obj[:3]])
 			return
 
