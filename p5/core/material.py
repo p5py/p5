@@ -5,16 +5,16 @@ from . import fill
 __all__ = ['normal_material', 'basic_material']
 
 
-class Basic:
+class BasicMaterial:
     def __init__(self, color):
         self.color = color
 
 
-class Normal:
+class NormalMaterial:
     pass
 
 
-class BlinnPhong:
+class BlinnPhongMaterial:
     def __init__(self, color, ambient, diffuse, specular, shininess):
         self.color = color
         self.ambient = ambient
