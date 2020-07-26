@@ -74,3 +74,4 @@ void main() {
 src_default = ShaderSource(default_vertex_source, default_fragment_source)
 src_fbuffer = ShaderSource(fbuffer_vertex_source, fbuffer_fragment_source)
 src_normal = ShaderSource(read_shader('normal.vert'), read_shader('normal.frag'))
+src_phong = ShaderSource(read_shader('3d/phong.vert'), read_shader('3d/phong.frag'))
