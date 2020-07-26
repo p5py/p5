@@ -1,6 +1,5 @@
-from . import p5
-from . import fill
-
+from . import p5, fill
+from ..sketch.util import ensure_p3d
 
 class BasicMaterial:
     def __init__(self, color):
@@ -18,10 +17,6 @@ class BlinnPhongMaterial:
         self.diffuse = diffuse
         self.specular = specular
         self.shininess = shininess
-
-
-def ensure_p3d(name):
-    assert p5.mode == 'P3D', name + "is only available in P3D renderer"
 
 
 def normal_material():
