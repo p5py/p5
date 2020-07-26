@@ -47,6 +47,8 @@ class Renderer3D(OpenGLRenderer):
 		self.lookat_matrix = np.identity(4)
 		self.material = BasicMaterial(self.fill_color)
 
+		# Camera position
+		self.camera_pos = np.zeros(3)
 		# Blinn-Phong Parameters
 		self.ambient = np.array([0.05]*3)
 		self.diffuse = np.array([0.6]*3)

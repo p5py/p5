@@ -187,10 +187,12 @@ def size(width, height):
 
     # update the look at matrix coordinates according to sketch size
     if p5.mode == "P3D":
+        eye = np.array((0, 0, height/math.tan(math.pi/6)))
         p5.renderer.lookat_matrix = matrix.look_at(
-        np.array([0, 0, height/math.tan(math.pi/6)]), 
-        np.array([0, 0, 0]), 
-        np.array([0, 1, 0]))
+            eye,
+            np.array((0, 0, 0)),
+            np.array((0, 1, 0)))
+        p5.renderer.camera_pos = eye
 
 def no_loop():
     """Stop draw() from being continuously called.

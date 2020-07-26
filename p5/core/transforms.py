@@ -229,6 +229,7 @@ def camera(position=None, target_position=(0, 0, 0), up_vector=(0, 1, 0)):
         np.array(position), 
         np.array(target_position), 
         np.array(up_vector))
+    p5.renderer.camera_pos = np.array(position)
 
 def perspective(fovy, aspect, near, far):
     """
