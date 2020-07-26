@@ -171,6 +171,8 @@ class Renderer3D(OpenGLRenderer):
 	def render(self, shape):
 		if isinstance(shape, Geometry):
 			n = len(shape.vertices)
+			# Perform model transform
+			# TODO: Investigate moving model transform from CPU to the GPU
 			tverts = self._transform_vertices(
 				np.hstack([shape.vertices, np.ones((n, 1))]),
 				shape.matrix,
