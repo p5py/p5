@@ -221,10 +221,10 @@ def camera(position=None, target_position=(0, 0, 0), up_vector=(0, 1, 0)):
     :type up_vector: tuple
 
     """
-    # Not setting this as a default argument gets around the problem that height is not found in package builtins
-    # Once we get rid of builtins we should be able to set it as a default argument
+    # Not setting this as a default argument gets around the problem that sketch.size is not initialized when
+    # default arguments are initialized
     if position is None:
-        position = (0, 0, builtins.height / math.tan(math.pi / 6))
+        position = (0, 0, p5.sketch.size[1] / math.tan(math.pi / 6))
     p5.renderer.lookat_matrix = matrix.look_at(
         np.array(position), 
         np.array(target_position), 
