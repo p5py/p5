@@ -16,8 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import numpy as np
 from numpy.linalg import inv
+from sys import stderr
+import numpy as np
 import math
 from ..pmath import matrix
 
@@ -31,6 +32,7 @@ from contextlib import contextmanager
 from ..core.constants import Z_EPSILON
 from ..core.geometry import Geometry
 from ..core.shape import PShape
+from ..core.light import AmbientLight, DirectionalLight, PointLight
 
 from ..pmath.matrix import translation_matrix
 from .openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3
@@ -50,6 +52,11 @@ class Renderer3D(OpenGLRenderer):
 		self.diffuse = np.array([0.6]*3)
 		self.specular = np.array([0.8]*3)
 		self.shininess = 0.6
+		# Lights
+		self.MAX_LIGHTS_PER_CATEGORY = 64
+		self.ambient_lights = []
+		self.directional_lights = []
+		self.point_lights = []
 
 	def initialize_renderer(self):
 		super().initialize_renderer()
@@ -297,3 +304,20 @@ class Renderer3D(OpenGLRenderer):
 	def cleanup(self):
 		super(Renderer3D, self).cleanup()
 		self.normal_prog.delete()
+
+	def _add_light_abstract(self, light, light_array):
+		if len(light_array) > self.MAX_LIGHTS_PER_CATEGORY:
+			print("Too many instances of {} are added. Max number {}.".format(type(light), self.MAX_LIGHTS_PER_CATEGORY),
+				  file=stderr)
+		else:
+			light_array.append(light)
+
+	def add_light(self, light):
+		if isinstance(light, DirectionalLight):
+			self._add_light_abstract(light, self.directional_lights)
+		elif isinstance(light, AmbientLight):
+			self._add_light_abstract(light, self.ambient_lights)
+		elif isinstance(light, PointLight):
+			self._add_light_abstract(light, self.point_lights)
+		else:
+			raise ValueError('Light passed to add_light is not of a known type')
