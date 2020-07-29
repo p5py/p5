@@ -32,7 +32,6 @@ from contextlib import contextmanager
 from ..core.constants import Z_EPSILON
 from ..core.geometry import Geometry
 from ..core.shape import PShape
-from ..core.light import AmbientLight, DirectionalLight, PointLight
 
 from ..pmath.matrix import translation_matrix
 from .openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3
