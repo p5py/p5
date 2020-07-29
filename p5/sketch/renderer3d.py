@@ -16,8 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import numpy as np
 from numpy.linalg import inv
+from sys import stderr
+import numpy as np
 import math
 from ..pmath import matrix
 
@@ -34,22 +35,61 @@ from ..core.shape import PShape
 
 from ..pmath.matrix import translation_matrix
 from .openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3
-from .shaders3d import src_default, src_fbuffer, src_normal
-from ..core.material import BasicMaterial, NormalMaterial
+from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
+from ..core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
 
+
+class GlslList:
+	"""List of objects to be used in glsl
+	"""
+	def __init__(self, max_size, obj_size, dtype):
+		"""Initialize GlslList
+		max_size: The maximum size of the list
+		obj_size: The length of an individual object
+		dtype: The data type of this list
+		"""
+		list_shape = max_size if obj_size == 1 else (max_size, obj_size)
+		self.data = np.zeros(list_shape, dtype=dtype)
+		self.size = 0
+		self.max_size = max_size
+
+	def add(self, obj):
+		if self.size == self.max_size:
+			print("Too many instances of {} are added. Max size {}.".format(type(obj), self.max_size),
+				  file=stderr)
+			return
+		self.data[self.size] = obj
+		self.size += 1
+
+	def clear(self):
+		self.data = np.zeros_like(self.data)
+		self.size = 0
 
 class Renderer3D(OpenGLRenderer):
 	def __init__(self):
 		super().__init__(src_fbuffer, src_default)
 		self.normal_prog = Program(src_normal.vert, src_normal.frag)
+		self.phong_prog = Program(src_phong.vert, src_phong.frag)
 		self.lookat_matrix = np.identity(4)
 		self.material = BasicMaterial(self.fill_color)
 
+		# Camera position
+		self.camera_pos = np.zeros(3)
 		# Blinn-Phong Parameters
-		self.ambient = np.array([0.05]*3)
+		self.ambient = np.array([0.2]*3)
 		self.diffuse = np.array([0.6]*3)
 		self.specular = np.array([0.8]*3)
-		self.shininess = 0.6
+		self.shininess = 8
+		# Lights
+		self.MAX_LIGHTS_PER_CATEGORY = 8
+		self.ambient_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.directional_light_dir = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.directional_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.point_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.point_light_pos = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.const_falloff = 0.0
+		self.linear_falloff = 0.0
+		self.quadratic_falloff = 0.0
 
 	def initialize_renderer(self):
 		super().initialize_renderer()
@@ -97,6 +137,13 @@ class Renderer3D(OpenGLRenderer):
 		gloo.set_state(clear_color=self.background_color)
 		gloo.clear(color=color, depth=depth)
 
+	def clear_lights(self):
+		self.ambient_light_color.clear()
+		self.directional_light_color.clear()
+		self.directional_light_dir.clear()
+		self.point_light_color.clear()
+		self.point_light_pos.clear()
+
 	def _comm_toggles(self, state=True):
 		gloo.set_state(blend=state)
 		gloo.set_state(depth_test=state)
@@ -120,6 +167,10 @@ class Renderer3D(OpenGLRenderer):
 		# normal_transform = np.linalg.inv(self.projection_matrix[:3, :3] @ self.lookat_matrix[:3, :3])
 		self.normal_prog['normal_transform'] = normal_transform.flatten()
 
+		# Blinn-Phong Shader
+		self.phong_prog['projection'] = self.projection_matrix.T.flatten()
+		self.phong_prog['perspective'] = self.lookat_matrix.T.flatten()
+
 	@contextmanager
 	def draw_loop(self):
 		"""The main draw loop context manager.
@@ -135,6 +186,7 @@ class Renderer3D(OpenGLRenderer):
 			self.fbuffer_prog['texture'] = self.fbuffer_tex_front
 			self.fbuffer_prog.draw('triangle_strip')
 			self.clear(color=False, depth=True)
+			self.clear_lights()
 
 			yield
 
@@ -164,6 +216,8 @@ class Renderer3D(OpenGLRenderer):
 	def render(self, shape):
 		if isinstance(shape, Geometry):
 			n = len(shape.vertices)
+			# Perform model transform
+			# TODO: Investigate moving model transform from CPU to the GPU
 			tverts = self._transform_vertices(
 				np.hstack([shape.vertices, np.ones((n, 1))]),
 				shape.matrix,
@@ -273,8 +327,29 @@ class Renderer3D(OpenGLRenderer):
 			# the buffers.
 			#
 			self.normal_prog.draw(draw_type, indices=self.index_buffer)
+		elif isinstance(material, BlinnPhongMaterial):
+			self.phong_prog.bind(self.vertex_buffer)
+			self.phong_prog['u_cam_pos'] = self.camera_pos
+			# Material attributes
+			self.phong_prog['u_ambient_color'] = material.ambient
+			self.phong_prog['u_diffuse_color'] = material.diffuse
+			self.phong_prog['u_specular_color'] = material.specular
+			self.phong_prog['u_shininess'] = material.shininess
+			# Directional lights
+			self.phong_prog['u_directional_light_count'] = self.directional_light_color.size
+			self.phong_prog['u_directional_light_dir'] = self.directional_light_dir.data
+			self.phong_prog['u_directional_light_color'] = self.directional_light_color.data
+			# Ambient lights
+			self.phong_prog['u_ambient_light_count'] = self.ambient_light_color.size
+			self.phong_prog['u_ambient_light_color'] = self.ambient_light_color.data
+			# Point lights
+			self.phong_prog['u_point_light_count'] = self.point_light_color.size
+			self.phong_prog['u_point_light_color'] = self.point_light_color.data
+			self.phong_prog['u_point_light_pos'] = self.point_light_pos.data
+			# Draw
+			self.phong_prog.draw(draw_type, indices=self.index_buffer)
 		else:
-			raise NotImplementedError("Other shaders are not implemented")
+			raise NotImplementedError("Material not implemented")
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
@@ -297,3 +372,15 @@ class Renderer3D(OpenGLRenderer):
 	def cleanup(self):
 		super(Renderer3D, self).cleanup()
 		self.normal_prog.delete()
+		self.phong_prog.delete()
+
+	def add_ambient_light(self, r, g, b):
+		self.ambient_light_color.add(np.array((r, g, b)))
+
+	def add_directional_light(self, r, g, b, x, y, z):
+		self.directional_light_color.add(np.array((r, g, b)))
+		self.directional_light_dir.add(np.array((x, y, z)))
+
+	def add_point_light(self, r, g, b, x, y, z):
+		self.point_light_color.add(np.array((r, g, b)))
+		self.point_light_pos.add(np.array((x, y, z)))
