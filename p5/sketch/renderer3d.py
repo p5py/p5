@@ -77,15 +77,20 @@ class Renderer3D(OpenGLRenderer):
 		# Camera position
 		self.camera_pos = np.zeros(3)
 		# Blinn-Phong Parameters
-		self.ambient = np.array([0.05]*3)
+		self.ambient = np.array([0.2]*3)
 		self.diffuse = np.array([0.6]*3)
 		self.specular = np.array([0.8]*3)
-		self.shininess = 0.6
+		self.shininess = 8
 		# Lights
-		self.MAX_LIGHTS_PER_CATEGORY = 64
-		self.ambient_lights = []
-		self.directional_lights = []
-		self.point_lights = []
+		self.MAX_LIGHTS_PER_CATEGORY = 8
+		self.ambient_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.directional_light_dir = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.directional_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.point_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.point_light_pos = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.const_falloff = 0.0
+		self.linear_falloff = 0.0
+		self.quadratic_falloff = 0.0
 
 	def initialize_renderer(self):
 		super().initialize_renderer()
@@ -133,6 +138,13 @@ class Renderer3D(OpenGLRenderer):
 		gloo.set_state(clear_color=self.background_color)
 		gloo.clear(color=color, depth=depth)
 
+	def clear_lights(self):
+		self.ambient_light_color.clear()
+		self.directional_light_color.clear()
+		self.directional_light_dir.clear()
+		self.point_light_color.clear()
+		self.point_light_pos.clear()
+
 	def _comm_toggles(self, state=True):
 		gloo.set_state(blend=state)
 		gloo.set_state(depth_test=state)
@@ -175,6 +187,7 @@ class Renderer3D(OpenGLRenderer):
 			self.fbuffer_prog['texture'] = self.fbuffer_tex_front
 			self.fbuffer_prog.draw('triangle_strip')
 			self.clear(color=False, depth=True)
+			self.clear_lights()
 
 			yield
 
@@ -315,8 +328,29 @@ class Renderer3D(OpenGLRenderer):
 			# the buffers.
 			#
 			self.normal_prog.draw(draw_type, indices=self.index_buffer)
+		elif isinstance(material, BlinnPhongMaterial):
+			self.phong_prog.bind(self.vertex_buffer)
+			self.phong_prog['u_cam_pos'] = self.camera_pos
+			# Material attributes
+			self.phong_prog['u_ambient_color'] = material.ambient
+			self.phong_prog['u_diffuse_color'] = material.diffuse
+			self.phong_prog['u_specular_color'] = material.specular
+			self.phong_prog['u_shininess'] = material.shininess
+			# Directional lights
+			self.phong_prog['u_directional_light_count'] = self.directional_light_color.size
+			self.phong_prog['u_directional_light_dir'] = self.directional_light_dir.data
+			self.phong_prog['u_directional_light_color'] = self.directional_light_color.data
+			# Ambient lights
+			self.phong_prog['u_ambient_light_count'] = self.ambient_light_color.size
+			self.phong_prog['u_ambient_light_color'] = self.ambient_light_color.data
+			# Point lights
+			self.phong_prog['u_point_light_count'] = self.point_light_color.size
+			self.phong_prog['u_point_light_color'] = self.point_light_color.data
+			self.phong_prog['u_point_light_pos'] = self.point_light_pos.data
+			# Draw
+			self.phong_prog.draw(draw_type, indices=self.index_buffer)
 		else:
-			raise NotImplementedError("Other shaders are not implemented")
+			raise NotImplementedError("Material not implemented")
 
 	def flush_geometry(self):
 		"""Flush all the shape geometry from the draw queue to the GPU.
@@ -341,19 +375,13 @@ class Renderer3D(OpenGLRenderer):
 		self.normal_prog.delete()
 		self.phong_prog.delete()
 
-	def _add_light_abstract(self, light, light_array):
-		if len(light_array) > self.MAX_LIGHTS_PER_CATEGORY:
-			print("Too many instances of {} are added. Max number {}.".format(type(light), self.MAX_LIGHTS_PER_CATEGORY),
-				  file=stderr)
-		else:
-			light_array.append(light)
+	def add_ambient_light(self, r, g, b):
+		self.ambient_light_color.add(np.array((r, g, b)))
 
-	def add_light(self, light):
-		if isinstance(light, DirectionalLight):
-			self._add_light_abstract(light, self.directional_lights)
-		elif isinstance(light, AmbientLight):
-			self._add_light_abstract(light, self.ambient_lights)
-		elif isinstance(light, PointLight):
-			self._add_light_abstract(light, self.point_lights)
-		else:
-			raise ValueError('Light passed to add_light is not of a known type')
+	def add_directional_light(self, r, g, b, x, y, z):
+		self.directional_light_color.add(np.array((r, g, b)))
+		self.directional_light_dir.add(np.array((x, y, z)))
+
+	def add_point_light(self, r, g, b, x, y, z):
+		self.point_light_color.add(np.array((r, g, b)))
+		self.point_light_pos.add(np.array((x, y, z)))
