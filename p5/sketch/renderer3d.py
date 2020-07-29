@@ -40,6 +40,32 @@ from .shaders3d import src_default, src_fbuffer, src_normal
 from ..core.material import BasicMaterial, NormalMaterial
 
 
+class GlslList:
+	"""List of objects to be used in glsl
+	"""
+	def __init__(self, max_size, obj_size, dtype):
+		"""Initialize GlslList
+		max_size: The maximum size of the list
+		obj_size: The length of an individual object
+		dtype: The data type of this list
+		"""
+		list_shape = max_size if obj_size == 1 else (max_size, obj_size)
+		self.data = np.zeros(list_shape, dtype=dtype)
+		self.size = 0
+		self.max_size = max_size
+
+	def add(self, obj):
+		if self.size == self.max_size:
+			print("Too many instances of {} are added. Max size {}.".format(type(obj), self.max_size),
+				  file=stderr)
+			return
+		self.data[self.size] = obj
+		self.size += 1
+
+	def clear(self):
+		self.data = np.zeros_like(self.data)
+		self.size = 0
+
 class Renderer3D(OpenGLRenderer):
 	def __init__(self):
 		super().__init__(src_fbuffer, src_default)
