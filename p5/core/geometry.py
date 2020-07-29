@@ -20,6 +20,7 @@
 3D geometry class for p5py
 """
 
+from . import p5
 import numpy as np
 import math
 
@@ -55,6 +56,7 @@ class Geometry:
 		self.stroke_indices = []
 
 		self.matrix = np.identity(4)
+		self.material = p5.renderer.material
 
 	def reset(self):
 		"""

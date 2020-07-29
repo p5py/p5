@@ -47,10 +47,11 @@ def push_style():
     - (*) text_mode
     - (*) text_size
     - (*) text_leading
-    - (*) emissive
-    - (*) specular
-    - (*) shininess
-    - (*) ambient
+    -  emissive
+    -  specular
+    -  shininess
+    -  ambient
+    -  material
 
     """
     prev_background_color = p5.renderer.background_color
@@ -68,6 +69,14 @@ def push_style():
     prev_color_mode = color.color_parse_mode
     prev_color_range = color.color_range
 
+    prev_ambient, prev_diffuse, prev_specular, prev_shininess, prev_material = [None] * 5
+    if p5.mode == 'P3D':
+        prev_ambient = p5.renderer.ambient
+        prev_diffuse = p5.renderer.diffuse
+        prev_specular = p5.renderer.specular
+        prev_shininess = p5.renderer.shininess
+        prev_material = p5.renderer.material
+
     yield
 
     p5.renderer.background_color = prev_background_color
@@ -84,3 +93,10 @@ def push_style():
 
     color.prev_color_parse_mode = prev_color_mode
     color.prev_color_range = prev_color_range
+
+    if p5.mode == 'P3D':
+        p5.renderer.ambient = prev_ambient
+        p5.renderer.diffuse = prev_diffuse
+        p5.renderer.specular = prev_specular
+        p5.renderer.shininess = prev_shininess
+        p5.renderer.material = prev_material
