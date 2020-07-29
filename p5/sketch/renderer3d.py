@@ -36,8 +36,8 @@ from ..core.light import AmbientLight, DirectionalLight, PointLight
 
 from ..pmath.matrix import translation_matrix
 from .openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3
-from .shaders3d import src_default, src_fbuffer, src_normal
-from ..core.material import BasicMaterial, NormalMaterial
+from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
+from ..core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
 
 
 class GlslList:
@@ -70,6 +70,7 @@ class Renderer3D(OpenGLRenderer):
 	def __init__(self):
 		super().__init__(src_fbuffer, src_default)
 		self.normal_prog = Program(src_normal.vert, src_normal.frag)
+		self.phong_prog = Program(src_phong.vert, src_phong.frag)
 		self.lookat_matrix = np.identity(4)
 		self.material = BasicMaterial(self.fill_color)
 
@@ -154,6 +155,10 @@ class Renderer3D(OpenGLRenderer):
 		# the results are funky, so it's probably incorrect? - ziyaointl, 2020/07/20
 		# normal_transform = np.linalg.inv(self.projection_matrix[:3, :3] @ self.lookat_matrix[:3, :3])
 		self.normal_prog['normal_transform'] = normal_transform.flatten()
+
+		# Blinn-Phong Shader
+		self.phong_prog['projection'] = self.projection_matrix.T.flatten()
+		self.phong_prog['perspective'] = self.lookat_matrix.T.flatten()
 
 	@contextmanager
 	def draw_loop(self):
@@ -334,6 +339,7 @@ class Renderer3D(OpenGLRenderer):
 	def cleanup(self):
 		super(Renderer3D, self).cleanup()
 		self.normal_prog.delete()
+		self.phong_prog.delete()
 
 	def _add_light_abstract(self, light, light_array):
 		if len(light_array) > self.MAX_LIGHTS_PER_CATEGORY:
