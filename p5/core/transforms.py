@@ -17,9 +17,9 @@
 #
 
 from contextlib import contextmanager
-
 import numpy as np
-
+import math
+import builtins
 from ..pmath import matrix
 
 from . import p5
@@ -197,7 +197,7 @@ def shear_y(theta):
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
     return shear_mat
 
-def camera(position, target_position, up_vector):
+def camera(position=None, target_position=(0, 0, 0), up_vector=(0, 1, 0)):
     """Sets the camera position for a 3D sketch. 
     Parameters for this function define the position for 
     the camera, the center of the sketch (where the 
@@ -207,7 +207,7 @@ def camera(position, target_position, up_vector):
     When called with no arguments, this function 
     creates a default camera equivalent to::
 
-        camera((0, 0, (height/2.0) / tan(PI*30.0 / 180.0)),
+        camera((0, 0, height / math.tan(math.pi / 6))),
                (0, 0, 0),
                (0, 1, 0))
 
@@ -221,6 +221,10 @@ def camera(position, target_position, up_vector):
     :type up_vector: tuple
 
     """
+    # Not setting this as a default argument gets around the problem that sketch.size is not initialized when
+    # default arguments are initialized
+    if position is None:
+        position = (0, 0, p5.sketch.size[1] / math.tan(math.pi / 6))
     p5.renderer.lookat_matrix = matrix.look_at(
         np.array(position), 
         np.array(target_position), 
