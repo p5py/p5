@@ -27,4 +27,6 @@ def point_light(r, g, b, x, y, z):
 
 def light_falloff(constant, linear, quadratic):
     ensure_p3d('light_falloff')
-    raise NotImplementedError()
+    p5.renderer.curr_constant_falloff = constant
+    p5.renderer.curr_linear_falloff = linear
+    p5.renderer.curr_quadratic_falloff = quadratic

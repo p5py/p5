@@ -48,7 +48,7 @@ class GlslList:
 		obj_size: The length of an individual object
 		dtype: The data type of this list
 		"""
-		list_shape = max_size if obj_size == 1 else (max_size, obj_size)
+		list_shape = (max_size, obj_size)
 		self.data = np.zeros(list_shape, dtype=dtype)
 		self.size = 0
 		self.max_size = max_size
@@ -87,9 +87,10 @@ class Renderer3D(OpenGLRenderer):
 		self.directional_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
 		self.point_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
 		self.point_light_pos = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
-		self.const_falloff = 0.0
-		self.linear_falloff = 0.0
-		self.quadratic_falloff = 0.0
+		self.const_falloff = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 1, np.float32)
+		self.linear_falloff = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 1, np.float32)
+		self.quadratic_falloff = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 1, np.float32)
+		self.curr_linear_falloff, self.curr_quadratic_falloff, self.curr_constant_falloff = 0.0, 0.0, 0.0
 
 	def initialize_renderer(self):
 		super().initialize_renderer()
@@ -143,6 +144,9 @@ class Renderer3D(OpenGLRenderer):
 		self.directional_light_dir.clear()
 		self.point_light_color.clear()
 		self.point_light_pos.clear()
+		self.const_falloff.clear()
+		self.linear_falloff.clear()
+		self.quadratic_falloff.clear()
 
 	def _comm_toggles(self, state=True):
 		gloo.set_state(blend=state)
@@ -346,6 +350,10 @@ class Renderer3D(OpenGLRenderer):
 			self.phong_prog['u_point_light_count'] = self.point_light_color.size
 			self.phong_prog['u_point_light_color'] = self.point_light_color.data
 			self.phong_prog['u_point_light_pos'] = self.point_light_pos.data
+			# Point light falloffs
+			self.phong_prog['u_const_falloff'] = self.const_falloff.data
+			self.phong_prog['u_linear_falloff'] = self.linear_falloff.data
+			self.phong_prog['u_quadratic_falloff'] = self.quadratic_falloff.data
 			# Draw
 			self.phong_prog.draw(draw_type, indices=self.index_buffer)
 		else:
@@ -384,3 +392,6 @@ class Renderer3D(OpenGLRenderer):
 	def add_point_light(self, r, g, b, x, y, z):
 		self.point_light_color.add(np.array((r, g, b)))
 		self.point_light_pos.add(np.array((x, y, z)))
+		self.const_falloff.add(self.curr_constant_falloff)
+		self.linear_falloff.add(self.curr_linear_falloff)
+		self.quadratic_falloff.add(self.curr_quadratic_falloff)
