@@ -85,12 +85,15 @@ class Renderer3D(OpenGLRenderer):
 		self.ambient_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
 		self.directional_light_dir = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
 		self.directional_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.directional_light_specular = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
 		self.point_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
 		self.point_light_pos = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
+		self.point_light_specular = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
 		self.const_falloff = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 1, np.float32)
 		self.linear_falloff = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 1, np.float32)
 		self.quadratic_falloff = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 1, np.float32)
 		self.curr_linear_falloff, self.curr_quadratic_falloff, self.curr_constant_falloff = 0.0, 0.0, 0.0
+		self.light_specular = np.array([0.0]*3)
 
 	def initialize_renderer(self):
 		super().initialize_renderer()
@@ -142,8 +145,10 @@ class Renderer3D(OpenGLRenderer):
 		self.ambient_light_color.clear()
 		self.directional_light_color.clear()
 		self.directional_light_dir.clear()
+		self.directional_light_specular.clear()
 		self.point_light_color.clear()
 		self.point_light_pos.clear()
+		self.point_light_specular.clear()
 		self.const_falloff.clear()
 		self.linear_falloff.clear()
 		self.quadratic_falloff.clear()
@@ -343,6 +348,7 @@ class Renderer3D(OpenGLRenderer):
 			self.phong_prog['u_directional_light_count'] = self.directional_light_color.size
 			self.phong_prog['u_directional_light_dir'] = self.directional_light_dir.data
 			self.phong_prog['u_directional_light_color'] = self.directional_light_color.data
+			self.phong_prog['u_directional_light_specular'] = self.directional_light_specular.data
 			# Ambient lights
 			self.phong_prog['u_ambient_light_count'] = self.ambient_light_color.size
 			self.phong_prog['u_ambient_light_color'] = self.ambient_light_color.data
@@ -350,6 +356,7 @@ class Renderer3D(OpenGLRenderer):
 			self.phong_prog['u_point_light_count'] = self.point_light_color.size
 			self.phong_prog['u_point_light_color'] = self.point_light_color.data
 			self.phong_prog['u_point_light_pos'] = self.point_light_pos.data
+			self.phong_prog['u_point_light_specular'] = self.point_light_specular.data
 			# Point light falloffs
 			self.phong_prog['u_const_falloff'] = self.const_falloff.data
 			self.phong_prog['u_linear_falloff'] = self.linear_falloff.data
@@ -388,10 +395,12 @@ class Renderer3D(OpenGLRenderer):
 	def add_directional_light(self, r, g, b, x, y, z):
 		self.directional_light_color.add(np.array((r, g, b)))
 		self.directional_light_dir.add(np.array((x, y, z)))
+		self.directional_light_specular.add(self.light_specular)
 
 	def add_point_light(self, r, g, b, x, y, z):
 		self.point_light_color.add(np.array((r, g, b)))
 		self.point_light_pos.add(np.array((x, y, z)))
+		self.point_light_specular.add(self.light_specular)
 		self.const_falloff.add(self.curr_constant_falloff)
 		self.linear_falloff.add(self.curr_linear_falloff)
 		self.quadratic_falloff.add(self.curr_quadratic_falloff)

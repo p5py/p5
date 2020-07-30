@@ -10,6 +10,7 @@ uniform float u_shininess; // Power of the cosine term in specular component
 uniform int u_directional_light_count;
 uniform vec3 u_directional_light_dir[8];
 uniform vec3 u_directional_light_color[8];
+uniform vec3 u_directional_light_specular[8];
 
 // Ambient lights
 uniform int u_ambient_light_count;
@@ -19,6 +20,7 @@ uniform vec3 u_ambient_light_color[8];
 uniform int u_point_light_count;
 uniform vec3 u_point_light_pos[8];
 uniform vec3 u_point_light_color[8];
+uniform vec3 u_point_light_specular[8];
 // Falloffs for point lights
 uniform float u_const_falloff[8];
 uniform float u_linear_falloff[8];
@@ -70,7 +72,7 @@ void main() {
       break;
     vec3 l_dir = normalize(-u_directional_light_dir[i]);
     col += diffuse(u_directional_light_color[i], l_dir);
-    col += specular(u_directional_light_color[i], l_dir);
+    col += specular(u_directional_light_specular[i], l_dir);
   }
 
   // Add point light contributions
@@ -81,7 +83,7 @@ void main() {
     float d = length(l_delta);
     vec3 l_dir = normalize(l_delta);
     col += fall_off(diffuse(u_point_light_color[i], l_dir), d, i);
-    col += fall_off(specular(u_point_light_color[i], l_dir), d, i);
+    col += fall_off(specular(u_point_light_specular[i], l_dir), d, i);
   }
   gl_FragColor = vec4(col, 1);
 }
