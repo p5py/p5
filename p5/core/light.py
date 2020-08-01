@@ -1,7 +1,8 @@
 from . import p5
 from ..sketch.util import ensure_p3d
+import numpy as np
 
-__all__ = ['lights', 'ambient_light', 'directional_light', 'point_light', 'light_falloff']
+__all__ = ['lights', 'ambient_light', 'directional_light', 'point_light', 'light_falloff', 'light_specular']
 
 
 def lights():
@@ -27,4 +28,11 @@ def point_light(r, g, b, x, y, z):
 
 def light_falloff(constant, linear, quadratic):
     ensure_p3d('light_falloff')
-    raise NotImplementedError()
+    p5.renderer.curr_constant_falloff = constant
+    p5.renderer.curr_linear_falloff = linear
+    p5.renderer.curr_quadratic_falloff = quadratic
+
+
+def light_specular(r, g, b):
+    ensure_p3d('light_specular')
+    p5.renderer.light_specular = np.array([r, g, b])

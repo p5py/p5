@@ -10,6 +10,7 @@ uniform float u_shininess; // Power of the cosine term in specular component
 uniform int u_directional_light_count;
 uniform vec3 u_directional_light_dir[8];
 uniform vec3 u_directional_light_color[8];
+uniform vec3 u_directional_light_specular[8];
 
 // Ambient lights
 uniform int u_ambient_light_count;
@@ -19,21 +20,22 @@ uniform vec3 u_ambient_light_color[8];
 uniform int u_point_light_count;
 uniform vec3 u_point_light_pos[8];
 uniform vec3 u_point_light_color[8];
+uniform vec3 u_point_light_specular[8];
 // Falloffs for point lights
-uniform float u_const_falloff;
-uniform float u_linear_falloff;
-uniform float u_quadratic_falloff;
+uniform float u_const_falloff[8];
+uniform float u_linear_falloff[8];
+uniform float u_quadratic_falloff[8];
 
 varying vec3 v_normal;
 varying vec3 v_position;
 
-vec3 fall_off(vec3 col, float d) {
-  if (u_const_falloff != .0)
-    col /= u_const_falloff;
-  if (u_linear_falloff != .0)
-    col /= u_linear_falloff * d;
-  if (u_quadratic_falloff != .0)
-    col /= u_quadratic_falloff * d * d;
+vec3 fall_off(vec3 col, float d, int i) {
+  if (u_const_falloff[i] != .0)
+    col /= u_const_falloff[i];
+  if (u_linear_falloff[i] != .0)
+    col /= u_linear_falloff[i] * d;
+  if (u_quadratic_falloff[i] != .0)
+    col /= u_quadratic_falloff[i] * d * d;
   return col;
 }
 
@@ -70,7 +72,7 @@ void main() {
       break;
     vec3 l_dir = normalize(-u_directional_light_dir[i]);
     col += diffuse(u_directional_light_color[i], l_dir);
-    col += specular(u_directional_light_color[i], l_dir);
+    col += specular(u_directional_light_specular[i], l_dir);
   }
 
   // Add point light contributions
@@ -80,8 +82,8 @@ void main() {
     vec3 l_delta = u_point_light_pos[i] - v_position;
     float d = length(l_delta);
     vec3 l_dir = normalize(l_delta);
-    col += fall_off(diffuse(u_point_light_color[i], l_dir), d);
-    col += fall_off(specular(u_point_light_color[i], l_dir), d);
+    col += fall_off(diffuse(u_point_light_color[i], l_dir), d, i);
+    col += fall_off(specular(u_point_light_specular[i], l_dir), d, i);
   }
   gl_FragColor = vec4(col, 1);
 }
