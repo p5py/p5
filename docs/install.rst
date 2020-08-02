@@ -89,25 +89,13 @@ to install the latest p5 version.
 Troubleshooting
 ---------------
 
-1. In case the automatically
-installation fails, try installing the dependencies separately:
+If you are having trouble installing p5.py follow the following steps:
 
-.. code:: bash
+1. Download https://raw.githubusercontent.com/p5py/p5/master/troubleshoot.py
+2. Open termianl and go to the directory where the file was downloaded.
+3. Run the python script.
 
-   $ pip install numpy
-   $ pip install vispy
-
-2. If you get a error that says ``Microsoft Visual C++ is required`` then follow the below steps:
-
-- Install the prebuilt version of vispy from here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#vispy. For instance if you have python 3.8 then download the cp38 one.
-
-- Open terminal and cd into the directory in which you downloaded the prebuilt vispy file.
-
-- Then in terminal type:
-    .. code:: bash
-
-        $ pip install file_downloaded.whl
-        $ pip install p5 --user
+This should solve all your problems and install everything!!!
 
 In case of other installation problems, open an issue on the main `p5
 Github <https://github.com/p5py/p5/issues>`_ repository.
