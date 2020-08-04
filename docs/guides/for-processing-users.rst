@@ -317,7 +317,7 @@ Math
      source = (0, width)
      target = (0, 10)
 
-     n = map(mouse_x, source, target)
+     n = remap(mouse_x, source, target)
 
 
 New Features
