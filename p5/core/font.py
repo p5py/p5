@@ -226,7 +226,7 @@ def text_size(size):
         if _font_family.path.endswith('ttf') or _font_family.path.endswith('otf'):
             _font_family = ImageFont.truetype(_font_family.path, size)
     else:
-        raise ValueError("text_size is nor supported for Bitmap Fonts")
+        raise ValueError("text_size is not supported for Bitmap Fonts")
 
 def text_width(text):
     """Calculates and returns the width of any character or text string
