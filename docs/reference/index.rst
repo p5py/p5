@@ -16,3 +16,4 @@ Reference
    typography
    math
    svg
+   lights
