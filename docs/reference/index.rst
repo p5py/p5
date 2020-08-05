@@ -17,3 +17,4 @@ Reference
    math
    svg
    lights
+   materials
