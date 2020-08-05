@@ -187,8 +187,8 @@ colour_codes = {
 	'black': '#000000',
 }
 
+
 # Shape types / kinds
-# POINTS, LINES, TRIANGLES, TRIANGLE_FAN TRIANGLE_STRIP, QUADS, or QUAD_STRIP
 class SType(Enum):
 	POINTS = 'POINTS'
 	LINES = 'LINES'
@@ -200,6 +200,22 @@ class SType(Enum):
 	QUAD_STRIP = 'QUAD_STRIP'
 	TESS = 'TESS'
 
+
+# Add all members of SType to global
+# One way to do the same thing but without auto-complete from editors
+#       globals().update(SType.__members__)
+POINTS = SType.POINTS
+LINES = SType.LINES
+LINE_STRIP = SType.LINE_STRIP
+TRIANGLES = SType.TRIANGLES
+TRIANGLE_FAN = SType.TRIANGLE_FAN
+TRIANGLE_STRIP = SType.TRIANGLE_STRIP
+QUADS = SType.QUADS
+QUAD_STRIP = SType.QUAD_STRIP
+TESS = SType.TESS
+
+# end_shape parameters
+CLOSE = "CLOSE"
+
 # Z_EPSILON for meshes and lines in 3D mode
 Z_EPSILON = 2
-

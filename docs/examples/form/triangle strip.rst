@@ -70,7 +70,7 @@ Example by Ira Greenberg. Generate a closed ring using the vertex() function and
 		angle = 0
 		angleStep = 180.0 / numPoints
 
-		begin_shape("TRIANGLE_STRIP")
+		begin_shape(TRIANGLE_STRIP)
 
 		for i in range(numPoints + 1):
 			px = x + cos(radians(angle)) * outsideRadius
