@@ -386,10 +386,10 @@ class PShape:
         :rtype: np.ndarray
 
         """
-        if (not sy) and (not sz):
+        if sy is None and sz is None:
             sy = sx
             sz = sx
-        elif not sz:
+        elif sz is None:
             sz = 1
         tmat = matrix.scale_transform(sx, sy, sz)
         return tmat
