@@ -122,7 +122,7 @@ The current time can be read with the second(), minute(), and hour() functions. 
 
 		# Draw the minute ticks
 		stroke_weight(2)
-		begin_shape("POINTS")
+		begin_shape(POINTS)
 		for a in range(0, 360, 6):
 			angle = radians(a)
 			x = cx + cos(angle) * secondsRadius

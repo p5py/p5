@@ -19,7 +19,7 @@
 from . import p5
 from . import primitives
 from .shape import PShape
-from .constants import SType
+from .constants import TESS
 from ..pmath import curves
 
 shape_kind = None
@@ -35,23 +35,19 @@ is_quadratic = False
 is_contour = False
 
 __all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
-		   'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']
+           'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']
 
-def begin_shape(kind=None):
-	"""
-	Begin shape drawing.  This is a helpful way of generating custom shapes quickly.
 
-	:param kind: POINTS, LINES, TRIANGLES, TRIANGLE_FAN TRIANGLE_STRIP, QUADS, or QUAD_STRIP
-	:type kind: str
+def begin_shape(kind=TESS):
+	"""Begin shape drawing.  This is a helpful way of generating custom shapes quickly.
+
+	:param kind: TESS, POINTS, LINES, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP, QUADS, or QUAD_STRIP; defaults to TESS
+	:type kind: SType
 	"""
 	global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
 	global curr_contour_vertices, curr_contour_vertices_types
 
-	if kind in (t.name for t in SType):
-		shape_kind = SType[kind]
-	else:
-		shape_kind = SType.TESS
-
+	shape_kind = kind
 	is_contour = False
 	vertices = []
 	vertices_types = []
@@ -205,6 +201,10 @@ def begin_contour():
 	contour_vertices_types = []
 
 def end_contour():
+	"""Ends the current contour.
+
+	For more info, see :any:`begin_contour`.
+	"""
 	global is_contour, curr_contour_vertices, curr_contour_vertices_types
 	is_contour = False
 	# Close contour
@@ -301,7 +301,7 @@ def end_shape(mode=""):
 	global is_bezier, is_curve, is_quadratic, is_contour
 	assert not is_contour, "begin_contour called without calling end_contour"
 	if is_curve or is_bezier or is_quadratic:
-		assert shape_kind == SType.TESS, "Should not specify primitive type for a curve"
+		assert shape_kind == TESS, "Should not specify primitive type for a curve"
 
 	if len(vertices) == 0:
 		return
@@ -319,17 +319,17 @@ def end_shape(mode=""):
 		if len(vertices) > 3:
 			shape = PShape(vertices=get_curve_vertices(vertices),
 						   contours=[get_curve_vertices(c) for c in contour_vertices],
-						   shape_type=SType.TESS)
+						   shape_type=TESS)
 	elif is_bezier:
 		shape = PShape(vertices=get_bezier_vertices(vertices, vertices_types),
 					   contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
                                  for i in range(len(contour_vertices))],
-					   shape_type=SType.TESS)
+					   shape_type=TESS)
 	elif is_quadratic:
 		shape = PShape(vertices=get_quadratic_vertices(vertices, vertices_types),
 					   contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
                                  for i in range(len(contour_vertices))],
-					   shape_type=SType.TESS)
+					   shape_type=TESS)
 	else:
 		shape = PShape(vertices=vertices, contours=contour_vertices, shape_type=shape_kind)
 
