@@ -10,15 +10,15 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 packages = ['p5']
 
-requires = [
-    'vispy',
-    'glfw',
-    'numpy',
-    'Pillow',
-    'triangle',
-]
+requires = []
+
+with open("requirements.txt", "r", encoding="UTF-8") as f:
+    require = f.read().split("\n")
+
+    for i in range(len(require)): requires.append(require[i].split("=")[0])
 
 meta_data = {}
+
 with open(os.path.join(here, 'p5', '__version__.py'), 'r', encoding='utf-8') as f:
     exec(f.read(), meta_data)
 
