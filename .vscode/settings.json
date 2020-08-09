@@ -1,0 +1,10 @@
+{
+    "python.linting.pylintArgs": [
+        "--disable", "E0102", 
+        "--disable", "C0111",
+        "--disable", "W0401",
+        "--disable", "C0304",
+        "--disable", "W0614",
+        "--disable", "W0622"
+    ]
+}
