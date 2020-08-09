@@ -1,1 +1,2 @@
 include LICENSE.txt
+recursive-include p5/sketch/shaders *
