@@ -28,4 +28,4 @@ Setup
         ]
     }
 
-5. Save the file and you are ready to write some amaizng projects in VsCode and p5py!!
+5. Save the file and you are ready to write some amazing projects in VsCode and p5py!!
