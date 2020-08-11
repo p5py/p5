@@ -1,10 +1,10 @@
 =======================
-Vs Code Integration
+VS Code Integration
 =======================
 
-Using Vs Code as your code editor for p5py will be a great choice as of pylinter integration and a lot of autocomplete features!
+Using VS Code as your code editor for p5py will be a great choice as of pylinter integration and a lot of autocomplete features!
 
-Before you start using Vs Code as your code editor for p5py. We reccomend that you turn off some pylint settings, for that you would require a settings file. The setup is simple so do not panic!
+Before you start using VS Code as your code editor for p5py. We reccomend that you turn off some pylint settings, for that you would require a settings file. The setup is simple so do not panic!
 
 =======================
 Setup
@@ -28,4 +28,4 @@ Setup
         ]
     }
 
-5. Save the file and you are ready to write some amazing projects in Vs Code and p5py!!
+5. Save the file and you are ready to write some amazing projects in VS Code and p5py!!
