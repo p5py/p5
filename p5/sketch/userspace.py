@@ -98,7 +98,7 @@ def setup():
     """
     pass
 
-def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D"):
+def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer="vispy"):
     """Run a sketch.
 
     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
@@ -139,11 +139,16 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D"):
             handlers[handler] = _fix_interface(hfunc)
 
     if mode == "P2D":
-        p5.renderer = Renderer2D()
         p5.mode = 'P2D'
+        if renderer == "vispy":
+            p5.renderer = Renderer2D()
+        else:
+            raise NotImplementedError("Invalid Renderer %s" % renderer)
     elif mode == "P3D":
         p5.mode = 'P3D'
-        p5.renderer = Renderer3D()
+        if renderer == "vispy":
+            p5.renderer = Renderer3D()
+        else: raise NotImplementedError("Invalid Renderer %s" % renderer)
     else:
         raise ValueError("Invalid Mode %s" % mode)
 
