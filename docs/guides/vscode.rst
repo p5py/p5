@@ -1,5 +1,5 @@
 =======================
-VsCode Integration
+Vs Code Integration
 =======================
 
 Using VsCode as your code editor for p5py will be a great choice as of pylinter integration and a lot of autocomplete features!
