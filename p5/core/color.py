@@ -276,6 +276,11 @@ class Color:
         return (self._red, self._green, self._blue, self._alpha)
 
     @property
+    def normalized_rgb(self):
+        """Normalized RGB color values"""
+        return (self._red, self._green, self._blue)
+
+    @property
     def gray(self):
         """The gray-scale value of the color.
 
