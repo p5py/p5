@@ -110,3 +110,11 @@ Typography
 
    typography/letters
    typography/words
+
+3D
+##########
+
+.. toctree::
+   :maxdepth: 1
+
+   3d/vertex
