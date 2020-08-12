@@ -1,5 +1,5 @@
-from . import p5, fill, Color
-from ..sketch.util import ensure_p3d
+from . import p5, fill
+from ..sketch.util import ensure_p3d, scale_tuple
 import numpy as np
 
 __all__ = ['normal_material', 'basic_material', 'blinn_phong_material', 'ambient', 'emissive', 'diffuse', 'shininess', 'specular']
@@ -86,7 +86,7 @@ def ambient(r, g, b):
     :type b: float
     """
     ensure_p3d('ambient')
-    p5.renderer.ambient = np.array(Color(r, g, b).normalized_rgb, dtype=np.float32)
+    p5.renderer.ambient = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def emissive(r, g, b):
@@ -102,7 +102,7 @@ def emissive(r, g, b):
     :type b: float
     """
     ensure_p3d('emissive')
-    return diffuse(*Color(r, g, b).normalized_rgb)
+    return diffuse(*scale_tuple((r, g, b)))
 
 
 def diffuse(r, g, b):
@@ -118,7 +118,7 @@ def diffuse(r, g, b):
     :type b: float
     """
     ensure_p3d('diffuse')
-    p5.renderer.diffuse = np.array(Color(r, g, b).normalized_rgb, dtype=np.float32)
+    p5.renderer.diffuse = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def shininess(p):
@@ -139,6 +139,6 @@ def specular(r, g, b):
     Should be used together with :any:`light_specular`.
     """
     ensure_p3d('specular')
-    p5.renderer.specular = np.array(Color(r, g, b).normalized_rgb, dtype=np.float32)
+    p5.renderer.specular = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 # TODO: Document default values for material functions in renderer3D

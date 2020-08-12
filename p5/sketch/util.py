@@ -9,3 +9,8 @@ def read_shader(filename):
 
 def ensure_p3d(name):
     assert p5.mode == 'P3D', name + "is only available in P3D renderer"
+
+def scale_tuple(t, scale=255):
+    """Divides each element of tuple by scale
+    """
+    return tuple(x / scale for x in t)
