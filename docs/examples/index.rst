@@ -117,4 +117,5 @@ Typography
 .. toctree::
    :maxdepth: 1
 
+   3d/vertex
    3d/basic_shapes
