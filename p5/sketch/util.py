@@ -10,7 +10,7 @@ def read_shader(filename):
 def ensure_p3d(name):
     assert p5.mode == 'P3D', name + "is only available in P3D renderer"
 
-def scale_colors(r, g, b):
-    """Divides each channel by 255
+def scale_tuple(t, scale=255):
+    """Divides each element of tuple by scale
     """
-    return (r / 255.0, g / 255.0, b / 255.0)
+    return tuple(x / scale for x in t)

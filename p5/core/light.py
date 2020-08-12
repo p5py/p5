@@ -1,5 +1,5 @@
 from . import p5
-from ..sketch.util import ensure_p3d, scale_colors
+from ..sketch.util import ensure_p3d, scale_tuple
 import numpy as np
 
 __all__ = ['lights', 'ambient_light', 'directional_light', 'point_light', 'light_falloff', 'light_specular']
@@ -31,7 +31,7 @@ def ambient_light(r, g, b):
     :type b: float
     """
     ensure_p3d('ambient_light')
-    p5.renderer.add_ambient_light(*scale_colors(r, g, b))
+    p5.renderer.add_ambient_light(*scale_tuple((r, g, b)))
 
 
 def directional_light(r, g, b, x, y, z):
@@ -59,7 +59,7 @@ def directional_light(r, g, b, x, y, z):
     :type z: float
     """
     ensure_p3d('directional_light')
-    p5.renderer.add_directional_light(*scale_colors(r, g, b), x, y, z)
+    p5.renderer.add_directional_light(*scale_tuple((r, g, b)), x, y, z)
 
 
 def point_light(r, g, b, x, y, z):
@@ -85,7 +85,7 @@ def point_light(r, g, b, x, y, z):
     :type z: float
     """
     ensure_p3d('point_light')
-    p5.renderer.add_point_light(*scale_colors(r, g, b), x, y, z)
+    p5.renderer.add_point_light(*scale_tuple((r, g, b)), x, y, z)
 
 
 def light_falloff(constant, linear, quadratic):
@@ -132,4 +132,4 @@ def light_specular(r, g, b):
     :type b: float
     """
     ensure_p3d('light_specular')
-    p5.renderer.light_specular = np.array(scale_colors(r, g, b))
+    p5.renderer.light_specular = np.array(scale_tuple((r, g, b)))
