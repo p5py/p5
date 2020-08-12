@@ -9,3 +9,8 @@ def read_shader(filename):
 
 def ensure_p3d(name):
     assert p5.mode == 'P3D', name + "is only available in P3D renderer"
+
+def scale_colors(r, g, b):
+    """Divides each channel by 255
+    """
+    return (r / 255.0, g / 255.0, b / 255.0)
