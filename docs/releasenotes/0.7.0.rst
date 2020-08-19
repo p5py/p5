@@ -1,0 +1,35 @@
+0.7.0
+=====
+
+We are happy to announce another developmental release from Google Summer of Code! The project was supervised
+by `Arihant Parsoya <https://github.com/parsoyaarihant>`_ and `Abhik Pal <https://github.com/abhikpal>`_  of the
+`Processing Foundation <https://processingfoundation.org/>`_. This release includes bug fixes, a refactored
+rendering pipeline with improved performance, new 3D capabilities, and new example code.
+
+
+List of New APIs
+----------------------
+
+New materials in P3D
+````````````````````````
+
+  - :any:`normal_material` assigns a color to a pixel solely based on the normal vector of the fragment being rendered. Useful for debugging
+  - :any:`basic_material` returns a uniform color.
+  - :any:`blinn_phong_material` is a material based on the Blinn-Phong reflection model. This is the most “realistic” material in p5py. Parameters to adjust it include
+
+    - :any:`ambient` is the color that interacts with :any:`ambient_light` s
+    - :any:`diffuse` / :any:`emissive` is the surface color that interacts with :any:`point_light` s and :any:`directional_light` s
+    - :any:`specular` is the highlight color that interacts with :any:`point_light`  and :any:`directional_light` 
+    - :any:`shininess` determines how glossy a surface is
+
+Lighting system in P3D
+````````````````````````
+
+  - :any:`lights` creates default lights
+  - :any:`ambient_light` is a light that's uniform everywhere
+  - :any:`directional_light` comes from one direction: it is stronger when hitting a surface squarely, and weaker if it hits at a gentle angle.
+  - :any:`point_light` comes from one location and emits to all directions.
+  - :any:`light_specular` controls the color of the specular highlight
+  - :any:`light_falloff` controls how fast a light fades with distance
+
+This release also includes contributions from @parsoyaarihant, @jeremydouglass, @tushar5526, @Hansimov, @ReneTC, @Andy-Python-Programmer, and @galaxyproduction. Thank you!
