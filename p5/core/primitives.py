@@ -516,7 +516,7 @@ def ellipse(*args, mode=None):
     if len(args) == 2:
         coordinate, args = args[0], args[1]
     elif len(args) == 4:
-        coordinate, args, mode = args[:2], args[2:], 'CENTER'
+        coordinate, args = args[:2], args[2:]
     else:
         raise ValueError("Unexpected number of arguments passed to ellipse()")
 
@@ -574,7 +574,7 @@ def circle(*args, mode=None):
     if len(args) == 2:
         coordinate, radius = args[0], args[1]
     elif len(args) == 3:
-        coordinate, radius, mode = args[:2], args[2], 'CENTER'
+        coordinate, radius = args[:2], args[2]
     else:
         raise ValueError("Unexpected number of arguments passed to circle()")
 
