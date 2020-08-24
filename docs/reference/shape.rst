@@ -34,7 +34,7 @@ line()
 ellipse()
 ---------
 
-.. function:: ellipse(a, b, c, d)
+.. function:: ellipse(a, b, c, d, mode=None)
    :noindex:
 .. autofunction:: ellipse(coordinate, *args, mode=None)
 
@@ -50,7 +50,9 @@ circle()
 arc()
 -----
 
-.. autofunction:: arc
+.. function:: arc(x, y, width, height, start_angle, stop_angle, mode=None, ellipse_mode=None)
+   :noindex:
+.. autofunction:: arc(coordinate, width, height, start_angle, stop_angle, mode=None, ellipse_mode=None)
 
 
 triangle()

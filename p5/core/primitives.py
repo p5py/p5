@@ -416,15 +416,20 @@ def rect_mode(mode='CORNER'):
     _rect_mode = mode
 
 @_draw_on_return
-def arc(coordinate, width, height, start_angle, stop_angle,
-        mode=None, ellipse_mode=None):
+def arc(*args, mode=None, ellipse_mode=None):
     """Return a ellipse.
+
+    :param x: x-coordinate of the arc's ellipse.
+    :type x: float
+
+    :param y: y-coordinate of the arc's ellipse.
+    :type y: float
 
     :param coordinate: Represents the center of the arc when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
         of the ellipse when mode is 'CORNER'.
 
-    :rtype coordinate: 3-tuple
+    :type coordinate: 3-tuple
 
     :param width: For ellipse modes 'CORNER' or 'CENTER' this
         represents the width of the the ellipse of which the arc is a
@@ -454,6 +459,13 @@ def arc(coordinate, width, height, start_angle, stop_angle,
     :rtype: Arc
 
     """
+    if len(args) == 5:
+        coordinate, width, height, start_angle, stop_angle = args
+    elif len(args) == 6:
+        coordinate = args[:2]
+        width, height, start_angle, stop_angle = args[2:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to arc()")
 
     if ellipse_mode is None:
         emode = _ellipse_mode
@@ -513,8 +525,8 @@ def ellipse(*args, mode=None):
     :rtype: Arc
 
     """
-    if len(args) == 2:
-        coordinate, args = args[0], args[1]
+    if len(args) == 3:
+        coordinate, args = args[0], args[1:]
     elif len(args) == 4:
         coordinate, args = args[:2], args[2:]
     else:
