@@ -34,13 +34,17 @@ line()
 ellipse()
 ---------
 
-.. autofunction:: ellipse
+.. function:: ellipse(a, b, c, d)
+   :noindex:
+.. autofunction:: ellipse(coordinate, *args, mode=None)
 
 
 circle()
 --------
 
-.. autofunction:: circle
+.. function:: circle(x, y, d)
+   :noindex:
+.. autofunction:: circle(coordinate, radius, mode=None)
 
 
 arc()

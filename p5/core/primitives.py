@@ -474,8 +474,20 @@ def arc(coordinate, width, height, start_angle, stop_angle,
         raise ValueError("Unknown arc mode {}".format(emode))
     return Arc(center, dim, start_angle, stop_angle, mode)
 
-def ellipse(coordinate, *args, mode=None):
+def ellipse(*args, mode=None):
     """Return a ellipse.
+
+    :param a: x-coordinate of the ellipse
+    :type a: float
+
+    :param b: y-coordinate of the ellipse
+    :type b: float
+
+    :param c: width of the ellipse
+    :type c: float
+
+    :param d: height of the ellipse
+    :type d: float
 
     :param coordinate: Represents the center of the ellipse when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
@@ -501,6 +513,13 @@ def ellipse(coordinate, *args, mode=None):
     :rtype: Arc
 
     """
+    if len(args) == 2:
+        coordinate, args = args[0], args[1]
+    elif len(args) == 4:
+        coordinate, args, mode = args[:2], args[2:], 'CENTER'
+    else:
+        raise ValueError("Unexpected number of arguments passed to ellipse()")
+
     if mode is None:
         mode = _ellipse_mode
 
