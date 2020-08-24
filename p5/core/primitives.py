@@ -544,7 +544,7 @@ def ellipse(*args, mode=None):
         mode = 'CORNER'
     else:
         width, height = args
-    return arc(coordinate, width, height, 0, math.pi * 2, 'CHORD', mode)
+    return arc(coordinate, width, height, 0, math.pi * 2, mode='CHORD', ellipse_mode=mode)
 
 def circle(*args, mode=None):
     """Return a circle.
