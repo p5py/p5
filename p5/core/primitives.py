@@ -534,8 +534,17 @@ def ellipse(*args, mode=None):
         width, height = args
     return arc(coordinate, width, height, 0, math.pi * 2, 'CHORD', mode)
 
-def circle(coordinate, radius, mode=None):
+def circle(*args, mode=None):
     """Return a circle.
+
+    :param x: x-coordinate of the centre of the circle.
+    :type x: float
+
+    :param y: y-coordinate of the centre of the circle.
+    :type y: float
+
+    :param d: diameter of the circle.
+    :type d: float
 
     :param coordinate: Represents the center of the ellipse when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
@@ -548,7 +557,7 @@ def circle(coordinate, radius, mode=None):
         represents the diameter; for the 'RADIUS' this represents the
         radius.
 
-    :type: tuple
+    :type radius: float
 
     :param mode: The drawing mode for the ellipse. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
@@ -562,6 +571,13 @@ def circle(coordinate, radius, mode=None):
     :raises ValueError: When mode is set to 'CORNERS'
 
     """
+    if len(args) == 2:
+        coordinate, radius = args[0], args[1]
+    elif len(args) == 3:
+        coordinate, radius, mode = args[:2], args[2], 'CENTER'
+    else:
+        raise ValueError("Unexpected number of arguments passed to circle()")
+
     if mode is None:
         mode = _ellipse_mode
 
