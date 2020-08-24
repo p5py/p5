@@ -27,7 +27,7 @@ from ..pmath.utils import SINCOS
 
 from .shape import PShape
 from .geometry import Geometry
-from .constants import SType
+from .constants import ROUND, SQUARE, PROJECT, SType
 
 from . import p5
 
@@ -131,7 +131,6 @@ class Arc(PShape):
             vertices.append(vertices[0])
         self.vertices = vertices
 
-@_draw_on_return
 def point(x, y, z=0):
     """Returns a point.
 
@@ -148,8 +147,13 @@ def point(x, y, z=0):
     :rtype: PShape
 
     """
-    return PShape([(x, y, z)])
-
+    if p5.renderer.stroke_cap == SQUARE:
+        pass
+    elif p5.renderer.stroke_cap == PROJECT:
+        return square((x, y, z), p5.renderer.stroke_weight, mode='CENTER')
+    elif p5.renderer.stroke_cap == ROUND:
+        return circle((x, y, z), p5.renderer.stroke_weight / 2, mode='CENTER')
+    raise ValueError('Unknown stroke_cap value')
 
 @_draw_on_return
 def line(*args):
