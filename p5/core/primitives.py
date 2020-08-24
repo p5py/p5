@@ -543,9 +543,6 @@ def circle(*args, mode=None):
     :param y: y-coordinate of the centre of the circle.
     :type y: float
 
-    :param d: diameter of the circle.
-    :type d: float
-
     :param coordinate: Represents the center of the ellipse when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
         of the ellipse when mode is 'CORNER' or, and an arbitrary

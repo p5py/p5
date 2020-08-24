@@ -42,7 +42,7 @@ ellipse()
 circle()
 --------
 
-.. function:: circle(x, y, d)
+.. function:: circle(x, y, radius, mode=None)
    :noindex:
 .. autofunction:: circle(coordinate, radius, mode=None)
 
