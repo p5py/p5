@@ -214,6 +214,13 @@ QUADS = SType.QUADS
 QUAD_STRIP = SType.QUAD_STRIP
 TESS = SType.TESS
 
+# Stroke parameters
+SQUARE = 'SQAURE'
+PROJECT = 'PROJECT'
+ROUND = 'ROUND'
+MITER = 'MITER'
+BEVEL = 'BEVEL'
+
 # end_shape parameters
 CLOSE = "CLOSE"
 
