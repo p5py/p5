@@ -24,7 +24,11 @@ point()
 line()
 ------
 
-.. autofunction:: line
+.. function:: line(x1, y1, x2, y2)
+   :noindex:
+.. function:: line(x1, y1, z1, x2, y2, z2)
+   :noindex:
+.. autofunction:: line(p1, p2)
 
 
 ellipse()

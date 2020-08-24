@@ -150,9 +150,28 @@ def point(x, y, z=0):
     """
     return PShape([(x, y, z)])
 
+
 @_draw_on_return
-def line(p1, p2):
+def line(*args):
     """Returns a line.
+
+    :param x1: x-coordinate of the first point
+    :type x1: float
+
+    :param y1: y-coordinate of the first point
+    :type y1: float
+
+    :param z1: z-coordinate of the first point
+    :type z1: float
+
+    :param x2: x-coordinate of the first point
+    :type x2: float
+
+    :param y2: y-coordinate of the first point
+    :type y2: float
+
+    :param z2: z-coordinate of the first point
+    :type z2: float
 
     :param p1: Coordinates of the starting point of the line.
     :type p1: tuple
@@ -164,6 +183,15 @@ def line(p1, p2):
     :rtype: PShape
 
     """
+    if len(args) == 2:
+        p1, p2 = args[0], args[1]
+    elif len(args) == 4:
+        p1, p2 = args[:2], args[2:]
+    elif len(args) == 6:
+        p1, p2 = args[:3], args[3:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to line()")
+
     path = [
         Point(*p1),
         Point(*p2)
