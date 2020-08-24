@@ -150,9 +150,28 @@ def point(x, y, z=0):
     """
     return PShape([(x, y, z)])
 
+
 @_draw_on_return
-def line(p1, p2):
+def line(*args):
     """Returns a line.
+
+    :param x1: x-coordinate of the first point
+    :type x1: float
+
+    :param y1: y-coordinate of the first point
+    :type y1: float
+
+    :param z1: z-coordinate of the first point
+    :type z1: float
+
+    :param x2: x-coordinate of the first point
+    :type x2: float
+
+    :param y2: y-coordinate of the first point
+    :type y2: float
+
+    :param z2: z-coordinate of the first point
+    :type z2: float
 
     :param p1: Coordinates of the starting point of the line.
     :type p1: tuple
@@ -164,6 +183,15 @@ def line(p1, p2):
     :rtype: PShape
 
     """
+    if len(args) == 2:
+        p1, p2 = args[0], args[1]
+    elif len(args) == 4:
+        p1, p2 = args[:2], args[2:]
+    elif len(args) == 6:
+        p1, p2 = args[:3], args[3:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to line()")
+
     path = [
         Point(*p1),
         Point(*p2)
@@ -388,15 +416,20 @@ def rect_mode(mode='CORNER'):
     _rect_mode = mode
 
 @_draw_on_return
-def arc(coordinate, width, height, start_angle, stop_angle,
-        mode=None, ellipse_mode=None):
+def arc(*args, mode=None, ellipse_mode=None):
     """Return a ellipse.
+
+    :param x: x-coordinate of the arc's ellipse.
+    :type x: float
+
+    :param y: y-coordinate of the arc's ellipse.
+    :type y: float
 
     :param coordinate: Represents the center of the arc when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
         of the ellipse when mode is 'CORNER'.
 
-    :rtype coordinate: 3-tuple
+    :type coordinate: 3-tuple
 
     :param width: For ellipse modes 'CORNER' or 'CENTER' this
         represents the width of the the ellipse of which the arc is a
@@ -426,6 +459,13 @@ def arc(coordinate, width, height, start_angle, stop_angle,
     :rtype: Arc
 
     """
+    if len(args) == 5:
+        coordinate, width, height, start_angle, stop_angle = args
+    elif len(args) == 6:
+        coordinate = args[:2]
+        width, height, start_angle, stop_angle = args[2:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to arc()")
 
     if ellipse_mode is None:
         emode = _ellipse_mode
@@ -446,8 +486,20 @@ def arc(coordinate, width, height, start_angle, stop_angle,
         raise ValueError("Unknown arc mode {}".format(emode))
     return Arc(center, dim, start_angle, stop_angle, mode)
 
-def ellipse(coordinate, *args, mode=None):
+def ellipse(*args, mode=None):
     """Return a ellipse.
+
+    :param a: x-coordinate of the ellipse
+    :type a: float
+
+    :param b: y-coordinate of the ellipse
+    :type b: float
+
+    :param c: width of the ellipse
+    :type c: float
+
+    :param d: height of the ellipse
+    :type d: float
 
     :param coordinate: Represents the center of the ellipse when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
@@ -473,6 +525,13 @@ def ellipse(coordinate, *args, mode=None):
     :rtype: Arc
 
     """
+    if len(args) == 3:
+        coordinate, args = args[0], args[1:]
+    elif len(args) == 4:
+        coordinate, args = args[:2], args[2:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to ellipse()")
+
     if mode is None:
         mode = _ellipse_mode
 
@@ -485,10 +544,16 @@ def ellipse(coordinate, *args, mode=None):
         mode = 'CORNER'
     else:
         width, height = args
-    return arc(coordinate, width, height, 0, math.pi * 2, 'CHORD', mode)
+    return arc(coordinate, width, height, 0, math.pi * 2, mode='CHORD', ellipse_mode=mode)
 
-def circle(coordinate, radius, mode=None):
+def circle(*args, mode=None):
     """Return a circle.
+
+    :param x: x-coordinate of the centre of the circle.
+    :type x: float
+
+    :param y: y-coordinate of the centre of the circle.
+    :type y: float
 
     :param coordinate: Represents the center of the ellipse when mode
         is 'CENTER' (the default) or 'RADIUS', the lower-left corner
@@ -501,7 +566,7 @@ def circle(coordinate, radius, mode=None):
         represents the diameter; for the 'RADIUS' this represents the
         radius.
 
-    :type: tuple
+    :type radius: float
 
     :param mode: The drawing mode for the ellipse. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
@@ -515,6 +580,13 @@ def circle(coordinate, radius, mode=None):
     :raises ValueError: When mode is set to 'CORNERS'
 
     """
+    if len(args) == 2:
+        coordinate, radius = args[0], args[1]
+    elif len(args) == 3:
+        coordinate, radius = args[:2], args[2]
+    else:
+        raise ValueError("Unexpected number of arguments passed to circle()")
+
     if mode is None:
         mode = _ellipse_mode
 

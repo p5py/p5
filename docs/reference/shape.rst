@@ -24,25 +24,35 @@ point()
 line()
 ------
 
-.. autofunction:: line
+.. function:: line(x1, y1, x2, y2)
+   :noindex:
+.. function:: line(x1, y1, z1, x2, y2, z2)
+   :noindex:
+.. autofunction:: line(p1, p2)
 
 
 ellipse()
 ---------
 
-.. autofunction:: ellipse
+.. function:: ellipse(a, b, c, d, mode=None)
+   :noindex:
+.. autofunction:: ellipse(coordinate, *args, mode=None)
 
 
 circle()
 --------
 
-.. autofunction:: circle
+.. function:: circle(x, y, radius, mode=None)
+   :noindex:
+.. autofunction:: circle(coordinate, radius, mode=None)
 
 
 arc()
 -----
 
-.. autofunction:: arc
+.. function:: arc(x, y, width, height, start_angle, stop_angle, mode=None, ellipse_mode=None)
+   :noindex:
+.. autofunction:: arc(coordinate, width, height, start_angle, stop_angle, mode=None, ellipse_mode=None)
 
 
 triangle()
