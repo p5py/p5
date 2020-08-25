@@ -482,12 +482,24 @@ class PImage:
         """
         self._img.save(file_name)
 
-def image(img, location, size=None):
+def image(*args, size=None):
     """Draw an image to the display window.
 
     Images must be in the same folder as the sketch (or the image path
     should be explicitly mentioned). The color of an image may be
     modified with the :meth:`p5.tint` function. 
+
+    :param x: x-coordinate of the image by default
+    :type float:
+
+    :param y: y-coordinate of the image by default
+    :type float:
+
+    :param w: width to display the image by default
+    :type float:
+
+    :param h: height to display the image by default
+    :type float:
 
     :param img: the image to be displayed.
     :type img: p5.Image
@@ -505,6 +517,15 @@ def image(img, location, size=None):
     :type size: tuple | list
 
     """
+    if len(args) == 2:
+        img, location = args
+    elif len(args) == 3:
+        img, location = args[0], args[1:]
+    elif len(args) == 5:
+        img, location, size = args[0], args[1:3], args[3:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to image()")
+
     if size is None:
         size = img.size
     # Add else statement below to resize the img._img first,

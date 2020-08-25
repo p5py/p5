@@ -19,7 +19,11 @@ Loading and displaying
 image()
 -------
 
-.. autofunction:: image
+.. function:: image(img, x, y)
+   :noindex:
+.. function:: image(img, x, y, w, h)
+   :noindex:
+.. autofunction:: image(img, location, size=None)
 
 image_mode()
 ------------
