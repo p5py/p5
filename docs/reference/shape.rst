@@ -82,7 +82,9 @@ rect()
 square()
 --------
 
-.. autofunction:: square
+.. function:: square(x, y, side_length)
+   :noindex:
+.. autofunction:: square(coordinate, side_length, mode=None)
 
 
 Curves

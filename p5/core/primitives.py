@@ -442,8 +442,14 @@ def rect(*args, mode=None):
     p4 = Point(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
-def square(coordinate, side_length, mode=None):
+def square(*args, mode=None):
     """Return a square.
+
+    :param x: x-coordinate of the square by default
+    :type float:
+
+    :param y: y-coordinate of the square by default
+    :type float:
 
     :param coordinate: When mode is set to 'CORNER', the coordinate
         represents the lower-left corner of the square. For modes
@@ -470,6 +476,13 @@ def square(coordinate, side_length, mode=None):
     :raises ValueError: When the mode is set to 'CORNERS'
 
     """
+    if len(args) == 2:
+        coordinate, side_length = args
+    elif len(args) == 3:
+        coordinate, side_length = args[:2], args[2]
+    else:
+        raise ValueError("Unexpected number of arguments passed to square()")
+
     if mode is None:
         mode = _rect_mode
 
