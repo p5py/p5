@@ -197,7 +197,7 @@ def shear_y(theta):
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
     return shear_mat
 
-def camera(position=None, target_position=(0, 0, 0), up_vector=(0, 1, 0)):
+def camera(*args, **kwargs):
     """Sets the camera position for a 3D sketch. 
     Parameters for this function define the position for 
     the camera, the center of the sketch (where the 
@@ -211,6 +211,33 @@ def camera(position=None, target_position=(0, 0, 0), up_vector=(0, 1, 0)):
                (0, 0, 0),
                (0, 1, 0))
 
+    :param position_x: x-coordinate of the position vector
+    :type position_x: float
+
+    :param position_y: y-coordinate of the position vector
+    :type position_y: float
+
+    :param position_z: z-coordinate of the position vector
+    :type position_z: float
+
+    :param target_x: x-coordinate of the target vector
+    :type target_x: float
+
+    :param target_y: y-coordinate of the target vector
+    :type target_y: float
+
+    :param target_z: z-coordinate of the target vector
+    :type target_z: float
+
+    :param up_x: x-coordinate of the up vector
+    :type up_x: float
+
+    :param up_y: y-coordinate of the up vector
+    :type up_y: float
+
+    :param up_z: z-coordinate of the up vector
+    :type up_z: float
+
     :param position: camera position coordinates
     :type position: tuple
 
@@ -221,15 +248,30 @@ def camera(position=None, target_position=(0, 0, 0), up_vector=(0, 1, 0)):
     :type up_vector: tuple
 
     """
-    # Not setting this as a default argument gets around the problem that sketch.size is not initialized when
-    # default arguments are initialized
-    if position is None:
-        position = (0, 0, p5.sketch.size[1] / math.tan(math.pi / 6))
-    p5.renderer.lookat_matrix = matrix.look_at(
-        np.array(position), 
-        np.array(target_position), 
-        np.array(up_vector))
-    p5.renderer.camera_pos = np.array(position)
+    def real_camera(position=(0, 0, p5.sketch.size[1] / math.tan(math.pi / 6)),
+                    target_position=(0, 0, 0), up_vector=(0, 1, 0)):
+        p5.renderer.lookat_matrix = matrix.look_at(
+            np.array(position),
+            np.array(target_position),
+            np.array(up_vector))
+        p5.renderer.camera_pos = np.array(position)
+
+    if len(args) == 9: # If using non-tuple arguments
+        kwargs['position'] = args[:3]
+        kwargs['target_position'] = args[3:6]
+        kwargs['up_vector'] = args[6:]
+    elif len(args) <= 3: # If using tuple arguments
+        if len(args) >= 1:
+            kwargs['position'] = args[0]
+        if len(args) >= 2:
+            kwargs['target_position'] = args[1]
+        if len(args) >= 3:
+            kwargs['up_vector'] = args[2]
+    else:
+        raise ValueError("Unexpected number of arguments passed to camera()")
+
+    real_camera(**kwargs)
+
 
 def perspective(fovy, aspect, near, far):
     """
