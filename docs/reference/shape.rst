@@ -93,7 +93,11 @@ Curves
 bezier()
 --------
 
-.. autofunction:: bezier
+.. function:: bezier(x1, y1, x2, y2, x3, y3, x4, y4)
+   :noindex:
+.. function:: bezier(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
+   :noindex:
+.. autofunction:: bezier(start, control_point_1, control_point_2, stop)
 
 
 bezier_detail()

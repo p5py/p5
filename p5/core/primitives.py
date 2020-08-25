@@ -199,8 +199,44 @@ def line(*args):
     return PShape(vertices=path, shape_type=SType.LINES)
 
 @_draw_on_return
-def bezier(start, control_point_1, control_point_2, stop):
+def bezier(*args):
     """Return a bezier path defined by two control points.
+
+    :param x1: x-coordinate of the first anchor point
+    :type x1: float
+
+    :param y1: y-coordinate of the first anchor point
+    :type y1: float
+
+    :param z1: z-coordinate of the first anchor point
+    :type z1: float
+
+    :param x2: x-coordinate of the first control point
+    :type x2: float
+
+    :param y2: y-coordinate of the first control point
+    :type y2: float
+
+    :param z2: z-coordinate of the first control point
+    :type z2: float
+
+    :param x3: x-coordinate of the second control point
+    :type x3: float
+
+    :param y3: y-coordinate of the second control point
+    :type y3: float
+
+    :param z3: z-coordinate of the second control point
+    :type z3: float
+
+    :param x4: x-coordinate of the second anchor point
+    :type x4: float
+
+    :param y4: y-coordinate of the second anchor point
+    :type y4: float
+
+    :param z4: z-coordinate of the second anchor point
+    :type z4: float
 
     :param start: The starting point of the bezier curve.
     :type start: tuple.
@@ -220,6 +256,15 @@ def bezier(start, control_point_1, control_point_2, stop):
     :rtype: PShape.
 
     """
+    if len(args) == 4:
+        start, control_point_1, control_point_2, stop = args
+    elif len(args) == 8:
+        start, control_point_1, control_point_2, stop = args[:2], args[2:4], args[4:6], args[6:]
+    elif len(args) == 12:
+        start, control_point_1, control_point_2, stop = args[:3], args[3:6], args[6:9], args[9:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to bezier()")
+
     vertices = []
     steps = curves.bezier_resolution
     for i in range(steps + 1):
