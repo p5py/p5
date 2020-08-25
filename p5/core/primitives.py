@@ -308,8 +308,32 @@ def triangle(*args):
     return PShape(vertices=path, shape_type=SType.TRIANGLES)
 
 @_draw_on_return
-def quad(p1, p2, p3, p4):
+def quad(*args):
     """Return a quad.
+
+    :param x1: x-coordinate of the first point
+    :type x1: float
+
+    :param y1: y-coordinate of the first point
+    :type y1: float
+
+    :param x2: x-coordinate of the second point
+    :type x2: float
+
+    :param y2: y-coordinate of the second point
+    :type y2: float
+
+    :param x3: x-coordinate of the third point
+    :type x3: float
+
+    :param y3: y-coordinate of the third point
+    :type y3: float
+
+    :param x4: x-coordinate of the forth point
+    :type x4: float
+
+    :param y4: y-coordinate of the forth point
+    :type y4: float
 
     :param p1: coordinates of the first point of the quad
     :type p1: tuple | list | p5.Vector
@@ -326,6 +350,13 @@ def quad(p1, p2, p3, p4):
     :returns: A quad.
     :rtype: PShape
     """
+    if len(args) == 8:
+        p1, p2, p3, p4 = args[:2], args[2:4], args[4:6], args[6:]
+    elif len(args) == 4:
+        p1, p2, p3, p4 = args
+    else:
+        raise ValueError("Unexpected number of arguments passed to quad()")
+
     path = [
         Point(*p1),
         Point(*p2),
