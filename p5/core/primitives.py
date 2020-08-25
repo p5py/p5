@@ -276,8 +276,44 @@ def bezier(*args):
     return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
 
 @_draw_on_return
-def curve(point_1, point_2, point_3, point_4):
+def curve(*args):
     """Return a Catmull-Rom curve defined by four points.
+
+    :param x1: x-coordinate of the beginning control point
+    :type x1: float
+
+    :param y1: y-coordinate of the beginning control point
+    :type y1: float
+
+    :param z1: z-coordinate of the beginning control point
+    :type z1: float
+
+    :param x2: x-coordinate of the first point
+    :type x2: float
+
+    :param y2: y-coordinate of the first point
+    :type y2: float
+
+    :param z2: z-coordinate of the first point
+    :type z2: float
+
+    :param x3: x-coordinate of the second point
+    :type x3: float
+
+    :param y3: y-coordinate of the second point
+    :type y3: float
+
+    :param z3: z-coordinate of the second point
+    :type z3: float
+
+    :param x4: x-coordinate of the ending control point
+    :type x4: float
+
+    :param y4: y-coordinate of the ending control point
+    :type y4: float
+
+    :param z4: z-coordinate of the ending control point
+    :type z4: float
 
     :param point_1: The first point of the curve.
     :type point_1: tuple
@@ -295,6 +331,15 @@ def curve(point_1, point_2, point_3, point_4):
     :rtype: PShape
 
     """
+    if len(args) == 4:
+        point_1, point_2, point_3, point_4 = args
+    elif len(args) == 8:
+        point_1, point_2, point_3, point_4 = args[:2], args[2:4], args[4:6], args[6:]
+    elif len(args) == 12:
+        point_1, point_2, point_3, point_4 = args[:3], args[3:6], args[6:9], args[9:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to curve()")
+
     vertices = []
     steps = curves.curve_resolution
     for i in range(steps + 1):

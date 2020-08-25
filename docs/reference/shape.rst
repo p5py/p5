@@ -121,7 +121,11 @@ bezier_tangent()
 curve()
 -------
 
-.. autofunction:: curve
+.. function:: curve(x1, y1, x2, y2, x3, y3, x4, y4)
+   :noindex:
+.. function:: curve(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
+   :noindex:
+.. autofunction:: curve(point_1, point_2, point_3, point_4)
 
 
 curve_detail()
