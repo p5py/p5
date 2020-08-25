@@ -260,8 +260,26 @@ def curve(point_1, point_2, point_3, point_4):
     return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
 
 @_draw_on_return
-def triangle(p1, p2, p3):
+def triangle(*args):
     """Return a triangle.
+
+    :param x1: x-coordinate of the first point
+    :type x1: float
+
+    :param y1: y-coordinate of the first point
+    :type y1: float
+
+    :param x2: x-coordinate of the second point
+    :type x2: float
+
+    :param y2: y-coordinate of the second point
+    :type y2: float
+
+    :param x3: x-coordinate of the third point
+    :type x3: float
+
+    :param y3: y-coordinate of the third point
+    :type y3: float
 
     :param p1: coordinates of the first point of the triangle
     :type p1: tuple | list | p5.Vector
@@ -275,6 +293,13 @@ def triangle(p1, p2, p3):
     :returns: A triangle.
     :rtype: p5.PShape
     """
+    if len(args) == 6:
+        p1, p2, p3 = args[:2], args[2:4], args[4:]
+    elif len(args) == 3:
+        p1, p2, p3 = args
+    else:
+        raise ValueError("Unexpected number of arguments passed to triangle()")
+
     path = [
         Point(*p1),
         Point(*p2),

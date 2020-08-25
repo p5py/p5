@@ -58,7 +58,9 @@ arc()
 triangle()
 ----------
 
-.. autofunction:: triangle
+.. function:: triangle(x1, y1, x2, y2, x3, y3)
+   :noindex:
+.. autofunction:: triangle(p1, p2, p3)
 
 
 quad()
