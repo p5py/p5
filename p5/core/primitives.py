@@ -365,8 +365,20 @@ def quad(*args):
     ]
     return PShape(vertices=path, shape_type=SType.QUADS)
 
-def rect(coordinate, *args, mode=None):
+def rect(*args, mode=None):
     """Return a rectangle.
+
+    :param x: x-coordinate of the rectangle by default
+    :type float:
+
+    :param y: y-coordinate of the rectangle by default
+    :type float:
+
+    :param w: width of the rectangle by default
+    :type float:
+
+    :param h: height of the rectangle by default
+    :type float:
 
     :param coordinate: Represents the lower left corner of then
         rectangle when mode is 'CORNER', the center of the rectangle
@@ -392,6 +404,13 @@ def rect(coordinate, *args, mode=None):
     :rtype: p5.PShape
 
     """
+    if len(args) == 4:
+        coordinate, args = args[:2], args[2:]
+    elif len(args) == 3:
+        coordinate, args = args[0], args[1:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to rect()")
+
     if mode is None:
         mode = _rect_mode
 

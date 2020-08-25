@@ -74,7 +74,9 @@ quad()
 rect()
 ------
 
-.. autofunction:: rect
+.. function:: rect(x, y, w, h)
+   :noindex:
+.. autofunction:: rect(coordinate, *args, mode=None)
 
 
 square()
