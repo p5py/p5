@@ -19,6 +19,7 @@
 
 """
 
+from collections.abc import Iterable
 from functools import wraps
 from ..pmath import Point
 
@@ -64,21 +65,20 @@ def bezier_detail(detail_value):
     global bezier_resolution
     bezier_resolution = max(1, detail_value)
 
-@typecast_arguments_as_points
 def bezier_point(start, control_1, control_2, stop, parameter):
     """Return the coordinate of a point along a bezier curve.
 
     :param start: The start point of the bezier curve
-    :type start: 3-tuple.
+    :type start: float or n-tuple
 
     :param control_1: The first control point of the bezier curve
-    :type control_1: 3-tuple.
+    :type control_1: float or n-tuple
 
     :param control_2: The second control point of the bezier curve
-    :type control_2: 3-tuple.
+    :type control_2: float or n-tuple
 
     :param stop: The end point of the bezier curve
-    :type stop: 3-tuple.
+    :type stop: float or n-tuple
 
     :param parameter: The parameter for the required location along
         the curve. Should be in the range [0.0, 1.0] where 0 indicates
@@ -86,19 +86,25 @@ def bezier_point(start, control_1, control_2, stop, parameter):
     :type parameter: float
 
     :returns: The coordinate of the point along the bezier curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    # Package floats into tuples
+    is_iterable = isinstance(start, Iterable)
+    if not is_iterable:
+        start, control_1, control_2, stop = (start,), (control_1,), (control_2,), (stop,)
+
     t = parameter
     t_ = 1 - parameter
-
     P = [start, control_1, control_2, stop]
     coeffs = [t_*t_*t_, 3*t*t_*t_,  3*t*t*t_, t*t*t]
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
 
-    return Point(x, y)
 
 @typecast_arguments_as_points
 def bezier_tangent(start, control_1, control_2, stop, parameter):

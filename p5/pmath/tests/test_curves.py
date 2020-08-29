@@ -13,11 +13,16 @@ class TestCurves(unittest.TestCase):
 
         self.assertEqual(
             bezier_point(p1, p2, p3, p4, 0.5),
-            Point(67.5, 41.875, 0))
+            (67.5, 41.875))
 
         self.assertEqual(
             bezier_point(p1, p2, p3, p4, 0.9),
-            Point(43.5, 73.055, 0))
+            (43.5, 73.055))
+
+        self.assertEqual(
+            bezier_point(30, 80, 80, 30, 0.5),
+            67.5
+        )
 
     def test_bezier_tangent(self):
         p1 = (30, 20)
