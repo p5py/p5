@@ -210,21 +210,20 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
         ans = ans[0]
     return ans
 
-@typecast_arguments_as_points
 def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     """Return the tangent at a point along a curve.
 
     :param point_1: The first control point of the curve.
-    :type point_1: 3-tuple.
+    :type point_1: float or n-tuple.
 
     :param point_2: The second control point of the curve.
-    :type point_2: 3-tuple.
+    :type point_2: float or n-tuple.
 
     :param point_3: The third control point of the curve.
-    :type point_3: 3-tuple.
+    :type point_3: float or n-tuple.
 
     :param point_4: The fourth control point of the curve.
-    :type point_4: 3-tuple.
+    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required tangent location
         along the curve. Should be in the range [0.0, 1.0] where 0
@@ -233,22 +232,26 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     :type parameter: float
 
     :returns: The tangent at the required point along the curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    # Package floats into tuples
+    is_iterable = isinstance(point_1, Iterable)
+    if not is_iterable:
+        point_1, point_2, point_3, point_4 = (point_1,), (point_2,), (point_3,), (point_4,)
+
     t = parameter
     basis = curve_basis_matrix
     P = [point_1, point_2, point_3, point_4]
-
     coeffs = [
         sum((3 - i)*(t**(2 - i)) * basis[i][j] for i in range(3))
         for j in range(4)
     ]
-
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
-
-    return Point(x, y)
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(point_1)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
 @typecast_arguments_as_points
 def quadratic_point(start, control, stop, parameter):
