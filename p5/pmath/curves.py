@@ -105,22 +105,20 @@ def bezier_point(start, control_1, control_2, stop, parameter):
     return ans
 
 
-
-@typecast_arguments_as_points
 def bezier_tangent(start, control_1, control_2, stop, parameter):
     """Return the tangent at a point along a bezier curve.
 
     :param start: The start point of the bezier curve
-    :type start: 3-tuple.
+    :type start: float or n-tuple.
 
     :param control_1: The first control point of the bezier curve
-    :type control_1: 3-tuple.
+    :type control_1: float or n-tuple.
 
     :param control_2: The second control point of the bezier curve
-    :type control_2: 3-tuple.
+    :type control_2: float or n-tuple.
 
     :param stop: The end point of the bezier curve
-    :type stop: 3-tuple.
+    :type stop: float or n-tuple.
 
     :param parameter: The parameter for the required tangent location
         along the curve. Should be in the range [0.0, 1.0] where 0
@@ -130,16 +128,23 @@ def bezier_tangent(start, control_1, control_2, stop, parameter):
 
     :returns: The tangent at the required point along the bezier
         curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    # Package floats into tuples
+    is_iterable = isinstance(start, Iterable)
+    if not is_iterable:
+        start, control_1, control_2, stop = (start,), (control_1,), (control_2,), (stop,)
+
     t = parameter
     tangent = lambda a, b, c, d: 3*t*t*(3*b - 3*c + d - a) + \
                                  6*t*(a - 2*b + c) + \
                                  3*(b - a)
-    x = tangent(start.x, control_1.x, control_2.x, stop.x)
-    y = tangent(start.y, control_1.y, control_2.y, stop.y)
-    return Point(x, y)
+    ans = tuple(tangent(start[i], control_1[i], control_2[i], stop[i]) for i in range(len(start)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
 def _reinit_curve_matrices():
     # TODO: Add basis matrices for faster tessellation.
