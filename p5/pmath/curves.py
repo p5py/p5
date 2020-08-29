@@ -253,18 +253,17 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
         ans = ans[0]
     return ans
 
-@typecast_arguments_as_points
 def quadratic_point(start, control, stop, parameter):
     """Return the coordinates of a point along a bezier curve.
 
     :param point_1: The start point of the curve.
-    :type point_1: 3-tuple.
+    :type point_1: float or n-tuple.
 
     :param point_3: The control point of the curve.
-    :type point_3: 3-tuple.
+    :type point_3: float or n-tuple.
 
     :param point_4: The end point of the curve.
-    :type point_4: 3-tuple.
+    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required point location
         along the curve. Should be in the range [0.0, 1.0] where 0
@@ -274,19 +273,22 @@ def quadratic_point(start, control, stop, parameter):
 
     :returns: The coordinate of the point at the required location
         along the curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    is_iterable = isinstance(start, Iterable)
+    if not is_iterable:
+        start, control, stop = (start,), (control,), (stop,)
+
     t = parameter
     t_ = 1 - parameter
-
     P = [start, control, stop]
     coeffs = [t_*t_, 2*t*t_, t*t]
-
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
-
-    return Point(x, y)
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
 # Set the default values.
 bezier_detail(20)

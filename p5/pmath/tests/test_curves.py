@@ -56,7 +56,7 @@ class TestCurves(unittest.TestCase):
         p1 = (20, 20)
         p2 = (80, 20)
         p3 = (50, 50)
-        self.assertEqual(quadratic_point(p1, p2, p3, 0.5), Point(57.5, 27.5, 0))
+        self.assertEqual(quadratic_point(p1, p2, p3, 0.5), (57.5, 27.5))
 
 if __name__ == "__main__":
     unittest.main()
