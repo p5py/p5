@@ -43,7 +43,7 @@ class TestCurves(unittest.TestCase):
         p2 = (73, 61)
         p3 = (15, 65)
         p4 = (15, 65)
-        self.assertEqual(curve_point(p1, p2, p3, p4, 0.5), Point(44.0, 65.3125, 0))
+        self.assertEqual(curve_point(p1, p2, p3, p4, 0.5), (44.0, 65.3125))
 
     def test_curve_tangent(self):
         p1 = (73, 24)
