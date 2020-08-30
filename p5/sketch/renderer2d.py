@@ -31,7 +31,7 @@ from vispy.gloo import VertexBuffer
 from contextlib import contextmanager
 from .shaders2d import src_texture
 from .shaders2d import src_line
-from .openglrenderer import OpenGLRenderer, get_render_primitives
+from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 
 class Renderer2D(OpenGLRenderer):
 	def __init__(self):
@@ -98,7 +98,7 @@ class Renderer2D(OpenGLRenderer):
 
 	def clear(self, color=True, depth=True):
 		"""Clear the renderer background."""
-		gloo.set_state(clear_color=self.background_color)
+		gloo.set_state(clear_color=self.style.background_color)
 		gloo.clear(color=color, depth=depth)
 
 	def _comm_toggles(self, state=True):
@@ -274,7 +274,7 @@ class Renderer2D(OpenGLRenderer):
 		"""
 		self.flush_geometry()
 
-		self.texture_prog['fill_color'] = self.tint_color if self.tint_enabled else self.COLOR_WHITE
+		self.texture_prog['fill_color'] = self.style.tint_color if self.style.tint_enabled else COLOR_WHITE
 		self.texture_prog['transform'] = self.transform_matrix.T.flatten()
 
 		x, y = location

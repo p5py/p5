@@ -71,7 +71,7 @@ class Renderer3D(OpenGLRenderer):
 		self.normal_prog = Program(src_normal.vert, src_normal.frag)
 		self.phong_prog = Program(src_phong.vert, src_phong.frag)
 		self.lookat_matrix = np.identity(4)
-		self.material = BasicMaterial(self.fill_color)
+		self.material = BasicMaterial(self.style.fill_color)
 
 		# Camera position
 		self.camera_pos = np.zeros(3)
@@ -138,7 +138,7 @@ class Renderer3D(OpenGLRenderer):
 
 	def clear(self, color=True, depth=True):
 		"""Clear the renderer background."""
-		gloo.set_state(clear_color=self.background_color)
+		gloo.set_state(clear_color=self.style.background_color)
 		gloo.clear(color=color, depth=depth)
 
 	def clear_lights(self):
@@ -236,7 +236,7 @@ class Renderer3D(OpenGLRenderer):
 			edges = shape.edges
 			faces = shape.faces
 
-			self.add_to_draw_queue('poly', tverts, edges, faces, self.fill_color, self.stroke_color, tnormals, self.material)
+			self.add_to_draw_queue('poly', tverts, edges, faces, self.style.fill_color, self.style.stroke_color, tnormals, self.material)
 
 		elif isinstance(shape, PShape):
 			fill = shape.fill.normalized if shape.fill else None
@@ -285,8 +285,8 @@ class Renderer3D(OpenGLRenderer):
 		// TODO: Unite style-related attributes for both 2D and 3D under one material class
 		"""
 
-		fill_shape = self.fill_enabled and not (fill is None)
-		stroke_shape = self.stroke_enabled and not (stroke is None)
+		fill_shape = self.style.fill_enabled and not (fill is None)
+		stroke_shape = self.style.stroke_enabled and not (stroke is None)
 
 		if fill_shape and stype not in ['point', 'path']:
 			idx = np.array(faces, dtype=np.uint32).ravel()

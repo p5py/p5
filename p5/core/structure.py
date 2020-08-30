@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from contextlib import contextmanager
-
+from copy import copy
 
 from . import primitives
 from . import color
@@ -54,13 +54,7 @@ def push_style():
     -  material
 
     """
-    prev_background_color = p5.renderer.background_color
-    prev_fill_color = p5.renderer.fill_color
-    prev_fill_enabled = p5.renderer.fill_enabled
-    prev_stroke_enabled = p5.renderer.stroke_enabled
-    prev_stroke_color = p5.renderer.stroke_color
-    prev_tint_color = p5.renderer.tint_color
-    prev_tint_enabled = p5.renderer.tint_enabled
+    prev_style = copy(p5.renderer.style)
 
     prev_ellipse_mode = primitives._ellipse_mode
     prev_rect_mode = primitives._rect_mode
@@ -79,13 +73,7 @@ def push_style():
 
     yield
 
-    p5.renderer.background_color = prev_background_color
-    p5.renderer.fill_color = prev_fill_color
-    p5.renderer.fill_enabled = prev_fill_enabled
-    p5.renderer.stroke_color = prev_stroke_color
-    p5.renderer.stroke_enabled = prev_stroke_enabled
-    p5.renderer.tint_color = prev_tint_color
-    p5.renderer.tint_enabled = prev_tint_enabled
+    p5.renderer.style = prev_style
 
     primitives._ellipse_mode = prev_ellipse_mode
     primitives._rect_mode = prev_rect_mode

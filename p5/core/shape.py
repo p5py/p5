@@ -135,11 +135,11 @@ class PShape:
         if isinstance(value, Color):  # Is Color, no need to parse
             color = value
         else:  # Not Color, attempt to parse it
-            if name == 'stroke' and p5.renderer.stroke_enabled:
-                color = Color(*p5.renderer.stroke_color,
+            if name == 'stroke' and p5.renderer.style.stroke_enabled:
+                color = Color(*p5.renderer.style.stroke_color,
                               color_mode='RGBA', normed=True)
-            if name == 'fill' and p5.renderer.fill_enabled:
-                color = Color(*p5.renderer.fill_color,
+            if name == 'fill' and p5.renderer.style.fill_enabled:
+                color = Color(*p5.renderer.style.fill_color,
                               color_mode='RGBA', normed=True)
 
         if name == 'stroke':

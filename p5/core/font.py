@@ -106,7 +106,7 @@ def text(text_string, position, wrap_at=None):
 
     is_stroke_valid = False # True when stroke_weight != 0
     is_min_filter = False   # True when stroke_weight <0
-    if p5.renderer.stroke_enabled:
+    if p5.renderer.style.stroke_enabled:
         stroke_weight = p5.renderer.stroke_weight
         if stroke_weight < 0:
             stroke_weight = abs(stroke_weight)
@@ -162,13 +162,13 @@ def text(text_string, position, wrap_at=None):
         position[1] -= height/2
 
     with push_style():
-        if p5.renderer.fill_enabled:
-            p5.renderer.tint_enabled = True
-            p5.renderer.tint_color = p5.renderer.fill_color
+        if p5.renderer.style.fill_enabled:
+            p5.renderer.style.tint_enabled = True
+            p5.renderer.style.tint_color = p5.renderer.style.fill_color
             image(text_image, position)
-        if p5.renderer.stroke_enabled and is_stroke_valid:
-            p5.renderer.tint_enabled = True
-            p5.renderer.tint_color = p5.renderer.stroke_color
+        if p5.renderer.style.stroke_enabled and is_stroke_valid:
+            p5.renderer.style.tint_enabled = True
+            p5.renderer.style.tint_color = p5.renderer.style.stroke_color
             image(text_stroke_image, position)
 
     return text_string

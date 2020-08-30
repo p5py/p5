@@ -44,7 +44,7 @@ def basic_material(r, g, b):
     """
     ensure_p3d("basic_material")
     fill(r, g, b)
-    p5.renderer.material = BasicMaterial(p5.renderer.fill_color)
+    p5.renderer.material = BasicMaterial(p5.renderer.style.fill_color)
 
 
 def blinn_phong_material():

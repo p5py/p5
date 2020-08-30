@@ -306,7 +306,7 @@ def end_shape(mode=""):
 	if len(vertices) == 0:
 		return
 
-	if (not p5.renderer.stroke_enabled) and (not p5.renderer.fill_enabled):
+	if (not p5.renderer.style.stroke_enabled) and (not p5.renderer.style.fill_enabled):
 		return
 
 	# if the shape is closed, the first element is also the last element

@@ -5,9 +5,13 @@ from ..core import p5
 from ..core.constants import SType
 from ..core.primitives import Arc
 
+from dataclasses import dataclass
 from vispy.gloo import Program, VertexBuffer, FrameBuffer, IndexBuffer
 from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolygon, gluTessEndContour, gluTessVertex
 
+# Useful constants
+COLOR_WHITE = (1, 1, 1, 1)
+COLOR_BLACK = (0, 0, 0, 1)
 
 def to_3x3(mat):
     """Returns the upper left 3x3 corner of an np.array
@@ -171,10 +175,10 @@ def get_render_primitives(shape):
     render_primitives = []
     if isinstance(shape, Arc):
         # Render meshes
-        if p5.renderer.fill_enabled:
+        if p5.renderer.style.fill_enabled:
             render_primitives.extend(_get_meshes(shape))
         # Render borders
-        if p5.renderer.stroke_enabled:
+        if p5.renderer.style.stroke_enabled:
             if shape.arc_mode in ['CHORD', 'OPEN']:  # Implies shape.shape_type == TESS
                 render_primitives.extend(_get_borders(shape))
             elif shape.arc_mode is None:  # Implies shape.shape_type == TRIANGLE_FAN
@@ -186,13 +190,22 @@ def get_render_primitives(shape):
         if shape.shape_type == SType.POINTS:
             render_primitives.append(_vertices_to_render_primitive(render_primitives, 'points'))
         # Render meshes
-        if p5.renderer.fill_enabled:
+        if p5.renderer.style.fill_enabled:
             render_primitives.extend(_get_meshes(shape))
         # Render borders
-        if p5.renderer.stroke_enabled:
+        if p5.renderer.style.stroke_enabled:
             render_primitives.extend(_get_borders(shape))
     return render_primitives
 
+@dataclass
+class Style:
+    background_color = (0.8, 0.8, 0.8, 1.0)
+    fill_color = COLOR_WHITE
+    fill_enabled = True
+    stroke_color = COLOR_BLACK
+    stroke_enabled = True
+    tint_color = COLOR_BLACK
+    tint_enabled = False
 
 # Abstract class that contains common code for OpenGL renderers
 class OpenGLRenderer(ABC):
@@ -207,23 +220,9 @@ class OpenGLRenderer(ABC):
         self.vertex_buffer = None
         self.index_buffer = None
 
-        # Renderer Globals: USEFUL CONSTANTS
-        self.COLOR_WHITE = (1, 1, 1, 1)
-        self.COLOR_BLACK = (0, 0, 0, 1)
-        self.COLOR_DEFAULT_BG = (0.8, 0.8, 0.8, 1.0)
-
         # Renderer Globals: STYLE/MATERIAL PROPERTIES
         #
-        self.background_color = self.COLOR_DEFAULT_BG
-
-        self.fill_color = self.COLOR_WHITE
-        self.fill_enabled = True
-
-        self.stroke_color = self.COLOR_BLACK
-        self.stroke_enabled = True
-
-        self.tint_color = self.COLOR_BLACK
-        self.tint_enabled = False
+        self.style = Style()
 
         # Renderer Globals: Curves
         self.stroke_weight = 1
