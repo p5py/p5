@@ -56,7 +56,7 @@ class Geometry:
 		self.stroke_indices = []
 
 		self.matrix = np.identity(4)
-		self.material = p5.renderer.material
+		self.material = p5.renderer.style.material
 
 	def reset(self):
 		"""

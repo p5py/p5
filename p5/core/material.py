@@ -27,7 +27,7 @@ def normal_material():
     Useful for debugging.
     """
     ensure_p3d("normal_material")
-    p5.renderer.material = NormalMaterial()
+    p5.renderer.style.material = NormalMaterial()
 
 
 def basic_material(r, g, b):
@@ -44,7 +44,7 @@ def basic_material(r, g, b):
     """
     ensure_p3d("basic_material")
     fill(r, g, b)
-    p5.renderer.material = BasicMaterial(p5.renderer.style.fill_color)
+    p5.renderer.style.material = BasicMaterial(p5.renderer.style.fill_color)
 
 
 def blinn_phong_material():
@@ -69,8 +69,8 @@ def blinn_phong_material():
     The color shown on the user's screen is the sum of all three components. 
     """
     ensure_p3d("blinn_phong_material")
-    rend = p5.renderer
-    p5.renderer.material = BlinnPhongMaterial(rend.ambient, rend.diffuse, rend.specular, rend.shininess)
+    rend = p5.renderer.style
+    p5.renderer.style.material = BlinnPhongMaterial(rend.ambient, rend.diffuse, rend.specular, rend.shininess)
 
 
 def ambient(r, g, b):
@@ -86,7 +86,7 @@ def ambient(r, g, b):
     :type b: float
     """
     ensure_p3d('ambient')
-    p5.renderer.ambient = np.array(scale_tuple((r, g, b)), dtype=np.float32)
+    p5.renderer.style.ambient = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def emissive(r, g, b):
@@ -118,7 +118,7 @@ def diffuse(r, g, b):
     :type b: float
     """
     ensure_p3d('diffuse')
-    p5.renderer.diffuse = np.array(scale_tuple((r, g, b)), dtype=np.float32)
+    p5.renderer.style.diffuse = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def shininess(p):
@@ -130,7 +130,7 @@ def shininess(p):
     :type p: float
     """
     ensure_p3d('shininess')
-    p5.renderer.shininess = p
+    p5.renderer.style.shininess = p
 
 
 def specular(r, g, b):
@@ -139,6 +139,6 @@ def specular(r, g, b):
     Should be used together with :any:`light_specular`.
     """
     ensure_p3d('specular')
-    p5.renderer.specular = np.array(scale_tuple((r, g, b)), dtype=np.float32)
+    p5.renderer.style.specular = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 # TODO: Document default values for material functions in renderer3D

@@ -17,6 +17,7 @@
 #
 
 from numpy.linalg import inv
+from dataclasses import dataclass
 from sys import stderr
 import numpy as np
 import math
@@ -34,7 +35,7 @@ from ..core.geometry import Geometry
 from ..core.shape import PShape
 
 from ..pmath.matrix import translation_matrix
-from .openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3
+from .openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, Style, COLOR_WHITE
 from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
 from ..core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
 
@@ -65,21 +66,24 @@ class GlslList:
 		self.data = np.zeros_like(self.data)
 		self.size = 0
 
+@dataclass
+class Style3D(Style):
+	ambient = np.array([0.2]*3)
+	diffuse = np.array([0.6]*3)
+	specular = np.array([0.8]*3)
+	shininess = 8
+	material = BasicMaterial(COLOR_WHITE)
+
 class Renderer3D(OpenGLRenderer):
 	def __init__(self):
 		super().__init__(src_fbuffer, src_default)
+		self.style = Style3D()
 		self.normal_prog = Program(src_normal.vert, src_normal.frag)
 		self.phong_prog = Program(src_phong.vert, src_phong.frag)
 		self.lookat_matrix = np.identity(4)
-		self.material = BasicMaterial(self.style.fill_color)
 
 		# Camera position
 		self.camera_pos = np.zeros(3)
-		# Blinn-Phong Parameters
-		self.ambient = np.array([0.2]*3)
-		self.diffuse = np.array([0.6]*3)
-		self.specular = np.array([0.8]*3)
-		self.shininess = 8
 		# Lights
 		self.MAX_LIGHTS_PER_CATEGORY = 8
 		self.ambient_light_color = GlslList(self.MAX_LIGHTS_PER_CATEGORY, 3, np.float32)
@@ -236,7 +240,7 @@ class Renderer3D(OpenGLRenderer):
 			edges = shape.edges
 			faces = shape.faces
 
-			self.add_to_draw_queue('poly', tverts, edges, faces, self.style.fill_color, self.style.stroke_color, tnormals, self.material)
+			self.add_to_draw_queue('poly', tverts, edges, faces, self.style.fill_color, self.style.stroke_color, tnormals, self.style.material)
 
 		elif isinstance(shape, PShape):
 			fill = shape.fill.normalized if shape.fill else None

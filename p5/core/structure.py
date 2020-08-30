@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from contextlib import contextmanager
-from copy import copy
+from copy import deepcopy
 
 from . import primitives
 from . import color
@@ -54,35 +54,16 @@ def push_style():
     -  material
 
     """
-    prev_style = copy(p5.renderer.style)
-
+    prev_style = deepcopy(p5.renderer.style)
     prev_ellipse_mode = primitives._ellipse_mode
     prev_rect_mode = primitives._rect_mode
-
     prev_color_mode = color.color_parse_mode
     prev_color_range = color.color_range
-
-    prev_ambient, prev_diffuse, prev_specular, prev_shininess, prev_material = [None] * 5
-    if p5.mode == 'P3D':
-        prev_ambient = p5.renderer.ambient
-        prev_diffuse = p5.renderer.diffuse
-        prev_specular = p5.renderer.specular
-        prev_shininess = p5.renderer.shininess
-        prev_material = p5.renderer.material
 
     yield
 
     p5.renderer.style = prev_style
-
     primitives._ellipse_mode = prev_ellipse_mode
     primitives._rect_mode = prev_rect_mode
-
     color.prev_color_parse_mode = prev_color_mode
     color.prev_color_range = prev_color_range
-
-    if p5.mode == 'P3D':
-        p5.renderer.ambient = prev_ambient
-        p5.renderer.diffuse = prev_diffuse
-        p5.renderer.specular = prev_specular
-        p5.renderer.shininess = prev_shininess
-        p5.renderer.material = prev_material
