@@ -61,6 +61,7 @@ MIN_POINT_ACCURACY = 20
 MAX_POINT_ACCURACY = 200
 POINT_ACCURACY_FACTOR = 10
 
+
 def _draw_on_return(func):
     """Set shape parameters to default renderer parameters
 
@@ -73,6 +74,7 @@ def _draw_on_return(func):
 
     return wrapped
 
+
 class Arc(PShape):
     def __init__(self, center, radii, start_angle, stop_angle,
                  mode=None, fill_color='auto',
@@ -84,7 +86,8 @@ class Arc(PShape):
         self._stop_angle = stop_angle
         self.arc_mode = mode
 
-        gl_type = SType.TESS if mode in ['OPEN', 'CHORD'] else SType.TRIANGLE_FAN
+        gl_type = SType.TESS if mode in [
+            'OPEN', 'CHORD'] else SType.TRIANGLE_FAN
         super().__init__(fill_color=fill_color,
                          stroke_color=stroke_color, stroke_weight=stroke_weight,
                          stroke_join=stroke_join, stroke_cap=stroke_cap, shape_type=gl_type, **kwargs)
@@ -105,7 +108,8 @@ class Arc(PShape):
         s2 = p5.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
 
         sdiff = (s2 - s1)
-        size_acc = (np.sqrt(np.sum(sdiff * sdiff)) * math.pi * 2) / POINT_ACCURACY_FACTOR
+        size_acc = (np.sqrt(np.sum(sdiff * sdiff)) *
+                    math.pi * 2) / POINT_ACCURACY_FACTOR
 
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)
@@ -131,6 +135,7 @@ class Arc(PShape):
             vertices.append(vertices[0])
         self.vertices = vertices
 
+
 def point(x, y, z=0):
     """Returns a point.
 
@@ -154,6 +159,7 @@ def point(x, y, z=0):
     elif p5.renderer.stroke_cap == ROUND:
         return circle((x, y, z), p5.renderer.stroke_weight / 2, mode='CENTER')
     raise ValueError('Unknown stroke_cap value')
+
 
 @_draw_on_return
 def line(*args):
@@ -201,6 +207,7 @@ def line(*args):
         Point(*p2)
     ]
     return PShape(vertices=path, shape_type=SType.LINES)
+
 
 @_draw_on_return
 def bezier(*args):
@@ -279,6 +286,7 @@ def bezier(*args):
 
     return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
 
+
 @_draw_on_return
 def curve(*args):
     """Return a Catmull-Rom curve defined by four points.
@@ -338,9 +346,11 @@ def curve(*args):
     if len(args) == 4:
         point_1, point_2, point_3, point_4 = args
     elif len(args) == 8:
-        point_1, point_2, point_3, point_4 = args[:2], args[2:4], args[4:6], args[6:]
+        point_1, point_2, point_3, point_4 = args[:
+                                                  2], args[2:4], args[4:6], args[6:]
     elif len(args) == 12:
-        point_1, point_2, point_3, point_4 = args[:3], args[3:6], args[6:9], args[9:]
+        point_1, point_2, point_3, point_4 = args[:
+                                                  3], args[3:6], args[6:9], args[9:]
     else:
         raise ValueError("Unexpected number of arguments passed to curve()")
 
@@ -352,6 +362,7 @@ def curve(*args):
         vertices.append(p[:3])
 
     return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
+
 
 @_draw_on_return
 def triangle(*args):
@@ -400,6 +411,7 @@ def triangle(*args):
         Point(*p3)
     ]
     return PShape(vertices=path, shape_type=SType.TRIANGLES)
+
 
 @_draw_on_return
 def quad(*args):
@@ -458,6 +470,7 @@ def quad(*args):
         Point(*p4)
     ]
     return PShape(vertices=path, shape_type=SType.QUADS)
+
 
 def rect(*args, mode=None):
     """Return a rectangle.
@@ -536,6 +549,7 @@ def rect(*args, mode=None):
     p4 = Point(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
+
 def square(*args, mode=None):
     """Return a square.
 
@@ -584,6 +598,7 @@ def square(*args, mode=None):
         raise ValueError("Cannot draw square with {} mode".format(mode))
     return rect(coordinate, side_length, side_length, mode=mode)
 
+
 def rect_mode(mode='CORNER'):
     """Change the rect and square drawing mode for the p5.renderer.
 
@@ -596,6 +611,7 @@ def rect_mode(mode='CORNER'):
     """
     global _rect_mode
     _rect_mode = mode
+
 
 @_draw_on_return
 def arc(*args, mode=None, ellipse_mode=None):
@@ -668,6 +684,7 @@ def arc(*args, mode=None, ellipse_mode=None):
         raise ValueError("Unknown arc mode {}".format(emode))
     return Arc(center, dim, start_angle, stop_angle, mode)
 
+
 def ellipse(*args, mode=None):
     """Return a ellipse.
 
@@ -728,6 +745,7 @@ def ellipse(*args, mode=None):
         width, height = args
     return arc(coordinate, width, height, 0, math.pi * 2, mode='CHORD', ellipse_mode=mode)
 
+
 def circle(*args, mode=None):
     """Return a circle.
 
@@ -776,6 +794,7 @@ def circle(*args, mode=None):
         raise ValueError("Cannot create circle in CORNERS mode")
     return ellipse(coordinate, radius, radius, mode=mode)
 
+
 def ellipse_mode(mode='CENTER'):
     """Change the ellipse and circle drawing mode for the p5.renderer.
 
@@ -788,6 +807,7 @@ def ellipse_mode(mode='CENTER'):
     """
     global _ellipse_mode
     _ellipse_mode = mode
+
 
 def draw_shape(shape, pos=(0, 0, 0)):
     """Draw the given shape at the specified location.
@@ -806,6 +826,7 @@ def draw_shape(shape, pos=(0, 0, 0)):
 
     for child_shape in shape.children:
         draw_shape(child_shape)
+
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape
@@ -833,8 +854,8 @@ def create_shape(kind=None, *args, **kwargs):
     """
 
     # TODO: add 'box', 'sphere' support
-    valid_values = { None, 'point', 'line', 'triangle', 'quad',
-                     'rect', 'square', 'ellipse', 'circle', 'arc', }
+    valid_values = {None, 'point', 'line', 'triangle', 'quad',
+                    'rect', 'square', 'ellipse', 'circle', 'arc', }
 
     def empty_shape(*args, **kwargs):
         return PShape()

@@ -41,7 +41,8 @@ def _ensure_editable(func):
     @functools.wraps(func)
     def editable_method(instance, *args, **kwargs):
         if not instance._in_edit_mode:
-            raise ValueError('{} only works in edit mode'.format(func.__name__))
+            raise ValueError(
+                '{} only works in edit mode'.format(func.__name__))
         return func(instance, *args, **kwargs)
 
     return editable_method
@@ -195,7 +196,6 @@ class PShape:
             self._stroke_cap = p5.renderer.stroke_cap
         else:
             self._stroke_cap = stroke
-
 
     @contextlib.contextmanager
     def edit(self, reset=True):

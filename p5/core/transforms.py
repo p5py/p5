@@ -24,11 +24,12 @@ from ..pmath import matrix
 
 from . import p5
 
-__all__ = ['push_matrix', 'reset_transforms', 
-           'translate', 'rotate', 'rotate_x', 'rotate_y', 
-           'rotate_z', 'scale', 'shear_x', 'shear_y', 
+__all__ = ['push_matrix', 'reset_transforms',
+           'translate', 'rotate', 'rotate_x', 'rotate_y',
+           'rotate_z', 'scale', 'shear_x', 'shear_y',
            'camera', 'frustum', 'ortho', 'perspective',
            'print_matrix', 'reset_matrix', 'apply_matrix']
+
 
 @contextmanager
 def push_matrix():
@@ -38,11 +39,13 @@ def push_matrix():
     finally:
         p5.renderer.transform_matrix = previous_matrix
 
+
 def reset_transforms():
     """Reset all transformations to their default state.
 
     """
     p5.renderer.transform_matrix = np.identity(4)
+
 
 def translate(x, y, z=0):
     """Translate the display origin to the given location.
@@ -70,6 +73,7 @@ def translate(x, y, z=0):
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
     return tmat
 
+
 def rotate(theta, axis=np.array([0, 0, 1])):
     """Rotate the display by the given angle along the given axis.
 
@@ -88,6 +92,7 @@ def rotate(theta, axis=np.array([0, 0, 1])):
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
     return tmat
 
+
 def rotate_x(theta):
     """Rotate the view along the x axis.
 
@@ -99,6 +104,7 @@ def rotate_x(theta):
 
     """
     rotate(theta, axis=np.array([1, 0, 0]))
+
 
 def rotate_y(theta):
     """Rotate the view along the y axis.
@@ -112,6 +118,7 @@ def rotate_y(theta):
    """
     rotate(theta, axis=np.array([0, 1, 0]))
 
+
 def rotate_z(theta):
     """Rotate the view along the z axis.
 
@@ -123,6 +130,7 @@ def rotate_z(theta):
 
    """
     rotate(theta, axis=np.array([0, 0, 1]))
+
 
 def scale(sx, sy=None, sz=None):
     """Scale the display by the given factor.
@@ -148,6 +156,7 @@ def scale(sx, sy=None, sz=None):
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
     return tmat
 
+
 def apply_matrix(transform_matrix):
     """Apply the given matrix to the sketch's transform matrix..
 
@@ -157,15 +166,18 @@ def apply_matrix(transform_matrix):
     tmatrix = np.array(transform_matrix)
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmatrix)
 
+
 def reset_matrix():
     """Reset the current transform matrix.
     """
     p5.renderer.transform_matrix = np.identity(4)
 
+
 def print_matrix():
     """Print the transform matrix being used by the sketch.
     """
     print(p5.renderer.transform_matrix)
+
 
 def shear_x(theta):
     """Shear display along the x-axis.
@@ -182,6 +194,7 @@ def shear_x(theta):
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
     return shear_mat
 
+
 def shear_y(theta):
     """Shear display along the y-axis.
 
@@ -196,6 +209,7 @@ def shear_y(theta):
     shear_mat[1, 0] = np.tan(theta)
     p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
     return shear_mat
+
 
 def camera(*args, **kwargs):
     """Sets the camera position for a 3D sketch. 
@@ -256,11 +270,11 @@ def camera(*args, **kwargs):
             np.array(up_vector))
         p5.renderer.camera_pos = np.array(position)
 
-    if len(args) == 9: # If using non-tuple arguments
+    if len(args) == 9:  # If using non-tuple arguments
         kwargs['position'] = args[:3]
         kwargs['target_position'] = args[3:6]
         kwargs['up_vector'] = args[6:]
-    elif len(args) <= 3: # If using tuple arguments
+    elif len(args) <= 3:  # If using tuple arguments
         if len(args) >= 1:
             kwargs['position'] = args[0]
         if len(args) >= 2:
@@ -290,11 +304,12 @@ def perspective(fovy, aspect, near, far):
     :type far: float   
     """
     p5.renderer.projection_matrix = matrix.perspective_matrix(
-            fovy,
-            aspect,
-            near,
-            far
-        )
+        fovy,
+        aspect,
+        near,
+        far
+    )
+
 
 def ortho(left, right, bottom, top, near, far):
     """
@@ -325,7 +340,8 @@ def ortho(left, right, bottom, top, near, far):
         [0, 2/(top - bottom), 0, -(top + bottom)/(top - bottom)],
         [0, 0, -2/(far - near), -(far + near)/(far - near)],
         [0, 0, 0, 1],
-        ])
+    ])
+
 
 def frustum():
     raise NotImplementedError

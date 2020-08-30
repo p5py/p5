@@ -22,6 +22,7 @@ from . import primitives
 from . import color
 from . import p5
 
+
 @contextmanager
 def push_style():
     """Save the current style settings and then restores them on exit.
@@ -69,7 +70,8 @@ def push_style():
     prev_color_mode = color.color_parse_mode
     prev_color_range = color.color_range
 
-    prev_ambient, prev_diffuse, prev_specular, prev_shininess, prev_material = [None] * 5
+    prev_ambient, prev_diffuse, prev_specular, prev_shininess, prev_material = [
+        None] * 5
     if p5.mode == 'P3D':
         prev_ambient = p5.renderer.ambient
         prev_diffuse = p5.renderer.diffuse

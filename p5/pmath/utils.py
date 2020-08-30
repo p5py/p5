@@ -60,8 +60,8 @@ HALF_TAU = math.pi
 SINCOS_PRECISION = 0.5
 SINCOS_LENGTH = int(360 / SINCOS_PRECISION)
 
-PRE_SIN = [ sin(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH) ]
-PRE_COS = [ cos(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH) ]
+PRE_SIN = [sin(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH)]
+PRE_COS = [cos(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH)]
 
 SINCOS = list(zip(PRE_SIN, PRE_COS))
 
@@ -69,8 +69,10 @@ SINCOS = list(zip(PRE_SIN, PRE_COS))
 def _sanitize(point, target_dimension=3):
     return list(point) + [0] * (target_dimension - len(point))
 
+
 def _is_numeric(val):
     return isinstance(val, int) or isinstance(val, float)
+
 
 def constrain(amount, low, high):
     """Constrain the given value in the specified range.
@@ -106,6 +108,7 @@ def constrain(amount, low, high):
     else:
         return amount
 
+
 def lerp(start, stop, amount):
     """Linearly interpolate the start value to the stop value.
 
@@ -133,6 +136,7 @@ def lerp(start, stop, amount):
 
     """
     return start + amount * (stop - start)
+
 
 def remap(value, source_range, target_range):
     """Remap a value from the source range to the target range.
@@ -166,6 +170,7 @@ def remap(value, source_range, target_range):
     T = t1 - t0
     return t0 + ((value - s0) / S) * T
 
+
 def normalize(value, low, high):
     """Normalize the given value to the specified range.
 
@@ -193,6 +198,7 @@ def normalize(value, low, high):
     :type high: float
     """
     return remap(value, (low, high), (0, 1))
+
 
 def magnitude(x, y, z=0):
     """Return the magnitude of the given vector.
@@ -223,6 +229,7 @@ def magnitude(x, y, z=0):
     """
     return np.sqrt(np.sum(np.array([x, y, z]) ** 2))
 
+
 def distance(point_1, point_2):
     """Return the distance between two points.
 
@@ -251,6 +258,7 @@ def distance(point_1, point_2):
     p2 = np.array(_sanitize(point_2))
     return np.sqrt(np.sum((p1 - p2) ** 2))
 
+
 def sq(number):
     """Square a number.
 
@@ -274,6 +282,7 @@ def sq(number):
 
     """
     return number ** 2
+
 
 def fract(number):
     """Calculates the fractional part of a number.

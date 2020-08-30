@@ -2,7 +2,9 @@ from . import p5, fill
 from ..sketch.util import ensure_p3d, scale_tuple
 import numpy as np
 
-__all__ = ['normal_material', 'basic_material', 'blinn_phong_material', 'ambient', 'emissive', 'diffuse', 'shininess', 'specular']
+__all__ = ['normal_material', 'basic_material', 'blinn_phong_material',
+           'ambient', 'emissive', 'diffuse', 'shininess', 'specular']
+
 
 class BasicMaterial:
     def __init__(self, color):
@@ -70,7 +72,8 @@ def blinn_phong_material():
     """
     ensure_p3d("blinn_phong_material")
     rend = p5.renderer
-    p5.renderer.material = BlinnPhongMaterial(rend.ambient, rend.diffuse, rend.specular, rend.shininess)
+    p5.renderer.material = BlinnPhongMaterial(
+        rend.ambient, rend.diffuse, rend.specular, rend.shininess)
 
 
 def ambient(r, g, b):

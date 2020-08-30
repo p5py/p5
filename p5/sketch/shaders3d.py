@@ -22,7 +22,12 @@ from .util import read_shader
 
 ShaderSource = namedtuple('ShaderSource', 'vert frag')
 
-src_default = ShaderSource(read_shader('3d/default3d.vert'), read_shader('common/default.frag'))
-src_fbuffer = ShaderSource(read_shader('common/fbuffer.vert'), read_shader('common/fbuffer.frag')) # Shader sources to draw framebuffers textues.
-src_normal = ShaderSource(read_shader('3d/normal.vert'), read_shader('3d/normal.frag'))
-src_phong = ShaderSource(read_shader('3d/phong.vert'), read_shader('3d/phong.frag'))
+src_default = ShaderSource(read_shader(
+    '3d/default3d.vert'), read_shader('common/default.frag'))
+# Shader sources to draw framebuffers textues.
+src_fbuffer = ShaderSource(read_shader(
+    'common/fbuffer.vert'), read_shader('common/fbuffer.frag'))
+src_normal = ShaderSource(read_shader('3d/normal.vert'),
+                          read_shader('3d/normal.frag'))
+src_phong = ShaderSource(read_shader('3d/phong.vert'),
+                         read_shader('3d/phong.frag'))

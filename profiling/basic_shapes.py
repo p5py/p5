@@ -4,9 +4,11 @@ from p5 import *
 
 FRAME_MAX = 1000
 
+
 def setup():
     # Sets the screen to be 720 pixels wide and 400 pixels high
     size(720, 400)
+
 
 def draw():
     global frames

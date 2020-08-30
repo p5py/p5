@@ -15,7 +15,8 @@ requires = []
 with open("requirements.txt", "r", encoding="UTF-8") as f:
     require = f.read().split("\n")
 
-    for i in range(len(require)): requires.append(require[i].split("=")[0])
+    for i in range(len(require)):
+        requires.append(require[i].split("=")[0])
 
 meta_data = {}
 

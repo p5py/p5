@@ -24,135 +24,139 @@ from . import p5
 import numpy as np
 import math
 
+
 class Geometry:
-	"""
-	Geometry class for all 3D shapes
+    """
+    Geometry class for all 3D shapes
 
-    :param detail_x: number of triangle subdivisions in x-dimension
-    :type detail_x: integer
+:param detail_x: number of triangle subdivisions in x-dimension
+:type detail_x: integer
 
-    :param detail_y: number of triangle subdivisions in y-dimension
-    :type detail_y: integer
+:param detail_y: number of triangle subdivisions in y-dimension
+:type detail_y: integer
 
-	"""
-	def __init__(self, detail_x=1, detail_y=1):
-		self.vertices = []
+    """
 
-		self.line_vertices = []
+    def __init__(self, detail_x=1, detail_y=1):
+        self.vertices = []
 
-		self.line_normals = []
+        self.line_vertices = []
 
-		self.vertex_normals = []
+        self.line_normals = []
 
-		self.faces = []
+        self.vertex_normals = []
 
-		self.uvs = []
-		# a 2D array containing edge connectivity pattern for create line vertices
-		# based on faces for most objects
-		self.edges = []
-		self.detail_x = detail_x
-		self.detail_y = detail_y
+        self.faces = []
 
-		self.stroke_indices = []
+        self.uvs = []
+        # a 2D array containing edge connectivity pattern for create line vertices
+        # based on faces for most objects
+        self.edges = []
+        self.detail_x = detail_x
+        self.detail_y = detail_y
 
-		self.matrix = np.identity(4)
-		self.material = p5.renderer.material
+        self.stroke_indices = []
 
-	def reset(self):
-		"""
-		Reset geometry parameters
-		"""
-		self.vertices = []
-		self.line_vertices = []
-		self.line_normals = []
-		self.vertex_normals = []
-		self.faces = []
-		self.uvs = []
-		self.edges = []
+        self.matrix = np.identity(4)
+        self.material = p5.renderer.material
 
-	def compute_faces(self):
-		"""
-		Adds the faces for the geometry for predefined order of vertices
-		"""
-		self.faces = []
-		sliceCount = self.detail_x + 1
-		for i in range(self.detail_y):
-			for j in range(self.detail_x):
-				a = i * sliceCount + j
-				b = i * sliceCount + j + 1
-				c = (i + 1) * sliceCount + j + 1
-				d = (i + 1) * sliceCount + j
-				self.faces.append([a, b, d])
-				self.faces.append([d, b, c])
+    def reset(self):
+        """
+        Reset geometry parameters
+        """
+        self.vertices = []
+        self.line_vertices = []
+        self.line_normals = []
+        self.vertex_normals = []
+        self.faces = []
+        self.uvs = []
+        self.edges = []
 
-	def make_triangle_edges(self):
-		"""
-		Adds the edges to the geometry based on the faces
-		"""
-		self.edges = []
-		for j in range(len(self.faces)):
-			self.edges.append([self.faces[j][0], self.faces[j][1]])
-			self.edges.append([self.faces[j][1], self.faces[j][2]])
-			self.edges.append([self.faces[j][2], self.faces[j][0]])
+    def compute_faces(self):
+        """
+        Adds the faces for the geometry for predefined order of vertices
+        """
+        self.faces = []
+        sliceCount = self.detail_x + 1
+        for i in range(self.detail_y):
+            for j in range(self.detail_x):
+                a = i * sliceCount + j
+                b = i * sliceCount + j + 1
+                c = (i + 1) * sliceCount + j + 1
+                d = (i + 1) * sliceCount + j
+                self.faces.append([a, b, d])
+                self.faces.append([d, b, c])
 
-	def get_face_normal(self, faceId):
-		"""
-		Returns the normal for a given face
-		"""
-		face = self.faces[faceId]
-		vA = np.array(self.vertices[face[0]])
-		vB = np.array(self.vertices[face[1]])
-		vC = np.array(self.vertices[face[2]])
-		ab = vB - vA
-		ac = vC - vA
-		n = np.cross(ab, ac)
-		ln = np.linalg.norm(n)
+    def make_triangle_edges(self):
+        """
+        Adds the edges to the geometry based on the faces
+        """
+        self.edges = []
+        for j in range(len(self.faces)):
+            self.edges.append([self.faces[j][0], self.faces[j][1]])
+            self.edges.append([self.faces[j][1], self.faces[j][2]])
+            self.edges.append([self.faces[j][2], self.faces[j][0]])
 
-		sinAlpha = ln / (np.linalg.norm(ab) * np.linalg.norm(ac))
-		if sinAlpha > 1: 
-			sinAlpha = 1
+    def get_face_normal(self, faceId):
+        """
+        Returns the normal for a given face
+        """
+        face = self.faces[faceId]
+        vA = np.array(self.vertices[face[0]])
+        vB = np.array(self.vertices[face[1]])
+        vC = np.array(self.vertices[face[2]])
+        ab = vB - vA
+        ac = vC - vA
+        n = np.cross(ab, ac)
+        ln = np.linalg.norm(n)
 
-		return n*math.sin(sinAlpha)/ln
+        sinAlpha = ln / (np.linalg.norm(ab) * np.linalg.norm(ac))
+        if sinAlpha > 1:
+            sinAlpha = 1
 
-	def compute_normals(self):
-		"""
-		Compute normals for every vertex
-		"""
-		self.vertex_normals = []
-		for iv in range(len(self.vertices)):
-			self.vertex_normals.append([0, 0, 0])
+        return n*math.sin(sinAlpha)/ln
 
-		for f in range(len(self.faces)):
-			face = self.faces[f]
-			face_normal = self.get_face_normal(f)
+    def compute_normals(self):
+        """
+        Compute normals for every vertex
+        """
+        self.vertex_normals = []
+        for iv in range(len(self.vertices)):
+            self.vertex_normals.append([0, 0, 0])
 
-			for fv in range(3):
-				vertex_index = face[fv]
-				self.vertex_normals[vertex_index] += face_normal
+        for f in range(len(self.faces)):
+            face = self.faces[f]
+            face_normal = self.get_face_normal(f)
 
-		for iv in range(len(self.vertices)):
-			self.vertex_normals[iv] = self.vertex_normals[iv]/np.linalg.norm(self.vertex_normals[iv])
+            for fv in range(3):
+                vertex_index = face[fv]
+                self.vertex_normals[vertex_index] += face_normal
 
-	def edges_to_vertices(self):
-		self.line_vertices = []
-		self.line_normals = []
+        for iv in range(len(self.vertices)):
+            self.vertex_normals[iv] = self.vertex_normals[iv] / \
+                np.linalg.norm(self.vertex_normals[iv])
 
-		for i in range(len(self.edges)):
-			begin = self.vertices[self.edges[i][0]]
-			end = self.vertices[self.edges[i][1]]
+    def edges_to_vertices(self):
+        self.line_vertices = []
+        self.line_normals = []
 
-			direction = np.array(end) - np.array(begin)
-			direction = direction/np.linalg.norm(direction)
-			direction = direction.tolist()
+        for i in range(len(self.edges)):
+            begin = self.vertices[self.edges[i][0]]
+            end = self.vertices[self.edges[i][1]]
 
-			a = begin
-			b = begin
-			c = end
-			d = end
-			dirAdd = direction
-			dirSub = direction
-			dirAdd.append(1)
-			dirSub.append(-1)
+            direction = np.array(end) - np.array(begin)
+            direction = direction/np.linalg.norm(direction)
+            direction = direction.tolist()
 
-			self.line_normals.extend([dirAdd, dirSub, dirAdd, dirAdd, dirSub, dirSub])
-			self.line_vertices.extend([a, b, c, c, b, d])
+            a = begin
+            b = begin
+            c = end
+            d = end
+            dirAdd = direction
+            dirSub = direction
+            dirAdd.append(1)
+            dirSub.append(-1)
+
+            self.line_normals.extend(
+                [dirAdd, dirSub, dirAdd, dirAdd, dirSub, dirSub])
+            self.line_vertices.extend([a, b, c, c, b, d])

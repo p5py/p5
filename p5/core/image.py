@@ -38,6 +38,7 @@ __all__ = ['PImage', 'image', 'load_image', 'image_mode',
 
 _image_mode = 'corner'
 
+
 def _ensure_loaded(func):
     """Reloads the image if required before calling the function.
 
@@ -49,6 +50,7 @@ def _ensure_loaded(func):
         return func(instance, *args, **kwargs)
     return rfunc
 
+
 @contextlib.contextmanager
 def _restore_color_mode():
     old_mode = color.color_parse_mode
@@ -58,6 +60,7 @@ def _restore_color_mode():
     yield
 
     color.color_mode(old_mode, *old_range)
+
 
 class PImage:
     """Image class for p5.
@@ -80,6 +83,7 @@ class PImage:
     :type fmt: str
 
     """
+
     def __init__(self, width, height, fmt='RGBA'):
         self._width = width
         self._height = height
@@ -160,7 +164,8 @@ class PImage:
 
     def _load(self):
         if self._img is None:
-            self._img = Image.new(self._img_format, (self._width, self._height))
+            self._img = Image.new(
+                self._img_format, (self._width, self._height))
 
         width, height = self._img.size
         self._width = width
@@ -334,7 +339,7 @@ class PImage:
 
     def load_pixels(self):
         """Load internal pixel data for the image.
-        
+
         By default image data is only loaded lazily, i.e., right
         before displaying an image on the screen. Use this method to
         manually load the internal image data.
@@ -482,6 +487,7 @@ class PImage:
         """
         self._img.save(file_name)
 
+
 def image(*args, size=None):
     """Draw an image to the display window.
 
@@ -548,6 +554,7 @@ def image(*args, size=None):
 
     p5.renderer.render_image(img, (lx, ly), (sx, sy))
 
+
 def image_mode(mode):
     """Modify the locaton from which the images are drawn.
 
@@ -581,6 +588,7 @@ def image_mode(mode):
         raise ValueError("Unknown image mode!")
     _image_mode = mode.lower()
 
+
 def load_image(filename):
     """Load an image from the given filename.
 
@@ -608,17 +616,18 @@ def load_image(filename):
 
     return pimg
 
+
 @contextlib.contextmanager
 def load_pixels():
     """Load a snapshot of the display window into the ``pixels`` Image.
-    
+
     This context manager loads data into the global ``pixels`` Image.
     Once the program execution leaves the context manager, all changes
     to the image are written to the main display.
 
     """
     pixels = PImage(builtins.width, builtins.height, 'RGB')
-    #sketch.renderer.flush_geometry()
+    # sketch.renderer.flush_geometry()
     pixel_data = p5.renderer.fbuffer.read(mode='color', alpha=False)
 
     pixels._img = Image.fromarray(pixel_data)
@@ -634,6 +643,7 @@ def load_pixels():
         image(builtins.pixels, (0, 0))
 
     builtins.pixels = None
+
 
 def save_frame(filename=None):
     if filename:
