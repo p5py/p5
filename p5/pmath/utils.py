@@ -20,7 +20,7 @@
 """
 
 import math
-from math import ceil, floor, exp, log, sqrt
+from math import ceil, floor, exp, log, sqrt, modf
 from math import degrees, radians
 from math import sin, cos, tan
 from math import asin, acos, atan, atan2
@@ -44,7 +44,7 @@ __all__ = [
     # MATH FUNCTIONS DEFINED HERE
 
     'constrain', 'lerp', 'remap', 'normalize', 'distance', 'dist',
-    'magnitude', 'mag', 'sq',
+    'magnitude', 'mag', 'sq', 'fract',
 ]
 
 TWO_PI = 2 * math.pi
@@ -274,6 +274,26 @@ def sq(number):
 
     """
     return number ** 2
+
+def fract(number):
+    """Calculates the fractional part of a number.
+
+    Examples ::
+
+        >>> fract(7345.73472742)
+        0.73472742
+
+        >>> fract(1.4215e-15)
+        1.4215e-15
+
+    :param number: Number whose fractional part needs to be found out.
+    :type number: float
+
+    :returns: Fractional part of the number.
+    :rtype: float
+
+    """
+    return modf(number)[0]
 
 
 # Helpful aliases
