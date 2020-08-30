@@ -58,7 +58,6 @@ def push_style():
 
     prev_ellipse_mode = primitives._ellipse_mode
     prev_rect_mode = primitives._rect_mode
-    prev_shape_mode = primitives._shape_mode
 
     prev_color_mode = color.color_parse_mode
     prev_color_range = color.color_range
@@ -77,7 +76,6 @@ def push_style():
 
     primitives._ellipse_mode = prev_ellipse_mode
     primitives._rect_mode = prev_rect_mode
-    primitives._shape_mode = prev_shape_mode
 
     color.prev_color_parse_mode = prev_color_mode
     color.prev_color_range = prev_color_range
