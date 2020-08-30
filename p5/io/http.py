@@ -16,9 +16,13 @@ def http_get(url):
 	except Exception:
 		print("Invalid url. Connection Failed.")
 		exit(1)
+
 	data = resp.read()
-	data = json.loads(data.decode("UTF-8"))
-	return data
+	data = data.decode("UTF-8")
+	try:
+		return json.loads(data)
+	except:
+		return data
 
 #synchronous
 def http_post(url,post_data):
