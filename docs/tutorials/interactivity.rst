@@ -257,8 +257,8 @@ Use the logical operator ``and`` with an ``if`` structure to select a rectangula
 
    def draw():
       background(204)
-      if (mouse_x > 40) and (mouse_x < 80) and
-         (mouse_y > 20) and (mouse_y < 80):
+      if ((mouse_x > 40) and (mouse_x < 80) and
+            (mouse_y > 20) and (mouse_y < 80)):
          fill(255)
       else:
          fill(0)
@@ -266,7 +266,7 @@ Use the logical operator ``and`` with an ``if`` structure to select a rectangula
       rect((40, 20), 40, 60)
 
    if __name__ == '__main__':
-      run()
+      run() 
 
 This code asks, “Is the cursor to the right of the left edge and is the cursor to the left of the right edge and is the cursor beyond the top edge and is the cursor above the bottom?” The code for the next example asks a set of similar questions and combines them with the keyword else to determine which one of the defined areas contains the cursor.
 
