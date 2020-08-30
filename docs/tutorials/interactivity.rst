@@ -28,9 +28,12 @@ The Processing variables ``mouse_x`` and ``mouse_y`` store the x-coordinate and 
 
 .. code:: python
 
-	def draw():
-		frame_rate(12)
-		print(mouse_x, " : ", mouse_y)
+   def draw():
+      # Your draw goes here 
+      print(mouse_x, " : ", mouse_y) # Use this at the end of the draw to
+                                     # print in console the mouse x and y
+        
+   run(frame_rate=12) # Use this to control the frame rate  
 
 When a program starts, the ``mouse_x`` and ``mouse_y`` values are 0. If the cursor moves into the display window, the values are set to the current position of the cursor. If the cursor is at the left, the ``mouse_x`` value is 0 and the value increases as the cursor moves to the right. If the cursor is at the top, the ``mouse_y`` value is 0 and the value increases as the cursor moves down. If ``mouse_x`` and ``mouse_y`` are used in programs without a ``draw()`` or if ``no_loop()`` is run in ``setup()``, the values will always be 0.
 
@@ -145,8 +148,11 @@ The Processing variables ``pmouse_x`` and ``pmouse_y`` store the mouse values fr
 .. code:: python
 
    def draw():
-      frame_rate(12)
-      print(pmouse_y - mouse_x)
+      # Your draw goes here 
+      print(mouse_x, " : ", mouse_y) # Use this at the end of the draw to
+                                     # print in console the mouse x and y
+        
+   run(frame_rate=12) # Use this to control the frame rate
 
 Draw a line from the previous mouse position to the current position to show the changing position in one frame and reveal the speed and direction of the mouse. When the mouse is not moving, a point is drawn, but quick mouse movements create long lines.
 
@@ -251,8 +257,8 @@ Use the logical operator ``and`` with an ``if`` structure to select a rectangula
 
    def draw():
       background(204)
-      if ((mouse_x > 40) and (mouse_x < 80) and
-         (mouse_y > 20) and (mouse_y < 80)):
+      if (mouse_x > 40) and (mouse_x < 80) and
+         (mouse_y > 20) and (mouse_y < 80):
          fill(255)
       else:
          fill(0)
@@ -551,7 +557,7 @@ Because each character has a numeric value as defined by the ASCII table (p. 605
 
       global angle
       if key_is_pressed:
-         if (key >= 32) and (key <= 126):
+         if (ord(str(key)) >= 32) and (ord(str(key)) <= 126):
             #  If the key is alphanumeric, use its value as an angle
             angle = (ord(str(key)) - 32) * 3
 
@@ -578,7 +584,7 @@ In addition to reading key values for numbers, letters, and symbols, Processing 
 
    from p5 import *
 
-   y = 35
+   y = 0
 
    def setup():
        size(100, 100)
@@ -711,8 +717,11 @@ The code inside the ``mouse_moved()`` and ``mouse_dragged()`` event functions ar
 
    from p5 import *
 
-   dragX, dragY, moveX, moveY = (0, 0, 0, 0)
-
+   dragX = 0
+   dragY = 0
+   moveX = 0
+   moveY = 0
+         
    def setup():
       size(100, 100)
       no_stroke()
