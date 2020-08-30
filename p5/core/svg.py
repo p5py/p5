@@ -26,6 +26,7 @@ from . import PShape
 from . import primitives
 from . import transforms
 from ..pmath import matrix
+from .constants import ROUND
 
 default_values = { # default values of SVG attributes
 	"stroke-width": 1,
@@ -97,7 +98,7 @@ def parse_circle(element):
 		0, 2*math.pi,
 		"CHORD",
 		fill_color=fill, stroke_weight=stroke_weight, 
-		stroke_color=stroke, stroke_cap=2)
+		stroke_color=stroke, stroke_cap=ROUND)
 
 def parse_line(element):
 	x1 = float(element.get('x1'))
@@ -133,7 +134,7 @@ def parse_ellipse(element):
 		0, 2*math.pi, 
 		"CHORD", 
 		fill_color=fill, stroke_weight=stroke_weight, 
-		stroke_color=stroke, stroke_cap=2, stroke_join=default_values["stroke-join"])	
+		stroke_color=stroke, stroke_cap=ROUND, stroke_join=default_values["stroke-join"])
 
 parser_function = {
 	# tag: parser

@@ -24,24 +24,13 @@ from .image import image_mode
 from .image import PImage
 from .structure import push_style
 from .transforms import push_matrix
+from .constants import SQUARE, PROJECT, ROUND, MITER, BEVEL
 
 from . import p5
 
 __all__ = [ 'background', 'clear', 'fill', 'no_fill',
             'stroke', 'no_stroke', 'tint', 'no_tint' , 
             'stroke_weight', 'stroke_cap', 'stroke_join']
-
-stroke_cap_codes = {
-    'PROJECT': 0,
-    'SQUARE': 1,
-    'ROUND': 2
-}
-
-stroke_join_codes = {
-    'MITER': 0,
-    'BEVEL': 1,
-    'ROUND': 2
-}
 
 def fill(*fill_args, **fill_kwargs):
     """Set the fill color of the shapes.
@@ -106,8 +95,8 @@ def stroke_cap(c):
     :type c: string
 
     """
-    if c in stroke_cap_codes.keys():
-        p5.renderer.stroke_cap = stroke_cap_codes[c]
+    if c in [SQUARE, PROJECT, ROUND]:
+        p5.renderer.stroke_cap = c
     else:
         raise ValueError("Invalid Stroke Cap %s" % c)
 
@@ -121,8 +110,8 @@ def stroke_join(j):
     :type j: string
 
     """
-    if j in stroke_join_codes.keys():
-        p5.renderer.stroke_join = stroke_join_codes[j]
+    if j in [MITER, BEVEL, ROUND]:
+        p5.renderer.stroke_join = j
     else:
         raise ValueError("Invalid Stroke Cap %s" % j)
 

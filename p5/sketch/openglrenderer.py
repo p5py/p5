@@ -2,7 +2,7 @@ from abc import ABC
 import numpy as np
 
 from ..core import p5
-from ..core.constants import SType
+from ..core.constants import SType, ROUND, MITER
 from ..core.primitives import Arc
 
 from vispy.gloo import Program, VertexBuffer, FrameBuffer, IndexBuffer
@@ -227,8 +227,8 @@ class OpenGLRenderer(ABC):
 
         # Renderer Globals: Curves
         self.stroke_weight = 1
-        self.stroke_cap = 2
-        self.stroke_join = 0
+        self.stroke_cap = ROUND
+        self.stroke_join = MITER
 
         # Renderer Globals
         # VIEW MATRICES, ETC

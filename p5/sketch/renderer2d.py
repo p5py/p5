@@ -206,6 +206,18 @@ class Renderer2D(OpenGLRenderer):
 		cap_type = []
 		color = []
 
+		stroke_cap_codes = {
+		    'PROJECT': 0,
+		    'SQUARE': 1,
+		    'ROUND': 2
+		}
+
+		stroke_join_codes = {
+		    'MITER': 0,
+		    'BEVEL': 1,
+		    'ROUND': 2
+		}
+
 		for line in queue:
 			if len(line[1]) == 0:
 				continue
@@ -229,8 +241,8 @@ class Renderer2D(OpenGLRenderer):
 					side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0]) # Left or right side of the segment
 					pos.extend([line[0][segment[i]]]*6) # Left vertex of each segment
 					linewidth.extend([line[3]]*6)
-					join_type.extend([line[5]]*6)
-					cap_type.extend([line[4]]*6)
+					join_type.extend([stroke_join_codes[line[5]]]*6)
+					cap_type.extend([stroke_cap_codes[line[4]]]*6)
 					color.extend([line[2]]*6)
 
 		if len(pos) == 0:
