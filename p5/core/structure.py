@@ -69,6 +69,8 @@ def push_style():
     return _StyleContext()
 
 def pop_style():
+    """Restores previously pushed style settings
+    """
     assert len(style_stack) > 0, "No styles to pop"
     renderer_styles, shape_modes, color_settings = style_stack.pop()
 

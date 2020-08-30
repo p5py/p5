@@ -24,7 +24,7 @@ from ..pmath import matrix
 
 from . import p5
 
-__all__ = ['push_matrix', 'reset_transforms', 
+__all__ = ['push_matrix', 'pop_matrix', 'reset_transforms',
            'translate', 'rotate', 'rotate_x', 'rotate_y', 
            'rotate_z', 'scale', 'shear_x', 'shear_y', 
            'camera', 'frustum', 'ortho', 'perspective',
@@ -37,10 +37,14 @@ class _MatrixContext(AbstractContextManager):
 matrix_stack = []
 
 def push_matrix():
+    """Pushes the current transformation matrix onto the matrix stack.
+    """
     matrix_stack.append(p5.renderer.transform_matrix.copy())
     return _MatrixContext()
 
 def pop_matrix():
+    """Pops the current transformation matrix off the matrix stack.
+    """
     assert len(matrix_stack) > 0, "No matrix to pop"
     p5.renderer.transform_matrix = matrix_stack.pop()
 

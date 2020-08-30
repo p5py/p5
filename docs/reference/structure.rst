@@ -44,3 +44,8 @@ push_style()
 ============
 
 .. autofunction:: push_style
+
+pop_style()
+============
+
+.. autofunction:: pop_style
