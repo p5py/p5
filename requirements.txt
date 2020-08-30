@@ -5,3 +5,5 @@ Pillow==7.1.2
 vispy==0.6.4
 PyOpenGL==3.1.5
 PyOpenGL-accelerate==3.1.5
+requests==2.22.0
+
