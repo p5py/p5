@@ -15,14 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from contextlib import contextmanager
+from contextlib import AbstractContextManager
 from copy import deepcopy
 
 from . import primitives
 from . import color
 from . import p5
 
-@contextmanager
+from contextlib import AbstractContextManager
+
+style_stack = []
+
+class _StyleContext(AbstractContextManager):
+    def __exit__(self, exc_type, exc_value, traceback):
+        pop_style()
+
 def push_style():
     """Save the current style settings and then restores them on exit.
 
@@ -54,16 +61,17 @@ def push_style():
     -  material
 
     """
-    prev_style = deepcopy(p5.renderer.style)
-    prev_ellipse_mode = primitives._ellipse_mode
-    prev_rect_mode = primitives._rect_mode
-    prev_color_mode = color.color_parse_mode
-    prev_color_range = color.color_range
+    renderer_styles = deepcopy(p5.renderer.style)
+    shape_modes = (primitives._ellipse_mode, primitives._rect_mode)
+    color_settings = (color.color_parse_mode, color.color_range)
 
-    yield
+    style_stack.append((renderer_styles, shape_modes, color_settings))
+    return _StyleContext()
 
-    p5.renderer.style = prev_style
-    primitives._ellipse_mode = prev_ellipse_mode
-    primitives._rect_mode = prev_rect_mode
-    color.prev_color_parse_mode = prev_color_mode
-    color.prev_color_range = prev_color_range
+def pop_style():
+    assert len(style_stack) > 0, "No styles to pop"
+    renderer_styles, shape_modes, color_settings = style_stack.pop()
+
+    p5.renderer.style = renderer_styles
+    primitives._ellipse_mode, primitives._rect_mode = shape_modes
+    color.color_parse_mode, color.color_range = color_settings
