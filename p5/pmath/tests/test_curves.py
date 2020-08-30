@@ -13,11 +13,16 @@ class TestCurves(unittest.TestCase):
 
         self.assertEqual(
             bezier_point(p1, p2, p3, p4, 0.5),
-            Point(67.5, 41.875, 0))
+            (67.5, 41.875))
 
         self.assertEqual(
             bezier_point(p1, p2, p3, p4, 0.9),
-            Point(43.5, 73.055, 0))
+            (43.5, 73.055))
+
+        self.assertEqual(
+            bezier_point(30, 80, 80, 30, 0.5),
+            67.5
+        )
 
     def test_bezier_tangent(self):
         p1 = (30, 20)
@@ -27,27 +32,31 @@ class TestCurves(unittest.TestCase):
 
         self.assertEqual(
             bezier_tangent(p1, p2, p3, p4, 0.5),
-            Point(0.0, 93.75, 0))
+            (0.0, 93.75))
+
+        self.assertEqual(
+            bezier_tangent(p1[0], p2[0], p3[0], p4[0], 0.5),
+            0.0)
 
     def test_curve_point(self):
         p1 = (73, 24)
         p2 = (73, 61)
         p3 = (15, 65)
         p4 = (15, 65)
-        self.assertEqual(curve_point(p1, p2, p3, p4, 0.5), Point(44.0, 65.3125, 0))
+        self.assertEqual(curve_point(p1, p2, p3, p4, 0.5), (44.0, 65.3125))
 
     def test_curve_tangent(self):
         p1 = (73, 24)
         p2 = (73, 61)
         p3 = (15, 65)
         p4 = (15, 65)
-        self.assertEqual(curve_tangent(p1, p2, p3, p4, 0.5), Point(-72.5, 0.375, 0))
+        self.assertEqual(curve_tangent(p1, p2, p3, p4, 0.5), (-72.5, 0.375))
 
     def test_quadratic_point(self):
         p1 = (20, 20)
         p2 = (80, 20)
         p3 = (50, 50)
-        self.assertEqual(quadratic_point(p1, p2, p3, 0.5), Point(57.5, 27.5, 0))
+        self.assertEqual(quadratic_point(p1, p2, p3, 0.5), (57.5, 27.5))
 
 if __name__ == "__main__":
     unittest.main()

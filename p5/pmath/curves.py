@@ -19,6 +19,7 @@
 
 """
 
+from collections.abc import Iterable
 from functools import wraps
 from ..pmath import Point
 
@@ -64,21 +65,20 @@ def bezier_detail(detail_value):
     global bezier_resolution
     bezier_resolution = max(1, detail_value)
 
-@typecast_arguments_as_points
 def bezier_point(start, control_1, control_2, stop, parameter):
     """Return the coordinate of a point along a bezier curve.
 
     :param start: The start point of the bezier curve
-    :type start: 3-tuple.
+    :type start: float or n-tuple
 
     :param control_1: The first control point of the bezier curve
-    :type control_1: 3-tuple.
+    :type control_1: float or n-tuple
 
     :param control_2: The second control point of the bezier curve
-    :type control_2: 3-tuple.
+    :type control_2: float or n-tuple
 
     :param stop: The end point of the bezier curve
-    :type stop: 3-tuple.
+    :type stop: float or n-tuple
 
     :param parameter: The parameter for the required location along
         the curve. Should be in the range [0.0, 1.0] where 0 indicates
@@ -86,35 +86,39 @@ def bezier_point(start, control_1, control_2, stop, parameter):
     :type parameter: float
 
     :returns: The coordinate of the point along the bezier curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    # Package floats into tuples
+    is_iterable = isinstance(start, Iterable)
+    if not is_iterable:
+        start, control_1, control_2, stop = (start,), (control_1,), (control_2,), (stop,)
+
     t = parameter
     t_ = 1 - parameter
-
     P = [start, control_1, control_2, stop]
     coeffs = [t_*t_*t_, 3*t*t_*t_,  3*t*t*t_, t*t*t]
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
 
-    return Point(x, y)
-
-@typecast_arguments_as_points
 def bezier_tangent(start, control_1, control_2, stop, parameter):
     """Return the tangent at a point along a bezier curve.
 
     :param start: The start point of the bezier curve
-    :type start: 3-tuple.
+    :type start: float or n-tuple.
 
     :param control_1: The first control point of the bezier curve
-    :type control_1: 3-tuple.
+    :type control_1: float or n-tuple.
 
     :param control_2: The second control point of the bezier curve
-    :type control_2: 3-tuple.
+    :type control_2: float or n-tuple.
 
     :param stop: The end point of the bezier curve
-    :type stop: 3-tuple.
+    :type stop: float or n-tuple.
 
     :param parameter: The parameter for the required tangent location
         along the curve. Should be in the range [0.0, 1.0] where 0
@@ -124,16 +128,23 @@ def bezier_tangent(start, control_1, control_2, stop, parameter):
 
     :returns: The tangent at the required point along the bezier
         curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    # Package floats into tuples
+    is_iterable = isinstance(start, Iterable)
+    if not is_iterable:
+        start, control_1, control_2, stop = (start,), (control_1,), (control_2,), (stop,)
+
     t = parameter
     tangent = lambda a, b, c, d: 3*t*t*(3*b - 3*c + d - a) + \
                                  6*t*(a - 2*b + c) + \
                                  3*(b - a)
-    x = tangent(start.x, control_1.x, control_2.x, stop.x)
-    y = tangent(start.y, control_1.y, control_2.y, stop.y)
-    return Point(x, y)
+    ans = tuple(tangent(start[i], control_1[i], control_2[i], stop[i]) for i in range(len(start)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
 def _reinit_curve_matrices():
     # TODO: Add basis matrices for faster tessellation.
@@ -158,21 +169,20 @@ def curve_tightness(amount):
     curve_tightness_amount = amount
     _reinit_curve_matrices()
 
-@typecast_arguments_as_points
 def curve_point(point_1, point_2, point_3, point_4, parameter):
     """Return the coordinates of a point along a curve.
 
     :param point_1: The first control point of the curve.
-    :type point_1: 3-tuple.
+    :type point_1: float or n-tuple.
 
     :param point_2: The second control point of the curve.
-    :type point_2: 3-tuple.
+    :type point_2: float or n-tuple.
 
     :param point_3: The third control point of the curve.
-    :type point_3: 3-tuple.
+    :type point_3: float or n-tuple.
 
     :param point_4: The fourth control point of the curve.
-    :type point_4: 3-tuple.
+    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required point location
         along the curve. Should be in the range [0.0, 1.0] where 0
@@ -182,35 +192,38 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
 
     :returns: The coordinate of the point at the required location
         along the curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    # Package floats into tuples
+    is_iterable = isinstance(point_1, Iterable)
+    if not is_iterable:
+        point_1, point_2, point_3, point_4 = (point_1,), (point_2,), (point_3,), (point_4,)
+
     t = parameter
     basis = curve_basis_matrix
     P = [point_1, point_2, point_3, point_4]
-
     coeffs = [sum(t**(3 - i) * basis[i][j] for i in range(4)) for j in range(4)]
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(point_1)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
-
-    return Point(x, y)
-
-@typecast_arguments_as_points
 def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     """Return the tangent at a point along a curve.
 
     :param point_1: The first control point of the curve.
-    :type point_1: 3-tuple.
+    :type point_1: float or n-tuple.
 
     :param point_2: The second control point of the curve.
-    :type point_2: 3-tuple.
+    :type point_2: float or n-tuple.
 
     :param point_3: The third control point of the curve.
-    :type point_3: 3-tuple.
+    :type point_3: float or n-tuple.
 
     :param point_4: The fourth control point of the curve.
-    :type point_4: 3-tuple.
+    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required tangent location
         along the curve. Should be in the range [0.0, 1.0] where 0
@@ -219,35 +232,38 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     :type parameter: float
 
     :returns: The tangent at the required point along the curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    # Package floats into tuples
+    is_iterable = isinstance(point_1, Iterable)
+    if not is_iterable:
+        point_1, point_2, point_3, point_4 = (point_1,), (point_2,), (point_3,), (point_4,)
+
     t = parameter
     basis = curve_basis_matrix
     P = [point_1, point_2, point_3, point_4]
-
     coeffs = [
         sum((3 - i)*(t**(2 - i)) * basis[i][j] for i in range(3))
         for j in range(4)
     ]
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(point_1)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
-
-    return Point(x, y)
-
-@typecast_arguments_as_points
 def quadratic_point(start, control, stop, parameter):
     """Return the coordinates of a point along a bezier curve.
 
     :param point_1: The start point of the curve.
-    :type point_1: 3-tuple.
+    :type point_1: float or n-tuple.
 
     :param point_3: The control point of the curve.
-    :type point_3: 3-tuple.
+    :type point_3: float or n-tuple.
 
     :param point_4: The end point of the curve.
-    :type point_4: 3-tuple.
+    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required point location
         along the curve. Should be in the range [0.0, 1.0] where 0
@@ -257,19 +273,22 @@ def quadratic_point(start, control, stop, parameter):
 
     :returns: The coordinate of the point at the required location
         along the curve.
-    :rtype: Point (namedtuple with x, y, z attributes)
+    :rtype: float or n-tuple
 
     """
+    is_iterable = isinstance(start, Iterable)
+    if not is_iterable:
+        start, control, stop = (start,), (control,), (stop,)
+
     t = parameter
     t_ = 1 - parameter
-
     P = [start, control, stop]
     coeffs = [t_*t_, 2*t*t_, t*t]
-
-    x = sum(pt.x * c for pt, c in zip(P, coeffs))
-    y = sum(pt.y * c for pt, c in zip(P, coeffs))
-
-    return Point(x, y)
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
+    # Unpack answer if input is not iterable
+    if not is_iterable:
+        ans = ans[0]
+    return ans
 
 # Set the default values.
 bezier_detail(20)

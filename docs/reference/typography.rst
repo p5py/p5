@@ -21,7 +21,11 @@ load_font()
 text()
 ------
 
-.. autofunction:: text
+.. function:: text(text_string, x, y)
+    :noindex:
+.. function:: text(text_string, x, y, z)
+    :noindex:
+.. autofunction:: text(text_string, position, wrap_at=None)
 
 
 text_font()

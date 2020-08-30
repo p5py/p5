@@ -21,6 +21,7 @@ from . import primitives
 from .shape import PShape
 from .constants import TESS
 from ..pmath import curves
+from p5.pmath.vector import Point
 
 shape_kind = None
 vertices = [] # stores the vertex coordinates
@@ -240,7 +241,7 @@ def get_curve_vertices(verts):
 		for i in range(steps + 1):
 			t = i / steps
 			p = curves.bezier_point(start, c1, c2, stop, t)
-			shape_vertices.append(p[:3])
+			shape_vertices.append(Point(*p))
 
 	return shape_vertices
 
@@ -262,7 +263,7 @@ def get_bezier_vertices(verts, vert_types):
 			for i in range(steps + 1):
 					t = i / steps
 					p = curves.bezier_point(start, c1, c2, stop, t)
-					shape_vertices.append(p[:3])
+					shape_vertices.append(Point(*p))
 	return shape_vertices
 
 def get_quadratic_vertices(verts, vert_types):
@@ -282,7 +283,7 @@ def get_quadratic_vertices(verts, vert_types):
 			for i in range(steps + 1):
 				t = i / steps
 				p = curves.quadratic_point(start, control, stop, t)
-				shape_vertices.append(p[:3])
+				shape_vertices.append(Point(*p))
 
 	return shape_vertices
 

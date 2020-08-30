@@ -67,11 +67,20 @@ def load_font(font_name):
     """
     return create_font(font_name)
 
-def text(text_string, position, wrap_at=None):
+def text(*args, wrap_at=None):
     """Draw the given text on the screen and save the image.
 
     :param text_string: text to display
     :type text_string: str
+
+    :param x: x-coordinate of text
+    :type x: float
+
+    :param y: y-coordinate of text
+    :type y: float
+
+    :param z: z-coordinate of text
+    :type z: float
 
     :param position: position of the text on the screen
     :type position: tuple
@@ -85,6 +94,12 @@ def text(text_string, position, wrap_at=None):
     :rtype: str
 
     """
+    if len(args) == 2:
+        text_string, position = args
+    elif len(args) == 3 or len(args) == 4:
+        text_string, position = args[0], args[1:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to text()")
 
     if len(text_string) == 0:
         return 

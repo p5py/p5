@@ -199,8 +199,44 @@ def line(*args):
     return PShape(vertices=path, shape_type=SType.LINES)
 
 @_draw_on_return
-def bezier(start, control_point_1, control_point_2, stop):
+def bezier(*args):
     """Return a bezier path defined by two control points.
+
+    :param x1: x-coordinate of the first anchor point
+    :type x1: float
+
+    :param y1: y-coordinate of the first anchor point
+    :type y1: float
+
+    :param z1: z-coordinate of the first anchor point
+    :type z1: float
+
+    :param x2: x-coordinate of the first control point
+    :type x2: float
+
+    :param y2: y-coordinate of the first control point
+    :type y2: float
+
+    :param z2: z-coordinate of the first control point
+    :type z2: float
+
+    :param x3: x-coordinate of the second control point
+    :type x3: float
+
+    :param y3: y-coordinate of the second control point
+    :type y3: float
+
+    :param z3: z-coordinate of the second control point
+    :type z3: float
+
+    :param x4: x-coordinate of the second anchor point
+    :type x4: float
+
+    :param y4: y-coordinate of the second anchor point
+    :type y4: float
+
+    :param z4: z-coordinate of the second anchor point
+    :type z4: float
 
     :param start: The starting point of the bezier curve.
     :type start: tuple.
@@ -220,6 +256,15 @@ def bezier(start, control_point_1, control_point_2, stop):
     :rtype: PShape.
 
     """
+    if len(args) == 4:
+        start, control_point_1, control_point_2, stop = args
+    elif len(args) == 8:
+        start, control_point_1, control_point_2, stop = args[:2], args[2:4], args[4:6], args[6:]
+    elif len(args) == 12:
+        start, control_point_1, control_point_2, stop = args[:3], args[3:6], args[6:9], args[9:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to bezier()")
+
     vertices = []
     steps = curves.bezier_resolution
     for i in range(steps + 1):
@@ -231,8 +276,44 @@ def bezier(start, control_point_1, control_point_2, stop):
     return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
 
 @_draw_on_return
-def curve(point_1, point_2, point_3, point_4):
+def curve(*args):
     """Return a Catmull-Rom curve defined by four points.
+
+    :param x1: x-coordinate of the beginning control point
+    :type x1: float
+
+    :param y1: y-coordinate of the beginning control point
+    :type y1: float
+
+    :param z1: z-coordinate of the beginning control point
+    :type z1: float
+
+    :param x2: x-coordinate of the first point
+    :type x2: float
+
+    :param y2: y-coordinate of the first point
+    :type y2: float
+
+    :param z2: z-coordinate of the first point
+    :type z2: float
+
+    :param x3: x-coordinate of the second point
+    :type x3: float
+
+    :param y3: y-coordinate of the second point
+    :type y3: float
+
+    :param z3: z-coordinate of the second point
+    :type z3: float
+
+    :param x4: x-coordinate of the ending control point
+    :type x4: float
+
+    :param y4: y-coordinate of the ending control point
+    :type y4: float
+
+    :param z4: z-coordinate of the ending control point
+    :type z4: float
 
     :param point_1: The first point of the curve.
     :type point_1: tuple
@@ -250,6 +331,15 @@ def curve(point_1, point_2, point_3, point_4):
     :rtype: PShape
 
     """
+    if len(args) == 4:
+        point_1, point_2, point_3, point_4 = args
+    elif len(args) == 8:
+        point_1, point_2, point_3, point_4 = args[:2], args[2:4], args[4:6], args[6:]
+    elif len(args) == 12:
+        point_1, point_2, point_3, point_4 = args[:3], args[3:6], args[6:9], args[9:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to curve()")
+
     vertices = []
     steps = curves.curve_resolution
     for i in range(steps + 1):
@@ -260,8 +350,26 @@ def curve(point_1, point_2, point_3, point_4):
     return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
 
 @_draw_on_return
-def triangle(p1, p2, p3):
+def triangle(*args):
     """Return a triangle.
+
+    :param x1: x-coordinate of the first point
+    :type x1: float
+
+    :param y1: y-coordinate of the first point
+    :type y1: float
+
+    :param x2: x-coordinate of the second point
+    :type x2: float
+
+    :param y2: y-coordinate of the second point
+    :type y2: float
+
+    :param x3: x-coordinate of the third point
+    :type x3: float
+
+    :param y3: y-coordinate of the third point
+    :type y3: float
 
     :param p1: coordinates of the first point of the triangle
     :type p1: tuple | list | p5.Vector
@@ -275,6 +383,13 @@ def triangle(p1, p2, p3):
     :returns: A triangle.
     :rtype: p5.PShape
     """
+    if len(args) == 6:
+        p1, p2, p3 = args[:2], args[2:4], args[4:]
+    elif len(args) == 3:
+        p1, p2, p3 = args
+    else:
+        raise ValueError("Unexpected number of arguments passed to triangle()")
+
     path = [
         Point(*p1),
         Point(*p2),
@@ -283,8 +398,32 @@ def triangle(p1, p2, p3):
     return PShape(vertices=path, shape_type=SType.TRIANGLES)
 
 @_draw_on_return
-def quad(p1, p2, p3, p4):
+def quad(*args):
     """Return a quad.
+
+    :param x1: x-coordinate of the first point
+    :type x1: float
+
+    :param y1: y-coordinate of the first point
+    :type y1: float
+
+    :param x2: x-coordinate of the second point
+    :type x2: float
+
+    :param y2: y-coordinate of the second point
+    :type y2: float
+
+    :param x3: x-coordinate of the third point
+    :type x3: float
+
+    :param y3: y-coordinate of the third point
+    :type y3: float
+
+    :param x4: x-coordinate of the forth point
+    :type x4: float
+
+    :param y4: y-coordinate of the forth point
+    :type y4: float
 
     :param p1: coordinates of the first point of the quad
     :type p1: tuple | list | p5.Vector
@@ -301,6 +440,13 @@ def quad(p1, p2, p3, p4):
     :returns: A quad.
     :rtype: PShape
     """
+    if len(args) == 8:
+        p1, p2, p3, p4 = args[:2], args[2:4], args[4:6], args[6:]
+    elif len(args) == 4:
+        p1, p2, p3, p4 = args
+    else:
+        raise ValueError("Unexpected number of arguments passed to quad()")
+
     path = [
         Point(*p1),
         Point(*p2),
@@ -309,8 +455,20 @@ def quad(p1, p2, p3, p4):
     ]
     return PShape(vertices=path, shape_type=SType.QUADS)
 
-def rect(coordinate, *args, mode=None):
+def rect(*args, mode=None):
     """Return a rectangle.
+
+    :param x: x-coordinate of the rectangle by default
+    :type float:
+
+    :param y: y-coordinate of the rectangle by default
+    :type float:
+
+    :param w: width of the rectangle by default
+    :type float:
+
+    :param h: height of the rectangle by default
+    :type float:
 
     :param coordinate: Represents the lower left corner of then
         rectangle when mode is 'CORNER', the center of the rectangle
@@ -336,6 +494,13 @@ def rect(coordinate, *args, mode=None):
     :rtype: p5.PShape
 
     """
+    if len(args) == 4:
+        coordinate, args = args[:2], args[2:]
+    elif len(args) == 3:
+        coordinate, args = args[0], args[1:]
+    else:
+        raise ValueError("Unexpected number of arguments passed to rect()")
+
     if mode is None:
         mode = _rect_mode
 
@@ -367,8 +532,14 @@ def rect(coordinate, *args, mode=None):
     p4 = Point(p1.x, p3.y, p3.z)
     return quad(p1, p2, p3, p4)
 
-def square(coordinate, side_length, mode=None):
+def square(*args, mode=None):
     """Return a square.
+
+    :param x: x-coordinate of the square by default
+    :type float:
+
+    :param y: y-coordinate of the square by default
+    :type float:
 
     :param coordinate: When mode is set to 'CORNER', the coordinate
         represents the lower-left corner of the square. For modes
@@ -395,6 +566,13 @@ def square(coordinate, side_length, mode=None):
     :raises ValueError: When the mode is set to 'CORNERS'
 
     """
+    if len(args) == 2:
+        coordinate, side_length = args
+    elif len(args) == 3:
+        coordinate, side_length = args[:2], args[2]
+    else:
+        raise ValueError("Unexpected number of arguments passed to square()")
+
     if mode is None:
         mode = _rect_mode
 
