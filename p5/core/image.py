@@ -630,7 +630,7 @@ def load_pixels():
 
     with push_style():
         image_mode('corner')
-        p5.renderer.tint_enabled = False
+        p5.renderer.style.tint_enabled = False
         image(builtins.pixels, (0, 0))
 
     builtins.pixels = None

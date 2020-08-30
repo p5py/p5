@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from contextlib import contextmanager
+from contextlib import AbstractContextManager
 import numpy as np
 import math
 import builtins
@@ -24,19 +24,29 @@ from ..pmath import matrix
 
 from . import p5
 
-__all__ = ['push_matrix', 'reset_transforms', 
+__all__ = ['push_matrix', 'pop_matrix', 'reset_transforms',
            'translate', 'rotate', 'rotate_x', 'rotate_y', 
            'rotate_z', 'scale', 'shear_x', 'shear_y', 
            'camera', 'frustum', 'ortho', 'perspective',
            'print_matrix', 'reset_matrix', 'apply_matrix']
 
-@contextmanager
+class _MatrixContext(AbstractContextManager):
+    def __exit__(self, exc_type, exc_value, traceback):
+        pop_matrix()
+
+matrix_stack = []
+
 def push_matrix():
-    previous_matrix = p5.renderer.transform_matrix.copy()
-    try:
-        yield previous_matrix
-    finally:
-        p5.renderer.transform_matrix = previous_matrix
+    """Pushes the current transformation matrix onto the matrix stack.
+    """
+    matrix_stack.append(p5.renderer.transform_matrix.copy())
+    return _MatrixContext()
+
+def pop_matrix():
+    """Pops the current transformation matrix off the matrix stack.
+    """
+    assert len(matrix_stack) > 0, "No matrix to pop"
+    p5.renderer.transform_matrix = matrix_stack.pop()
 
 def reset_transforms():
     """Reset all transformations to their default state.

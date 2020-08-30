@@ -46,14 +46,14 @@ def fill(*fill_args, **fill_kwargs):
 
     """
     fill_color = Color(*fill_args, **fill_kwargs)
-    p5.renderer.fill_enabled = True
+    p5.renderer.style.fill_enabled = True
     p5.renderer.fill_image_enabled = False
-    p5.renderer.fill_color = fill_color.normalized
+    p5.renderer.style.fill_color = fill_color.normalized
     return fill_color
 
 def no_fill():
     """Disable filling geometry."""
-    p5.renderer.fill_enabled = False
+    p5.renderer.style.fill_enabled = False
 
 def stroke(*color_args, **color_kwargs):
     """Set the color used to draw lines around shapes
@@ -71,8 +71,8 @@ def stroke(*color_args, **color_kwargs):
     :rtype: Color
     """
     stroke_color = Color(*color_args, **color_kwargs)
-    p5.renderer.stroke_enabled = True
-    p5.renderer.stroke_color = stroke_color.normalized
+    p5.renderer.style.stroke_enabled = True
+    p5.renderer.style.stroke_color = stroke_color.normalized
 
 def stroke_weight(thickness):
     """Sets the width of the stroke used for lines, points, and the border around shapes. All widths are set in units of pixels.
@@ -85,7 +85,7 @@ def stroke_weight(thickness):
 
 def no_stroke():
     """Disable drawing the stroke around shapes."""
-    p5.renderer.stroke_enabled = False
+    p5.renderer.style.stroke_enabled = False
 
 def stroke_cap(c):
     """Sets the style of line endings. The ends are SQUARE, 
@@ -131,12 +131,12 @@ def tint(*color_args, **color_kwargs):
     :rtype: Color
     """
     tint_color = Color(*color_args, **color_kwargs)
-    p5.renderer.tint_enabled = True
-    p5.renderer.tint_color = tint_color.normalized
+    p5.renderer.style.tint_enabled = True
+    p5.renderer.style.tint_color = tint_color.normalized
 
 def no_tint():
     """Disable tinting of images."""
-    p5.renderer.tint_enabled = False
+    p5.renderer.style.tint_enabled = False
 
 def background(*args, **kwargs):
     """Set the background color for the p5.renderer.
@@ -182,7 +182,7 @@ def background(*args, **kwargs):
         no_stroke()
 
         with push_matrix():
-            p5.renderer.background_color = background_color.normalized
+            p5.renderer.style.background_color = background_color.normalized
             p5.renderer.clear()
 
 def clear():

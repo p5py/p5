@@ -9,6 +9,11 @@ push_matrix()
 
 .. autofunction:: push_matrix()
 
+pop_matrix()
+-------------
+
+.. autofunction:: pop_matrix()
+
 print_matrix()
 --------------
 

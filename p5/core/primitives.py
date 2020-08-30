@@ -37,7 +37,6 @@ __all__ = ['Arc', 'point', 'line', 'arc', 'triangle', 'quad',
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
-_shape_mode = 'CORNER'
 
 # We use these in ellipse tessellation. The algorithm is similar to
 # the one used in Processing and the we compute the number of
