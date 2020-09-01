@@ -1,0 +1,98 @@
+0.7.0 - 0.7.1
+*************
+In GSOC 2020 two releases were published.
+The goals of the project were:
+
+#. Standardize p5py API so it's as close as possible to that of the Processing Language (Java Mode) while being reasonably pythonic (e.g. supporting some python-only features and syntax)
+#. Explore moving tessellation of shapes to OpenGL for improved performance
+#. Improve 3D support
+
+We met all of these goals completely. In addition, the following stretch goals were completed:
+
+#. Implement a profiling harness to measure performance improvements
+#. Fix existing bugs
+
+0.7.0
+=====
+
+We are happy to announce another developmental release from Google Summer of Code! The project was supervised
+by `Arihant Parsoya <https://github.com/parsoyaarihant>`_ and `Abhik Pal <https://github.com/abhikpal>`_  of the
+`Processing Foundation <https://processingfoundation.org/>`_. This release includes bug fixes, a refactored
+rendering pipeline with improved performance, new 3D capabilities, and new example code.
+
+
+List of New APIs
+----------------------
+
+New materials in P3D
+````````````````````````
+
+  - :any:`normal_material` assigns a color to a pixel solely based on the normal vector of the fragment being rendered. Useful for debugging
+  - :any:`basic_material` returns a uniform color.
+  - :any:`blinn_phong_material` is a material based on the Blinn-Phong reflection model. This is the most “realistic” material in p5py. Parameters to adjust it include
+
+    - :any:`ambient` is the color that interacts with :any:`ambient_light` s
+    - :any:`diffuse` / :any:`emissive` is the surface color that interacts with :any:`point_light` s and :any:`directional_light` s
+    - :any:`specular` is the highlight color that interacts with :any:`point_light`  and :any:`directional_light` 
+    - :any:`shininess` determines how glossy a surface is
+
+Lighting system in P3D
+````````````````````````
+
+  - :any:`lights` creates default lights
+  - :any:`ambient_light` is a light that's uniform everywhere
+  - :any:`directional_light` comes from one direction: it is stronger when hitting a surface squarely, and weaker if it hits at a gentle angle.
+  - :any:`point_light` comes from one location and emits to all directions.
+  - :any:`light_specular` controls the color of the specular highlight
+  - :any:`light_falloff` controls how fast a light fades with distance
+
+This release also includes contributions from @parsoyaarihant, @jeremydouglass, @tushar5526, @Hansimov, @ReneTC, @Andy-Python-Programmer, and @galaxyproduction. Thank you!
+
+
+0.7.1
+=====
+We are happy to announce another developmental release from Google Summer of Code! The project was supervised
+by `Arihant Parsoya <https://github.com/parsoyaarihant>`_ and `Abhik Pal <https://github.com/abhikpal>`_  of the
+`Processing Foundation <https://processingfoundation.org/>`_. This is the final release for GSOC this year and 
+includes API refactors, addtions, and bug fixes with compatibility and stability as a focus.
+
+List of New APIs
+----------------------
+
+- `fract` calculates the fractional part of a number. Contributed by @tushar5526
+- :any:`http_get` and :any:`http_post` makes HTTP requests to the web. Contrbuted by @nakul-shahdadpuri
+- :any:`pop_matrix` and :any:`pop_style` are alternatives to the context manager syntax used by previous version. Accordingly, :any:`push_matrix` and  `pop_matrix` can now both act as context managers and be directly called like in Processing or p5.js
+
+The following additional signatures are added for compatibility with other Processing dialects
+
+- `line(x1, y1, x2, y2)`
+- `line(x1, y1, z1, x2, y2, z2)`
+- `ellipse(a, b, c, d, mode=None)`
+- `circle(x, y, radius, mode=None)`
+- `arc(x, y, width, height, start_angle, stop_angle, mode=None, ellipse_mode=None)`
+- `image(img, x, y)`
+- `image(img, x, y, w, h)`
+- `triangle(x1, y1, x2, y2, x3, y3)`
+- `quad(x1, y1, x2, y2, x3, y3, x4, y4)`
+- `rect(x, y, w, h)`
+- `square(x, y, side_length)`
+- `bezier(x1, y1, x2, y2, x3, y3, x4, y4)`
+- `bezier(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)`
+- `curve(x1, y1, x2, y2, x3, y3, x4, y4)`
+- `curve(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)`
+- `camera(position_x, position_y, position_z, target_x, target_y, target_z, up_x, up_y, up_z)`
+- `camera(position, target_position, up_vector)`
+- `text(text_string, x, y)`
+- `text(text_string, x, y, z)`
+
+The following functions can now take floats and tuples of arbitrary length
+
+- `bezier_point`
+- `bezier_tangent`
+- `curve_point`
+- `curve_tangent`
+- `quadratic_point`
+
+This release also includes contributions from @nakul-shahdadpuri, @tushar5526, and @parsoyaarihant. Thank you!
+
+
