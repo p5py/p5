@@ -1,14 +1,14 @@
 #for loading tables in csv format
 class Table:
 
-	def __init__(self,PATH):
+	def __init__(self,path):
 		"""
 		Initializes Table object when given the path to a CSV file.
 
 		:param PATH: Path to the CSV file.
 		:type PATH: string
 		"""
-		file = open(PATH,'r')
+		file = open(path,'r')
 		lines = file.readlines()
 		data = []
 		for line in lines:
@@ -23,13 +23,13 @@ class Table:
 		"""
 		Returns number of rows in the read CSV.
 		"""
-		return (len(self.data))
+		return len(self.data)
 
 	def get_column_count(self):
 		"""
 		Returns number of columns in the read CSV.
 		"""
-		return (len(self.data[0]))
+		return len(self.data[0])
 
 	def get_column(self,name):
 		"""
@@ -65,12 +65,12 @@ class Table:
 		return self.data
 
 
-def load_table(PATH):
+def load_table(path):
 	"""
 	Calls Table class and returns a Table class object
 	
 	:param PATH: Path to file
 	:type PATH: string
 	"""
-	table = Table(PATH)
+	table = Table(path)
 	return table  
