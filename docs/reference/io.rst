@@ -19,3 +19,12 @@ http_post()
 
 .. autofunction:: http_post
 
+LOCAL
+=============
+
+Loading Tables
+---------------
+
+.. autoclass:: Table
+   :members:
+   :special-members:

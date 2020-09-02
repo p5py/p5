@@ -2,6 +2,12 @@
 class Table:
 
 	def __init__(self,PATH):
+		"""
+		Initializes Table object when given the path to a CSV file.
+
+		:param PATH: Path to the CSV file.
+		:type PATH: string
+		"""
 		file = open(PATH,'r')
 		lines = file.readlines()
 		data = []
@@ -14,12 +20,24 @@ class Table:
 		self.data = data
 
 	def get_row_count(self):
+		"""
+		Returns number of rows in the read CSV.
+		"""
 		return (len(self.data))
 
 	def get_column_count(self):
+		"""
+		Returns number of columns in the read CSV.
+		"""
 		return (len(self.data[0]))
 
 	def get_column(self,name):
+		"""
+		Returns an entire column based on the column index.
+
+		:param name: Name of the required column
+		:type name: string
+		"""
 		count = 0
 		for i in self.data[0]:
 			if i == name:
@@ -30,9 +48,18 @@ class Table:
 			column.append(item[count])
 		return column
 
-	def get_row(self,inde):
+	def get_row(self,index):
+		"""
+		Returns an entire row when given the row index.
+
+		:param index: Name of the row
+		:type index: string
+		"""
 		for fragment in self.data:
-			if fragment[0] == inde:
+			if fragment[0] == index:
 				return fragment
 	def get_array(self):
+		"""
+		Returns the entire csv data as an multidimensional array.
+		"""
 		return self.data
