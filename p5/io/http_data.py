@@ -34,5 +34,3 @@ def http_post(url,post_data):
 	data = requests.post(url,post_data)
 	data = data.json()
 	return data
-
-
