@@ -37,7 +37,7 @@ def set_item(key, value):
     * Local storage persists in between the p5py sketch sessions.
     * The key can be the name of the variable but doesn't have to be.
     * Sensitive data such as passwords or personal information should not be stored in local storage.
-    * Overwrites keys if already present
+    * Overwrites the key if already present
 
     :param key: key name that you wish to you use in local storage
     :type key: basestring

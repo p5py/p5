@@ -19,3 +19,4 @@ Reference
    lights
    materials
    io
+   data
