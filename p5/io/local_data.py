@@ -63,3 +63,14 @@ class Table:
 		Returns the entire csv data as an multidimensional array.
 		"""
 		return self.data
+
+
+def load_table(PATH):
+	"""
+	Calls Table class and returns a Table class object
+	
+	:param PATH: Path to file
+	:type PATH: string
+	"""
+	table = Table(PATH)
+	return table  

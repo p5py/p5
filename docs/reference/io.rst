@@ -28,3 +28,8 @@ Loading Tables
 .. autoclass:: Table
    :members:
    :special-members:
+
+load_table()
+-----------
+
+.. autofunction:: load_table 
