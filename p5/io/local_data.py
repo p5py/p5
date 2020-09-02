@@ -1,11 +1,8 @@
-class table:
+#for loading tables in csv format
+class Table:
 
 	def __init__(self,PATH):
-		try:
-			file = open(PATH,'r')
-		except:
-			print("No file detected.")
-			exit(1)
+		file = open(PATH,'r')
 		lines = file.readlines()
 		data = []
 		for line in lines:
@@ -24,17 +21,14 @@ class table:
 
 	def get_column(self,name):
 		count = 0
-		try:
-			for i in self.data[0]:
-				if i == name:
-					break
-				count = count + 1
-			column = []
-			for item in self.data:
-				column.append(item[count])
-			return column
-		except:
-			print("ERROR: column does not exist")
+		for i in self.data[0]:
+			if i == name:
+				break
+			count = count + 1
+		column = []
+		for item in self.data:
+			column.append(item[count])
+		return column
 
 	def get_row(self,inde):
 		for fragment in self.data:
