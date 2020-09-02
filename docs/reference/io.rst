@@ -11,7 +11,7 @@ HTTP
 http_get()
 ----------
 
-.. autofunction:: http_get 
+.. autofunction:: http_get
 
 
 http_post()
@@ -19,7 +19,7 @@ http_post()
 
 .. autofunction:: http_post
 
-LOCAL
+Local
 =============
 
 Loading Tables
@@ -27,9 +27,8 @@ Loading Tables
 
 .. autoclass:: Table
    :members:
-   :special-members:
 
 load_table()
------------
+------------
 
-.. autofunction:: load_table 
+.. autofunction:: load_table
