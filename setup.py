@@ -10,7 +10,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 packages = ['p5']
 
-requires = []
+requires = [
+    'dataclasses;python_version=="3.6"'
+]
 
 with open("requirements.txt", "r", encoding="UTF-8") as f:
     require = f.read().split("\n")
