@@ -10,14 +10,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 packages = ['p5']
 
-requires = [
-    'dataclasses;python_version=="3.6"'
-]
-
 with open("requirements.txt", "r", encoding="UTF-8") as f:
-    require = f.read().split("\n")
-
-    for i in range(len(require)): requires.append(require[i].split("=")[0])
+    requires = f.read().split("\n")
 
 meta_data = {}
 
@@ -44,6 +38,7 @@ setup(
 
     setup_requires=['numpy'],
     install_requires=requires,
+    python_requires='>=3.6',
 
     classifiers=[
         'Development Status :: 3 - Alpha',
