@@ -77,7 +77,7 @@ def load_table(path,mode):
 	:param path: Path to file
 	:type path: string
 
-	:param mode: Type of File csv/ssv.
+	:param mode: Type of File csv/ssv/tsv.
 	:type mode: string
 
 	:returns: A Table object
@@ -87,6 +87,8 @@ def load_table(path,mode):
 		seperator = ','
 	if mode == "ssv":
 		seperator = ';'
+	if mode == "tsv":
+		seperator = '\t'
 
 	table = Table(path,seperator)
 	return table  
