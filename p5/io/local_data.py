@@ -1,12 +1,14 @@
 #for loading tables in csv format
 class Table:
+	"""Class to represent tabular data
+
+	:param path: Path to the CSV file.
+	:type path: string
+	"""
 
 	def __init__(self,path):
 		"""
 		Initializes Table object when given the path to a CSV file.
-
-		:param PATH: Path to the CSV file.
-		:type PATH: string
 		"""
 		file = open(path,'r')
 		lines = file.readlines()
@@ -69,8 +71,8 @@ def load_table(path):
 	"""
 	Calls Table class and returns a Table class object
 	
-	:param PATH: Path to file
-	:type PATH: string
+	:param path: Path to file
+	:type path: string
 	"""
 	table = Table(path)
 	return table  
