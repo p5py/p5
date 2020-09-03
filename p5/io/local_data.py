@@ -54,12 +54,10 @@ class Table:
 		"""
 		Returns an entire row when given the row index.
 
-		:param index: Name of the row
-		:type index: string
+		:param index: Index of the required row.
+		:type index: int
 		"""
-		for fragment in self.data:
-			if fragment[0] == index:
-				return fragment
+		return self.data[index]
 	def get_array(self):
 		"""
 		Returns the entire csv data as an multidimensional array.
