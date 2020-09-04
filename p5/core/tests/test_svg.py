@@ -2,7 +2,13 @@ import unittest
 import numpy as np
 
 import xml.etree.ElementTree as etree
-from p5.core.svg import (get_style, parse_rect, parse_circle, parse_line, parse_ellipse, parser)
+from p5.core.svg import (
+    get_style,
+    parse_rect,
+    parse_circle,
+    parse_line,
+    parse_ellipse,
+    parser)
 from p5.core.color import Color
 from p5.core.shape import PShape
 
@@ -26,6 +32,7 @@ rect = elements[3]
 ellipse = elements[1]
 circle = elements[2]
 
+
 class TestSVG(unittest.TestCase):
     def test_get_style(self):
         self.assertEqual(get_style(line, "stroke"), 'springgreen')
@@ -37,19 +44,36 @@ class TestSVG(unittest.TestCase):
 
     def test_parse_rect(self):
         parsed = parse_rect(rect)
-        self.assertTrue(np.array_equal(parsed.vertices, np.array([(0, 0), (300, 0), (300, 100), (0, 100)])))
-        self.assertTrue(np.array_equal(parsed._fill, Color(0.0, 0.0, 0.0, 0.0)))
+        self.assertTrue(np.array_equal(parsed.vertices, np.array(
+            [(0, 0), (300, 0), (300, 100), (0, 100)])))
+        self.assertTrue(
+            np.array_equal(
+                parsed._fill,
+                Color(
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0)))
         self.assertTrue(np.array_equal(parsed.stroke_weight, 1))
-        self.assertTrue(np.array_equal(parsed.stroke,  Color(0.0, 0.0, 0.0, 0.0)))
+        self.assertTrue(
+            np.array_equal(
+                parsed.stroke,
+                Color(
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0)))
         self.assertTrue(np.array_equal(parsed.stroke_join, 0))
 
     def test_parse_line(self):
         parsed = parse_line(line)
 
-        self.assertTrue(np.array_equal(parsed.vertices, np.array([(100, 20), (20, 200)])))
+        self.assertTrue(np.array_equal(parsed.vertices,
+                                       np.array([(100, 20), (20, 200)])))
         self.assertTrue(np.array_equal(parsed._fill, Color("none")))
         self.assertTrue(np.array_equal(parsed.stroke_weight, 2))
-        self.assertTrue(np.array_equal(parsed.stroke,  Color("springgreen")))
+        self.assertTrue(np.array_equal(parsed.stroke, Color("springgreen")))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,9 @@
 from p5 import *
 
+
 def setup():
     size(720, 400)
+
 
 def draw():
     no_fill()
@@ -37,6 +39,7 @@ def draw():
     quadratic_vertex(120, 180, 180, 180)
     vertex(180, 160)
     end_shape()
+
 
 if __name__ == '__main__':
     run()

@@ -111,3 +111,13 @@ ENV/
 
 # Profiling results
 profiling/*.prof
+
+
+.idea/
+.vscode/
+a.ssv
+debug.py
+test.py
+testing.py
+try.py
+

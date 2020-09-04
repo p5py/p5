@@ -27,6 +27,7 @@ EPSILON = 1e-8
 Point = namedtuple('Point', ['x', 'y', 'z'])
 Point.__new__.__defaults__ = (None, None, 0)
 
+
 class Vector(Point):
     """Describes a vector in two or three dimensional space.
 
@@ -55,6 +56,7 @@ class Vector(Point):
     :type z: int or float
 
     """
+
     def __init__(self, x, y, z=0):
         self._array = np.array([x, y, z], dtype=np.float32)
 
@@ -286,7 +288,7 @@ class Vector(Point):
 
     @angle.setter
     def angle(self, theta):
-        self.rotate(theta -  self.angle)
+        self.rotate(theta - self.angle)
 
     def rotate(self, theta):
         """Rotates the vector by an angle.
@@ -426,7 +428,6 @@ class Vector(Point):
         vec.normalize()
         return vec
 
-
     def copy(self):
         """Return a copy of the current point.
 
@@ -463,7 +464,8 @@ class Vector(Point):
 
     def __neq__(self, other):
         if hasattr(other, '_array') and self._array.shape == other._array.shape:
-            return not np.all(np.absolute(self._array - other._array) < EPSILON)
+            return not np.all(np.absolute(
+                self._array - other._array) < EPSILON)
         return True
 
     def __repr__(self):

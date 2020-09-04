@@ -2,7 +2,13 @@ from . import p5
 from ..sketch.util import ensure_p3d, scale_tuple
 import numpy as np
 
-__all__ = ['lights', 'ambient_light', 'directional_light', 'point_light', 'light_falloff', 'light_specular']
+__all__ = [
+    'lights',
+    'ambient_light',
+    'directional_light',
+    'point_light',
+    'light_falloff',
+    'light_specular']
 
 
 def lights():

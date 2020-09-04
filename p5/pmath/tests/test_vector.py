@@ -8,6 +8,7 @@ a = Vector(2, 3, 4)
 b = Vector(5, 6, 7)
 c = Vector(1, 1)
 
+
 class TestVector(unittest.TestCase):
 
     def test_properties(self):
@@ -24,7 +25,7 @@ class TestVector(unittest.TestCase):
     def test_arithmetic(self):
         self.assertEqual(a + b, Vector(7, 9, 11))
         self.assertEqual(a - b, Vector(-3, -3, -3))
-        self.assertEqual(a*2, Vector(4, 6, 8))
+        self.assertEqual(a * 2, Vector(4, 6, 8))
         self.assertEqual(-a, Vector(-2, -3, -4))
 
     def test_dot(self):
@@ -34,10 +35,11 @@ class TestVector(unittest.TestCase):
         self.assertEqual(a.cross(b), Vector(-3, 6, -3))
 
     def test_angle(self):
-        self.assertTrue(np.allclose(c.angle, PI/4))
+        self.assertTrue(np.allclose(c.angle, PI / 4))
 
     def test_angle_between(self):
         self.assertTrue(np.allclose(a.angle_between(b), 0.13047689))
+
 
 if __name__ == "__main__":
     unittest.main()

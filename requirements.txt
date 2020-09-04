@@ -1,9 +1,10 @@
-freetype-py==2.1.0.post1
-glfw==1.11.2
-numpy==1.18.5
-Pillow==7.1.2
-vispy==0.6.4
-PyOpenGL==3.1.5
-PyOpenGL-accelerate==3.1.5
-requests==2.22.0
-dataclasses;python_version=="3.6"
+freetype - py == 2.1.0.post1
+glfw == 1.11.2
+numpy == 1.18.5
+Pillow == 7.1.2
+vispy == 0.6.4
+PyOpenGL == 3.1.5
+PyOpenGL - accelerate == 3.1.5
+requests == 2.22.0
+dataclasses
+python_version == "3.6"
