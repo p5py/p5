@@ -32,14 +32,16 @@ def _tess_new_contour(vertices):
 def _vertices_to_render_primitive(gl_name, vertices):
     """Returns a render primitive of gl_type with vertices in sequential order
     """
-    return [gl_name, np.asarray(vertices), np.arange(len(vertices), dtype=np.uint32)]
+    return [gl_name, np.asarray(vertices), np.arange(
+        len(vertices), dtype=np.uint32)]
 
 
 def _get_line_from_verts(vertices):
     """Given a list of vertices, chain them sequentially in a line rendering primitive
     """
     n_vert = len(vertices)
-    return _get_line_from_indices(vertices, np.arange(n_vert - 1, dtype=np.uint32), np.arange(1, n_vert, dtype=np.uint32))
+    return _get_line_from_indices(vertices, np.arange(
+        n_vert - 1, dtype=np.uint32), np.arange(1, n_vert, dtype=np.uint32))
 
 
 def _get_line_from_indices(vertices, start, end):
@@ -81,14 +83,16 @@ def _not_enough_vertices(shape, n):
 def _wrong_multiple(shape, n):
     """Returns an error string that describes the # of vertices is not a multiple of n
     """
-    return "{} requires the number of vertices to be a multiple of {}".format(shape.shape_type, n)
+    return "{} requires the number of vertices to be a multiple of {}".format(
+        shape.shape_type, n)
 
 
 def _check_shape(shape):
     """Checks if the shape is valid using assertions
     """
     n_vert = len(shape.vertices)
-    if shape.shape_type in [SType.TRIANGLES, SType.TRIANGLE_FAN, SType.TRIANGLE_STRIP]:
+    if shape.shape_type in [SType.TRIANGLES,
+                            SType.TRIANGLE_FAN, SType.TRIANGLE_STRIP]:
         assert n_vert >= 3, _not_enough_vertices(shape, 3)
     elif shape.shape_type in [SType.LINES, SType.LINE_STRIP]:
         assert n_vert >= 2, _not_enough_vertices(shape, 2)
@@ -156,7 +160,8 @@ def _get_meshes(shape):
     """
     render_primitives = []
     n_vert = len(shape.vertices)
-    if shape.shape_type in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
+    if shape.shape_type in [
+            SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
         gl_name = shape.shape_type.name.lower()
         if gl_name == 'quad_strip':  # vispy does not support quad_strip
             gl_name = 'triangle_strip'  # but it can be drawn using triangle_strip

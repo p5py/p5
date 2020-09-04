@@ -143,7 +143,8 @@ class Renderer2D(OpenGLRenderer):
 
         self.fbuffer_tex_front, self.fbuffer_tex_back = self.fbuffer_tex_back, self.fbuffer_tex_front
 
-    def _add_to_draw_queue(self, stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join):
+    def _add_to_draw_queue(self, stype, vertices, idx, fill,
+                           stroke, stroke_weight, stroke_cap, stroke_join):
         """Adds shape of stype to draw queue
         """
         if stype == 'lines':
@@ -230,7 +231,8 @@ class Renderer2D(OpenGLRenderer):
             for segment in line[1]:
                 # the data is sent to renderer in line segments
                 for i in range(len(segment) - 1):
-                    for j in [0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
+                    for j in [
+                            0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
                         if i + j - 1 >= 0:
                             posPrev.append(line[0][segment[i + j - 1]])
                         else:
@@ -248,11 +250,11 @@ class Renderer2D(OpenGLRenderer):
                     # Left or right side of the segment
                     side.extend([1.0, 1.0, -1.0, 1.0, -1.0, -1.0])
                     # Left vertex of each segment
-                    pos.extend([line[0][segment[i]]]*6)
-                    linewidth.extend([line[3]]*6)
-                    join_type.extend([stroke_join_codes[line[5]]]*6)
-                    cap_type.extend([stroke_cap_codes[line[4]]]*6)
-                    color.extend([line[2]]*6)
+                    pos.extend([line[0][segment[i]]] * 6)
+                    linewidth.extend([line[3]] * 6)
+                    join_type.extend([stroke_join_codes[line[5]]] * 6)
+                    cap_type.extend([stroke_cap_codes[line[4]]] * 6)
+                    color.extend([line[2]] * 6)
 
         if len(pos) == 0:
             return

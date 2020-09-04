@@ -6,7 +6,8 @@ from ..core import p5
 def read_shader(filename):
     """Reads a shader in string mode and returns the content
     """
-    return pkgutil.get_data('p5', os.path.join('sketch/shaders/', filename)).decode()
+    return pkgutil.get_data('p5', os.path.join(
+        'sketch/shaders/', filename)).decode()
 
 
 def ensure_p3d(name):

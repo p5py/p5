@@ -101,7 +101,7 @@ def bezier_point(start, control_1, control_2, stop, parameter):
     t = parameter
     t_ = 1 - parameter
     P = [start, control_1, control_2, stop]
-    coeffs = [t_*t_*t_, 3*t*t_*t_,  3*t*t*t_, t*t*t]
+    coeffs = [t_ * t_ * t_, 3 * t * t_ * t_, 3 * t * t * t_, t * t * t]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs))
                 for i in range(len(start)))
     # Unpack answer if input is not iterable
@@ -144,9 +144,9 @@ def bezier_tangent(start, control_1, control_2, stop, parameter):
 
     t = parameter
 
-    def tangent(a, b, c, d): return 3*t*t*(3*b - 3*c + d - a) + \
-        6*t*(a - 2*b + c) + \
-        3*(b - a)
+    def tangent(a, b, c, d): return 3 * t * t * (3 * b - 3 * c + d - a) + \
+        6 * t * (a - 2 * b + c) + \
+        3 * (b - a)
     ans = tuple(tangent(start[i], control_1[i],
                         control_2[i], stop[i]) for i in range(len(start)))
     # Unpack answer if input is not iterable
@@ -261,7 +261,7 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     basis = curve_basis_matrix
     P = [point_1, point_2, point_3, point_4]
     coeffs = [
-        sum((3 - i)*(t**(2 - i)) * basis[i][j] for i in range(3))
+        sum((3 - i) * (t**(2 - i)) * basis[i][j] for i in range(3))
         for j in range(4)
     ]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs))
@@ -302,7 +302,7 @@ def quadratic_point(start, control, stop, parameter):
     t = parameter
     t_ = 1 - parameter
     P = [start, control, stop]
-    coeffs = [t_*t_, 2*t*t_, t*t]
+    coeffs = [t_ * t_, 2 * t * t_, t * t]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs))
                 for i in range(len(start)))
     # Unpack answer if input is not iterable

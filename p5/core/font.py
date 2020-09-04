@@ -43,7 +43,7 @@ _text_leading = 0
 def create_font(name, size=10):
     """Create the given font at the appropriate size.
 
-    :param name: Filename of the font file (only pil, otf and ttf 
+    :param name: Filename of the font file (only pil, otf and ttf
         fonts are supported.)
     :type name: str
 
@@ -117,7 +117,7 @@ def text(*args, wrap_at=None):
     elif "\n" in text_string:
         multiline = True
         size = list(_font_family.getsize_multiline(text_string))
-        size[1] += _text_leading*text_string.count("\n")
+        size[1] += _text_leading * text_string.count("\n")
     else:
         size = _font_family.getsize(text_string)
 
@@ -135,7 +135,7 @@ def text(*args, wrap_at=None):
             is_stroke_valid = True
 
     if is_stroke_valid:
-        new_size = list(map(lambda x: x+2*stroke_weight, size))
+        new_size = list(map(lambda x: x + 2 * stroke_weight, size))
         is_stroke_valid = True
         text_xy = (stroke_weight, stroke_weight)
     else:
@@ -170,14 +170,14 @@ def text(*args, wrap_at=None):
     elif _text_align_x == "RIGHT":
         position[0] -= width
     elif _text_align_x == "CENTER":
-        position[0] -= width/2
+        position[0] -= width / 2
 
     if _text_align_y == "TOP":
         position[1] += 0
     elif _text_align_y == "BOTTOM":
         position[1] -= height
     elif _text_align_y == "CENTER":
-        position[1] -= height/2
+        position[1] -= height / 2
 
     with push_style():
         if p5.renderer.style.fill_enabled:
@@ -245,7 +245,8 @@ def text_size(size):
 
     # reload the font with new size
     if hasattr(_font_family, 'path'):
-        if _font_family.path.endswith('ttf') or _font_family.path.endswith('otf'):
+        if _font_family.path.endswith(
+                'ttf') or _font_family.path.endswith('otf'):
             _font_family = ImageFont.truetype(_font_family.path, size)
     else:
         raise ValueError("text_size is not supported for Bitmap Fonts")

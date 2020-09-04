@@ -21,7 +21,7 @@ import builtins
 
 
 def millis():
-    return int((time.perf_counter() - builtins.start_time)*1000)
+    return int((time.perf_counter() - builtins.start_time) * 1000)
 
 
 def day():

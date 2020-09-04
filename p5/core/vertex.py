@@ -60,14 +60,14 @@ def begin_shape(kind=TESS):
 
 def curve_vertex(x, y, z=0):
     """
-    Specifies vertex coordinates for curves. The first 
-    and last points in a series of curveVertex() lines 
-    will be used to guide the beginning and end of a the 
-    curve. A minimum of four points is required to draw a 
-    tiny curve between the second and third points. Adding 
-    a fifth point with curveVertex() will draw the curve 
-    between the second, third, and fourth points. The 
-    curveVertex() function is an implementation of 
+    Specifies vertex coordinates for curves. The first
+    and last points in a series of curveVertex() lines
+    will be used to guide the beginning and end of a the
+    curve. A minimum of four points is required to draw a
+    tiny curve between the second and third points. Adding
+    a fifth point with curveVertex() will draw the curve
+    between the second, third, and fourth points. The
+    curveVertex() function is an implementation of
     Catmull-Rom splines.
 
     :param x: x-coordinate of the vertex
@@ -163,10 +163,10 @@ def quadratic_vertex(cx, cy, x3, y3):
 
 def vertex(x, y, z=0):
     """
-    All shapes are constructed by connecting a series of 
-    vertices. vertex() is used to specify the vertex 
-    coordinates for points, lines, triangles, quads, 
-    and polygons. It is used exclusively within the 
+    All shapes are constructed by connecting a series of
+    vertices. vertex() is used to specify the vertex
+    coordinates for points, lines, triangles, quads,
+    and polygons. It is used exclusively within the
     beginShape() and endShape() functions.
 
     :param x: x-coordinate of the vertex
@@ -191,14 +191,14 @@ def vertex(x, y, z=0):
 
 def begin_contour():
     """
-    Use the beginContour() and endContour() functions 
-    to create negative shapes within shapes such as 
-    the center of the letter 'O'. beginContour() begins 
-    recording vertices for the shape and endContour() stops 
-    recording. The vertices that define a negative shape must 
-    "wind" in the opposite direction from the exterior shape. 
-    First draw vertices for the exterior clockwise order, then 
-    for internal shapes, draw vertices shape in counter-clockwise. 
+    Use the beginContour() and endContour() functions
+    to create negative shapes within shapes such as
+    the center of the letter 'O'. beginContour() begins
+    recording vertices for the shape and endContour() stops
+    recording. The vertices that define a negative shape must
+    "wind" in the opposite direction from the exterior shape.
+    First draw vertices for the exterior clockwise order, then
+    for internal shapes, draw vertices shape in counter-clockwise.
 
     """
     global is_contour, contour_vertices, contour_vertices_types
@@ -320,7 +320,8 @@ def end_shape(mode=""):
     if len(vertices) == 0:
         return
 
-    if (not p5.renderer.style.stroke_enabled) and (not p5.renderer.style.fill_enabled):
+    if (not p5.renderer.style.stroke_enabled) and (
+            not p5.renderer.style.fill_enabled):
         return
 
     # if the shape is closed, the first element is also the last element

@@ -55,20 +55,20 @@ def blinn_phong_material():
     Blinn-Phong shading can be decomposed into three parts:
     ambient, diffuse, and specular.
 
-    The ambient component is essentially a constant term that is alway present. 
-    We calculate it by summing all the ambient lights in a scene and multiplying it 
+    The ambient component is essentially a constant term that is alway present.
+    We calculate it by summing all the ambient lights in a scene and multiplying it
     with the normalized ambient coefficent set by ambient.
 
-    The diffuse component takes the normal vector of a surface into account and 
-    varies how much light is reflected depending on the angle that the surface 
+    The diffuse component takes the normal vector of a surface into account and
+    varies how much light is reflected depending on the angle that the surface
     makes with the incoming light.
 
-    The specular component not only accounts for the direction of the light 
-    (like the diffuse component) but also the direction of the viewer. If the 
-    viewer is not on the path of the reflected light, the specular component 
+    The specular component not only accounts for the direction of the light
+    (like the diffuse component) but also the direction of the viewer. If the
+    viewer is not on the path of the reflected light, the specular component
     falls off quickly, producing the glossy reflections we see on some materials.
 
-    The color shown on the user's screen is the sum of all three components. 
+    The color shown on the user's screen is the sum of all three components.
     """
     ensure_p3d("blinn_phong_material")
     rend = p5.renderer.style

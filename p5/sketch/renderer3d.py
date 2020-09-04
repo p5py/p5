@@ -70,9 +70,9 @@ class GlslList:
 
 @dataclass
 class Style3D(Style):
-    ambient = np.array([0.2]*3)
-    diffuse = np.array([0.6]*3)
-    specular = np.array([0.8]*3)
+    ambient = np.array([0.2] * 3)
+    diffuse = np.array([0.6] * 3)
+    specular = np.array([0.8] * 3)
     shininess = 8
     material = BasicMaterial(COLOR_WHITE)
 
@@ -110,7 +110,7 @@ class Renderer3D(OpenGLRenderer):
         self.quadratic_falloff = GlslList(
             self.MAX_LIGHTS_PER_CATEGORY, 1, np.float32)
         self.curr_linear_falloff, self.curr_quadratic_falloff, self.curr_constant_falloff = 0.0, 0.0, 0.0
-        self.light_specular = np.array([0.0]*3)
+        self.light_specular = np.array([0.0] * 3)
 
     def initialize_renderer(self):
         super().initialize_renderer()
@@ -187,7 +187,8 @@ class Renderer3D(OpenGLRenderer):
         # Normal shader
         self.normal_prog['projection'] = self.projection_matrix.T.flatten()
         self.normal_prog['perspective'] = self.lookat_matrix.T.flatten()
-        # This is a no-op, meaning that the normals stay in world space, which matches the behavior in p5.js
+        # This is a no-op, meaning that the normals stay in world space, which
+        # matches the behavior in p5.js
         normal_transform = np.identity(3)
         # I think the transformation below takes the vertices to camera space, but
         # the results are funky, so it's probably incorrect? - ziyaointl, 2020/07/20
@@ -236,9 +237,11 @@ class Renderer3D(OpenGLRenderer):
     def tnormals(self, shape):
         """Obtain a list of vertex normals in world coordinates
         """
-        if isinstance(shape.material, BasicMaterial):  # Basic shader doesn't need this
+        if isinstance(shape.material,
+                      BasicMaterial):  # Basic shader doesn't need this
             return None
-        return shape.vertex_normals @ np.linalg.inv(to_3x3(self.transform_matrix) @ to_3x3(shape.matrix))
+        return shape.vertex_normals @ np.linalg.inv(
+            to_3x3(self.transform_matrix) @ to_3x3(shape.matrix))
 
     def render(self, shape):
         if isinstance(shape, Geometry):
@@ -273,7 +276,8 @@ class Renderer3D(OpenGLRenderer):
                 self._add_to_draw_queue_simple(
                     stype, vertices, idx, stroke if stype == 'lines' else fill)
 
-    def add_to_draw_queue(self, stype, vertices, edges, faces, fill=None, stroke=None, normals=None, material=None):
+    def add_to_draw_queue(self, stype, vertices, edges, faces,
+                          fill=None, stroke=None, normals=None, material=None):
         """Add the given vertex data to the draw queue.
 
         :param stype: type of shape to be added. Should be one of {'poly',
@@ -326,8 +330,10 @@ class Renderer3D(OpenGLRenderer):
     def render_with_shaders(self, draw_type, draw_obj):
         vertices, idx, color, normals, material = draw_obj
         """Like render_default but is aware of shaders other than the basic one"""
-        # 0. If material does not need normals nor extra info, strip them out and use the method from superclass
-        if material is None or isinstance(material, BasicMaterial) or draw_type in ['points', 'lines']:
+        # 0. If material does not need normals nor extra info, strip them out
+        # and use the method from superclass
+        if material is None or isinstance(material, BasicMaterial) or draw_type in [
+                'points', 'lines']:
             OpenGLRenderer.render_default(self, draw_type, [draw_obj[:3]])
             return
 
@@ -398,7 +404,8 @@ class Renderer3D(OpenGLRenderer):
             # to resolve z-fighting
             if current_shape == 'lines':
                 # line_transform is used whenever we render lines to break ties in depth
-                # We transform the points to camera space, move them by Z_EPSILON, and them move them back to world space
+                # We transform the points to camera space, move them by
+                # Z_EPSILON, and them move them back to world space
                 line_transform = inv(self.lookat_matrix).dot(
                     translation_matrix(0, 0, Z_EPSILON).dot(self.lookat_matrix))
                 vertices = current_obj[0]

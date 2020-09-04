@@ -32,7 +32,7 @@ def http_post(url, post_data):
     :param url: url of the API
     :type url: string
     :param post_data: Key-value pairs of the request payload.
-    :type post_data: dict 
+    :type post_data: dict
 
     """
     data = requests.post(url, post_data)

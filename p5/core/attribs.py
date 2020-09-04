@@ -94,7 +94,7 @@ def no_stroke():
 
 
 def stroke_cap(c):
-    """Sets the style of line endings. The ends are SQUARE, 
+    """Sets the style of line endings. The ends are SQUARE,
     PROJECT, and ROUND. The default cap is ROUND.
 
     :param c: either 'SQUARE', 'PROJECT' or 'ROUND'
@@ -108,9 +108,9 @@ def stroke_cap(c):
 
 
 def stroke_join(j):
-    """Sets the style of the joints which connect line segments. 
-    These joints are either mitered, beveled, or rounded and 
-    specified with the corresponding parameters MITER, BEVEL, 
+    """Sets the style of the joints which connect line segments.
+    These joints are either mitered, beveled, or rounded and
+    specified with the corresponding parameters MITER, BEVEL,
     and ROUND. The default joint is MITER.
 
     :param weight: either 'MITER', 'BEVEL' or 'ROUND'
@@ -198,6 +198,6 @@ def background(*args, **kwargs):
 
 def clear():
     """
-    Clears the pixels within a buffer. 
+    Clears the pixels within a buffer.
     """
     p5.renderer.clear()

@@ -526,7 +526,7 @@ def rect(*args, mode=None):
     elif mode == 'CENTER':
         center = Point(*coordinate)
         width, height = args
-        corner = Point(center.x - width/2, center.y - height/2, center.z)
+        corner = Point(center.x - width / 2, center.y - height / 2, center.z)
     elif mode == 'RADIUS':
         center = Point(*coordinate)
         half_width, half_height = args
@@ -671,7 +671,7 @@ def arc(*args, mode=None, ellipse_mode=None):
 
     if emode == 'CORNER':
         corner = Point(*coordinate)
-        dim = Point(width/2, height/2)
+        dim = Point(width / 2, height / 2)
         center = (corner.x + dim.x, corner.y + dim.y, corner.z)
     elif emode == 'CENTER':
         center = Point(*coordinate)
@@ -742,7 +742,8 @@ def ellipse(*args, mode=None):
         mode = 'CORNER'
     else:
         width, height = args
-    return arc(coordinate, width, height, 0, math.pi * 2, mode='CHORD', ellipse_mode=mode)
+    return arc(coordinate, width, height, 0, math.pi *
+               2, mode='CHORD', ellipse_mode=mode)
 
 
 def circle(*args, mode=None):

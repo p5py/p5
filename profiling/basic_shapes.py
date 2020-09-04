@@ -1,4 +1,5 @@
-# Adapted from https://p5.readthedocs.io/en/latest/examples/form/shape%20primitives.html
+# Adapted from
+# https://p5.readthedocs.io/en/latest/examples/form/shape%20primitives.html
 import cProfile
 from p5 import *
 
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     pr.enable()
     try:
         run()
-    except:
+    except BaseException:
         pass
     pr.disable()
     pr.dump_stats("basic_shapes.prof")

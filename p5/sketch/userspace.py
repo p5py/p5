@@ -102,7 +102,8 @@ def setup():
     pass
 
 
-def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer="vispy"):
+def run(sketch_setup=None, sketch_draw=None,
+        frame_rate=60, mode="P2D", renderer="vispy"):
     """Run a sketch.
 
     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
@@ -199,7 +200,7 @@ def size(width, height):
 
     # update the look at matrix coordinates according to sketch size
     if p5.mode == "P3D":
-        eye = np.array((0, 0, height/math.tan(math.pi/6)))
+        eye = np.array((0, 0, height / math.tan(math.pi / 6)))
         p5.renderer.lookat_matrix = matrix.look_at(
             eye,
             np.array((0, 0, 0)),
@@ -293,7 +294,7 @@ def cursor(cursor_type='ARROW'):
 
 
 def save(filename='screen.png'):
-    """Save an image from the display window. 
+    """Save an image from the display window.
 
     Saves an image from the display window. Append a file extension to
     the name of the file, to indicate the file format to be used.If no
@@ -322,7 +323,7 @@ def save_frame(filename="screen.png"):
     function is run. To save an image that is identical to the display
     window, run the function at the end of :meth:`p5.draw` or within
     mouse and key events such as :meth:`p5.mouse_pressed` and
-    :meth:`p5.key_pressed`. 
+    :meth:`p5.key_pressed`.
 
     If save_frame() is used without parameters, it will save files as
     screen-0000.png, screen-0001.png, and so on. Append a file

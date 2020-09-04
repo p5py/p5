@@ -13,7 +13,7 @@ class TestMatrix(unittest.TestCase):
         self.assertEqual(matrix._magnitude(v), 5.0)
 
     def test_normalize(self):
-        self.assertTrue(np.array_equal(matrix._normalize(v), v/5.0))
+        self.assertTrue(np.array_equal(matrix._normalize(v), v / 5.0))
 
     def test_scale_transform(self):
         T = matrix.scale_transform(1, 2, 3)
@@ -37,7 +37,7 @@ class TestMatrix(unittest.TestCase):
 
     def test_rotation_matrix(self):
         axis = np.array([1, 1, 1])
-        T = matrix.rotation_matrix(axis, PI/2)
+        T = matrix.rotation_matrix(axis, PI / 2)
         R = np.array([
             [0.33333333, -0.24401694, 0.9106836, 0],
             [0.9106836, 0.33333333, -0.24401694, 0],
@@ -75,8 +75,8 @@ class TestMatrix(unittest.TestCase):
         self.assertTrue(np.array_equal(T, R))
 
     def test_perspective_matrix(self):
-        fov = 2/3*PI
-        aspect = 3/4
+        fov = 2 / 3 * PI
+        aspect = 3 / 4
         near_plane = 0.1
         far_plane = 100
 

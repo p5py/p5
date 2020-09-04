@@ -45,7 +45,7 @@ class TestSVG(unittest.TestCase):
             parsed._fill, Color(0.0, 0.0, 0.0, 0.0)))
         self.assertTrue(np.array_equal(parsed.stroke_weight, 1))
         self.assertTrue(np.array_equal(
-            parsed.stroke,  Color(0.0, 0.0, 0.0, 0.0)))
+            parsed.stroke, Color(0.0, 0.0, 0.0, 0.0)))
         self.assertTrue(np.array_equal(parsed.stroke_join, 0))
 
     def test_parse_line(self):
@@ -55,7 +55,7 @@ class TestSVG(unittest.TestCase):
                                        np.array([(100, 20), (20, 200)])))
         self.assertTrue(np.array_equal(parsed._fill, Color("none")))
         self.assertTrue(np.array_equal(parsed.stroke_weight, 2))
-        self.assertTrue(np.array_equal(parsed.stroke,  Color("springgreen")))
+        self.assertTrue(np.array_equal(parsed.stroke, Color("springgreen")))
 
 
 if __name__ == "__main__":

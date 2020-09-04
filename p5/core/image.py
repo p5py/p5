@@ -118,7 +118,7 @@ class PImage:
     def height(self):
         """The height of the image
 
-        :rtype: int 
+        :rtype: int
         """
         return self._height
 
@@ -493,7 +493,7 @@ def image(*args, size=None):
 
     Images must be in the same folder as the sketch (or the image path
     should be explicitly mentioned). The color of an image may be
-    modified with the :meth:`p5.tint` function. 
+    modified with the :meth:`p5.tint` function.
 
     :param x: x-coordinate of the image by default
     :type float:
@@ -593,11 +593,11 @@ def load_image(filename):
     """Load an image from the given filename.
 
     Loads an image into a variable of type PImage. Four types of
-    images may be loaded. 
+    images may be loaded.
 
     In most cases, load all images in setup() or outside the draw()
     call to preload them at the start of the program. Loading images
-    inside draw() will reduce the speed of a program. 
+    inside draw() will reduce the speed of a program.
 
     :param filename: Filename (or path)of the given image. The
         file-extennsion is automatically inferred.

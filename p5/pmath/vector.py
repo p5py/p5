@@ -464,7 +464,8 @@ class Vector(Point):
 
     def __neq__(self, other):
         if hasattr(other, '_array') and self._array.shape == other._array.shape:
-            return not np.all(np.absolute(self._array - other._array) < EPSILON)
+            return not np.all(np.absolute(
+                self._array - other._array) < EPSILON)
         return True
 
     def __repr__(self):

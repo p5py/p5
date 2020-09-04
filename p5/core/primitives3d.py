@@ -138,9 +138,9 @@ def plane(width, height, detail_x=1, detail_y=1):
     geom = Geometry(detail_x, detail_y)
 
     for i in range(detail_y + 1):
-        v = i/detail_y
+        v = i / detail_y
         for j in range(detail_x + 1):
-            u = j/detail_x
+            u = j / detail_x
             p = [u - 0.5, v - 0.5, 0]
             geom.vertices.append(p)
             geom.uvs.extend([u, v])
@@ -195,7 +195,7 @@ def ellipsoid(radius_x, radius_y, radius_z, detail_x=24, detail_y=24):
 
     for i in range(detail_y + 1):
         v = i / detail_y
-        phi = math.pi * v - math.pi/2
+        phi = math.pi * v - math.pi / 2
         cosPhi = math.cos(phi)
         sinPhi = math.sin(phi)
 
@@ -218,7 +218,8 @@ def ellipsoid(radius_x, radius_y, radius_z, detail_x=24, detail_y=24):
     return geom
 
 
-def truncated_cone(bottom_radius, top_radius, height, detail_x, detail_y, bottom_cap, top_cap):
+def truncated_cone(bottom_radius, top_radius, height,
+                   detail_x, detail_y, bottom_cap, top_cap):
     geom = Geometry(detail_x, detail_y)
 
     bottom_radius = 1 if bottom_radius <= 0 else bottom_radius
@@ -255,10 +256,10 @@ def truncated_cone(bottom_radius, top_radius, height, detail_x, detail_y, bottom
             # center of bottom or top caps
             ring_radius = 0
 
-        y -= height/2  # shift coordinate origin to the center of object
+        y -= height / 2  # shift coordinate origin to the center of object
         for ii in range(detail_x):
             u = ii / detail_x
-            ur = 2*math.pi*u
+            ur = 2 * math.pi * u
             sur = math.sin(ur)
             cur = math.cos(ur)
 
@@ -284,7 +285,7 @@ def truncated_cone(bottom_radius, top_radius, height, detail_x, detail_y, bottom
                 start_index + detail_x + jj
             ])
 
-        start_index += detail_x*2
+        start_index += detail_x * 2
 
     for yy in range(detail_y):
         for ii in range(detail_x):
@@ -315,7 +316,8 @@ def truncated_cone(bottom_radius, top_radius, height, detail_x, detail_y, bottom
 
 
 @_draw_on_return
-def cylinder(radius=50, height=50, detail_x=24, detail_y=1, top_cap=True, bottom_cap=True):
+def cylinder(radius=50, height=50, detail_x=24,
+             detail_y=1, top_cap=True, bottom_cap=True):
     """
     Draw a cylinder with given radius and height
 
@@ -395,7 +397,7 @@ def torus(radius=50, tube_radius=10, detail_x=24, detail_y=16):
 
     for i in range(detail_y + 1):
         v = i / detail_y
-        phi = 2*math.pi*v
+        phi = 2 * math.pi * v
         cosPhi = math.cos(phi)
         sinPhi = math.sin(phi)
         r = 1 + tube_ratio * cosPhi

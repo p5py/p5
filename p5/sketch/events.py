@@ -60,7 +60,7 @@ class MouseButton:
         button_map = {
             'CENTER': VispyButton.MIDDLE,
             'MIDDLE': VispyButton.MIDDLE,
-            'LEFT':  VispyButton.LEFT,
+            'LEFT': VispyButton.LEFT,
             'RIGHT': VispyButton.RIGHT,
         }
         if isinstance(other, str):
@@ -241,7 +241,8 @@ class MouseEvent(Event):
         y = max(min(builtins.height, builtins.height - y), 0)
         dx, dy = self._raw.delta
 
-        if (self._raw.press_event != None) and (self._raw.last_event != None):
+        if (self._raw.press_event is not None) and (
+                self._raw.last_event is not None):
             px, py = self._raw.press_event.pos
             cx, cy = self._raw.last_event.pos
             self.change = Position(cx - px, cy - py)

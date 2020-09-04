@@ -15,10 +15,10 @@ def draw():
     # box(100, 100, 100)
     # Begin LIGHTS
     # directional_light(1, 1, 1, 0, 0, -1)
-    locX = mouse_x - width/2
-    locY = mouse_y - height/2
+    locX = mouse_x - width / 2
+    locY = mouse_y - height / 2
     light_specular(0, 0, 255)
-    point_light(360, 360*1.5, 360, locX, locY, 400)
+    point_light(360, 360 * 1.5, 360, locX, locY, 400)
     # End LIGHTS
     # cone(200, 400)
 

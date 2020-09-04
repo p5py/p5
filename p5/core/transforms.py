@@ -225,13 +225,13 @@ def shear_y(theta):
 
 
 def camera(*args, **kwargs):
-    """Sets the camera position for a 3D sketch. 
-    Parameters for this function define the position for 
-    the camera, the center of the sketch (where the 
-    camera is pointing), and an up direction (the 
+    """Sets the camera position for a 3D sketch.
+    Parameters for this function define the position for
+    the camera, the center of the sketch (where the
+    camera is pointing), and an up direction (the
     orientation of the camera).
 
-    When called with no arguments, this function 
+    When called with no arguments, this function
     creates a default camera equivalent to::
 
         camera((0, 0, height / math.tan(math.pi / 6))),
@@ -268,7 +268,7 @@ def camera(*args, **kwargs):
     :param position: camera position coordinates
     :type position: tuple
 
-    :param target_position: target position of camera in world coordinates 
+    :param target_position: target position of camera in world coordinates
     :type target_position: tuple
 
     :param up_vector: up direction vector for the camera
@@ -302,7 +302,7 @@ def camera(*args, **kwargs):
 
 def perspective(fovy, aspect, near, far):
     """
-    Sets a perspective projection for the camera in a 3D sketch.  
+    Sets a perspective projection for the camera in a 3D sketch.
 
     :param fovy: camera frustum vertical field of view, from bottom to top of view, in angleMode units
     :type fovy: float
@@ -314,7 +314,7 @@ def perspective(fovy, aspect, near, far):
     :type near: float
 
     :param far: frustum far plane length
-    :type far: float   
+    :type far: float
     """
     p5.renderer.projection_matrix = matrix.perspective_matrix(
         fovy,
@@ -346,12 +346,12 @@ def ortho(left, right, bottom, top, near, far):
     :type near: float
 
     :param far: camera frustum far plane
-    :type far: float   
+    :type far: float
     """
     p5.renderer.projection_matrix = np.array([
-        [2/(right - left), 0, 0, -(right + left)/(right - left)],
-        [0, 2/(top - bottom), 0, -(top + bottom)/(top - bottom)],
-        [0, 0, -2/(far - near), -(far + near)/(far - near)],
+        [2 / (right - left), 0, 0, -(right + left) / (right - left)],
+        [0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)],
+        [0, 0, -2 / (far - near), -(far + near) / (far - near)],
         [0, 0, 0, 1],
     ])
 

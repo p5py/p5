@@ -40,7 +40,7 @@ class TestPShape(unittest.TestCase):
             ])))
         quad.reset_matrix()
 
-        quad.rotate_x(PI/2)
+        quad.rotate_x(PI / 2)
         self.assertTrue(np.allclose(
             quad._matrix,
             np.array([
@@ -51,7 +51,7 @@ class TestPShape(unittest.TestCase):
             ])))
         quad.reset_matrix()
 
-        quad.rotate_y(PI/2)
+        quad.rotate_y(PI / 2)
         self.assertTrue(np.allclose(
             quad._matrix,
             np.array([
@@ -62,7 +62,7 @@ class TestPShape(unittest.TestCase):
             ])))
         quad.reset_matrix()
 
-        quad.rotate_z(PI/2)
+        quad.rotate_z(PI / 2)
         self.assertTrue(np.allclose(
             quad._matrix,
             np.array([
@@ -84,7 +84,7 @@ class TestPShape(unittest.TestCase):
             ])))
         quad.reset_matrix()
 
-        quad.shear_x(PI/4)
+        quad.shear_x(PI / 4)
         self.assertTrue(np.allclose(
             quad._matrix,
             np.array([
@@ -95,7 +95,7 @@ class TestPShape(unittest.TestCase):
             ])))
         quad.reset_matrix()
 
-        quad.shear_y(PI/4)
+        quad.shear_y(PI / 4)
         self.assertTrue(np.allclose(
             quad._matrix,
             np.array([

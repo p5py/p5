@@ -114,7 +114,7 @@ class Geometry:
         if sinAlpha > 1:
             sinAlpha = 1
 
-        return n*math.sin(sinAlpha)/ln
+        return n * math.sin(sinAlpha) / ln
 
     def compute_normals(self):
         """
@@ -145,7 +145,7 @@ class Geometry:
             end = self.vertices[self.edges[i][1]]
 
             direction = np.array(end) - np.array(begin)
-            direction = direction/np.linalg.norm(direction)
+            direction = direction / np.linalg.norm(direction)
             direction = direction.tolist()
 
             a = begin

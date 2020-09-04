@@ -97,8 +97,8 @@ def parse_circle(element):
 
     return primitives.Arc(
         (cx, cy),
-        (r/2, r/2),
-        0, 2*math.pi,
+        (r / 2, r / 2),
+        0, 2 * math.pi,
         "CHORD",
         fill_color=fill, stroke_weight=stroke_weight,
         stroke_color=stroke, stroke_cap=ROUND)
@@ -134,8 +134,8 @@ def parse_ellipse(element):
 
     return primitives.Arc(
         (cx, cy),
-        (rx/2, ry/2),
-        0, 2*math.pi,
+        (rx / 2, ry / 2),
+        0, 2 * math.pi,
         "CHORD",
         fill_color=fill, stroke_weight=stroke_weight,
         stroke_color=stroke, stroke_cap=ROUND, stroke_join=default_values["stroke-join"])

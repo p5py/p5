@@ -15,9 +15,9 @@ class Table:
         data = []
         for line in lines:
             fragment = line.split(',')
-            x = fragment[len(fragment)-1]
+            x = fragment[len(fragment) - 1]
             x = x[:-1]
-            fragment[len(fragment)-1] = x
+            fragment[len(fragment) - 1] = x
             data.append(fragment)
         self.data = data
 

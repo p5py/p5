@@ -38,7 +38,7 @@ if __name__ == '__main__':
     pr.enable()
     try:
         run()
-    except:
+    except BaseException:
         pass
     pr.disable()
     pr.dump_stats("custom_shapes.prof")
