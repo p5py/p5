@@ -1,6 +1,6 @@
 name: Pylint
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -19,4 +19,5 @@ jobs:
         pip install pylint
     - name: Test with pytest
       run: |
-        pylint `ls -R|grep .py$|xargs`
+        pylint `find . -name '*.py'`
+
