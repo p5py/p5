@@ -17,14 +17,18 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import sphinx_rtd_theme
+import p5
 import os
 import sys
 from unittest.mock import MagicMock
+
 
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
         return MagicMock()
+
 
 MOCK_MODULES = [
     'vispy',
@@ -36,7 +40,6 @@ sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('..'))
 
-import p5
 
 # -- General configuration ------------------------------------------------
 
@@ -48,7 +51,7 @@ import p5
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
-              'sphinx.ext.mathjax',]
+              'sphinx.ext.mathjax', ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -100,7 +103,6 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
@@ -176,6 +178,7 @@ texinfo_documents = [
      author, 'p5', 'p5 is a Python package based on the core ideas of Processing.',
      'Miscellaneous'),
 ]
+
 
 def setup(app):
     app.add_js_file('p5.min.js')

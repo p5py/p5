@@ -22,9 +22,14 @@ from .util import read_shader
 
 ShaderSource = namedtuple('ShaderSource', 'vert frag')
 
-src_default = ShaderSource(read_shader('2d/default2d.vert'), read_shader('common/default.frag'))
-src_texture = ShaderSource(read_shader('2d/texture.vert'), read_shader('2d/texture.frag'))
-src_fbuffer = ShaderSource(read_shader('common/fbuffer.vert'), read_shader('common/fbuffer.frag')) # Shader sources to draw framebuffers textues.
-src_line = ShaderSource(read_shader('2d/stroke.vert'), read_shader('2d/stroke.frag'))
+src_default = ShaderSource(read_shader(
+    '2d/default2d.vert'), read_shader('common/default.frag'))
+src_texture = ShaderSource(read_shader(
+    '2d/texture.vert'), read_shader('2d/texture.frag'))
+# Shader sources to draw framebuffers textues.
+src_fbuffer = ShaderSource(read_shader(
+    'common/fbuffer.vert'), read_shader('common/fbuffer.frag'))
+src_line = ShaderSource(read_shader('2d/stroke.vert'),
+                        read_shader('2d/stroke.frag'))
 
 # TODO: Move 2D and 3D shaders into separate folders

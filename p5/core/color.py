@@ -29,6 +29,7 @@ __all__ = ['color_mode', 'Color']
 color_parse_mode = 'RGB'
 color_range = (255, 255, 255, 255)
 
+
 def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
     """Set the color mode of the renderer.
 
@@ -64,6 +65,7 @@ def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
 
     color_range = (max_1, max_2, max_3, max_alpha)
     color_parse_mode = mode
+
 
 def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     """Parses a color from a range of different input formats.
@@ -123,11 +125,11 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
                 rgb = (0, 0, 0)
             else:
                 if name[0] == "#":
-                    hexadecimal = args[0]                
+                    hexadecimal = args[0]
                 elif name in colour_codes.keys():
                     hexadecimal = colour_codes[name]
                 else:
-                    raise ValueError("Invalid colour name %s" %name)
+                    raise ValueError("Invalid colour name %s" % name)
 
                 alpha = 255
                 _r = int(hexadecimal[1:3], 16)
@@ -137,7 +139,7 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
 
     elif len(args) == 2:
         gray, alpha = args
-        rgb =  gray, gray, gray
+        rgb = gray, gray, gray
     elif (len(args) == 3) and color_mode.startswith('RGB'):
         rgb = args
     elif (len(args) == 3) and color_mode.startswith('HSB'):
@@ -199,6 +201,7 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
 
 class Color:
     """Represents a color."""
+
     def __init__(self, *args, color_mode=None, normed=False, **kwargs):
         if color_mode is None:
             color_mode = color_parse_mode
@@ -226,7 +229,8 @@ class Color:
 
     def _recompute_rgb(self):
         """Recompute the RGB values from HSB values."""
-        r, g, b = colorsys.hsv_to_rgb(self._hue, self._saturation, self._brightness)
+        r, g, b = colorsys.hsv_to_rgb(
+            self._hue, self._saturation, self._brightness)
         self._red = r
         self._greeen = g
         self._blue = b
@@ -306,7 +310,7 @@ class Color:
         #
         # - Conversion to grayscale, sample implementation (StackOverflow)
         # <https://stackoverflow.com/a/15686412>
-        norm_gray  = 0.299 * self._red + 0.587 * self._green + 0.144 * self._blue
+        norm_gray = 0.299 * self._red + 0.587 * self._green + 0.144 * self._blue
         return norm_gray * 255
 
     @gray.setter
@@ -341,7 +345,6 @@ class Color:
         :rtype: tuple
         """
         return (self.red, self.green, self.blue, self.alpha)
-
 
     @property
     def red(self):
@@ -432,18 +435,18 @@ class Color:
     @property
     def b(self):
         """The blue or the brightness value (depending on the color mode)."""
-        if color_parse_mode== 'RGB':
+        if color_parse_mode == 'RGB':
             return self.blue
-        elif color_parse_mode== 'HSB':
+        elif color_parse_mode == 'HSB':
             return self.brightness
         else:
             raise ValueError("Unknown color mode {}".format(color_parse_mode))
 
     @b.setter
     def b(self, value):
-        if color_parse_mode== 'RGB':
+        if color_parse_mode == 'RGB':
             self.blue = value
-        elif color_parse_mode== 'HSB':
+        elif color_parse_mode == 'HSB':
             self.brightness = value
         else:
             raise ValueError("Unknown color mode {}".format(color_parse_mode))

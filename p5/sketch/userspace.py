@@ -63,6 +63,7 @@ builtins.key_is_pressed = False
 builtins.pixels = None
 builtins.start_time = 0
 
+
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
 
@@ -79,6 +80,7 @@ def _fix_interface(func):
     else:
         return func
 
+
 def draw():
     """Continuously execute code defined inside.
 
@@ -89,6 +91,7 @@ def draw():
     """
     pass
 
+
 def setup():
     """Called to setup initial sketch options.
 
@@ -97,6 +100,7 @@ def setup():
 
     """
     pass
+
 
 def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer="vispy"):
     """Run a sketch.
@@ -148,7 +152,8 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer
         p5.mode = 'P3D'
         if renderer == "vispy":
             p5.renderer = Renderer3D()
-        else: raise NotImplementedError("Invalid Renderer %s" % renderer)
+        else:
+            raise NotImplementedError("Invalid Renderer %s" % renderer)
     else:
         raise ValueError("Invalid Mode %s" % mode)
 
@@ -166,6 +171,7 @@ def run(sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer
     app.run()
     exit()
 
+
 def title(new_title):
     """Set the title of the p5 window.
 
@@ -175,6 +181,7 @@ def title(new_title):
     """
     builtins.title = new_title
     p5.sketch.title = new_title
+
 
 def size(width, height):
     """Resize the sketch window.
@@ -199,6 +206,7 @@ def size(width, height):
             np.array((0, 1, 0)))
         p5.renderer.camera_pos = eye
 
+
 def no_loop():
     """Stop draw() from being continuously called.
 
@@ -212,6 +220,7 @@ def no_loop():
     p5.sketch.looping = False
     p5.sketch.redraw = True
 
+
 def loop():
     """Make sure `draw()` is being called continuously.
 
@@ -220,6 +229,7 @@ def loop():
 
     """
     p5.sketch.looping = True
+
 
 def redraw():
     """Call `draw()` once.
@@ -230,6 +240,7 @@ def redraw():
     """
     if not p5.sketch.looping:
         p5.sketch.redraw = True
+
 
 def exit(*args, **kwargs):
     """Exit the sketch.
@@ -249,11 +260,13 @@ def exit(*args, **kwargs):
         app.quit()
     p5.exit(*args, **kwargs)
 
+
 def no_cursor():
     """Hide the mouse cursor.
     """
     # window.set_mouse_visible(False)
     raise NotImplementedError
+
 
 def cursor(cursor_type='ARROW'):
     """Set the cursor to the specified type.
@@ -278,6 +291,7 @@ def cursor(cursor_type='ARROW'):
     # window.set_mouse_cursor(cursor)
     raise NotImplementedError
 
+
 def save(filename='screen.png'):
     """Save an image from the display window. 
 
@@ -299,6 +313,7 @@ def save(filename='screen.png'):
     # TODO: images saved using ``save()`` should *not* be numbered.
     # --abhikpal (2018-08-14)
     p5.sketch.screenshot(filename)
+
 
 def save_frame(filename="screen.png"):
     """Save a numbered sequence of images whenever the function is run.

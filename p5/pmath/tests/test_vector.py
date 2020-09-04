@@ -8,6 +8,7 @@ a = Vector(2, 3, 4)
 b = Vector(5, 6, 7)
 c = Vector(1, 1)
 
+
 class TestVector(unittest.TestCase):
 
     def test_properties(self):
@@ -38,6 +39,7 @@ class TestVector(unittest.TestCase):
 
     def test_angle_between(self):
         self.assertTrue(np.allclose(a.angle_between(b), 0.13047689))
+
 
 if __name__ == "__main__":
     unittest.main()

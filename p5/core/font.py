@@ -30,18 +30,19 @@ from .structure import push_style
 from . import p5
 
 __all__ = ['create_font', 'load_font', 'text', 'text_font',
-    'text_align', 'text_leading', 'text_size', 'text_width',
-    'text_ascent', 'text_descent'
-    ]
+           'text_align', 'text_leading', 'text_size', 'text_width',
+           'text_ascent', 'text_descent'
+           ]
 
 _font_family = ImageFont.load_default()
 _text_align_x = "LEFT"
 _text_align_y = "TOP"
 _text_leading = 0
 
+
 def create_font(name, size=10):
     """Create the given font at the appropriate size.
-    
+
     :param name: Filename of the font file (only pil, otf and ttf 
         fonts are supported.)
     :type name: str
@@ -61,11 +62,13 @@ def create_font(name, size=10):
 
     return font
 
+
 def load_font(font_name):
     """Loads the given font into a font object
 
     """
     return create_font(font_name)
+
 
 def text(*args, wrap_at=None):
     """Draw the given text on the screen and save the image.
@@ -102,10 +105,10 @@ def text(*args, wrap_at=None):
         raise ValueError("Unexpected number of arguments passed to text()")
 
     if len(text_string) == 0:
-        return 
+        return
 
     global _font_family, _text_leading
-    
+
     multiline = False
     if not (wrap_at is None):
         text_string = textwrap.fill(text_string, wrap_at)
@@ -118,8 +121,7 @@ def text(*args, wrap_at=None):
     else:
         size = _font_family.getsize(text_string)
 
-
-    is_stroke_valid = False # True when stroke_weight != 0
+    is_stroke_valid = False  # True when stroke_weight != 0
     is_min_filter = False   # True when stroke_weight <0
     if p5.renderer.style.stroke_enabled:
         stroke_weight = p5.renderer.stroke_weight
@@ -133,18 +135,19 @@ def text(*args, wrap_at=None):
             is_stroke_valid = True
 
     if is_stroke_valid:
-        new_size = list(map(lambda x:x+2*stroke_weight, size))
+        new_size = list(map(lambda x: x+2*stroke_weight, size))
         is_stroke_valid = True
         text_xy = (stroke_weight, stroke_weight)
     else:
         new_size = size
-        text_xy = (0,0)
+        text_xy = (0, 0)
 
     canvas = Image.new("RGBA", new_size, color=(0, 0, 0, 0))
     canvas_draw = ImageDraw.Draw(canvas)
-    
+
     if multiline:
-        canvas_draw.multiline_text(text_xy, text_string, font=_font_family, spacing=_text_leading)
+        canvas_draw.multiline_text(
+            text_xy, text_string, font=_font_family, spacing=_text_leading)
     else:
         canvas_draw.text(text_xy, text_string, font=_font_family)
 
@@ -156,7 +159,7 @@ def text(*args, wrap_at=None):
             canvas_dilate = canvas.filter(ImageFilter.MinFilter(stroke_weight))
         else:
             canvas_dilate = canvas.filter(ImageFilter.MaxFilter(stroke_weight))
-        canvas_stroke = ImageChops.difference(canvas,canvas_dilate)
+        canvas_stroke = ImageChops.difference(canvas, canvas_dilate)
         text_stroke_image = PImage(*new_size)
         text_stroke_image._img = canvas_stroke
 
@@ -188,6 +191,7 @@ def text(*args, wrap_at=None):
 
     return text_string
 
+
 def text_font(font, size=10):
     """Set current text font.
 
@@ -197,6 +201,7 @@ def text_font(font, size=10):
     """
     global _font_family
     _font_family = font
+
 
 def text_align(align_x, align_y=None):
     """Set the alignment of drawing text
@@ -215,6 +220,7 @@ def text_align(align_x, align_y=None):
     if align_y:
         _text_align_y = align_y
 
+
 def text_leading(leading):
     """Sets the spacing between lines of text in units of pixels
 
@@ -225,6 +231,7 @@ def text_leading(leading):
 
     global _text_leading
     _text_leading = leading
+
 
 def text_size(size):
     """Sets the current font size
@@ -243,6 +250,7 @@ def text_size(size):
     else:
         raise ValueError("text_size is not supported for Bitmap Fonts")
 
+
 def text_width(text):
     """Calculates and returns the width of any character or text string
 
@@ -256,6 +264,7 @@ def text_width(text):
 
     return _font_family.getsize(text)[0]
 
+
 def text_ascent():
     """Returns ascent of the current font at its current size
 
@@ -266,6 +275,7 @@ def text_ascent():
     global _font_family
     ascent, descent = _font_family.getmetrics()
     return ascent
+
 
 def text_descent():
     """Returns descent of the current font at its current size

@@ -46,6 +46,7 @@ curve_basis_matrix = [
     [0, 1, 0, 0]
 ]
 
+
 def typecast_arguments_as_points(func):
     """Typecast all but the last argument of the function as Points."""
     @wraps(func)
@@ -56,6 +57,7 @@ def typecast_arguments_as_points(func):
         return ret_value
     return decorated
 
+
 def bezier_detail(detail_value):
     """Change the resolution used to draw bezier curves.
 
@@ -64,6 +66,7 @@ def bezier_detail(detail_value):
     """
     global bezier_resolution
     bezier_resolution = max(1, detail_value)
+
 
 def bezier_point(start, control_1, control_2, stop, parameter):
     """Return the coordinate of a point along a bezier curve.
@@ -92,13 +95,15 @@ def bezier_point(start, control_1, control_2, stop, parameter):
     # Package floats into tuples
     is_iterable = isinstance(start, Iterable)
     if not is_iterable:
-        start, control_1, control_2, stop = (start,), (control_1,), (control_2,), (stop,)
+        start, control_1, control_2, stop = (
+            start,), (control_1,), (control_2,), (stop,)
 
     t = parameter
     t_ = 1 - parameter
     P = [start, control_1, control_2, stop]
     coeffs = [t_*t_*t_, 3*t*t_*t_,  3*t*t*t_, t*t*t]
-    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs))
+                for i in range(len(start)))
     # Unpack answer if input is not iterable
     if not is_iterable:
         ans = ans[0]
@@ -134,21 +139,26 @@ def bezier_tangent(start, control_1, control_2, stop, parameter):
     # Package floats into tuples
     is_iterable = isinstance(start, Iterable)
     if not is_iterable:
-        start, control_1, control_2, stop = (start,), (control_1,), (control_2,), (stop,)
+        start, control_1, control_2, stop = (
+            start,), (control_1,), (control_2,), (stop,)
 
     t = parameter
-    tangent = lambda a, b, c, d: 3*t*t*(3*b - 3*c + d - a) + \
-                                 6*t*(a - 2*b + c) + \
-                                 3*(b - a)
-    ans = tuple(tangent(start[i], control_1[i], control_2[i], stop[i]) for i in range(len(start)))
+
+    def tangent(a, b, c, d): return 3*t*t*(3*b - 3*c + d - a) + \
+        6*t*(a - 2*b + c) + \
+        3*(b - a)
+    ans = tuple(tangent(start[i], control_1[i],
+                        control_2[i], stop[i]) for i in range(len(start)))
     # Unpack answer if input is not iterable
     if not is_iterable:
         ans = ans[0]
     return ans
 
+
 def _reinit_curve_matrices():
     # TODO: Add basis matrices for faster tessellation.
     pass
+
 
 def curve_detail(detail_value):
     """Change the resolution used to draw bezier curves.
@@ -159,6 +169,7 @@ def curve_detail(detail_value):
     global curve_resolution
     curve_resolution = detail_value
 
+
 def curve_tightness(amount):
     """Change the curve tightness used to draw curves.
 
@@ -168,6 +179,7 @@ def curve_tightness(amount):
     global curve_tightness_amount
     curve_tightness_amount = amount
     _reinit_curve_matrices()
+
 
 def curve_point(point_1, point_2, point_3, point_4, parameter):
     """Return the coordinates of a point along a curve.
@@ -198,17 +210,21 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
     # Package floats into tuples
     is_iterable = isinstance(point_1, Iterable)
     if not is_iterable:
-        point_1, point_2, point_3, point_4 = (point_1,), (point_2,), (point_3,), (point_4,)
+        point_1, point_2, point_3, point_4 = (
+            point_1,), (point_2,), (point_3,), (point_4,)
 
     t = parameter
     basis = curve_basis_matrix
     P = [point_1, point_2, point_3, point_4]
-    coeffs = [sum(t**(3 - i) * basis[i][j] for i in range(4)) for j in range(4)]
-    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(point_1)))
+    coeffs = [sum(t**(3 - i) * basis[i][j] for i in range(4))
+              for j in range(4)]
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs))
+                for i in range(len(point_1)))
     # Unpack answer if input is not iterable
     if not is_iterable:
         ans = ans[0]
     return ans
+
 
 def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     """Return the tangent at a point along a curve.
@@ -238,7 +254,8 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     # Package floats into tuples
     is_iterable = isinstance(point_1, Iterable)
     if not is_iterable:
-        point_1, point_2, point_3, point_4 = (point_1,), (point_2,), (point_3,), (point_4,)
+        point_1, point_2, point_3, point_4 = (
+            point_1,), (point_2,), (point_3,), (point_4,)
 
     t = parameter
     basis = curve_basis_matrix
@@ -247,11 +264,13 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
         sum((3 - i)*(t**(2 - i)) * basis[i][j] for i in range(3))
         for j in range(4)
     ]
-    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(point_1)))
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs))
+                for i in range(len(point_1)))
     # Unpack answer if input is not iterable
     if not is_iterable:
         ans = ans[0]
     return ans
+
 
 def quadratic_point(start, control, stop, parameter):
     """Return the coordinates of a point along a bezier curve.
@@ -284,11 +303,13 @@ def quadratic_point(start, control, stop, parameter):
     t_ = 1 - parameter
     P = [start, control, stop]
     coeffs = [t_*t_, 2*t*t_, t*t]
-    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
+    ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs))
+                for i in range(len(start)))
     # Unpack answer if input is not iterable
     if not is_iterable:
         ans = ans[0]
     return ans
+
 
 # Set the default values.
 bezier_detail(20)

@@ -2,7 +2,9 @@ from . import p5, fill
 from ..sketch.util import ensure_p3d, scale_tuple
 import numpy as np
 
-__all__ = ['normal_material', 'basic_material', 'blinn_phong_material', 'ambient', 'emissive', 'diffuse', 'shininess', 'specular']
+__all__ = ['normal_material', 'basic_material', 'blinn_phong_material',
+           'ambient', 'emissive', 'diffuse', 'shininess', 'specular']
+
 
 class BasicMaterial:
     def __init__(self, color):
@@ -70,7 +72,8 @@ def blinn_phong_material():
     """
     ensure_p3d("blinn_phong_material")
     rend = p5.renderer.style
-    p5.renderer.style.material = BlinnPhongMaterial(rend.ambient, rend.diffuse, rend.specular, rend.shininess)
+    p5.renderer.style.material = BlinnPhongMaterial(
+        rend.ambient, rend.diffuse, rend.specular, rend.shininess)
 
 
 def ambient(r, g, b):
@@ -86,7 +89,8 @@ def ambient(r, g, b):
     :type b: float
     """
     ensure_p3d('ambient')
-    p5.renderer.style.ambient = np.array(scale_tuple((r, g, b)), dtype=np.float32)
+    p5.renderer.style.ambient = np.array(
+        scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def emissive(r, g, b):
@@ -118,7 +122,8 @@ def diffuse(r, g, b):
     :type b: float
     """
     ensure_p3d('diffuse')
-    p5.renderer.style.diffuse = np.array(scale_tuple((r, g, b)), dtype=np.float32)
+    p5.renderer.style.diffuse = np.array(
+        scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def shininess(p):
@@ -139,6 +144,7 @@ def specular(r, g, b):
     Should be used together with :any:`light_specular`.
     """
     ensure_p3d('specular')
-    p5.renderer.style.specular = np.array(scale_tuple((r, g, b)), dtype=np.float32)
+    p5.renderer.style.specular = np.array(
+        scale_tuple((r, g, b)), dtype=np.float32)
 
 # TODO: Document default values for material functions in renderer3D
