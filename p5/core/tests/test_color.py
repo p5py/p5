@@ -1,6 +1,7 @@
 import unittest
 from p5.core.color import Color
 
+
 class TestColor(unittest.TestCase):
     def test_parser(self):
         # RGB
@@ -22,6 +23,7 @@ class TestColor(unittest.TestCase):
 
         # Name
         self.assertEqual(Color("crimson"), Color(220, 20, 60))
-        
+
+
 if __name__ == "__main__":
     unittest.main()

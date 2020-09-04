@@ -35,6 +35,7 @@ def _dummy(*args, **kwargs):
     """
     pass
 
+
 class Sketch(app.Canvas):
     """The main sketch instance.
 
@@ -55,6 +56,7 @@ class Sketch(app.Canvas):
     :type frame_rate: int
 
     """
+
     def __init__(self, setup_method, draw_method,
                  handlers=dict(), frame_rate=60):
         app.Canvas.__init__(

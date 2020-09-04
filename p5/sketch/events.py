@@ -22,10 +22,10 @@ from enum import IntEnum
 
 Position = namedtuple('Position', ['x', 'y'])
 
-handler_names = [ 'key_pressed', 'key_released', 'key_typed',
-                  'mouse_clicked', 'mouse_double_clicked',
-                  'mouse_dragged', 'mouse_moved',
-                  'mouse_pressed', 'mouse_released', 'mouse_wheel',]
+handler_names = ['key_pressed', 'key_released', 'key_typed',
+                 'mouse_clicked', 'mouse_double_clicked',
+                 'mouse_dragged', 'mouse_moved',
+                 'mouse_pressed', 'mouse_released', 'mouse_wheel', ]
 
 
 class VispyButton(IntEnum):
@@ -41,6 +41,7 @@ class MouseButton:
     :type buttons: str list
 
     """
+
     def __init__(self, buttons):
         button_names = {
             VispyButton.LEFT: 'LEFT',
@@ -59,7 +60,7 @@ class MouseButton:
         button_map = {
             'CENTER': VispyButton.MIDDLE,
             'MIDDLE': VispyButton.MIDDLE,
-            'LEFT':  VispyButton.LEFT,
+            'LEFT': VispyButton.LEFT,
             'RIGHT': VispyButton.RIGHT,
         }
         if isinstance(other, str):
@@ -88,6 +89,7 @@ class Key:
     :type name: str
 
     """
+
     def __init__(self, name, text=''):
         self.name = name.upper()
         self.text = text
@@ -122,6 +124,7 @@ class Event:
     :type pressed: bool
 
     """
+
     def __init__(self, raw_event, active=False):
         self._modifiers = list(map(lambda k: k.name, raw_event.modifiers))
         self._active = active
@@ -169,7 +172,7 @@ class Event:
         :rtype: bool
 
         """
-        return  'Meta' in self._modifiers
+        return 'Meta' in self._modifiers
 
     def _update_builtins(self):
         pass
@@ -185,6 +188,7 @@ class KeyEvent(Event):
     :type pressed: bool
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -228,6 +232,7 @@ class MouseEvent(Event):
     :type button: MouseButton
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -236,7 +241,8 @@ class MouseEvent(Event):
         y = max(min(builtins.height, builtins.height - y), 0)
         dx, dy = self._raw.delta
 
-        if (self._raw.press_event != None) and (self._raw.last_event != None):
+        if (self._raw.press_event is not None) and (
+                self._raw.last_event is not None):
             px, py = self._raw.press_event.pos
             cx, cy = self._raw.last_event.pos
             self.change = Position(cx - px, cy - py)

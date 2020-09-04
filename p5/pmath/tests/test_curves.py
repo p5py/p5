@@ -1,8 +1,9 @@
 import unittest
 
 from p5.pmath.curves import (bezier_point, bezier_tangent, curve_point,
-        curve_tangent, quadratic_point)
+                             curve_tangent, quadratic_point)
 from p5.pmath.vector import Point
+
 
 class TestCurves(unittest.TestCase):
     def test_bezier_point(self):
@@ -57,6 +58,7 @@ class TestCurves(unittest.TestCase):
         p2 = (80, 20)
         p3 = (50, 50)
         self.assertEqual(quadratic_point(p1, p2, p3, 0.5), (57.5, 27.5))
+
 
 if __name__ == "__main__":
     unittest.main()

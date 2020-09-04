@@ -13,6 +13,7 @@ from OpenGL.GLU import gluTessBeginPolygon, gluTessBeginContour, gluTessEndPolyg
 COLOR_WHITE = (1, 1, 1, 1)
 COLOR_BLACK = (0, 0, 0, 1)
 
+
 def to_3x3(mat):
     """Returns the upper left 3x3 corner of an np.array
     """
@@ -31,14 +32,16 @@ def _tess_new_contour(vertices):
 def _vertices_to_render_primitive(gl_name, vertices):
     """Returns a render primitive of gl_type with vertices in sequential order
     """
-    return [gl_name, np.asarray(vertices), np.arange(len(vertices), dtype=np.uint32)]
+    return [gl_name, np.asarray(vertices), np.arange(
+        len(vertices), dtype=np.uint32)]
 
 
 def _get_line_from_verts(vertices):
     """Given a list of vertices, chain them sequentially in a line rendering primitive
     """
     n_vert = len(vertices)
-    return _get_line_from_indices(vertices, np.arange(n_vert - 1, dtype=np.uint32), np.arange(1, n_vert, dtype=np.uint32))
+    return _get_line_from_indices(vertices, np.arange(
+        n_vert - 1, dtype=np.uint32), np.arange(1, n_vert, dtype=np.uint32))
 
 
 def _get_line_from_indices(vertices, start, end):
@@ -80,14 +83,16 @@ def _not_enough_vertices(shape, n):
 def _wrong_multiple(shape, n):
     """Returns an error string that describes the # of vertices is not a multiple of n
     """
-    return "{} requires the number of vertices to be a multiple of {}".format(shape.shape_type, n)
+    return "{} requires the number of vertices to be a multiple of {}".format(
+        shape.shape_type, n)
 
 
 def _check_shape(shape):
     """Checks if the shape is valid using assertions
     """
     n_vert = len(shape.vertices)
-    if shape.shape_type in [SType.TRIANGLES, SType.TRIANGLE_FAN, SType.TRIANGLE_STRIP]:
+    if shape.shape_type in [SType.TRIANGLES,
+                            SType.TRIANGLE_FAN, SType.TRIANGLE_STRIP]:
         assert n_vert >= 3, _not_enough_vertices(shape, 3)
     elif shape.shape_type in [SType.LINES, SType.LINE_STRIP]:
         assert n_vert >= 2, _not_enough_vertices(shape, 2)
@@ -110,27 +115,37 @@ def _get_borders(shape):
     if shape.shape_type == SType.TRIANGLES:
         start = np.arange(n_vert)
         end = np.arange(n_vert) + np.tile([1, 1, -2], n_vert // 3)
-        _add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+        _add_edges_to_primitive_list(
+            render_primitives, shape.vertices, start, end)
     elif shape.shape_type == SType.TRIANGLE_STRIP:
         start = np.concatenate((np.arange(n_vert - 1), np.arange(n_vert - 2)))
         end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
-        _add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+        _add_edges_to_primitive_list(
+            render_primitives, shape.vertices, start, end)
     elif shape.shape_type == SType.TRIANGLE_FAN:
-        start = np.concatenate((np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
+        start = np.concatenate(
+            (np.repeat([0], n_vert - 1), np.arange(1, n_vert - 1)))
         end = np.concatenate((np.arange(1, n_vert), np.arange(2, n_vert)))
-        _add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+        _add_edges_to_primitive_list(
+            render_primitives, shape.vertices, start, end)
     elif shape.shape_type == SType.QUADS:
         start = np.arange(n_vert)
         end = np.arange(n_vert) + np.tile([1, 1, 1, -3], n_vert // 4)
-        _add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+        _add_edges_to_primitive_list(
+            render_primitives, shape.vertices, start, end)
     elif shape.shape_type == SType.QUAD_STRIP:
-        start = np.concatenate((np.arange(0, n_vert, 2), np.arange(n_vert - 2)))
+        start = np.concatenate(
+            (np.arange(
+                0, n_vert, 2), np.arange(
+                n_vert - 2)))
         end = np.concatenate((np.arange(1, n_vert, 2), np.arange(2, n_vert)))
-        _add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+        _add_edges_to_primitive_list(
+            render_primitives, shape.vertices, start, end)
     elif shape.shape_type == SType.LINES:
         start = np.arange(0, n_vert, 2)
         end = np.arange(1, n_vert, 2)
-        _add_edges_to_primitive_list(render_primitives, shape.vertices, start, end)
+        _add_edges_to_primitive_list(
+            render_primitives, shape.vertices, start, end)
     elif shape.shape_type == SType.LINE_STRIP:
         render_primitives.append(_get_line_from_verts(shape.vertices))
     elif shape.shape_type == SType.TESS:
@@ -147,11 +162,14 @@ def _get_meshes(shape):
     """
     render_primitives = []
     n_vert = len(shape.vertices)
-    if shape.shape_type in [SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
+    if shape.shape_type in [
+            SType.TRIANGLES, SType.TRIANGLE_STRIP, SType.TRIANGLE_FAN, SType.QUAD_STRIP]:
         gl_name = shape.shape_type.name.lower()
         if gl_name == 'quad_strip':  # vispy does not support quad_strip
             gl_name = 'triangle_strip'  # but it can be drawn using triangle_strip
-        render_primitives.append(_vertices_to_render_primitive(gl_name, shape.vertices))
+        render_primitives.append(
+            _vertices_to_render_primitive(
+                gl_name, shape.vertices))
     elif shape.shape_type == SType.QUADS:
         n_quad = len(shape.vertices) // 4
         render_primitives.append(['triangles', np.asarray(shape.vertices),
@@ -179,16 +197,20 @@ def get_render_primitives(shape):
             render_primitives.extend(_get_meshes(shape))
         # Render borders
         if p5.renderer.style.stroke_enabled:
-            if shape.arc_mode in ['CHORD', 'OPEN']:  # Implies shape.shape_type == TESS
+            if shape.arc_mode in [
+                    'CHORD', 'OPEN']:  # Implies shape.shape_type == TESS
                 render_primitives.extend(_get_borders(shape))
             elif shape.arc_mode is None:  # Implies shape.shape_type == TRIANGLE_FAN
-                render_primitives.append(_get_line_from_verts(shape.vertices[1:]))
+                render_primitives.append(
+                    _get_line_from_verts(shape.vertices[1:]))
             elif shape.arc_mode == 'PIE':  # Implies shape.shape_type == TRIANGLE_FAN
                 render_primitives.append(_get_line_from_verts(shape.vertices))
     else:
         # Render points
         if shape.shape_type == SType.POINTS:
-            render_primitives.append(_vertices_to_render_primitive(render_primitives, 'points'))
+            render_primitives.append(
+                _vertices_to_render_primitive(
+                    render_primitives, 'points'))
         # Render meshes
         if p5.renderer.style.fill_enabled:
             render_primitives.extend(_get_meshes(shape))
@@ -196,6 +218,7 @@ def get_render_primitives(shape):
         if p5.renderer.style.stroke_enabled:
             render_primitives.extend(_get_borders(shape))
     return render_primitives
+
 
 @dataclass
 class Style:
@@ -208,6 +231,8 @@ class Style:
     tint_enabled = False
 
 # Abstract class that contains common code for OpenGL renderers
+
+
 class OpenGLRenderer(ABC):
     def __init__(self, src_fbuffer, src_default):
         self.default_prog = None
@@ -292,7 +317,8 @@ class OpenGLRenderer(ABC):
         for vertices, idx, color in draw_queue:
             num_shape_verts = len(vertices)
 
-            data['position'][sidx:(sidx + num_shape_verts), ] = np.array(vertices)
+            data['position'][sidx:(sidx + num_shape_verts),
+                             ] = np.array(vertices)
 
             color_array = np.array([color] * num_shape_verts)
             data['color'][sidx:sidx + num_shape_verts, :] = color_array
