@@ -18,6 +18,7 @@
 
 from collections import namedtuple
 import numpy as np
+from numpy.random import random
 
 __all__ = ['Vector', 'Point']
 
@@ -414,7 +415,7 @@ class Vector(Point):
     def random_2D(cls):
         """Return a random 2D unit vector.
         """
-        x, y = 2 * (np.random.random(2) - 0.5)
+        x, y = 2 * (random(2) - 0.5)
         vec = cls(x, y)
         vec.normalize()
         return vec
@@ -423,7 +424,7 @@ class Vector(Point):
     def random_3D(cls):
         """Return a new random 3D unit vector.
         """
-        x, y, z = np.random.random(3)
+        x, y, z = random(3)
         vec = cls(x, y, z)
         vec.normalize()
         return vec

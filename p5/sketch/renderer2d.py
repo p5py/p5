@@ -61,7 +61,7 @@ class Renderer2D(OpenGLRenderer):
             builtins.height,
         )
 
-        gloo.set_viewport(*self.viewport)
+        gloo.set_viewport(*self.viewport)  # pylint: disable=no-member
 
         cz = (builtins.height / 2) / math.tan(math.radians(30))
         self.projection_matrix = matrix.perspective_matrix(
@@ -101,16 +101,16 @@ class Renderer2D(OpenGLRenderer):
 
     def clear(self, color=True, depth=True):
         """Clear the renderer background."""
-        gloo.set_state(clear_color=self.style.background_color)
-        gloo.clear(color=color, depth=depth)
+        gloo.set_state(clear_color=self.style.background_color)  # pylint: disable=no-member
+        gloo.clear(color=color, depth=depth)  # pylint: disable=no-member
 
     def _comm_toggles(self, state=True):
-        gloo.set_state(blend=state)
-        gloo.set_state(depth_test=state)
+        gloo.set_state(blend=state)  # pylint: disable=no-member
+        gloo.set_state(depth_test=state)  # pylint: disable=no-member
 
         if state:
-            gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))
-            gloo.set_state(depth_func='lequal')
+            gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))   # pylint: disable=no-member
+            gloo.set_state(depth_func='lequal')  # pylint: disable=no-member
 
     @contextmanager
     def draw_loop(self):
@@ -125,7 +125,7 @@ class Renderer2D(OpenGLRenderer):
         self.fbuffer.color_buffer = self.fbuffer_tex_back
 
         with self.fbuffer:
-            gloo.set_viewport(*self.texture_viewport)
+            gloo.set_viewport(*self.texture_viewport)  # pylint: disable=no-member
             self._comm_toggles()
             self.fbuffer_prog['texture'] = self.fbuffer_tex_front
             self.fbuffer_prog.draw('triangle_strip')
@@ -135,7 +135,7 @@ class Renderer2D(OpenGLRenderer):
             self.flush_geometry()
             self.transform_matrix = np.identity(4)
 
-        gloo.set_viewport(*self.viewport)
+        gloo.set_viewport(*self.viewport)  # pylint: disable=no-member
         self._comm_toggles(False)
         self.clear()
         self.fbuffer_prog['texture'] = self.fbuffer_tex_back

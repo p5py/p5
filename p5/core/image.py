@@ -176,7 +176,7 @@ class PImage:
 
         self._channels = len(self._img.getbands())
 
-        self._img_data = data.reshape(height, width, self._channels)
+        self._img_data = data.reshape((height, width, self._channels))
         self._img_texture = None
         self._reload = False
 

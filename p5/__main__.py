@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from . import _p5
+from . import p5
 
 # we should be parsing sys args here and expose a series of commands
 # similar to processing-java.
