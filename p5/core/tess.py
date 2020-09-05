@@ -3,6 +3,7 @@ from OpenGL.GLU import gluNewTess, gluTessCallback, GLU_TESS_VERTEX, GLU_TESS_BE
 from OpenGL.GL import GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, GL_TRIANGLES, GL_LINE_LOOP
 import numpy as np
 
+
 class Tessellator:
     def __init__(self):
         self.tess = gluNewTess()
@@ -16,7 +17,8 @@ class Tessellator:
                        GL_LINE_LOOP: 'line_loop'}
 
         def end_shape_handler():
-            curr_obj = [gl_mode_map[self.type], self.vertices, np.arange(len(self.vertices), dtype=np.uint32)]
+            curr_obj = [gl_mode_map[self.type], self.vertices,
+                        np.arange(len(self.vertices), dtype=np.uint32)]
             self.primitives.append(curr_obj)
 
         def begin_shape_handler(x):
@@ -32,7 +34,12 @@ class Tessellator:
         # Register Callbacks
         gluTessCallback(self.tess, GLU_TESS_VERTEX, vertex_handler)
         gluTessCallback(self.tess, GLU_TESS_END, end_shape_handler)
-        gluTessCallback(self.tess, GLU_TESS_ERROR, lambda x: print("Error", gluErrorString(x)))
+        gluTessCallback(
+            self.tess,
+            GLU_TESS_ERROR,
+            lambda x: print(
+                "Error",
+                gluErrorString(x)))
         gluTessCallback(self.tess, GLU_TESS_BEGIN, begin_shape_handler)
         gluTessCallback(self.tess, GLU_TESS_COMBINE, combine_handler)
 

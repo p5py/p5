@@ -1,0 +1,24 @@
+name: Pylint
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint sphinx sphinx_rtd_theme
+        pip install -r requirements.txt
+    - name: Test with pytest
+      run: |
+        pylint --disable=I --disable=W --disable=C --disable=R `find . -type d \( -path ./p5/core/tests -o -path ./profiling -o -path ./p5/sketch/tests -o -path ./p5/pmath/tests \) \
+        -prune -false -o -name '*.py'`

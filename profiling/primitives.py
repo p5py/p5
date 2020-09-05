@@ -1,7 +1,9 @@
 from p5 import *
 
+
 def setup():
     size(720, 400)
+
 
 def draw():
     triangle((30, 75), (58, 20), (86, 75))
@@ -11,6 +13,7 @@ def draw():
     line((130, 120), (185, 175))
     ellipse((256, 146), 35, 55)
     circle((56, 246), 55)
+
 
 if __name__ == '__main__':
     run()
