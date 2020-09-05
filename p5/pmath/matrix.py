@@ -19,6 +19,7 @@ import math
 
 import numpy as np
 
+
 def _magnitude(arr):
     """Return the madnitude of the given array.
 
@@ -29,6 +30,7 @@ def _magnitude(arr):
     :rtype: float
     """
     return np.sqrt(arr.dot(arr))
+
 
 def _normalize(arry):
     """Return the normalized version of the given array.
@@ -42,6 +44,7 @@ def _normalize(arry):
     """
     mag = _magnitude(arry)
     return arry / mag
+
 
 def scale_transform(x, y, z=1):
     """Return a scale transformation matrix.
@@ -65,28 +68,30 @@ def scale_transform(x, y, z=1):
     scale_matrix[2, 2] = z
     return scale_matrix
 
+
 def translation_matrix(x, y, z=0):
-   """Return a new translation matrix.
+    """Return a new translation matrix.
 
-   :param x: translation in the x-direction.
-   :type x: numeric
+    :param x: translation in the x-direction.
+    :type x: numeric
 
-   :param y: translation in the y-direction.
-   :type y: numeric
+    :param y: translation in the y-direction.
+    :type y: numeric
 
-   :param z: translation in the z-direction.
-   :type z: numeric (defaults to 0)
+    :param z: translation in the z-direction.
+    :type z: numeric (defaults to 0)
 
-   :returns: A transform matrix with the given translation applied to
-       it
-   :rtype: np.ndarray
+    :returns: A transform matrix with the given translation applied to
+        it
+    :rtype: np.ndarray
 
-   """
-   translate_matrix = np.identity(4)
-   translate_matrix[0, -1] = x
-   translate_matrix[1, -1] = y
-   translate_matrix[2, -1] = z
-   return translate_matrix
+    """
+    translate_matrix = np.identity(4)
+    translate_matrix[0, -1] = x
+    translate_matrix[1, -1] = y
+    translate_matrix[2, -1] = z
+    return translate_matrix
+
 
 def rotation_matrix(axis, angle):
     """Return a roation matrix with the given angle and rotation.
@@ -120,6 +125,7 @@ def rotation_matrix(axis, angle):
 
     return rotation
 
+
 def euler_rotation_matrix(heading, attitude, bank):
     """
 
@@ -127,6 +133,7 @@ def euler_rotation_matrix(heading, attitude, bank):
     :rtype: np.ndarray
     """
     pass
+
 
 def triple_axis_rotation_matrix(x, y, z):
     """Return a rotation matrix based on three axes.
@@ -148,6 +155,7 @@ def triple_axis_rotation_matrix(x, y, z):
     rotation_matrix[1, :3] = y
     rotation_matrix[2, :3] = z
     return rotation_matrix
+
 
 def look_at(eye, at, up):
     """Return a new 'look-at' matrix.
@@ -176,6 +184,7 @@ def look_at(eye, at, up):
     mat[2, 3] = (-1) * z.dot(eye)
 
     return mat
+
 
 def perspective_matrix(field_of_view, aspect_ratio, near_plane, far_plane):
     """Return a perspective matrix.
@@ -206,7 +215,7 @@ def perspective_matrix(field_of_view, aspect_ratio, near_plane, far_plane):
     f = 1 / math.tan(field_of_view / 2)
     mat = np.identity(4)
     mat[0, 0] = f / aspect_ratio
-    mat[1, 1] =  f
+    mat[1, 1] = f
     mat[2, 2] = (far_plane + near_plane) / (near_plane - far_plane)
     mat[2, 3] = 2 * far_plane * near_plane / (near_plane - far_plane)
     mat[3, 2] = -1

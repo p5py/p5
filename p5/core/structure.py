@@ -26,9 +26,11 @@ from contextlib import AbstractContextManager
 
 style_stack = []
 
+
 class _StyleContext(AbstractContextManager):
     def __exit__(self, exc_type, exc_value, traceback):
         pop_style()
+
 
 def push_style():
     """Save the current style settings and then restores them on exit.
@@ -67,6 +69,7 @@ def push_style():
 
     style_stack.append((renderer_styles, shape_modes, color_settings))
     return _StyleContext()
+
 
 def pop_style():
     """Restores previously pushed style settings

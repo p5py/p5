@@ -1,12 +1,15 @@
-# Adapted from https://p5.readthedocs.io/en/latest/examples/form/shape%20primitives.html
+# Adapted from
+# https://p5.readthedocs.io/en/latest/examples/form/shape%20primitives.html
 import cProfile
 from p5 import *
 
 FRAME_MAX = 1000
 
+
 def setup():
     # Sets the screen to be 720 pixels wide and 400 pixels high
     size(720, 400)
+
 
 def draw():
     global frames
@@ -40,7 +43,7 @@ if __name__ == '__main__':
     pr.enable()
     try:
         run()
-    except:
+    except BaseException:
         pass
     pr.disable()
     pr.dump_stats("basic_shapes.prof")

@@ -40,23 +40,23 @@ __all__ = [
 #
 #         --- abhikpal (2017-08-04)
 
-#P: PERLIN NOISE
-#P:
-#P: [toxi 040903]
-#P: octaves and amplitude amount per octave are now user controlled via
-#P: the noiseDetail() function.
-#P:
-#P: [toxi 030902]
-#P: cleaned up code and now using bagel's cosine table to speed up
-#P:
-#P: [toxi 030901]
-#P: implementation by the german demo group farbrausch as used in their
-#P: demo "art": http://www.farb-rausch.de/fr010src.zip
+# P: PERLIN NOISE
+# P:
+# P: [toxi 040903]
+# P: octaves and amplitude amount per octave are now user controlled via
+# P: the noiseDetail() function.
+# P:
+# P: [toxi 030902]
+# P: cleaned up code and now using bagel's cosine table to speed up
+# P:
+# P: [toxi 030901]
+# P: implementation by the german demo group farbrausch as used in their
+# P: demo "art": http://www.farb-rausch.de/fr010src.zip
 
-#P: Default to medium smooth
+# P: Default to medium smooth
 PERLIN_OCTAVES = 4
 
-#P: 50% redution per octave
+# P: 50% redution per octave
 PERLIN_FALLOFF = 0.5
 
 PERLIN_YWRAPB = 4
@@ -65,14 +65,15 @@ PERLIN_ZWRAPB = 8
 PERLIN_ZWRAP = 1 << PERLIN_ZWRAPB
 PERLIN_SIZE = 4095
 
-#P: [toxi 031112]
-#P: new vars needed due to recent change of cos table in PGraphics
+# P: [toxi 031112]
+# P: new vars needed due to recent change of cos table in PGraphics
 PERLIN_COS_TABLE = PRE_COS
 PERLIN_TWO_PI = SINCOS_LENGTH
 PERLIN_PI = PERLIN_TWO_PI
 PERLIN_PI >>= 1
 
 PERLIN = None
+
 
 def noise(x, y=0, z=0):
     """Return perlin noise value at the given location.
@@ -96,16 +97,16 @@ def noise(x, y=0, z=0):
 
     global PERLIN
 
-    #P: [toxi 031112]
-    #P: now adjusts to the size of the cosLUT used via
-    #P: the new variables, defined above
+    # P: [toxi 031112]
+    # P: now adjusts to the size of the cosLUT used via
+    # P: the new variables, defined above
     def noise_fsc(i):
-        #P: using bagel's cosine table instead
+        # P: using bagel's cosine table instead
         return 0.5 * (1 - PERLIN_COS_TABLE[int(i * PERLIN_PI) % PERLIN_TWO_PI])
 
-    #P: [toxi 031112]
-    #P: noise broke due to recent change of cos table in PGraphics
-    #P: this will take care of it
+    # P: [toxi 031112]
+    # P: noise broke due to recent change of cos table in PGraphics
+    # P: this will take care of it
     if PERLIN is None:
         PERLIN = [random.random() for _ in range(PERLIN_SIZE + 1)]
 
@@ -170,6 +171,7 @@ def noise(x, y=0, z=0):
 
     return r
 
+
 def noise_detail(octaves=4, falloff=0.5):
     """Adjust the level of noise detail produced by noise().
 
@@ -191,6 +193,7 @@ def noise_detail(octaves=4, falloff=0.5):
         PERLIN_OCTAVES = octaves
     PERLIN_FALLOFF = constrain(falloff, 0, 1)
 
+
 def noise_seed(seed):
     """Set the seed value for :code:`noise()`
 
@@ -207,6 +210,7 @@ def noise_seed(seed):
     random_seed(seed)
     PERLIN = None
 
+
 def random_uniform(high=1, low=0):
     """Return a uniformly sampled random number.
 
@@ -221,6 +225,7 @@ def random_uniform(high=1, low=0):
 
     """
     return random.uniform(low, high)
+
 
 def random_gaussian(mean=0, std_dev=1):
     """Return a normally sampled random number.
@@ -239,6 +244,7 @@ def random_gaussian(mean=0, std_dev=1):
 
     """
     return random.gauss(mean, std_dev)
+
 
 def random_seed(seed):
     """Set the seed used to generate random numbers.
