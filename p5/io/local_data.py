@@ -6,7 +6,7 @@ class Table:
     :type path: string
     """
 
-    def __init__(self, path):
+    def __init__(self, path,seperator):
         """
         Initializes Table object when given the path to a CSV file.
         """
@@ -14,7 +14,7 @@ class Table:
         lines = file.readlines()
         data = []
         for line in lines:
-            fragment = line.split(',')
+            fragment = line.split(seperator)
             x = fragment[len(fragment) - 1]
             x = x[:-1]
             fragment[len(fragment) - 1] = x
@@ -23,22 +23,25 @@ class Table:
 
     def get_row_count(self):
         """
-        Returns number of rows in the read CSV.
+        :returns: Number of rows in the read CSV.
+        :rtype: int
         """
         return len(self.data)
 
     def get_column_count(self):
         """
-        Returns number of columns in the read CSV.
+        :returns: Number of columns in the read CSV.
+        :rtype: int
         """
         return len(self.data[0])
 
     def get_column(self, name):
         """
-        Returns an entire column based on the column index.
-
         :param name: Name of the required column
         :type name: string
+
+        :returns: An entire column based on the column index.
+        :rtype: list
         """
         count = 0
         for i in self.data[0]:
@@ -56,6 +59,9 @@ class Table:
 
         :param index: Name of the row
         :type index: string
+
+        :returns: An entire row when given the row index.
+        :rtype: list
         """
         for fragment in self.data:
             if fragment[0] == index:
@@ -63,17 +69,31 @@ class Table:
 
     def get_array(self):
         """
-        Returns the entire csv data as an multidimensional array.
+        :returns: the entire csv data as an multidimensional array.
+        :rtype: list
         """
         return self.data
 
 
-def load_table(path):
+def load_table(path, mode='csv'):
     """
     Calls Table class and returns a Table class object
-
+    
     :param path: Path to file
     :type path: string
+
+    :param mode: Type of File csv/ssv/tsv.
+    :type mode: string
+    
+    :returns: A table object
+    :rtype: object
+
     """
-    table = Table(path)
+    if mode == 'csv':
+    	seperator = ','
+    if mode == 'ssv':
+    	seperator = ';'
+    if mode == 'tsv':
+    	seperator = '\t'
+    table = Table(path,seperator)
     return table
