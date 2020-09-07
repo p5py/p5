@@ -62,7 +62,6 @@ class Table:
 
         :returns: An entire row when given the row index.
         :rtype: list
-
         """
         for fragment in self.data:
             if fragment[0] == index:
@@ -79,13 +78,13 @@ class Table:
 def load_table(path, mode='csv'):
     """
     Calls Table class and returns a Table class object
-
+    
     :param path: Path to file
     :type path: string
 	
 	:param mode: Type of File csv/ssv/tsv.
 	:type mode: string
-	
+    
     :returns: A table object
     :rtype: object
 
