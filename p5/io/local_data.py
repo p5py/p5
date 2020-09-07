@@ -39,8 +39,8 @@ class Table:
         """
         :param name: Name of the required column
         :type name: string
-		
-		:returns: An entire column based on the column index.
+
+        :returns: An entire column based on the column index.
         :rtype: list
         """
         count = 0
@@ -81,9 +81,9 @@ def load_table(path, mode='csv'):
     
     :param path: Path to file
     :type path: string
-	
-	:param mode: Type of File csv/ssv/tsv.
-	:type mode: string
+
+    :param mode: Type of File csv/ssv/tsv.
+    :type mode: string
     
     :returns: A table object
     :rtype: object
