@@ -76,7 +76,7 @@ class Table:
         return self.data
 
 
-def load_table(path,mode):
+def load_table(path, mode='csv'):
     """
     Calls Table class and returns a Table class object
 
