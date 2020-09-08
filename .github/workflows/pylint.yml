@@ -20,5 +20,4 @@ jobs:
         pip install -r requirements.txt
     - name: Test with pytest
       run: |
-        pylint --disable=I --disable=W --disable=C --disable=R `find . -type d \( -path ./p5/core/tests -o -path ./profiling -o -path ./p5/sketch/tests -o -path ./p5/pmath/tests \) \
-        -prune -false -o -name '*.py'`
+        pylint --disable=I --disable=W --disable=C --disable=R `find .  -path ./profiling -prune -false -o -name '*.py'`
