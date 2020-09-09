@@ -1,4 +1,4 @@
-name: Pylint
+name: Build and Test
 
 on: [push, pull_request]
 
@@ -19,7 +19,10 @@ jobs:
         pip install pylint sphinx sphinx_rtd_theme
         pip install -r requirements.txt
         pip install pytest
-    - name: Test with pytest
+    - name: Run pylint
       run: |
         pylint --disable=I --disable=W --disable=C --disable=R `find .  -path ./profiling -prune -false -o -name '*.py'`
-        pytest -svv .
+    - name: Run Tests
+      run: |
+        sudo apt-get install python-opengl libglfw3 -y
+        pytest -svv p5
