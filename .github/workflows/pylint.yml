@@ -18,6 +18,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint sphinx sphinx_rtd_theme
         pip install -r requirements.txt
+        pip install pytest
     - name: Test with pytest
       run: |
         pylint --disable=I --disable=W --disable=C --disable=R `find .  -path ./profiling -prune -false -o -name '*.py'`
