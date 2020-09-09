@@ -21,3 +21,4 @@ jobs:
     - name: Test with pytest
       run: |
         pylint --disable=I --disable=W --disable=C --disable=R `find .  -path ./profiling -prune -false -o -name '*.py'`
+        pytest -svv .
