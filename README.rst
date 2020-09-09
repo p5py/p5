@@ -64,7 +64,7 @@ Take a look at the installation steps here in the `p5 installation page
 
 Contributing
 ------------
-We welcome contributions from anyone, even if you are new to open source. You can start by fixing the existing [issues](https://github.com/p5py/p5/issues) in p5py. In case you need any help or support from the p5py development community, you can jon our [slack group](https://join.slack.com/t/p5py/shared_invite/zt-g9uo4vph-dUVltiE1ixvmjFTCyRlzpQ). 
+We welcome contributions from anyone, even if you are new to open source. You can start by fixing the existing `issues <https://github.com/p5py/p5/issues>`_ in p5py. In case you need any help or support from the p5py development community, you can jon our `slack group <https://join.slack.com/t/p5py/shared_invite/zt-g9uo4vph-dUVltiE1ixvmjFTCyRlzpQ>`_. 
 
 License
 -------
