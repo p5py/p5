@@ -106,43 +106,6 @@ class TestPShape(unittest.TestCase):
             ])))
         quad.reset_matrix()
 
-    # def test_edges(self):
-    #     self.assertTrue(
-    #         np.array_equal(quad._compute_poly_edges(),
-    #                        np.array([[0, 1], [1, 2], [2, 3], [3, 0]])))
-    #     self.assertTrue(
-    #         np.array_equal(quad._compute_outline_edges(),
-    #                        np.array([[0, 1], [1, 2], [2, 3]])))
-    #
-    # def test_triangulation(self):
-    #     quad._retriangulate()
-    #     self.assertTrue(
-    #         np.array_equal(quad._tri_edges,
-    #                        np.array([[1, 0], [2, 1], [3, 2], [0, 3]])))
-    #
-    #     self.assertTrue(
-    #         np.array_equal(quad._tri_faces,
-    #                        np.array([[3, 0, 1], [1, 2, 3]])))
-    #
-    #     self.assertTrue(
-    #         np.array_equal(quad._tri_vertices,
-    #                        np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])))
-    #
-    #     contour_shape._retriangulate()
-    #     self.assertTrue(
-    #         np.array_equal(contour_shape._tri_edges,
-    #                        np.array([[1, 0], [2, 1], [3, 2], [0, 3], [4, 5], [6, 5], [7, 6], [4, 7]])))
-    #
-    #     self.assertTrue(
-    #         np.array_equal(contour_shape._tri_faces,
-    #                        np.array([[0, 4, 7],
-    #                        [4, 0, 1], [3, 7, 6], [7, 3, 0], [5, 1, 2], [1, 5, 4], [6, 2, 3], [2, 6, 5]])))
-    #
-    #     self.assertTrue(
-    #         np.array_equal(contour_shape._tri_vertices,
-    #                        np.array([[0.0, 0.0], [100.0, 0.0],
-    #                        [100.0, 100.0], [0.0, 100.0], [25.0, 25.0], [75.0, 25.0], [75.0, 75.0], [25.0, 75.0]])))
-
 
 if __name__ == "__main__":
     unittest.main()
