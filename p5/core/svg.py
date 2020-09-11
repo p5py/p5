@@ -74,12 +74,12 @@ def parse_rect(element):
     stroke = Color(get_style(element, "stroke"))
     stroke_cap = get_style(element, "stroke-cap")
 
-    return PShape([
+    return PShape(vertices=[
         (x, y),
         (x + width, y),
         (x + width, y + height),
-        (x, y + height)
-    ], children=[],
+        (x, y + height)],
+        children=[],
         fill_color=fill, stroke_weight=stroke_weight,
         stroke_color=stroke, stroke_cap=stroke_cap,
         stroke_join=default_values["stroke-join"])
@@ -115,10 +115,11 @@ def parse_line(element):
     stroke = Color(get_style(element, "stroke"))
     stroke_cap = get_style(element, "stroke-cap")
 
-    return PShape([(x1, y1), (x2, y2)], attribs='path',
-                  fill_color=fill, stroke_weight=stroke_weight,
-                  stroke_color=stroke, stroke_cap=stroke_cap,
-                  stroke_join=default_values["stroke-join"])
+    return PShape(
+        vertices=[(x1, y1), (x2, y2)],
+        fill_color=fill, stroke_weight=stroke_weight,
+        stroke_color=stroke, stroke_cap=stroke_cap,
+        stroke_join=default_values["stroke-join"])
 
 
 def parse_ellipse(element):

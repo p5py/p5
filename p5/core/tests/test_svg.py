@@ -49,20 +49,12 @@ class TestSVG(unittest.TestCase):
         self.assertTrue(
             np.array_equal(
                 parsed._fill,
-                Color(
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0)))
+                Color(0.0, 0.0, 0.0, 0.0)))
         self.assertTrue(np.array_equal(parsed.stroke_weight, 1))
         self.assertTrue(
             np.array_equal(
                 parsed.stroke,
-                Color(
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0)))
+                Color(0.0, 0.0, 0.0, 0.0)))
         self.assertTrue(np.array_equal(parsed.stroke_join, 0))
 
     def test_parse_line(self):

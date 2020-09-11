@@ -1,12 +1,10 @@
-name: Run pylint
+name: Run pytest
 
 on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.8
@@ -16,8 +14,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pylint sphinx sphinx_rtd_theme
           pip install -r requirements.txt
-      - name: Run pylint
+          pip install pytest
+          sudo apt-get install python-opengl libglfw3 -y
+      - name: Run Tests
         run: |
-          pylint --disable=I --disable=W --disable=C --disable=R `find .  -path ./profiling -prune -false -o -name '*.py'`
+          pytest -svv p5
