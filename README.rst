@@ -16,6 +16,9 @@ Python. It combines the core ideas of `Processing
 with Python's readability to make programming more accessible to
 beginners, educators, and artists.
 
+To report a bug / make a feature request use the `issues page <https://github.com/p5py/p5/issues>`_ in this repository. You can also use the `discourse platform
+<https://discourse.processing.org/c/p5py/27>`_  to ask/discuss anything related to p5py. 
+
 Example
 -------
 
