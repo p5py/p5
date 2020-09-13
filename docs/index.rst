@@ -47,7 +47,7 @@ p5 is free and open source software and has been `released under the
 GPL3 license <https://github.com/p5py/p5/blob/master/LICENSE>`_. To
 report a bug / make a feature request use the `issues page
 <https://github.com/p5py/p5/issues>`_ on the `main repository
-<https://github.com/p5py/p5>`_.
+<https://github.com/p5py/p5>`_. You can also use the `discourse platform <https://discourse.processing.org/c/p5py/27>`_ to ask / discuss anything related to p5py.
 
 .. toctree::
    :maxdepth: 2
