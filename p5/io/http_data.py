@@ -1,5 +1,5 @@
 """
-Part of the io library and has functions that require **internet** connection.
+Part of the io library. Includes functions that require **internet** connection.
 """
 
 from urllib import request
@@ -30,7 +30,7 @@ class http_get:
         try:
             self.json = json.loads(data)
         except: 
-            print("The data provided did not return in a json format.")
+            self.json = data
 
 # Synchronous
 
@@ -47,3 +47,4 @@ def http_post(url, post_data):
     data = requests.post(url, post_data)
     data = data.json()
     return data
+    
