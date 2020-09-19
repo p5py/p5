@@ -120,3 +120,12 @@ Typography
    3d/vertex
    3d/basic_shapes
    3d/blinn_phong
+
+IO
+##########
+
+.. toctree::
+   :maxdepth: 1
+
+   IO/GET
+   IO/POST
