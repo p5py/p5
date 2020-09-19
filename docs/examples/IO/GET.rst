@@ -39,17 +39,17 @@ GET
     from p5 import *
 
     def setup():
-		size(400, 400)
-		no_loop()
+    	size(400, 400)
+    	no_loop()
 
     def draw():
     	background(220)
-		sleep(0.5)
-		sat_data = http_get('https://api.wheretheiss.at/v1/satellites/25544')
-		lat = sat_data['latitude']
-		log = sat_data['longitude']
-		print(lat,log)
-		fill(0)
-		text("  latitude = " + str(lat) + "  longitude = " + str(log),(0,200))
+    	sleep(0.5)
+    	sat_data = http_get('https://api.wheretheiss.at/v1/satellites/25544')
+    	lat = sat_data['latitude']
+    	log = sat_data['longitude']
+    	print(lat,log)
+    	fill(0)
+    	text("  latitude = " + str(lat) + "  longitude = " + str(log),(0,200))
 
     run(mode='P3D')
