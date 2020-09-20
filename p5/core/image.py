@@ -20,6 +20,10 @@ import functools
 
 import builtins
 
+import io
+import re
+import urllib
+
 import numpy as np
 from PIL import Image
 from PIL import ImageFilter
@@ -590,7 +594,7 @@ def image_mode(mode):
 
 
 def load_image(filename):
-    """Load an image from the given filename.
+    """Load an image from the given filename (or URL).
 
     Loads an image into a variable of type PImage. Four types of
     images may be loaded.
@@ -599,7 +603,7 @@ def load_image(filename):
     call to preload them at the start of the program. Loading images
     inside draw() will reduce the speed of a program.
 
-    :param filename: Filename (or path)of the given image. The
+    :param filename: Filename (or path or URL) of the given image. The
         file-extennsion is automatically inferred.
     :type filename: str
 
@@ -607,9 +611,12 @@ def load_image(filename):
     :rtype: :class:`p5.PImage`
 
     """
-    # todo: add support for loading images from URLs -- abhikpal
-    # (2018-08-14)
-    img = Image.open(filename)
+    if (re.match(r'\w+://', filename)):
+        with urllib.request.urlopen(filename) as url:
+            f = io.BytesIO(url.read())
+            img = Image.open(f)
+    else:
+        img = Image.open(filename)
     w, h = img.size
     pimg = PImage(w, h)
     pimg._img = img
