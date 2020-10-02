@@ -49,7 +49,7 @@ def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
         max_1)
     :type max_3: int
 
-    :param max_alpha: Maximum valu for the alpha channel (default:
+    :param max_alpha: Maximum value for the alpha channel (default:
         255)
     :type max_alpha: int
 

@@ -808,7 +808,6 @@ def ellipse_mode(mode='CENTER'):
     global _ellipse_mode
     _ellipse_mode = mode
 
-
 def draw_shape(shape, pos=(0, 0, 0)):
     """Draw the given shape at the specified location.
 
@@ -826,7 +825,6 @@ def draw_shape(shape, pos=(0, 0, 0)):
 
     for child_shape in shape.children:
         draw_shape(child_shape)
-
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape

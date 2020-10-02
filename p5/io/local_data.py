@@ -6,7 +6,7 @@ class Table:
     :type path: string
     """
 
-    def __init__(self, path,seperator):
+    def __init__(self, path, seperator):
         """
         Initializes Table object when given the path to a CSV file.
         """
@@ -28,12 +28,26 @@ class Table:
         """
         return len(self.data)
 
+    def getRowCount(self):
+        """
+        :returns: Number of rows in the read CSV.
+        :rtype: int
+        """
+        return self.get_row_count()
+
     def get_column_count(self):
         """
         :returns: Number of columns in the read CSV.
         :rtype: int
         """
         return len(self.data[0])
+
+    def getColumnCount(self):
+        """
+        :returns: Number of columns in the read CSV.
+        :rtype: int
+        """
+        return self.get_column_count()
 
     def get_column(self, name):
         """
@@ -53,6 +67,16 @@ class Table:
             column.append(item[count])
         return column
 
+    def getColumn(self, name):
+        """
+        :param name: Name of the required column
+        :type name: string
+
+        :returns: An entire column based on the column index.
+        :rtype: list
+        """
+        return self.get_column(name)
+
     def get_row(self, index):
         """
         Returns an entire row when given the row index.
@@ -67,12 +91,31 @@ class Table:
             if fragment[0] == index:
                 return fragment
 
+    def getRow(self, index):
+        """
+        Returns an entire row when given the row index.
+
+        :param index: Name of the row
+        :type index: string
+
+        :returns: An entire row when given the row index.
+        :rtype: list
+        """
+        return self.get_row(index)
+
     def get_array(self):
         """
         :returns: the entire csv data as an multidimensional array.
         :rtype: list
         """
         return self.data
+
+    def getArray(self):
+        """
+        :returns: the entire csv data as an multidimensional array.
+        :rtype: list
+        """
+        return self.get_array()
 
 
 def load_table(path, mode='csv'):
@@ -90,10 +133,10 @@ def load_table(path, mode='csv'):
 
     """
     if mode == 'csv':
-    	seperator = ','
+        seperator = ','
     if mode == 'ssv':
-    	seperator = ';'
+        seperator = ';'
     if mode == 'tsv':
-    	seperator = '\t'
-    table = Table(path,seperator)
+        seperator = '\t'
+    table = Table(path, seperator)
     return table
