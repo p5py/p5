@@ -18,18 +18,15 @@ class http_get:
     """
 
     def __init__(self, url):
-        try:
-            resp = request.urlopen(url)
-        except:
-            print("Invalid url. Connection Failed.")
-            exit(1)
+        resp = request.urlopen(url)
 
         data = resp.read().decode("UTF-8")
 
         self.text = data
+
         try:
             self.json = json.loads(data)
-        except: 
+        except json.JSONDecodeError:
             self.json = data
 
 # Synchronous
