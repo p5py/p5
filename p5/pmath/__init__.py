@@ -22,3 +22,4 @@ from .rand import *
 from .curves import *
 from .time import *
 from . import matrix
+from .api import *
