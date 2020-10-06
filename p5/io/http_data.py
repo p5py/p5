@@ -1,11 +1,14 @@
-from urllib import request, parse
+"""
+Part of the io library. Includes functions that require **internet** connection.
+"""
+
+from urllib import request
 import json
 import requests
 
-# synchronous
+# Synchronous
 
-
-def http_get(url):
+class http_get:
     """
     Performs a synchronous GET request on the given url.
 
@@ -13,17 +16,20 @@ def http_get(url):
     :type url: string
 
     """
-    try:
+
+    def __init__(self, url):
         resp = request.urlopen(url)
-    except Exception:
-        print("Invalid url. Connection Failed.")
-        exit(1)
-    data = resp.read()
-    data = json.loads(data.decode("UTF-8"))
-    return data
 
-# synchronous
+        data = resp.read().decode("UTF-8")
 
+        self.text = data
+
+        try:
+            self.json = json.loads(data)
+        except json.JSONDecodeError:
+            self.json = data
+
+# Synchronous
 
 def http_post(url, post_data):
     """
@@ -38,3 +44,4 @@ def http_post(url, post_data):
     data = requests.post(url, post_data)
     data = data.json()
     return data
+    

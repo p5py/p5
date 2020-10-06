@@ -11,7 +11,7 @@ HTTP
 http_get()
 ----------
 
-.. autofunction:: http_get
+.. autoclass:: http_get
 
 
 http_post()
