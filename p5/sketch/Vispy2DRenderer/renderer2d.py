@@ -18,8 +18,8 @@
 
 import numpy as np
 import math
-from ..pmath import matrix
-from .shaders2d import src_default, src_fbuffer
+from p5.pmath import matrix
+from p5.sketch.shaders2d import src_default, src_fbuffer
 
 import builtins
 
@@ -29,12 +29,12 @@ from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
-from .shaders2d import src_texture
-from .shaders2d import src_line
-from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
+from p5.sketch.shaders2d import src_texture
+from p5.sketch.shaders2d import src_line
+from p5.sketch.openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 
 
-class Renderer2D(OpenGLRenderer):
+class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
         super().__init__(src_fbuffer, src_default)
         self.texture_prog = None

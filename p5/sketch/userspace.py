@@ -25,16 +25,11 @@ import builtins
 import time
 from functools import wraps
 
-from vispy import app
-
-from .base import Sketch
 from .events import handler_names
 
 from ..core import p5
 from ..pmath import matrix
 
-from ..core.constants import *
-from .renderer2d import Renderer2D
 from .renderer3d import Renderer3D
 
 __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
@@ -70,6 +65,7 @@ def _fix_interface(func):
     :returns: a new function that accepts arguments.
     :rtype: func
     """
+
     @wraps(func)
     def fixed_func(*args, **kwargs):
         return_value = func()
@@ -143,34 +139,35 @@ def run(sketch_setup=None, sketch_draw=None,
             hfunc = getattr(__main__, handler)
             handlers[handler] = _fix_interface(hfunc)
 
-    if mode == "P2D":
-        p5.mode = 'P2D'
-        if renderer == "vispy":
-            p5.renderer = Renderer2D()
-        else:
-            raise NotImplementedError("Invalid Renderer %s" % renderer)
-    elif mode == "P3D":
-        p5.mode = 'P3D'
-        if renderer == "vispy":
+    if renderer == "vispy":
+        import vispy
+        vispy.use('glfw')
+        from p5.sketch.Vispy2DRenderer.base import VispySketch
+        from vispy import app
+
+        if mode == "P2D":
+            from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
+            p5.mode = 'P2D'
+            p5.renderer = VispyRenderer2D()
+        elif mode == "P3D":
+            p5.mode = 'P3D'
             p5.renderer = Renderer3D()
         else:
-            raise NotImplementedError("Invalid Renderer %s" % renderer)
+            ValueError("Invalid Mode %s" % mode)
+        p5.sketch = VispySketch(setup_method, draw_method, handlers, frame_rate)
+        physical_width, physical_height = p5.sketch.physical_size
+        width, height = p5.sketch.size
+
+        builtins.pixel_x_density = physical_width // width
+        builtins.pixel_y_density = physical_height // height
+        builtins.start_time = time.perf_counter()
+
+        p5.sketch.timer.start()
+
+        app.run()
+        exit()
     else:
-        raise ValueError("Invalid Mode %s" % mode)
-
-    p5.sketch = Sketch(setup_method, draw_method, handlers, frame_rate)
-
-    physical_width, physical_height = p5.sketch.physical_size
-    width, height = p5.sketch.size
-
-    builtins.pixel_x_density = physical_width // width
-    builtins.pixel_y_density = physical_height // height
-    builtins.start_time = time.perf_counter()
-
-    p5.sketch.timer.start()
-
-    app.run()
-    exit()
+        raise NotImplementedError("Invalid Renderer %s" % renderer)
 
 
 def title(new_title):
