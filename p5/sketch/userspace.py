@@ -57,7 +57,7 @@ builtins.key_is_pressed = False
 
 builtins.pixels = None
 builtins.start_time = 0
-
+builtins.current_renderer = None
 
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
@@ -144,7 +144,7 @@ def run(sketch_setup=None, sketch_draw=None,
         vispy.use('glfw')
         from p5.sketch.Vispy2DRenderer.base import VispySketch
         from vispy import app
-
+        builtins.current_renderer = "vispy"
         if mode == "P2D":
             from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
             p5.mode = 'P2D'
@@ -254,8 +254,10 @@ def exit(*args, **kwargs):
         `exit()` function.
     """
     if not (p5.sketch is None):
-        p5.sketch.show(visible=False)
-        app.quit()
+        if builtins.current_renderer == "vispy":
+            from vispy import app
+            p5.sketch.show(visible=False)
+            app.quit()
     p5.exit(*args, **kwargs)
 
 
