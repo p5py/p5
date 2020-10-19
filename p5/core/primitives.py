@@ -25,7 +25,7 @@ from ..pmath import Point
 from ..pmath import curves
 from ..pmath.utils import SINCOS
 
-from .shape import PShape
+from p5.sketch.Vispy2DRenderer.shape import PShape
 from .geometry import Geometry
 from .constants import ROUND, SQUARE, PROJECT, SType
 

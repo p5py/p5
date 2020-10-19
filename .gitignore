@@ -111,3 +111,8 @@ ENV/
 
 # Profiling results
 profiling/*.prof
+
+.idea/
+test.py
+test2.py
+test3.py

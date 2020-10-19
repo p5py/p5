@@ -22,7 +22,7 @@ import re
 import numpy as np
 
 from . import Color
-from . import PShape
+from p5.sketch.Vispy2DRenderer.shape import PShape
 from . import primitives
 from . import transforms
 from ..pmath import matrix

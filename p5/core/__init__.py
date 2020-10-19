@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from .structure import *
-from .shape import *
 from .primitives import *
 from .primitives3d import *
 from .transforms import *

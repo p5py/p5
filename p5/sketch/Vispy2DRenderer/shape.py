@@ -23,12 +23,12 @@ import functools
 
 import numpy as np
 
-from .color import Color
-from .constants import SType
-from ..pmath import matrix
-from ..pmath.vector import Point
+from p5.core.color import Color
+from p5.core.constants import SType
+from p5.pmath import matrix
+from p5.pmath.vector import Point
 
-from . import p5
+from p5.core import p5
 
 __all__ = ['PShape']
 
