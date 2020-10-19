@@ -30,8 +30,6 @@ from .events import handler_names
 from ..core import p5
 from ..pmath import matrix
 
-from .renderer3d import Renderer3D
-
 __all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
            'cursor', 'exit', 'draw', 'setup', 'run', 'save_frame', 'save']
 
@@ -145,15 +143,18 @@ def run(sketch_setup=None, sketch_draw=None,
         from p5.sketch.Vispy2DRenderer.base import VispySketch
         from vispy import app
         builtins.current_renderer = "vispy"
+
         if mode == "P2D":
-            from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
             p5.mode = 'P2D'
+            from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
             p5.renderer = VispyRenderer2D()
         elif mode == "P3D":
             p5.mode = 'P3D'
+            from p5.sketch.Vispy3DRenderer.renderer3d import Renderer3D
             p5.renderer = Renderer3D()
         else:
             ValueError("Invalid Mode %s" % mode)
+
         p5.sketch = VispySketch(setup_method, draw_method, handlers, frame_rate)
         physical_width, physical_height = p5.sketch.physical_size
         width, height = p5.sketch.size

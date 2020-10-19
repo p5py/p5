@@ -19,7 +19,7 @@
 import numpy as np
 import math
 from p5.pmath import matrix
-from p5.sketch.shaders2d import src_default, src_fbuffer
+from p5.sketch.Vispy2DRenderer.shaders2d import src_default, src_fbuffer
 
 import builtins
 
@@ -29,8 +29,8 @@ from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
-from p5.sketch.shaders2d import src_texture
-from p5.sketch.shaders2d import src_line
+from p5.sketch.Vispy2DRenderer.shaders2d import src_texture
+from p5.sketch.Vispy2DRenderer.shaders2d import src_line
 from p5.sketch.Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 
 

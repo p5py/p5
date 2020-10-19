@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from p5.core.geometry import Geometry
 from p5.core import p5
-from p5.sketch.renderer3d import Renderer3D
+from p5.sketch.Vispy3DRenderer.renderer3d import Renderer3D
 
 p5.renderer = Renderer3D()
 

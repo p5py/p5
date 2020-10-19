@@ -1,13 +1,21 @@
 import pkgutil
 import os
 from ..core import p5
+import builtins
 
 
 def read_shader(filename):
     """Reads a shader in string mode and returns the content
     """
+    renderer_name = ""
+    if builtins.current_renderer == "vispy":
+        if p5.mode == 'P2D':
+            renderer_name = "Vispy2DRenderer"
+        elif p5.mode == 'P3D':
+            renderer_name = "Vispy3DRenderer"
+
     return pkgutil.get_data('p5', os.path.join(
-        'sketch/shaders/', filename)).decode()
+        'sketch/' + renderer_name + '/shaders/', filename)).decode()
 
 
 def ensure_p3d(name):
