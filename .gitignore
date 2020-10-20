@@ -112,7 +112,5 @@ ENV/
 # Profiling results
 profiling/*.prof
 
+# IntelliJ's project specific settings files
 .idea/
-test.py
-test2.py
-test3.py
