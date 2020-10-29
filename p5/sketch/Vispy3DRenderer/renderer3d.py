@@ -32,11 +32,11 @@ from contextlib import contextmanager
 
 from p5.core.constants import Z_EPSILON
 from p5.core.geometry import Geometry
-from p5.sketch.Vispy2DRenderer.shape import PShape
+from ..Vispy2DRenderer.shape import PShape
 
 from p5.pmath.matrix import translation_matrix
-from p5.sketch.Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, Style, COLOR_WHITE
-from p5.sketch.Vispy3DRenderer.shaders3d import src_default, src_fbuffer, src_normal, src_phong
+from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, Style, COLOR_WHITE
+from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
 from p5.core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
 
 

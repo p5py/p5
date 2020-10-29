@@ -3,7 +3,7 @@ import numpy as np
 
 from p5.core import p5
 from p5.core.constants import SType, ROUND, MITER
-from p5.core.primitives import Arc
+from .shape import Arc
 
 from dataclasses import dataclass
 from vispy.gloo import Program, VertexBuffer, FrameBuffer, IndexBuffer

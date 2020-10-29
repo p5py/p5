@@ -22,12 +22,13 @@ import contextlib
 import functools
 
 import numpy as np
+import math
 
 from p5.core.color import Color
 from p5.core.constants import SType
 from p5.pmath import matrix
 from p5.pmath.vector import Point
-
+from p5.pmath.utils import SINCOS
 from p5.core import p5
 
 __all__ = ['PShape']
@@ -426,3 +427,87 @@ class PShape:
         shear_mat = np.identity(4)
         shear_mat[1, 0] = np.tan(theta)
         return shear_mat
+
+
+# We use these in ellipse tessellation. The algorithm is similar to
+# the one used in Processing and the we compute the number of
+# subdivisions per ellipse using the following formula:
+#
+#    min(M, max(N, (2 * pi * size / F)))
+#
+# Where,
+#
+# - size :: is the measure of the dimensions of the circle when
+#   projected in screen coordiantes.
+#
+# - F :: sets the minimum number of subdivisions. A smaller `F` would
+#   produce more detailed circles (== POINT_ACCURACY_FACTOR)
+#
+# - N :: Minimum point accuracy (== MIN_POINT_ACCURACY)
+#
+# - M :: Maximum point accuracy (== MAX_POINT_ACCURACY)
+#
+MIN_POINT_ACCURACY = 20
+MAX_POINT_ACCURACY = 200
+POINT_ACCURACY_FACTOR = 10
+
+
+class Arc(PShape):
+    def __init__(self, center, radii, start_angle, stop_angle,
+                 mode=None, fill_color='auto',
+                 stroke_color='auto', stroke_weight="auto",
+                 stroke_join="auto", stroke_cap="auto", **kwargs):
+        self._center = center
+        self._radii = radii
+        self._start_angle = start_angle
+        self._stop_angle = stop_angle
+        self.arc_mode = mode
+
+        gl_type = SType.TESS if mode in [
+            'OPEN', 'CHORD'] else SType.TRIANGLE_FAN
+        super().__init__(fill_color=fill_color,
+                         stroke_color=stroke_color, stroke_weight=stroke_weight,
+                         stroke_join=stroke_join, stroke_cap=stroke_cap, shape_type=gl_type, **kwargs)
+        self._tessellate()
+
+    def _tessellate(self):
+        """Generate vertex and face data using radii.
+        """
+        rx = self._radii[0]
+        ry = self._radii[1]
+
+        c1x = self._center[0]
+        c1y = self._center[1]
+        s1 = p5.renderer.transform_matrix.dot(np.array([c1x, c1y, 0, 1]))
+
+        c2x = c1x + rx
+        c2y = c1y + ry
+        s2 = p5.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
+
+        sdiff = (s2 - s1)
+        size_acc = (np.sqrt(np.sum(sdiff * sdiff)) *
+                    math.pi * 2) / POINT_ACCURACY_FACTOR
+
+        acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
+        inc = int(len(SINCOS) / acc)
+
+        sclen = len(SINCOS)
+        start_index = int((self._start_angle / (math.pi * 2)) * sclen)
+        end_index = int((self._stop_angle / (math.pi * 2)) * sclen)
+
+        vertices = [(c1x, c1y, 0)] if self.arc_mode in ['PIE', None] else []
+        for idx in range(start_index, end_index, inc):
+            i = idx % sclen
+            vertices.append((
+                c1x + rx * SINCOS[i][1],
+                c1y + ry * SINCOS[i][0],
+                0
+            ))
+        vertices.append((
+            c1x + rx * SINCOS[end_index % sclen][1],
+            c1y + ry * SINCOS[end_index % sclen][0],
+            0
+        ))
+        if self.arc_mode == 'CHORD' or self.arc_mode == 'PIE':
+            vertices.append(vertices[0])
+        self.vertices = vertices

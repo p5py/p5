@@ -19,7 +19,7 @@
 import numpy as np
 import math
 from p5.pmath import matrix
-from p5.sketch.Vispy2DRenderer.shaders2d import src_default, src_fbuffer
+from .shaders2d import src_default, src_fbuffer
 
 import builtins
 
@@ -29,12 +29,12 @@ from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 
 from contextlib import contextmanager
-from p5.sketch.Vispy2DRenderer.shaders2d import src_texture
-from p5.sketch.Vispy2DRenderer.shaders2d import src_line
-from p5.sketch.Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
-from p5.core.primitives import Arc
+from .shaders2d import src_texture
+from .shaders2d import src_line
+from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 from p5.core.constants import SType
-from .shape import PShape
+from .shape import PShape, Arc
+
 
 class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
@@ -111,7 +111,7 @@ class VispyRenderer2D(OpenGLRenderer):
         gloo.set_state(depth_test=state)  # pylint: disable=no-member
 
         if state:
-            gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))   # pylint: disable=no-member
+            gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))  # pylint: disable=no-member
             gloo.set_state(depth_func='lequal')  # pylint: disable=no-member
 
     @contextmanager
@@ -241,7 +241,7 @@ class VispyRenderer2D(OpenGLRenderer):
                 for i in range(
                         len(segment) - 1):  # the data is sent to renderer in line segments
                     for j in [
-                            0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
+                        0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
                         if i + j - 1 >= 0:
                             posPrev.append(line[0][segment[i + j - 1]])
                         else:

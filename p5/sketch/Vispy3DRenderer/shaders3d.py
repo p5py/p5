@@ -18,7 +18,7 @@
 """Shaders used by the main program"""
 
 from collections import namedtuple
-from p5.sketch.util import read_shader
+from ..util import read_shader
 
 ShaderSource = namedtuple('ShaderSource', 'vert frag')
 
