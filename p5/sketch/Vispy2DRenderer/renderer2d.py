@@ -32,7 +32,9 @@ from contextlib import contextmanager
 from p5.sketch.Vispy2DRenderer.shaders2d import src_texture
 from p5.sketch.Vispy2DRenderer.shaders2d import src_line
 from p5.sketch.Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
-
+from p5.core.primitives import Arc
+from p5.core.constants import SType
+from .shape import PShape
 
 class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
@@ -337,3 +339,37 @@ class VispyRenderer2D(OpenGLRenderer):
         """
         OpenGLRenderer.cleanup(self)
         self.line_prog.delete()
+
+    def render_shape(self, shape):
+        self.render(shape)
+        for child_shape in shape.children:
+            self.render_shape(child_shape)
+
+    def line(self, *args):
+        path = args[0]
+        self.render_shape(PShape(vertices=path, shape_type=SType.LINES))
+
+    def bezier(self, *args):
+        vertices = args[0]
+        self.render_shape(PShape(vertices=vertices, shape_type=SType.LINE_STRIP))
+
+    def curve(self, *args):
+        vertices = args[0]
+        self.render_shape(PShape(vertices=vertices, shape_type=SType.LINE_STRIP))
+
+    def triangle(self, *args):
+        path = args[0]
+        self.render_shape(PShape(vertices=path, shape_type=SType.TRIANGLES))
+
+    def quad(self, *args):
+        path = args[0]
+        self.render_shape(PShape(vertices=path, shape_type=SType.QUADS))
+
+    def arc(self, *args):
+        center = args[0]
+        dim = args[1]
+        start_angle = args[2]
+        stop_angle = args[3]
+        mode = args[4]
+
+        self.render_shape(Arc(center, dim, start_angle, stop_angle, mode))

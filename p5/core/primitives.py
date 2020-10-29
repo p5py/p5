@@ -160,7 +160,6 @@ def point(x, y, z=0):
     raise ValueError('Unknown stroke_cap value')
 
 
-@_draw_on_return
 def line(*args):
     """Returns a line.
 
@@ -205,10 +204,9 @@ def line(*args):
         Point(*p1),
         Point(*p2)
     ]
-    return PShape(vertices=path, shape_type=SType.LINES)
+    p5.renderer.line(path)
 
 
-@_draw_on_return
 def bezier(*args):
     """Return a bezier path defined by two control points.
 
@@ -283,10 +281,9 @@ def bezier(*args):
                                 control_point_2, stop, t)
         vertices.append(p[:3])
 
-    return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
+    p5.renderer.bezier(vertices)
 
 
-@_draw_on_return
 def curve(*args):
     """Return a Catmull-Rom curve defined by four points.
 
@@ -360,10 +357,9 @@ def curve(*args):
         p = curves.curve_point(point_1, point_2, point_3, point_4, t)
         vertices.append(p[:3])
 
-    return PShape(vertices=vertices, shape_type=SType.LINE_STRIP)
+    p5.renderer.curve(vertices)
 
 
-@_draw_on_return
 def triangle(*args):
     """Return a triangle.
 
@@ -409,10 +405,9 @@ def triangle(*args):
         Point(*p2),
         Point(*p3)
     ]
-    return PShape(vertices=path, shape_type=SType.TRIANGLES)
+    p5.renderer.triangle(path)
 
 
-@_draw_on_return
 def quad(*args):
     """Return a quad.
 
@@ -468,7 +463,7 @@ def quad(*args):
         Point(*p3),
         Point(*p4)
     ]
-    return PShape(vertices=path, shape_type=SType.QUADS)
+    p5.renderer.quad(path)
 
 
 def rect(*args, mode=None):
@@ -612,7 +607,6 @@ def rect_mode(mode='CORNER'):
     _rect_mode = mode
 
 
-@_draw_on_return
 def arc(*args, mode=None, ellipse_mode=None):
     """Return a ellipse.
 
@@ -681,8 +675,7 @@ def arc(*args, mode=None, ellipse_mode=None):
         dim = Point(width, height)
     else:
         raise ValueError("Unknown arc mode {}".format(emode))
-    return Arc(center, dim, start_angle, stop_angle, mode)
-
+    p5.renderer.arc(center, dim, start_angle, stop_angle, mode)
 
 def ellipse(*args, mode=None):
     """Return a ellipse.
