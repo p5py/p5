@@ -18,7 +18,7 @@
 
 from . import p5
 from . import primitives
-from .shape import PShape
+from p5.sketch.Vispy2DRenderer.shape import PShape
 from .constants import TESS
 from ..pmath import curves
 from p5.pmath.vector import Point

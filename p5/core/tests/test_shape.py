@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from p5.core.shape import PShape
+from p5.sketch.Vispy2DRenderer.shape import PShape
 from p5.core.color import Color
 from p5.pmath import PI
 

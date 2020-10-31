@@ -23,11 +23,11 @@ import builtins
 from PIL import Image
 from vispy import app
 
-from ..core import p5
+from p5.core import p5
 
-from .events import KeyEvent
-from .events import MouseEvent
-from .events import handler_names
+from ..events import KeyEvent
+from ..events import MouseEvent
+from ..events import handler_names
 
 
 def _dummy(*args, **kwargs):
@@ -36,7 +36,7 @@ def _dummy(*args, **kwargs):
     pass
 
 
-class Sketch(app.Canvas):
+class VispySketch(app.Canvas):
     """The main sketch instance.
 
     :param setup_method: Setup method for the sketch. This is run

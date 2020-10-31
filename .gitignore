@@ -111,3 +111,6 @@ ENV/
 
 # Profiling results
 profiling/*.prof
+
+# IntelliJ's project specific settings files
+.idea/

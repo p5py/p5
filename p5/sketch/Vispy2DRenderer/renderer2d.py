@@ -18,7 +18,7 @@
 
 import numpy as np
 import math
-from ..pmath import matrix
+from p5.pmath import matrix
 from .shaders2d import src_default, src_fbuffer
 
 import builtins
@@ -32,9 +32,11 @@ from contextlib import contextmanager
 from .shaders2d import src_texture
 from .shaders2d import src_line
 from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
+from p5.core.constants import SType
+from .shape import PShape, Arc
 
 
-class Renderer2D(OpenGLRenderer):
+class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
         super().__init__(src_fbuffer, src_default)
         self.texture_prog = None
@@ -109,7 +111,7 @@ class Renderer2D(OpenGLRenderer):
         gloo.set_state(depth_test=state)  # pylint: disable=no-member
 
         if state:
-            gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))   # pylint: disable=no-member
+            gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))  # pylint: disable=no-member
             gloo.set_state(depth_func='lequal')  # pylint: disable=no-member
 
     @contextmanager
@@ -239,7 +241,7 @@ class Renderer2D(OpenGLRenderer):
                 for i in range(
                         len(segment) - 1):  # the data is sent to renderer in line segments
                     for j in [
-                            0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
+                        0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
                         if i + j - 1 >= 0:
                             posPrev.append(line[0][segment[i + j - 1]])
                         else:
@@ -337,3 +339,37 @@ class Renderer2D(OpenGLRenderer):
         """
         OpenGLRenderer.cleanup(self)
         self.line_prog.delete()
+
+    def render_shape(self, shape):
+        self.render(shape)
+        for child_shape in shape.children:
+            self.render_shape(child_shape)
+
+    def line(self, *args):
+        path = args[0]
+        self.render_shape(PShape(vertices=path, shape_type=SType.LINES))
+
+    def bezier(self, *args):
+        vertices = args[0]
+        self.render_shape(PShape(vertices=vertices, shape_type=SType.LINE_STRIP))
+
+    def curve(self, *args):
+        vertices = args[0]
+        self.render_shape(PShape(vertices=vertices, shape_type=SType.LINE_STRIP))
+
+    def triangle(self, *args):
+        path = args[0]
+        self.render_shape(PShape(vertices=path, shape_type=SType.TRIANGLES))
+
+    def quad(self, *args):
+        path = args[0]
+        self.render_shape(PShape(vertices=path, shape_type=SType.QUADS))
+
+    def arc(self, *args):
+        center = args[0]
+        dim = args[1]
+        start_angle = args[2]
+        stop_angle = args[3]
+        mode = args[4]
+
+        self.render_shape(Arc(center, dim, start_angle, stop_angle, mode))

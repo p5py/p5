@@ -17,5 +17,3 @@
 #
 from .userspace import *
 from .api import *
-import vispy
-vispy.use('glfw')
