@@ -29,7 +29,6 @@ from PIL import Image
 from PIL import ImageFilter
 from PIL import ImageChops
 from PIL import ImageOps
-from vispy import gloo
 from . import p5
 
 from . import color
@@ -158,7 +157,9 @@ class PImage:
     def _texture(self):
         if self._img_texture is None:
             texdata = self._data.astype(np.float32) / 255.0
-            self._img_texture = gloo.Texture2D(texdata, interpolation='linear')
+            if builtins.current_renderer == 'vispy':
+                from vispy.gloo import Texture2D
+                self._img_texture = Texture2D(texdata, interpolation='linear')
         return self._img_texture
 
     @property
