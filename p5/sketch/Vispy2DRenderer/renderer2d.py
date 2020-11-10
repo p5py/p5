@@ -373,3 +373,7 @@ class VispyRenderer2D(OpenGLRenderer):
         mode = args[4]
 
         self.render_shape(Arc(center, dim, start_angle, stop_angle, mode))
+
+    def shape(self, vertices, contours, shape_type, *args):
+        """Draws the shape made using begin_shape and end_shape"""
+        self.render_shape(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
