@@ -17,8 +17,6 @@
 #
 
 from . import p5
-from . import primitives
-from p5.sketch.Vispy2DRenderer.shape import PShape
 from .constants import TESS
 from ..pmath import curves
 from p5.pmath.vector import Point
@@ -300,7 +298,6 @@ def get_quadratic_vertices(verts, vert_types):
     return shape_vertices
 
 
-@primitives._draw_on_return
 def end_shape(mode=""):
     """
     The endShape() function is the companion to beginShape()
@@ -329,25 +326,24 @@ def end_shape(mode=""):
         vertices.append(vertices[0])
         vertices_types.append(vertices_types[0])
 
-    shape = None
     if is_curve:
         if len(vertices) > 3:
-            shape = PShape(vertices=get_curve_vertices(vertices),
-                           contours=[
-                get_curve_vertices(c) for c in contour_vertices],
-                shape_type=TESS)
+            p5.renderer.shape(vertices=get_curve_vertices(vertices),
+                              contours=[
+                                  get_curve_vertices(c) for c in contour_vertices],
+                              shape_type=TESS)
     elif is_bezier:
-        shape = PShape(vertices=get_bezier_vertices(vertices, vertices_types),
-                       contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
-                                 for i in range(len(contour_vertices))],
-                       shape_type=TESS)
+        p5.renderer.shape(vertices=get_bezier_vertices(vertices, vertices_types),
+                          contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
+                                    for i in range(len(contour_vertices))],
+                          shape_type=TESS)
     elif is_quadratic:
-        shape = PShape(vertices=get_quadratic_vertices(vertices, vertices_types),
-                       contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
-                                 for i in range(len(contour_vertices))],
-                       shape_type=TESS)
+        p5.renderer.shape(vertices=get_quadratic_vertices(vertices, vertices_types),
+                          contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
+                                    for i in range(len(contour_vertices))],
+                          shape_type=TESS)
     else:
-        shape = PShape(
+        p5.renderer.shape(
             vertices=vertices,
             contours=contour_vertices,
             shape_type=shape_kind)
@@ -356,5 +352,3 @@ def end_shape(mode=""):
     is_curve = False
     is_quadratic = False
     is_contour = False
-
-    return shape

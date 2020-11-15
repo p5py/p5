@@ -16,38 +16,22 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import functools
 import math
 
 from ..pmath import Point
 from ..pmath import curves
 
 from ..sketch.Vispy2DRenderer.shape import PShape
-from .geometry import Geometry
 from .constants import ROUND, SQUARE, PROJECT
 
 from . import p5
 
 __all__ = ['point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
-           'rect_mode', 'bezier', 'curve', 'create_shape', 'draw_shape']
+           'rect_mode', 'bezier', 'curve', 'create_shape']
 
 _rect_mode = 'CORNER'
 _ellipse_mode = 'CENTER'
-
-
-def _draw_on_return(func):
-    """Set shape parameters to default renderer parameters
-
-    """
-
-    @functools.wraps(func)
-    def wrapped(*args, **kwargs):
-        s = func(*args, **kwargs)
-        draw_shape(s)
-        return s
-
-    return wrapped
 
 
 def point(x, y, z=0):
@@ -716,25 +700,6 @@ def ellipse_mode(mode='CENTER'):
     """
     global _ellipse_mode
     _ellipse_mode = mode
-
-
-def draw_shape(shape, pos=(0, 0, 0)):
-    """Draw the given shape at the specified location.
-
-    :param shape: The shape that needs to be drawn.
-    :type shape: p5.PShape
-
-    :param pos: Position of the shape
-    :type pos: tuple | Vector
-
-    """
-    p5.renderer.render(shape)
-
-    if isinstance(shape, Geometry):
-        return
-
-    for child_shape in shape.children:
-        draw_shape(child_shape)
 
 
 def create_shape(kind=None, *args, **kwargs):
