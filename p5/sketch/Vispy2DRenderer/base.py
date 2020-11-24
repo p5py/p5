@@ -131,19 +131,35 @@ class VispySketch(app.Canvas):
         img.save(self._save_fname)
         self._save_flag = False
 
-    def screenshot(self, filename):
-        self.queue_screenshot(filename)
+    def screenshot(self, filename, numbered_fname=True):
+        """Save the current frame
+
+        :param numbered_fname: Whether or not to append a number to the stem of
+            the filename (the text before the extension). For example, if True, and
+            filename is `screen.png`, this will save `screen0001.png`. If false,
+            `screen.png` will be saved.
+        """
+        self.queue_screenshot(filename, numbered_fname=numbered_fname)
         p5.renderer.flush_geometry()
         self._save_buffer()
 
-    def queue_screenshot(self, filename):
+    def queue_screenshot(self, filename, numbered_fname=True):
         """Save the current frame
+
+        :param numbered_fname: Whether or not to append a number to the stem of
+            the filename (the text before the extension). For example, if True, and
+            filename is `screen.png`, this will save `screen0001.png`. If false,
+            `screen.png` will be saved.
         """
         fname_split = filename.split('.')
         ext = '.' + fname_split[-1]
         stem = '.'.join(fname_split[:-1])
-        self._save_fname = stem + str(self._save_fname_num).zfill(4) + ext
-        self._save_fname_num = self._save_fname_num + 1
+        if numbered_fname:
+            fname_num = str(self._save_fname_num).zfill(4)
+            self._save_fname_num = self._save_fname_num + 1
+        else:
+            fname_num = ""
+        self._save_fname = stem + fname_num + ext
         self._save_flag = True
 
     def on_close(self, event):

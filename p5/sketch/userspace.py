@@ -311,9 +311,7 @@ def save(filename='screen.png'):
     :type filename: str
 
     """
-    # TODO: images saved using ``save()`` should *not* be numbered.
-    # --abhikpal (2018-08-14)
-    p5.sketch.screenshot(filename)
+    p5.sketch.screenshot(filename, numbered_fname=False)
 
 
 def save_frame(filename="screen.png"):
