@@ -14,8 +14,16 @@ from .vertex import begin_shape, begin_contour, curve_vertex, bezier_vertex, end
 from .material import normal_material, basic_material, blinn_phong_material
 from .light import ambient_light, directional_light, point_light, light_falloff, light_specular
 
-
 def push():
+    """	The push() function saves the current drawing style settings and transformations"""
+    push_matrix()
+    push_style()
+
+def pop():
+    pop_style()
+    pop_matrix()
+
+def pushStyle():
     """Save the current style settings and then restores them on exit.
 
     The 'style' information consists of all the parameters controlled
@@ -49,7 +57,7 @@ def push():
     push_style()
 
 
-def pop():
+def popStyle():
     """Restores previously pushed style settings
     """
     pop_style()
