@@ -21,7 +21,7 @@ import numpy as np
 
 
 def _magnitude(arr):
-    """Return the madnitude of the given array.
+    """Return the magnitude of the given array.
 
     :param arr: Input array.
     :type arr: np.ndarray
@@ -94,7 +94,7 @@ def translation_matrix(x, y, z=0):
 
 
 def rotation_matrix(axis, angle):
-    """Return a roation matrix with the given angle and rotation.
+    """Return a rotation matrix with the given angle and rotation.
 
     :param axis: The axis along which the matrix should be rotated.
     :type axis: np.ndarray
