@@ -283,6 +283,10 @@ class Renderer3D(OpenGLRenderer):
                 self._add_to_draw_queue_simple(
                     stype, vertices, idx, stroke if stype == 'lines' else fill)
 
+    def shape(self, vertices, contours, shape_type, *args):
+        """Render a PShape"""
+        self.render(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
+
     def add_to_draw_queue(self, stype, vertices, edges, faces,
                           fill=None, stroke=None, normals=None, material=None):
         """Add the given vertex data to the draw queue.
