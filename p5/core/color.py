@@ -457,4 +457,4 @@ class Color:
         :returns: Color as a hex value
         :rtype: str
         """
-        raise NotImplementedError()
+        return ('#%02x%02x%02x' % self.rgb).upper()
