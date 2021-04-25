@@ -22,6 +22,7 @@ import __main__
 import math
 import numpy as np
 import builtins
+import sys
 import time
 from functools import wraps
 
@@ -259,7 +260,7 @@ def exit(*args, **kwargs):
             from vispy import app
             p5.sketch.show(visible=False)
             app.quit()
-    p5.exit(*args, **kwargs)
+    sys.exit(*args, **kwargs)
 
 
 def no_cursor():
