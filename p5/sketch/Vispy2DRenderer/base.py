@@ -82,7 +82,6 @@ class VispySketch(app.Canvas):
         self.handler_queue = []
 
         self._save_fname = 'screen'
-        self._save_fname_num = 0
         self._save_flag = False
 
         p5.renderer.initialize_renderer()
@@ -139,11 +138,7 @@ class VispySketch(app.Canvas):
     def queue_screenshot(self, filename):
         """Save the current frame
         """
-        fname_split = filename.split('.')
-        ext = '.' + fname_split[-1]
-        stem = '.'.join(fname_split[:-1])
-        self._save_fname = stem + str(self._save_fname_num).zfill(4) + ext
-        self._save_fname_num = self._save_fname_num + 1
+        self._save_fname = filename
         self._save_flag = True
 
     def on_close(self, event):
