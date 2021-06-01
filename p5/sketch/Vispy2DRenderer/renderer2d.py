@@ -165,6 +165,9 @@ class VispyRenderer2D(OpenGLRenderer):
         obj_list = get_render_primitives(shape)
         for obj in obj_list:
             stype, vertices, idx = obj
+            # Convert 2D vertices to 3D by adding "0" column, needed for further transformations
+            if len(vertices[0]) == 2:
+                vertices = np.hstack([vertices,  np.zeros((len(vertices), 1))])
             # Transform vertices
             vertices = self._transform_vertices(
                 np.hstack([vertices, np.ones((len(vertices), 1))]),
