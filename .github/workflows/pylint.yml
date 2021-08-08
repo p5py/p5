@@ -20,4 +20,4 @@ jobs:
           pip install -r requirements.txt
       - name: Run pylint
         run: |
-          pylint --disable=I --disable=W --disable=C --disable=R `find .  -path ./profiling -prune -false -o -name '*.py'`
+          pylint --disable=I --disable=W --disable=C --disable=R p5
