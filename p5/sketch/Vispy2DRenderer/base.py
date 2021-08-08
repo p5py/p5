@@ -142,7 +142,7 @@ class VispySketch(app.Canvas):
         self._save_flag = True
 
     def on_close(self, event):
-        exit()
+        app.quit()
 
     def on_draw(self, event):
         pass
