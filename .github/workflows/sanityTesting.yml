@@ -19,12 +19,12 @@ jobs:
           sudo apt-get install python-opengl libglfw3 python3-wheel -y
           python -m pip install --upgrade pip
           pip install wheel
-          pip install -r requirements.txt
-      - name: Set env
-        # TODO: Find an alternate way to get the path, instead of hard-coding
-        run: echo "PYTHONPATH=$PYTHONPATH:${HOME}/work/p5" >> $GITHUB_ENV
-      - name: Test
-        run: echo $PYTHONPATH
+          pip install .
+#      - name: Set env
+#        # TODO: Find an alternate way to get the path, instead of hard-coding
+#        run: echo "PYTHONPATH=$PYTHONPATH:${HOME}/work/p5" >> $GITHUB_ENV
+#      - name: Test
+#        run: echo $PYTHONPATH
       - name: Setup virtual frame buffer
         uses: GabrielBB/xvfb-action@v1
         with:

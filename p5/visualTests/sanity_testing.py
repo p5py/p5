@@ -2,9 +2,8 @@ import subprocess
 import os
 from subprocess import run, PIPE
 
-e = SystemExit()
+dirname = os.path.dirname(os.path.realpath(__file__))
 
-dirname = os.path.dirname(__file__)
 test_names_2d = [f'{dirname}/sanityTests/2DSanityTests/{name}' for name in
                  os.listdir(os.path.join(dirname, 'sanityTests/2DSanityTests'))
                  if name not in ['__init__.py', '__pycache__']]
@@ -25,7 +24,6 @@ for name in test_names_2d:
         # If any error was found raise and exception
         if process.stderr:
             raise Exception(f'{process.stderr} in {name}')
-
 
 print('============================= Running 3D tests =============================')
 for name in test_names_3d:
