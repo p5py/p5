@@ -67,6 +67,7 @@ class VispySketch(app.Canvas):
             resizable=True,
         )
 
+        self.events.ignore_callback_errors = False
         self.setup_method = setup_method
         self.draw_method = draw_method
 
@@ -74,6 +75,7 @@ class VispySketch(app.Canvas):
         self.redraw = None
         self.setup_done = False
         self.timer = app.Timer(1.0 / frame_rate, connect=self.on_timer)
+        self.timer.events.ignore_callback_errors = False
 
         self.handlers = dict()
         for handler_name in handler_names:

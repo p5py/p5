@@ -351,6 +351,5 @@ class OpenGLRenderer(ABC):
         self.fbuffer.delete()
 
     def _transform_vertices(self, vertices, local_matrix, global_matrix):
-        product = np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)
-        # dehomogenize coordinates
-        return [np.divide(coord, coord[3])[:3] for coord in product]
+        return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
+
