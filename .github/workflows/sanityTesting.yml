@@ -20,12 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
           pip install .
-#      - name: Set env
-#        # TODO: Find an alternate way to get the path, instead of hard-coding
-#        run: echo "PYTHONPATH=$PYTHONPATH:${HOME}/work/p5" >> $GITHUB_ENV
-#      - name: Test
-#        run: echo $PYTHONPATH
-      - name: Setup virtual frame buffer
+      - name: Run headless tests
         uses: GabrielBB/xvfb-action@v1
         with:
           run: python p5/visualTests/sanity_testing.py
