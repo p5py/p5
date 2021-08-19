@@ -351,5 +351,10 @@ class OpenGLRenderer(ABC):
         self.fbuffer.delete()
 
     def _transform_vertices(self, vertices, local_matrix, global_matrix):
-        return np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)[:, :3]
-
+        """Applies `local_matrix` then `global_matrix` to `vertices`
+        """
+        product = np.dot(np.dot(vertices, local_matrix.T), global_matrix.T)
+        # dehomogenize coordinates
+        # need np.newaxis to broadcast the vector because each row represents a vertex
+        dehomogenized = product / product[:,3][:,np.newaxis]
+        return dehomogenized[:,:3] # Return the first three rows of the result
