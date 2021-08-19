@@ -4,7 +4,7 @@ Installation
 Prerequisites: Python
 ---------------------
 
-p5 requires Python 3. Most recent versions of MacOS and Linux systems
+p5 requires Python 3.6 or above. Most recent versions of MacOS and Linux systems
 should have an installation of Python already. If you're not sure
 which version your computer is using, run
 
@@ -12,7 +12,7 @@ which version your computer is using, run
 
    python --version
 
-from a terminal window. If the reported version is greater than 3.0,
+from a terminal window. If the reported version is greater than 3.6,
 you're good to proceed.
 
 If you don't already have Python installed, refer to the `The
