@@ -13,7 +13,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.6
       - name: Install dependencies
         run: |
           sudo apt-get install python-opengl libglfw3 python3-wheel -y
