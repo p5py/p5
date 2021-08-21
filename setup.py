@@ -36,7 +36,6 @@ setup(
     package_dir={'p5': 'p5'},
     include_package_data=True,
 
-    setup_requires=['numpy'],
     install_requires=requires,
     python_requires='>=3.6',
 
