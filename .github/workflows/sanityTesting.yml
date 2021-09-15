@@ -1,4 +1,4 @@
-name: Run sanity tests
+name: sanity tests
 
 on:
   push:

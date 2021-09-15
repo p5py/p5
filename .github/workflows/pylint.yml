@@ -1,4 +1,4 @@
-name: Run pylint
+name: pylint
 
 on:
   push:
