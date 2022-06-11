@@ -64,7 +64,6 @@ class SkiaSketch():
         return window
 
     def skia_surface(self, window, size):
-        # print("surface created")
         self.context = skia.GrContext.MakeGL()
         backend_render_target = skia.GrBackendRenderTarget(
             *size,
@@ -84,7 +83,6 @@ class SkiaSketch():
 
     # create a new surface everytime
     def create_surface(self, size=None):
-        # print("create surface")
         if not size:
             size = self._size
         self._size = size
@@ -107,14 +105,12 @@ class SkiaSketch():
         # If called we have to render a frame once
         # Set redraw and looping to False
         # This is done to ensure draw() is called atleast once
-        # print("looping ", self.looping)
 
         while (self.main_loop_state):
             if self.resized and (self.looping or self.redraw) and (time() - last_render_call_time) > 1 / self.frame_rate:
                 builtins.frame_count += 1
                 with self.surface as self.canvas:
                     self.draw_method()
-                    # print("renderer called")
                     p5.renderer.render()
                 self.surface.flushAndSubmit()
                 glfw.swap_buffers(self.window)
@@ -123,7 +119,6 @@ class SkiaSketch():
                 # If redraw == True, we have rendered the frame once
                 # Now don't render the next one
                 if self.redraw:
-                    # self.looping = False
                     self.redraw = False
             self.poll_events()
 
@@ -134,11 +129,9 @@ class SkiaSketch():
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
         self.setup_method()
         self.poll_events()
-        # print("before buffers ", glfw.get_window_size(self.window), self._size)
         p5.renderer.render(rewind=False)
         self.surface.flushAndSubmit()
         glfw.swap_buffers(self.window)
-        # print("BEFORE MAIN")
         self.main_loop()
         self.clean_up()
 
@@ -151,7 +144,6 @@ class SkiaSketch():
         # when glfw changes the framebuffer size, we will be resized completely
         # until then hold the rendering calls
         self.resized = False
-        # print(glfw.get_framebuffer_size(self.window), self._size, glfw.get_window_size(self.window))
 
     def frame_buffer_resize_callback_handler(self, window, width, height):
         """
@@ -159,9 +151,6 @@ class SkiaSketch():
         Values of width and height may not be equal to the actual window's width and height
         in Retina Display
         """
-
-        # print("FRAME BUFFER CALLBACK NOW ")
-        # print("frame buffer size callback ", glfw.get_window_size(self.window))
 
         # Callback handler for frame buffer resize events
         GL.glViewport(0, 0, width, height)
