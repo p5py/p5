@@ -114,3 +114,7 @@ profiling/*.prof
 
 # IntelliJ's project specific settings files
 .idea/
+
+
+# VSCode config files
+.vscode
