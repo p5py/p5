@@ -8,11 +8,9 @@ def setup():
     size(1000, 700)
     p5.renderer.render_rectangle(200, 300, 50, 50)
     print("frame count", frame_count)
-
+    no_loop()
 
 def draw():
-    if frame_count == 1:
-        no_loop()
     p5.renderer.render_circle(20,20, 30)
     p5.renderer.render_circle(p5.sketch.mouseX, p5.sketch.mouseY, 30)
     print("frame count", frame_count)

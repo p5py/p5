@@ -108,16 +108,8 @@ class SkiaSketch():
         # Set redraw and looping to False
         # This is done to ensure draw() is called atleast once
         # print("looping ", self.looping)
-        if not self.looping:
-            self.redraw = True
-            self.looping = True
 
         while (self.main_loop_state):
-
-            # if redraw is true then call the main rendering loop once
-            # if self.redraw:
-            #     self.looping = True
-
             if self.resized and (self.looping or self.redraw) and (time() - last_render_call_time) > 1 / self.frame_rate:
                 builtins.frame_count += 1
                 with self.surface as self.canvas:
