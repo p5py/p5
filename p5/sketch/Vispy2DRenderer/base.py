@@ -86,7 +86,6 @@ class VispySketch(app.Canvas):
         self._save_fname = 'screen'
         self._save_flag = False
 
-        p5.renderer.initialize_renderer()
         p5.renderer.clear()
 
     def on_timer(self, event):

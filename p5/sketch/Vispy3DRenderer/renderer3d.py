@@ -112,10 +112,6 @@ class Renderer3D(OpenGLRenderer):
         self.curr_linear_falloff, self.curr_quadratic_falloff, self.curr_constant_falloff = 0.0, 0.0, 0.0
         self.light_specular = np.array([0.0] * 3)
 
-    def initialize_renderer(self):
-        super().initialize_renderer()
-        self.reset_view()
-
     def reset_view(self):
         self.viewport = (
             0,

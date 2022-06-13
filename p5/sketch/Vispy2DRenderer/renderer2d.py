@@ -39,15 +39,10 @@ from .shape import PShape, Arc
 class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
         super().__init__(src_fbuffer, src_default)
-        self.texture_prog = None
-        self.line_prog = None
-        self.modelview_matrix = np.identity(4)
-
-    def initialize_renderer(self):
-        super().initialize_renderer()
         self.texture_prog = Program(src_texture.vert, src_texture.frag)
         self.texture_prog['texcoord'] = self.fbuf_texcoords
-        self.reset_view()
+        self.line_prog = None
+        self.modelview_matrix = np.identity(4)
 
     def reset_view(self):
         self.viewport = (
