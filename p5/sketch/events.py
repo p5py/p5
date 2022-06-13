@@ -28,7 +28,7 @@ handler_names = ['key_pressed', 'key_released', 'key_typed',
                  'mouse_pressed', 'mouse_released', 'mouse_wheel', ]
 
 
-class VispyButton(IntEnum):
+class MouseButtonEnum(IntEnum):
     LEFT = 1
     RIGHT = 2
     MIDDLE = 3
@@ -44,9 +44,9 @@ class MouseButton:
 
     def __init__(self, buttons):
         button_names = {
-            VispyButton.LEFT: 'LEFT',
-            VispyButton.RIGHT: 'RIGHT',
-            VispyButton.MIDDLE: 'MIDDLE',
+            MouseButtonEnum.LEFT: 'LEFT',
+            MouseButtonEnum.RIGHT: 'RIGHT',
+            MouseButtonEnum.MIDDLE: 'MIDDLE',
         }
 
         self._buttons = buttons
@@ -58,10 +58,10 @@ class MouseButton:
 
     def __eq__(self, other):
         button_map = {
-            'CENTER': VispyButton.MIDDLE,
-            'MIDDLE': VispyButton.MIDDLE,
-            'LEFT': VispyButton.LEFT,
-            'RIGHT': VispyButton.RIGHT,
+            'CENTER': MouseButtonEnum.MIDDLE,
+            'MIDDLE': MouseButtonEnum.MIDDLE,
+            'LEFT': MouseButtonEnum.LEFT,
+            'RIGHT': MouseButtonEnum.RIGHT,
         }
         if isinstance(other, str):
             return button_map.get(other.upper(), -1) in self._buttons

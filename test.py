@@ -12,7 +12,7 @@ def setup():
 
 def draw():
     p5.renderer.render_circle(20,20, 30)
-    p5.renderer.render_circle(p5.sketch.mouseX, p5.sketch.mouseY, 30)
+    p5.renderer.render_circle(mouse_x, mouse_y, 30)
     print("frame count", frame_count)
 
 

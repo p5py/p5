@@ -177,7 +177,7 @@ def run(sketch_setup=None, sketch_draw=None,
             p5.renderer = SkiaRenderer()
         elif mode == 'P3D':
             raise NotImplementedError("3D mode is not available in skia")
-        p5.sketch = SkiaSketch(setup_method, draw_method, frame_rate)
+        p5.sketch = SkiaSketch(setup_method, draw_method, handlers, frame_rate)
         p5.sketch.start()
     else:
         raise NotImplementedError("Invalid Renderer %s" % renderer)
