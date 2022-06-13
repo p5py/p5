@@ -150,6 +150,8 @@ class VispySketch(app.Canvas):
         pass
 
     def on_resize(self, event):
+        if p5.renderer.fbuffer is None:
+            return
         builtins.width = int(self.size[0])
         builtins.height = int(self.size[1])
 
