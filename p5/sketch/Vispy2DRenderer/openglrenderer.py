@@ -235,15 +235,32 @@ class Style:
 
 class OpenGLRenderer(ABC):
     def __init__(self, src_fbuffer, src_default):
-        self.default_prog = None
-        self.fbuffer_prog = None
+        self.fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
+        self.default_prog = Program(src_default.vert, src_default.frag)
 
-        self.fbuffer = None
+        self.fbuffer = FrameBuffer()
         self.fbuffer_tex_front = None
         self.fbuffer_tex_back = None
 
-        self.vertex_buffer = None
-        self.index_buffer = None
+        vertices = np.array([[-1.0, -1.0],
+                             [+1.0, -1.0],
+                             [-1.0, +1.0],
+                             [+1.0, +1.0]],
+                            np.float32)
+        texcoords = np.array([[0.0, 0.0],
+                              [1.0, 0.0],
+                              [0.0, 1.0],
+                              [1.0, 1.0]],
+                             dtype=np.float32)
+
+        self.fbuf_vertices = VertexBuffer(data=vertices)
+        self.fbuf_texcoords = VertexBuffer(data=texcoords)
+
+        self.fbuffer_prog['texcoord'] = self.fbuf_texcoords
+        self.fbuffer_prog['position'] = self.fbuf_vertices
+
+        self.vertex_buffer = VertexBuffer()
+        self.index_buffer = IndexBuffer()
 
         # Renderer Globals: STYLE/MATERIAL PROPERTIES
         #
@@ -265,32 +282,6 @@ class OpenGLRenderer(ABC):
         # Renderer Globals: RENDERING
         self.draw_queue = []
 
-        # Shaders
-        self.fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
-        self.default_prog = Program(src_default.vert, src_default.frag)
-
-    def initialize_renderer(self):
-        self.fbuffer = FrameBuffer()
-
-        vertices = np.array([[-1.0, -1.0],
-                             [+1.0, -1.0],
-                             [-1.0, +1.0],
-                             [+1.0, +1.0]],
-                            np.float32)
-        texcoords = np.array([[0.0, 0.0],
-                              [1.0, 0.0],
-                              [0.0, 1.0],
-                              [1.0, 1.0]],
-                             dtype=np.float32)
-
-        self.fbuf_vertices = VertexBuffer(data=vertices)
-        self.fbuf_texcoords = VertexBuffer(data=texcoords)
-
-        self.fbuffer_prog['texcoord'] = self.fbuf_texcoords
-        self.fbuffer_prog['position'] = self.fbuf_vertices
-
-        self.vertex_buffer = VertexBuffer()
-        self.index_buffer = IndexBuffer()
 
     def render_default(self, draw_type, draw_queue):
         # 1. Get the maximum number of vertices persent in the shapes
