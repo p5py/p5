@@ -20,12 +20,20 @@ import builtins
 from collections import namedtuple
 from enum import IntEnum
 
-Position = namedtuple('Position', ['x', 'y'])
+Position = namedtuple("Position", ["x", "y"])
 
-handler_names = ['key_pressed', 'key_released', 'key_typed',
-                 'mouse_clicked', 'mouse_double_clicked',
-                 'mouse_dragged', 'mouse_moved',
-                 'mouse_pressed', 'mouse_released', 'mouse_wheel', ]
+handler_names = [
+    "key_pressed",
+    "key_released",
+    "key_typed",
+    "mouse_clicked",
+    "mouse_double_clicked",
+    "mouse_dragged",
+    "mouse_moved",
+    "mouse_pressed",
+    "mouse_released",
+    "mouse_wheel",
+]
 
 
 class MouseButtonEnum(IntEnum):
@@ -44,12 +52,14 @@ class MouseButton:
 
     def __init__(self, buttons):
         button_names = {
-            MouseButtonEnum.LEFT: 'LEFT',
-            MouseButtonEnum.RIGHT: 'RIGHT',
-            MouseButtonEnum.MIDDLE: 'MIDDLE',
+            MouseButtonEnum.LEFT: "LEFT",
+            MouseButtonEnum.RIGHT: "RIGHT",
+            MouseButtonEnum.MIDDLE: "MIDDLE",
         }
         self._buttons = buttons
-        self._button_names = [button_names[bt] for bt in self._buttons] if self._buttons  else ""
+        self._button_names = (
+            [button_names[bt] for bt in self._buttons] if self._buttons else ""
+        )
 
     @property
     def buttons(self):
@@ -57,10 +67,10 @@ class MouseButton:
 
     def __eq__(self, other):
         button_map = {
-            'CENTER': MouseButtonEnum.MIDDLE,
-            'MIDDLE': MouseButtonEnum.MIDDLE,
-            'LEFT': MouseButtonEnum.LEFT,
-            'RIGHT': MouseButtonEnum.RIGHT,
+            "CENTER": MouseButtonEnum.MIDDLE,
+            "MIDDLE": MouseButtonEnum.MIDDLE,
+            "LEFT": MouseButtonEnum.LEFT,
+            "RIGHT": MouseButtonEnum.RIGHT,
         }
         if isinstance(other, str):
             return button_map.get(other.upper(), -1) in self._buttons
@@ -70,7 +80,7 @@ class MouseButton:
         return not (self == other)
 
     def __repr__(self):
-        fstr = ', '.join(self.buttons)
+        fstr = ", ".join(self.buttons)
         return "MouseButton({})".format(fstr)
 
     __str__ = __repr__
@@ -89,7 +99,7 @@ class Key:
 
     """
 
-    def __init__(self, name, text=''):
+    def __init__(self, name, text=""):
         self.name = name.upper()
         self.text = text
 
@@ -144,7 +154,7 @@ class Event:
         :rtype: bool
 
         """
-        return 'Shift' in self._modifiers
+        return "Shift" in self._modifiers
 
     def is_ctrl_down(self):
         """Was ctrl (command on Mac) held down during the event?
@@ -153,7 +163,7 @@ class Event:
         :rtype: bool
 
         """
-        return 'Control' in self._modifiers
+        return "Control" in self._modifiers
 
     def is_alt_down(self):
         """Was alt held down during the event?
@@ -162,7 +172,7 @@ class Event:
         :rtype: bool
 
         """
-        return 'Alt' in self._modifiers
+        return "Alt" in self._modifiers
 
     def is_meta_down(self):
         """Was the meta key (windows/option key) held down?
@@ -171,7 +181,7 @@ class Event:
         :rtype: bool
 
         """
-        return 'Meta' in self._modifiers
+        return "Meta" in self._modifiers
 
     def _update_builtins(self):
         pass
@@ -193,7 +203,7 @@ class KeyEvent(Event):
         if self._raw.key is not None:
             self.key = Key(self._raw.key.name, self._raw.text)
         else:
-            self.key = Key('UNKNOWN')
+            self.key = Key("UNKNOWN")
 
     def _update_builtins(self):
         builtins.key_is_pressed = self.pressed
@@ -242,11 +252,16 @@ class MouseEvent(Event):
         self.y = max(min(builtins.height, builtins.height - y), 0)
 
         self.position = Position(x, y)
+        
+        # TODO: scroll should be renamed as delta 
+        # https://p5js.org/reference/#/p5/mouseWheel
         self.scroll = Position(int(dx), int(dy))
 
         self.count = self.scroll.y
-        self.button = MouseButton(self._raw.buttons + [self._raw.button] if self._raw.button else [])
-        
+        self.button = MouseButton(
+            self._raw.buttons + [self._raw.button] if self._raw.button else []
+        )
+
     def _update_builtins(self):
         builtins.pmouse_x = builtins.mouse_x
         builtins.pmouse_y = builtins.mouse_y
@@ -256,9 +271,9 @@ class MouseEvent(Event):
         builtins.mouse_button = self.button if self.pressed else None
         builtins.moved_x = builtins.mouse_x - builtins.pmouse_x
         builtins.moved_y = builtins.mouse_y - builtins.pmouse_y
-        
+
     def __repr__(self):
-        press = 'pressed' if self.pressed else 'not-pressed'
+        press = "pressed" if self.pressed else "not-pressed"
         return "MouseEvent({} at {})".format(press, self.position)
 
     __str__ = __repr__

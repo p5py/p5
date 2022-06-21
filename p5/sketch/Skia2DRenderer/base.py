@@ -11,22 +11,22 @@ from .handlers import *
 
 
 def _dummy(*args, **kwargs):
-    """Eat all arguments, do nothing.
-    """
+    """Eat all arguments, do nothing."""
     pass
 
-class SkiaSketch():
+
+class SkiaSketch:
     def __init__(self, setup_method, draw_method, handlers=dict(), frame_rate=60):
         self.frame_count = 0
         self._size = (600, 400)
         self.setup_method = setup_method
         self.draw_method = draw_method
-        
+
         self.surface = None
         self.context = None
         self.window = None
         self.canvas = None
-        
+
         self.main_loop_state = True
         self.looping = True
         self.redraw = False
@@ -34,9 +34,9 @@ class SkiaSketch():
         self.paint = skia.Paint()
         self.paint.setAntiAlias(True)
         self.path = skia.Path()
-        
+
         self.frame_rate = frame_rate
-        
+
         """
         resized : (boolean) 
         When we make a call to resize the window, it does not happen instantly
@@ -51,14 +51,14 @@ class SkiaSketch():
 
         # we can discard using builtins, by using p5.variableName
         builtins.frame_count = 0
-        
+
         self.handlers = {}
-        
+
         for handler_name in handler_names:
             self.handlers[handler_name] = handlers.get(handler_name, _dummy)
 
         self.handler_queue = []
-        
+
     @property
     def size(self):
         return self._size
@@ -74,9 +74,9 @@ class SkiaSketch():
 
     def glfw_window(self):
         if not glfw.init():
-            raise RuntimeError('glfw.init() failed')
+            raise RuntimeError("glfw.init() failed")
         glfw.window_hint(glfw.STENCIL_BITS, 8)
-        window = glfw.create_window(*self._size, 'p5py', None, None)
+        window = glfw.create_window(*self._size, "p5py", None, None)
         glfw.make_context_current(window)
         return window
 
@@ -86,13 +86,18 @@ class SkiaSketch():
             *size,
             0,  # sampleCnt
             0,  # stencilBits
-            skia.GrGLFramebufferInfo(0, GL.GL_RGBA8))
+            skia.GrGLFramebufferInfo(0, GL.GL_RGBA8)
+        )
         surface = skia.Surface.MakeFromBackendRenderTarget(
-            self.context, backend_render_target, skia.kBottomLeft_GrSurfaceOrigin,
-            skia.kRGBA_8888_ColorType, skia.ColorSpace.MakeSRGB())
+            self.context,
+            backend_render_target,
+            skia.kBottomLeft_GrSurfaceOrigin,
+            skia.kRGBA_8888_ColorType,
+            skia.ColorSpace.MakeSRGB(),
+        )
         assert surface is not None
         return surface
-    
+
     # create a new surface everytime
     def create_surface(self, size=None):
         if not size:
@@ -103,7 +108,7 @@ class SkiaSketch():
         self.surface = self.skia_surface(self.window, size)
         self.canvas = self.surface.getCanvas()
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
-    
+
     def main_loop(self):
         last_render_call_time = 0
 
@@ -112,8 +117,12 @@ class SkiaSketch():
         # Set redraw and looping to False
         # This is done to ensure draw() is called atleast once
 
-        while (self.main_loop_state):
-            if self.resized and (self.looping or self.redraw) and (time() - last_render_call_time) > 1 / self.frame_rate:
+        while self.main_loop_state:
+            if (
+                self.resized
+                and (self.looping or self.redraw)
+                and (time() - last_render_call_time) > 1 / self.frame_rate
+            ):
                 builtins.frame_count += 1
                 with self.surface as self.canvas:
                     self.draw_method()
@@ -136,15 +145,15 @@ class SkiaSketch():
         self.window = self.glfw_window()
         self.create_surface()
         self.assign_callbacks()
-        
+
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
         self.setup_method()
         self.poll_events()
-        
+
         p5.renderer.render(rewind=False)
         self.surface.flushAndSubmit()
         glfw.swap_buffers(self.window)
-        
+
         self.main_loop()
         self.clean_up()
 
@@ -160,22 +169,24 @@ class SkiaSketch():
 
     def poll_events(self):
         glfw.poll_events()
-        if (glfw.get_key(self.window, glfw.KEY_ESCAPE) == glfw.PRESS or glfw.window_should_close(self.window)):
+        if glfw.get_key(
+            self.window, glfw.KEY_ESCAPE
+        ) == glfw.PRESS or glfw.window_should_close(self.window):
             glfw.set_window_should_close(self.window, 1)
             self.main_loop_state = False
 
     # Callbacks and handlers
     def assign_callbacks(self):
-        glfw.set_framebuffer_size_callback(self.window, self.frame_buffer_resize_callback_handler)
-        
+        glfw.set_framebuffer_size_callback(
+            self.window, self.frame_buffer_resize_callback_handler
+        )
+
         glfw.set_key_callback(self.window, on_key_press)
         glfw.set_char_callback(self.window, on_key_char)
         glfw.set_mouse_button_callback(self.window, on_mouse_button)
         glfw.set_scroll_callback(self.window, on_mouse_scroll)
         glfw.set_cursor_pos_callback(self.window, on_mouse_motion)
         glfw.set_window_close_callback(self.window, on_close)
-        
-
 
     def frame_buffer_resize_callback_handler(self, window, width, height):
         """
@@ -197,8 +208,6 @@ class SkiaSketch():
         # Tell the program, we have resized the frame buffer
         # Restart the rendering again
         self.resized = True
-    
+
     def _enqueue_event(self, handler_name, event):
         self.handler_queue.append((self.handlers[handler_name], event))
-    
-    

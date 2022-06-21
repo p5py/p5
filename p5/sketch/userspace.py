@@ -31,8 +31,21 @@ from .events import handler_names
 from ..core import p5
 from ..pmath import matrix
 
-__all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
-           'cursor', 'exit', 'draw', 'setup', 'run', 'save_frame', 'save']
+__all__ = [
+    "no_loop",
+    "loop",
+    "redraw",
+    "size",
+    "title",
+    "no_cursor",
+    "cursor",
+    "exit",
+    "draw",
+    "setup",
+    "run",
+    "save_frame",
+    "save",
+]
 
 builtins.width = 360
 builtins.height = 360
@@ -60,6 +73,7 @@ builtins.key_is_pressed = False
 builtins.pixels = None
 builtins.start_time = 0
 builtins.current_renderer = None
+
 
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
@@ -100,8 +114,9 @@ def setup():
     pass
 
 
-def run(sketch_setup=None, sketch_draw=None,
-        frame_rate=60, mode="P2D", renderer="vispy"):
+def run(
+    sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer="vispy"
+):
     """Run a sketch.
 
     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
@@ -123,14 +138,14 @@ def run(sketch_setup=None, sketch_draw=None,
     # get the user-defined setup(), draw(), and handler functions.
     if sketch_setup is not None:
         setup_method = sketch_setup
-    elif hasattr(__main__, 'setup'):
+    elif hasattr(__main__, "setup"):
         setup_method = __main__.setup
     else:
         setup_method = setup
 
     if sketch_draw is not None:
         draw_method = sketch_draw
-    elif hasattr(__main__, 'draw'):
+    elif hasattr(__main__, "draw"):
         draw_method = __main__.draw
     else:
         draw_method = draw
@@ -143,18 +158,22 @@ def run(sketch_setup=None, sketch_draw=None,
 
     if renderer == "vispy":
         import vispy
-        vispy.use('glfw')
+
+        vispy.use("glfw")
         from p5.sketch.Vispy2DRenderer.base import VispySketch
         from vispy import app
+
         builtins.current_renderer = "vispy"
 
         if mode == "P2D":
-            p5.mode = 'P2D'
+            p5.mode = "P2D"
             from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
+
             p5.renderer = VispyRenderer2D()
         elif mode == "P3D":
-            p5.mode = 'P3D'
+            p5.mode = "P3D"
             from p5.sketch.Vispy3DRenderer.renderer3d import Renderer3D
+
             p5.renderer = Renderer3D()
         else:
             ValueError("Invalid Mode %s" % mode)
@@ -174,12 +193,13 @@ def run(sketch_setup=None, sketch_draw=None,
     elif renderer == "skia":
         from p5.sketch.Skia2DRenderer.base import SkiaSketch
         from p5.sketch.Skia2DRenderer.renderer2d import SkiaRenderer
+
         builtins.current_renderer = renderer
         # import sketch here
-        if mode == 'P2D':
-            p5.mode = 'P2D'
+        if mode == "P2D":
+            p5.mode = "P2D"
             p5.renderer = SkiaRenderer()
-        elif mode == 'P3D':
+        elif mode == "P3D":
             raise NotImplementedError("3D mode is not available in skia")
         p5.sketch = SkiaSketch(setup_method, draw_method, handlers, frame_rate)
         p5.sketch.start()
@@ -216,9 +236,8 @@ def size(width, height):
     if p5.mode == "P3D":
         eye = np.array((0, 0, height / math.tan(math.pi / 6)))
         p5.renderer.lookat_matrix = matrix.look_at(
-            eye,
-            np.array((0, 0, 0)),
-            np.array((0, 1, 0)))
+            eye, np.array((0, 0, 0)), np.array((0, 1, 0))
+        )
         p5.renderer.camera_pos = eye
 
 
@@ -273,19 +292,19 @@ def exit(*args, **kwargs):
     if not (p5.sketch is None):
         if builtins.current_renderer == "vispy":
             from vispy import app
+
             p5.sketch.show(visible=False)
             app.quit()
     sys.exit(*args, **kwargs)
 
 
 def no_cursor():
-    """Hide the mouse cursor.
-    """
+    """Hide the mouse cursor."""
     # window.set_mouse_visible(False)
     raise NotImplementedError
 
 
-def cursor(cursor_type='ARROW'):
+def cursor(cursor_type="ARROW"):
     """Set the cursor to the specified type.
 
     :param cursor_type: The cursor type to be used (defaults to
@@ -309,7 +328,7 @@ def cursor(cursor_type='ARROW'):
     raise NotImplementedError
 
 
-def save(filename='screen.png'):
+def save(filename="screen.png"):
     """Save an image from the display window.
 
     Saves an image from the display window. Append a file extension to
