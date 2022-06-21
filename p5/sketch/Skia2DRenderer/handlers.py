@@ -58,10 +58,9 @@ def on_mouse_scroll(window, x_off, y_off):
 def on_mouse_motion(window, x, y):
     event = PseudoMouseEvent(pos=(x,y), modifiers=p5.sketch.modifiers)
     mev = MouseEvent(event, active = builtins.mouse_is_pressed)
-    
-    p5.sketch._enqueue_event('mouse_moved', mev)
-    
 
+    # Queue a 'mouse_dragged` or `mouse_moved` event, not both similar to p5.js
+    p5.sketch._enqueue_event('mouse_dragged' if builtins.mouse_is_pressed else 'mouse_moved' , mev)
 
 def on_key_press(window, key, scancode, action, mod):
     pass
