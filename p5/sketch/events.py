@@ -240,15 +240,7 @@ class MouseEvent(Event):
         x = max(min(builtins.width, x), 0)
         y = max(min(builtins.height, builtins.height - y), 0)
         dx, dy = self._raw.delta
-
-        if (self._raw.press_event is not None) and (
-                self._raw.last_event is not None):
-            px, py = self._raw.press_event.pos
-            cx, cy = self._raw.last_event.pos
-            self.change = Position(cx - px, cy - py)
-        else:
-            self.change = Position(0, 0)
-
+        
         self.x = max(min(builtins.width, x), 0)
         self.y = max(min(builtins.height, builtins.height - y), 0)
 
@@ -264,7 +256,6 @@ class MouseEvent(Event):
         builtins.mouse_x = self.x
         builtins.mouse_y = self.y
         builtins.mouse_is_pressed = self._active
-        builtins.mouse_is_dragging = (self.change == (0, 0))
         builtins.mouse_button = self.button if self.pressed else None
 
     def __repr__(self):

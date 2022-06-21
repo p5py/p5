@@ -124,9 +124,6 @@ mouse_dragged()
 
 The user defined event handler called when the mouse is being dragged.
 Note that this is called *once* when the mouse has started dragging.
-To check if the mouse is still being dragged use the
-:code:`mouse_is_dragging` global variable.
-
 
 mouse_wheel()
 -------------
@@ -148,17 +145,7 @@ is `False` otherwise.
    if mouse_is_pressed:
        # code to run when the mouse button is held down.
 
-mouse_is_dragging
------------------
-
-`mouse_is_dragging` is a global boolean that stores whether or not the
-mouse is currently being dragged. When the mouse is being dragged,
-this variable is set to `True` and has a value of `False` otherwise.
-
 .. code:: python
-
-   if mouse_is_dragging:
-       # code to run when the mouse is being dragged.
 
 mouse_button
 ------------

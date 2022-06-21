@@ -46,7 +46,6 @@ builtins.focused = True
 
 builtins.mouse_button = None
 builtins.mouse_is_pressed = False
-builtins.mouse_is_dragging = False
 builtins.mouse_x = 0
 builtins.mouse_y = 0
 builtins.pmouse_x = 0
