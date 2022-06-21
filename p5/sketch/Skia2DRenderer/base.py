@@ -59,9 +59,6 @@ class SkiaSketch():
 
         self.handler_queue = []
         
-        # Modifiers used for managing the Input system
-        self.modifiers = list()
-
     @property
     def size(self):
         return self._size
