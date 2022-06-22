@@ -394,3 +394,9 @@ def set_frame_rate(fps):
         raise NotImplementedError("set_frame_rate is not present in vispy")
 
     p5.sketch.frame_rate = fps
+    
+    
+def is_looping():
+    """Returns the current looping state of the sketch
+    """
+    return p5.sketch.looping
