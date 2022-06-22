@@ -55,6 +55,7 @@ builtins.pixel_y_density = 1
 builtins.title = "p5"
 builtins.frame_count = -1
 builtins.frame_rate = None
+# TODO: Implement focussed for Vispy, only implemented in Skia2DRenderer
 builtins.focused = True
 
 builtins.mouse_button = None
@@ -378,3 +379,18 @@ def save_frame(filename="screen.png"):
     # saved image (instead of using the default sequencing) --abhikpal
     # (2018-08-14)
     p5.sketch.queue_screenshot(filename)
+
+
+# TODO: Add support to calculate the current frame_rate
+# TODO: Deprecate set_frame_rate and use frame_rate(), current frame_rate should return as per p5.js API
+def set_frame_rate(fps):
+    """Sets the frame_rate for the current sketch
+
+    Args:
+        fps (int): Number of frames to be displayed per second
+
+    """
+    if builtins.current_renderer in ["vispy"]:
+        raise NotImplementedError("set_frame_rate is not present in vispy")
+
+    p5.sketch.frame_rate = fps

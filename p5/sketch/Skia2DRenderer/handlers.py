@@ -106,5 +106,10 @@ def on_key_char(window, text):
     pass
 
 
+def on_window_focus(window, focused):
+    builtins.focused = bool(focused)
+
 def on_close(window):
     pass
+
+

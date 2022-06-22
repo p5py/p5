@@ -135,6 +135,7 @@ class SkiaSketch:
                 # Now don't render the next one
                 if self.redraw:
                     self.redraw = False
+                
             self.poll_events()
             while len(self.handler_queue) != 0:
                 function, event = self.handler_queue.pop(0)
@@ -187,6 +188,7 @@ class SkiaSketch:
         glfw.set_scroll_callback(self.window, on_mouse_scroll)
         glfw.set_cursor_pos_callback(self.window, on_mouse_motion)
         glfw.set_window_close_callback(self.window, on_close)
+        glfw.set_window_focus_callback(self.window, on_window_focus)
 
     def frame_buffer_resize_callback_handler(self, window, width, height):
         """
