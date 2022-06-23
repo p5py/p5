@@ -45,6 +45,8 @@ __all__ = [
     "run",
     "save_frame",
     "save",
+    "is_looping",
+    "set_frame_rate"
 ]
 
 builtins.width = 360

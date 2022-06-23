@@ -6,17 +6,60 @@ This file contains the handlers needed for glfw event handling
 import builtins
 import glfw
 from p5.core import p5
-from p5.sketch.events import MouseEvent
+from p5.sketch.events import KeyEvent, MouseEvent
 
 from dataclasses import dataclass
 from time import time
 
+from p5.util import keys
 
 BUTTONMAP = {
     glfw.MOUSE_BUTTON_LEFT: 1,
     glfw.MOUSE_BUTTON_RIGHT: 2,
     glfw.MOUSE_BUTTON_MIDDLE: 3,
 }
+
+
+KEYMAP = {
+    glfw.KEY_LEFT_SHIFT: keys.SHIFT,
+    glfw.KEY_RIGHT_SHIFT: keys.SHIFT,
+    glfw.KEY_LEFT_CONTROL: keys.CONTROL,
+    glfw.KEY_RIGHT_CONTROL: keys.CONTROL,
+    glfw.KEY_LEFT_ALT: keys.ALT,
+    glfw.KEY_RIGHT_ALT: keys.ALT,
+    glfw.KEY_LEFT_SUPER: keys.META,
+    glfw.KEY_RIGHT_SUPER: keys.META,
+    glfw.KEY_LEFT: keys.LEFT,
+    glfw.KEY_UP: keys.UP,
+    glfw.KEY_RIGHT: keys.RIGHT,
+    glfw.KEY_DOWN: keys.DOWN,
+    glfw.KEY_PAGE_UP: keys.PAGEUP,
+    glfw.KEY_PAGE_DOWN: keys.PAGEDOWN,
+    glfw.KEY_INSERT: keys.INSERT,
+    glfw.KEY_DELETE: keys.DELETE,
+    glfw.KEY_HOME: keys.HOME,
+    glfw.KEY_END: keys.END,
+    glfw.KEY_ESCAPE: keys.ESCAPE,
+    glfw.KEY_BACKSPACE: keys.BACKSPACE,
+    glfw.KEY_F1: keys.F1,
+    glfw.KEY_F2: keys.F2,
+    glfw.KEY_F3: keys.F3,
+    glfw.KEY_F4: keys.F4,
+    glfw.KEY_F5: keys.F5,
+    glfw.KEY_F6: keys.F6,
+    glfw.KEY_F7: keys.F7,
+    glfw.KEY_F8: keys.F8,
+    glfw.KEY_F9: keys.F9,
+    glfw.KEY_F10: keys.F10,
+    glfw.KEY_F11: keys.F11,
+    glfw.KEY_F12: keys.F12,
+    glfw.KEY_SPACE: keys.SPACE,
+    glfw.KEY_ENTER: keys.ENTER,
+    "\r": keys.ENTER,
+    glfw.KEY_TAB: keys.TAB,
+}
+
+MOD_KEYS = [keys.SHIFT, keys.ALT, keys.CONTROL, keys.META]
 
 
 @dataclass
@@ -27,11 +70,40 @@ class InputState:
 
     modifiers: list
     last_mouse_clicked_time: float
+    next_key_events: list
+    next_key_text: dict
+
+    def process_mod(self, key, down):
+        """Process (possible) keyboard modifiers"""
+        if key in MOD_KEYS:
+            if down:
+                if key not in self.modifiers:
+                    self.modifiers.append(key)
+            elif key in self.modifiers:
+                self.modifiers.pop(self.modifiers.index(key))
+        return self.modifiers
+
+    def process_key(self, key):
+        if 32 <= key <= 127:
+            return keys.Key(chr(key)), chr(key)
+        elif key in KEYMAP:
+            return KEYMAP[key], ""
+        else:
+            return None, ""
+
+
+class PseudoKeyEvent:
+    """Class to pass pseudo event data. They are used to work with the events module which is vispy dependent"""
+
+    def __init__(self, key=None, mod=None, text=None):
+        self.key = key
+        self.modifiers = mod
+        self.text = text
 
 
 class PseudoMouseEvent:
     """
-    This class is a helper class to reuse the events module which is very Vispy oriented
+    Class to pass pseudo event data. They are used to work with the events module which is vispy dependent
     """
 
     def __init__(
@@ -54,7 +126,7 @@ class PseudoMouseEvent:
 
 
 # Hold the input state for current sketch
-input_state = InputState([], 0)
+input_state = InputState([], 0, [], {})
 
 
 def on_mouse_button(window, button, action, mod):
@@ -99,17 +171,52 @@ def on_mouse_motion(window, x, y):
 
 
 def on_key_press(window, key, scancode, action, mod):
-    pass
+    key, text = input_state.process_key(key)
+    if action == glfw.PRESS:
+        down = True
+    elif action == glfw.RELEASE:
+        down = False
+    else:
+        return
+    input_state.process_mod(key, down=down)
+
+    # NOTE: GLFW only provides localized characters via _on_key_char, so if
+    # this event contains a character we store all other data and dispatch
+    # it once the final unicode character is sent shortly after.
+    if text != "" and action == glfw.PRESS:
+        input_state.next_key_events.append((action, key, input_state.modifiers))
+    else:
+        if key in input_state.next_key_text:
+            text = input_state.next_key_text[key]
+            del input_state.next_key_text[key]
+        # Not a char event, call the event normally
+        event = PseudoKeyEvent(key, input_state.modifiers, text)
+        kev = KeyEvent(event, action == glfw.PRESS)
+        p5.sketch._enqueue_event(
+            "key_pressed" if action == glfw.PRESS else "key_released", kev
+        )
 
 
 def on_key_char(window, text):
-    pass
+    # Repeat strokes (frequency configured at OS) are sent here only,
+    # no regular _on_key_press events. Currently ignored!
+    if len(input_state.next_key_events) == 0:
+        return
+    
+    (action, key, mod) = input_state.next_key_events.pop(0)
+    input_state.next_key_text[key] = text
+
+    event = PseudoKeyEvent(key, mod, chr(text))
+    kev = KeyEvent(event, action == glfw.PRESS)
+
+    p5.sketch._enqueue_event(
+        "key_pressed" if action == glfw.PRESS else "key_released", kev
+    )
 
 
 def on_window_focus(window, focused):
     builtins.focused = bool(focused)
 
+
 def on_close(window):
     pass
-
-

@@ -31,3 +31,5 @@ def scale_tuple(t, scale=255):
     """Divides each element of tuple by scale
     """
     return tuple(x / scale for x in t)
+
+
