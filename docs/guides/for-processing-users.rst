@@ -329,9 +329,6 @@ New Features
 * :code:`circle()` and :code:`square()` functions draw circles and
   squares.
 
-* :code:`mouse_is_dragging` is a global variable that can be used to
-  check if the mouse is being dragged.
-
 * Colors can be converted to their proper grayscale values.
 
   .. code:: python
