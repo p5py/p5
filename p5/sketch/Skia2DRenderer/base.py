@@ -104,7 +104,6 @@ class SkiaSketch:
             size = self._size
         self._size = size
         builtins.width, builtins.height = size
-        print("SIze passed ", size)
         self.surface = self.skia_surface(self.window, size)
         self.canvas = self.surface.getCanvas()
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
@@ -203,9 +202,6 @@ class SkiaSketch:
         # with self.surface as self.canvas:
         #     # redraw on the canvas/ ( new frame buffer ) after resizing
         #     # and do not rewind/clear the path
-        #     p5.renderer.render(rewind=False)
-        # self.surface.flushAndSubmit()
-        # glfw.swap_buffers(self.window)
 
         # Tell the program, we have resized the frame buffer
         # Restart the rendering again
