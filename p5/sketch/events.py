@@ -49,7 +49,7 @@ class MouseButton:
             MouseButtonEnum.MIDDLE: 'MIDDLE',
         }
         self._buttons = buttons
-        self._button_names = [button_names[bt] for bt in self._buttons]
+        self._button_names = [button_names[bt] for bt in self._buttons] if self._buttons  else ""
 
     @property
     def buttons(self):
@@ -245,7 +245,7 @@ class MouseEvent(Event):
         self.scroll = Position(int(dx), int(dy))
 
         self.count = self.scroll.y
-        self.button = MouseButton(self._raw.buttons + [self._raw.button])
+        self.button = MouseButton(self._raw.buttons + [self._raw.button] if self._raw.button else [])
         
     def _update_builtins(self):
         builtins.pmouse_x = builtins.mouse_x
@@ -254,7 +254,9 @@ class MouseEvent(Event):
         builtins.mouse_y = self.y
         builtins.mouse_is_pressed = self._active
         builtins.mouse_button = self.button if self.pressed else None
-
+        builtins.moved_x = builtins.mouse_x - builtins.pmouse_x
+        builtins.moved_y = builtins.mouse_y - builtins.pmouse_y
+        
     def __repr__(self):
         press = 'pressed' if self.pressed else 'not-pressed'
         return "MouseEvent({} at {})".format(press, self.position)

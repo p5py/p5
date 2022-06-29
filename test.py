@@ -12,8 +12,10 @@ def setup():
 
 def draw():
     p5.renderer.render_circle(20,20, 80)
-    # print(mouse_x, mouse_y)
-    p5.renderer.render_circle(mouse_x, mouse_y, 80)
+    print("test", moved_x, moved_y)
+    
+    # print(mouse_x, mouse_y, moved_x, moved_y)
+    p5.renderer.render_circle(mouse_x, mouse_y, abs(moved_x) + abs(moved_y))
     # print("frame count", frame_count)
 
 def mouse_pressed(event):

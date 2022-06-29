@@ -20,12 +20,12 @@ class PseudoMouseEvent:
     """
     This class is a helper class to reuse the events module which is very Vispy oriented
     """
-    def __init__(self, pos, delta, modifiers, button, buttons):
+    def __init__(self, pos=(0,0), delta=(0,0), modifiers=None, button=None, buttons=None):
         """Initialize the pseduoMouseEventClass to work with exisiting event system
 
         Args:
             pos (tuple): Position of the cursor
-            delta (tuple): Change in position of the cursor from the last frame
+            delta (tuple): The increment by which the mouse wheel has moved
             modifiers (list): Modifiers active during the event
             button (int): Mouse Button that was pressed
             buttons (list): Mouse Buttons that were pressed during the event
@@ -56,8 +56,11 @@ def on_mouse_scroll(window, x_off, y_off):
     pass
 
 def on_mouse_motion(window, x, y):
-    builtins.mouse_x = x
-    builtins.mouse_y = y
+    event = PseudoMouseEvent(pos=(x,y), modifiers=p5.sketch.modifiers)
+    mev = MouseEvent(event, active = builtins.mouse_is_pressed)
+    
+    p5.sketch._enqueue_event('mouse_moved', mev)
+    
 
 
 def on_key_press(window, key, scancode, action, mod):

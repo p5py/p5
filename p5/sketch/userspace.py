@@ -50,6 +50,10 @@ builtins.mouse_x = 0
 builtins.mouse_y = 0
 builtins.pmouse_x = 0
 builtins.pmouse_y = 0
+# TODO: Add docs for moved_x and moved_y
+builtins.moved_x = 0
+builtins.moved_y = 0
+
 builtins.key = None
 builtins.key_is_pressed = False
 

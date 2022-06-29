@@ -202,7 +202,6 @@ class SkiaSketch():
         self.resized = True
     
     def _enqueue_event(self, handler_name, event):
-        event._update_builtins()
         self.handler_queue.append((self.handlers[handler_name], event))
     
     
