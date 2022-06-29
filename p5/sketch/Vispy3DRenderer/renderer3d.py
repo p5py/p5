@@ -574,5 +574,5 @@ class Renderer3D(OpenGLRenderer):
         ])
 
 
-    def frustum():
+    def frustum(self):
         raise NotImplementedError
