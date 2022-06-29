@@ -40,6 +40,7 @@ from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitiv
 from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
 from p5.core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
 
+from p5.core import p5
 
 class GlslList:
     """List of objects to be used in glsl
