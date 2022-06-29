@@ -23,11 +23,10 @@ from ..pmath import lerp
 from ..pmath import constrain
 
 from .constants import colour_codes
+from . import p5
 
-__all__ = ['color_mode', 'Color']
+__all__ = ["color_mode", "Color"]
 
-color_parse_mode = 'RGB'
-color_range = (255, 255, 255, 255)
 
 
 def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
@@ -54,17 +53,14 @@ def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
     :type max_alpha: int
 
     """
-    global color_parse_mode
-    global color_range
-
     if max_2 is None:
         max_2 = max_1
 
     if max_3 is None:
         max_3 = max_1
 
-    color_range = (max_1, max_2, max_3, max_alpha)
-    color_parse_mode = mode
+    p5.renderer.style.color_range = (max_1, max_2, max_3, max_alpha)
+    p5.renderer.style.color_parse_mode = mode
 
 
 def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
@@ -109,7 +105,10 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     elif 'a' in kwargs:
         alpha = kwargs['a']
     else:
-        alpha = 1 if normed else color_range[3]
+        if normed:
+            alpha = 1 
+        else:
+            alpha = p5.renderer.style.color_range[3] if p5.renderer else 255
 
     hsb = None
     rgb = None
@@ -179,22 +178,22 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     if not (hsb is None):
         h, s, b = hsb
         if not normed:
-            h = constrain(h / color_range[0], 0, 1)
-            s = constrain(s / color_range[1], 0, 1)
-            b = constrain(b / color_range[2], 0, 1)
+            h = constrain(h / p5.renderer.style.color_range[0] if p5.renderer else 255, 0, 1)
+            s = constrain(s / p5.renderer.style.color_range[1] if p5.renderer else 255, 0, 1)
+            b = constrain(b / p5.renderer.style.color_range[2] if p5.renderer else 255, 0, 1)
         red, green, blue = colorsys.hsv_to_rgb(h, s, b)
 
     if not (rgb is None):
         r, g, b = rgb
         if not normed:
-            red = constrain(r / color_range[0], 0, 1)
-            green = constrain(g / color_range[1], 0, 1)
-            blue = constrain(b / color_range[2], 0, 1)
+            red = constrain(r / p5.renderer.style.color_range[0] if p5.renderer else 255, 0, 1)
+            green = constrain(g / p5.renderer.style.color_range[1] if p5.renderer else 255, 0, 1)
+            blue = constrain(b / p5.renderer.style.color_range[2] if p5.renderer else 255, 0, 1)
         else:
             red, green, blue = r, g, b
 
     if not normed:
-        alpha = constrain(alpha / color_range[3], 0, 1)
+        alpha = constrain(alpha / p5.renderer.style.color_range[3] if p5.renderer else 255, 0, 1)
 
     return red, green, blue, alpha
 
@@ -204,8 +203,8 @@ class Color:
 
     def __init__(self, *args, color_mode=None, normed=False, **kwargs):
         if color_mode is None:
-            color_mode = color_parse_mode
-
+            color_mode = p5.renderer.style.color_parse_mode if p5.renderer else "RGB"
+        
         if (len(args) == 1) and isinstance(args[0], Color):
             r = args[0]._red
             g = args[0]._green
@@ -324,11 +323,11 @@ class Color:
     @property
     def alpha(self):
         """The alpha value for the color."""
-        return self._alpha * color_range[3]
+        return self._alpha * p5.renderer.style.color_range[3]
 
     @alpha.setter
     def alpha(self, value):
-        self._alpha = constrain(value / color_range[3], 0, 1)
+        self._alpha = constrain(value / p5.renderer.style.color_range[3], 0, 1)
 
     @property
     def rgb(self):
@@ -349,31 +348,31 @@ class Color:
     @property
     def red(self):
         """The red component of the color"""
-        return self._red * color_range[0]
+        return self._red * p5.renderer.style.color_range[0]
 
     @red.setter
     def red(self, value):
-        self._red = constrain(value / color_range[0], 0, 1)
+        self._red = constrain(value / p5.renderer.style.color_range[0], 0, 1)
         self._recompute_hsb()
 
     @property
     def green(self):
         """The green component of the color"""
-        return self._green * color_range[1]
+        return self._green * p5.renderer.style.color_range[1]
 
     @green.setter
     def green(self, value):
-        self._green = constrain(value / color_range[1], 0, 1)
+        self._green = constrain(value / p5.renderer.style.color_range[1], 0, 1)
         self._recompute_hsb()
 
     @property
     def blue(self):
         """The blue component of the color"""
-        return self._blue * color_range[2]
+        return self._blue * p5.renderer.style.color_range[2]
 
     @blue.setter
     def blue(self, value):
-        self._blue = constrain(value / color_range[2], 0, 1)
+        self._blue = constrain(value / p5.renderer.style.color_range[2], 0, 1)
         self._recompute_hsb()
 
     @property
@@ -395,31 +394,31 @@ class Color:
     @property
     def hue(self):
         """The hue component of the color"""
-        return self._hue * color_range[0]
+        return self._hue * p5.renderer.style.color_range[0]
 
     @hue.setter
     def hue(self, value):
-        self._hue = constrain(value / color_range[0], 0, 1)
+        self._hue = constrain(value / p5.renderer.style.color_range[0], 0, 1)
         self._recompute_rgb()
 
     @property
     def saturation(self):
         """The saturation component of the color"""
-        return self._saturation * color_range[1]
+        return self._saturation * p5.renderer.style.color_range[1]
 
     @saturation.setter
     def saturation(self, value):
-        self._saturation = constrain(value / color_range[1], 0, 1)
+        self._saturation = constrain(value / p5.renderer.style.color_range[1], 0, 1)
         self._recompute_rgb()
 
     @property
     def brightness(self):
         """The brightness component of the color"""
-        return self._brightness * color_range[2]
+        return self._brightness * p5.renderer.style.color_range[2]
 
     @brightness.setter
     def brightness(self, value):
-        self._brightness = constrain(value / color_range[2], 0, 1)
+        self._brightness = constrain(value / p5.renderer.style.color_range[2], 0, 1)
         self._recompute_rgb()
 
     # ...and some convenient aliases
@@ -435,21 +434,21 @@ class Color:
     @property
     def b(self):
         """The blue or the brightness value (depending on the color mode)."""
-        if color_parse_mode == 'RGB':
+        if p5.renderer.style.color_parse_mode == 'RGB':
             return self.blue
-        elif color_parse_mode == 'HSB':
+        elif p5.renderer.style.color_parse_mode == 'HSB':
             return self.brightness
         else:
-            raise ValueError("Unknown color mode {}".format(color_parse_mode))
+            raise ValueError("Unknown color mode {}".format(p5.renderer.style.color_parse_mode))
 
     @b.setter
     def b(self, value):
-        if color_parse_mode == 'RGB':
+        if p5.renderer.style.color_parse_mode == 'RGB':
             self.blue = value
-        elif color_parse_mode == 'HSB':
+        elif p5.renderer.style.color_parse_mode == 'HSB':
             self.brightness = value
         else:
-            raise ValueError("Unknown color mode {}".format(color_parse_mode))
+            raise ValueError("Unknown color mode {}".format(p5.renderer.style.color_parse_mode))
 
     @property
     def hex(self):

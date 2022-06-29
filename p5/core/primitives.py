@@ -30,10 +30,6 @@ __all__ = ['point', 'line', 'arc', 'triangle', 'quad',
            'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
            'rect_mode', 'bezier', 'curve', 'create_shape']
 
-_rect_mode = 'CORNER'
-_ellipse_mode = 'CENTER'
-
-
 def point(x, y, z=0):
     """Returns a point.
 
@@ -412,7 +408,7 @@ def rect(*args, mode=None):
         raise ValueError("Unexpected number of arguments passed to rect()")
 
     if mode is None:
-        mode = _rect_mode
+        mode = p5.renderer.style.rect_mode
 
     if mode == 'CORNER':
         corner = coordinate
@@ -485,7 +481,7 @@ def square(*args, mode=None):
         raise ValueError("Unexpected number of arguments passed to square()")
 
     if mode is None:
-        mode = _rect_mode
+        mode = p5.renderer.style.rect_mode
 
     if mode == 'CORNERS':
         raise ValueError("Cannot draw square with {} mode".format(mode))
@@ -502,8 +498,7 @@ def rect_mode(mode='CORNER'):
     :type mode: str
 
     """
-    global _rect_mode
-    _rect_mode = mode
+    p5.renderer.style.rect_mode = mode
 
 
 def arc(*args, mode=None, ellipse_mode=None):
@@ -558,7 +553,7 @@ def arc(*args, mode=None, ellipse_mode=None):
         raise ValueError("Unexpected number of arguments passed to arc()")
 
     if ellipse_mode is None:
-        emode = _ellipse_mode
+        emode = p5.renderer.style.ellipse_mode
     else:
         emode = ellipse_mode
 
@@ -624,7 +619,7 @@ def ellipse(*args, mode=None):
         raise ValueError("Unexpected number of arguments passed to ellipse()")
 
     if mode is None:
-        mode = _ellipse_mode
+        mode = p5.renderer.style.ellipse_mode
 
     if mode == 'CORNERS':
         corner = Point(*coordinate)
@@ -681,7 +676,7 @@ def circle(*args, mode=None):
         raise ValueError("Unexpected number of arguments passed to circle()")
 
     if mode is None:
-        mode = _ellipse_mode
+        mode = p5.renderer.style.ellipse_mode
 
     if mode == 'CORNERS':
         raise ValueError("Cannot create circle in CORNERS mode")
@@ -698,8 +693,7 @@ def ellipse_mode(mode='CENTER'):
     :type mode: str
 
     """
-    global _ellipse_mode
-    _ellipse_mode = mode
+    p5.renderer.style.ellipse_mode = mode
 
 
 def create_shape(kind=None, *args, **kwargs):

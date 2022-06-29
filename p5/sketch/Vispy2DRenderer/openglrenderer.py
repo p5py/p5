@@ -220,15 +220,6 @@ def get_render_primitives(shape):
     return render_primitives
 
 
-@dataclass
-class Style:
-    background_color = (0.8, 0.8, 0.8, 1.0)
-    fill_color = COLOR_WHITE
-    fill_enabled = True
-    stroke_color = COLOR_BLACK
-    stroke_enabled = True
-    tint_color = COLOR_BLACK
-    tint_enabled = False
 
 # Abstract class that contains common code for OpenGL renderers
 
@@ -261,10 +252,6 @@ class OpenGLRenderer(ABC):
 
         self.vertex_buffer = VertexBuffer()
         self.index_buffer = IndexBuffer()
-
-        # Renderer Globals: STYLE/MATERIAL PROPERTIES
-        #
-        self.style = Style()
 
         # Renderer Globals: Curves
         self.stroke_weight = 1

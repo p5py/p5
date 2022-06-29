@@ -31,10 +31,26 @@ from vispy.gloo import VertexBuffer
 from contextlib import contextmanager
 from .shaders2d import src_texture
 from .shaders2d import src_line
-from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
+from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE, COLOR_BLACK
 from p5.core.constants import SType
 from .shape import PShape, Arc
 
+from dataclasses import dataclass
+
+@dataclass
+class Style2D:
+    background_color = (0.8, 0.8, 0.8, 1.0)
+    fill_color = COLOR_WHITE
+    fill_enabled = True
+    stroke_color = COLOR_BLACK
+    stroke_enabled = True
+    tint_color = COLOR_BLACK
+    tint_enabled = False
+    ellipse_mode = "CENTER"
+    rect_mode = "CORNER"
+    color_parse_mode = "RGB"
+    color_range = (255, 255, 255, 255)
+    
 
 class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
@@ -43,6 +59,8 @@ class VispyRenderer2D(OpenGLRenderer):
         self.texture_prog['texcoord'] = self.fbuf_texcoords
         self.line_prog = None
         self.modelview_matrix = np.identity(4)
+        self.style_stack = []
+        self.style = Style2D()
 
     def reset_view(self):
         self.viewport = (

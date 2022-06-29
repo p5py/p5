@@ -33,9 +33,10 @@ from contextlib import contextmanager
 from p5.core.constants import Z_EPSILON
 from p5.core.geometry import Geometry
 from ..Vispy2DRenderer.shape import PShape
+from ..Vispy2DRenderer.renderer2d import Style2D
 
 from p5.pmath.matrix import translation_matrix
-from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, Style, COLOR_WHITE
+from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, COLOR_WHITE
 from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
 from p5.core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
 
@@ -69,7 +70,7 @@ class GlslList:
 
 
 @dataclass
-class Style3D(Style):
+class Style3D(Style2D):
     ambient = np.array([0.2] * 3)
     diffuse = np.array([0.6] * 3)
     specular = np.array([0.8] * 3)
@@ -84,7 +85,8 @@ class Renderer3D(OpenGLRenderer):
         self.normal_prog = Program(src_normal.vert, src_normal.frag)
         self.phong_prog = Program(src_phong.vert, src_phong.frag)
         self.lookat_matrix = np.identity(4)
-
+        self.style_stack = []
+        
         # Camera position
         self.camera_pos = np.zeros(3)
         # Lights

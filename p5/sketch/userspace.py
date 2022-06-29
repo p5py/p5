@@ -137,7 +137,6 @@ def run(
     :type frame_rate: int :math:`\geq 1`
 
     """
-
     # get the user-defined setup(), draw(), and handler functions.
     if sketch_setup is not None:
         setup_method = sketch_setup
@@ -171,7 +170,6 @@ def run(
         if mode == "P2D":
             p5.mode = "P2D"
             from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
-
             p5.renderer = VispyRenderer2D()
         elif mode == "P3D":
             p5.mode = "P3D"
