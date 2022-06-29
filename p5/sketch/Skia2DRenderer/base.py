@@ -1,4 +1,5 @@
 import builtins
+from calendar import c
 from p5.core import p5
 
 import contextlib, glfw, skia
@@ -6,7 +7,7 @@ from OpenGL import GL
 from time import time
 
 from ..events import handler_names
-from .handlers import mouse_callback_handler
+from .handlers import *
 
 
 def _dummy(*args, **kwargs):
@@ -57,6 +58,9 @@ class SkiaSketch():
             self.handlers[handler_name] = handlers.get(handler_name, _dummy)
 
         self.handler_queue = []
+        
+        # Modifiers used for managing the Input system
+        self.modifiers = list()
 
     @property
     def size(self):
@@ -126,6 +130,10 @@ class SkiaSketch():
                 if self.redraw:
                     self.redraw = False
             self.poll_events()
+            while len(self.handler_queue) != 0:
+                function, event = self.handler_queue.pop(0)
+                event._update_builtins()
+                function(event)
 
     def start(self):
         self.window = self.glfw_window()
@@ -161,10 +169,15 @@ class SkiaSketch():
 
     # Callbacks and handlers
     def assign_callbacks(self):
-        glfw.set_cursor_pos_callback(self.window, mouse_callback_handler)
         glfw.set_framebuffer_size_callback(self.window, self.frame_buffer_resize_callback_handler)
-        glfw.set_mouse_button_callback(self.window, self.mouse_button_callback_handler)
-
+        
+        glfw.set_key_callback(self.window, on_key_press)
+        glfw.set_char_callback(self.window, on_key_char)
+        glfw.set_mouse_button_callback(self.window, on_mouse_button)
+        glfw.set_scroll_callback(self.window, on_mouse_scroll)
+        glfw.set_cursor_pos_callback(self.window, on_mouse_motion)
+        glfw.set_window_close_callback(self.window, on_close)
+        
 
 
     def frame_buffer_resize_callback_handler(self, window, width, height):
@@ -187,22 +200,9 @@ class SkiaSketch():
         # Tell the program, we have resized the frame buffer
         # Restart the rendering again
         self.resized = True
-
-    # For testing will be removed later
-    def mouse_button_callback_handler(self, window, button, action, mods):
-        # If a mouse button is pressed
-        if action == glfw.PRESS:
-
-            # Changing the values manually, at the end we will have an event handler
-            # similar to vispy
-            if button == glfw.MOUSE_BUTTON_LEFT:
-                self.redraw = True
-            if button == glfw.MOUSE_BUTTON_RIGHT:
-                self.looping = True
-
-        # If a mouse button is released
-        if action == glfw.RELEASE:
-            # set environment variables
-            pass
+    
+    def _enqueue_event(self, handler_name, event):
+        event._update_builtins()
+        self.handler_queue.append((self.handlers[handler_name], event))
     
     

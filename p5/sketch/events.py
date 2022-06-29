@@ -48,13 +48,12 @@ class MouseButton:
             MouseButtonEnum.RIGHT: 'RIGHT',
             MouseButtonEnum.MIDDLE: 'MIDDLE',
         }
-
         self._buttons = buttons
         self._button_names = [button_names[bt] for bt in self._buttons]
 
     @property
     def buttons(self):
-        self._button_names
+        return self._button_names
 
     def __eq__(self, other):
         button_map = {
@@ -191,7 +190,6 @@ class KeyEvent(Event):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         if self._raw.key is not None:
             self.key = Key(self._raw.key.name, self._raw.text)
         else:
@@ -235,7 +233,6 @@ class MouseEvent(Event):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         x, y = self._raw.pos
         x = max(min(builtins.width, x), 0)
         y = max(min(builtins.height, builtins.height - y), 0)
@@ -248,8 +245,8 @@ class MouseEvent(Event):
         self.scroll = Position(int(dx), int(dy))
 
         self.count = self.scroll.y
-        self.button = MouseButton(self._raw.buttons)
-
+        self.button = MouseButton(self._raw.buttons + [self._raw.button])
+        
     def _update_builtins(self):
         builtins.pmouse_x = builtins.mouse_x
         builtins.pmouse_y = builtins.mouse_y
