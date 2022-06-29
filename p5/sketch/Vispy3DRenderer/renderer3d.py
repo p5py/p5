@@ -86,6 +86,7 @@ class Renderer3D(OpenGLRenderer):
         self.phong_prog = Program(src_phong.vert, src_phong.frag)
         self.lookat_matrix = np.identity(4)
         self.style_stack = []
+        self.matrix_stack = []
         
         # Camera position
         self.camera_pos = np.zeros(3)
@@ -449,3 +450,128 @@ class Renderer3D(OpenGLRenderer):
         self.const_falloff.add(self.curr_constant_falloff)
         self.linear_falloff.add(self.curr_linear_falloff)
         self.quadratic_falloff.add(self.curr_quadratic_falloff)
+
+    def push_matrix(self):
+        """Pushes the current transformation matrix onto the matrix stack.
+        """
+        self.matrix_stack.append(self.transform_matrix.copy())
+
+    def pop_matrix(self):
+        """Pops the current transformation matrix off the matrix stack.
+        """
+        assert len(self.matrix_stack) > 0, "No matrix to pop"
+        self.transform_matrix = self.matrix_stack.pop()
+    
+    def reset_transforms(self):
+        """Reset all transformations to their default state.
+
+        """
+        self.transform_matrix = np.identity(4)
+    
+    def translate(self, x, y, z=0):
+        tmat = matrix.translation_matrix(x, y, z)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+    
+    def rotate(self, theta, axis=np.array([0, 0, 1])):
+        axis = np.array(axis[:])
+        tmat = matrix.rotation_matrix(axis, theta)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+        
+        
+    def rotate_x(self, theta):
+        self.rotate(theta, axis=np.array([1, 0, 0]))
+
+
+    def rotate_y(self, theta):
+        self.rotate(theta, axis=np.array([0, 1, 0]))
+
+
+    def rotate_z(self, theta):
+        self.rotate(theta, axis=np.array([0, 0, 1]))
+
+    def scale(self, sx, sy=None, sz=None):
+        if sy is None and sz is None:
+            sy = sx
+            sz = sx
+        elif sz is None:
+            sz = 1
+        tmat = matrix.scale_transform(sx, sy, sz)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+
+
+    def apply_matrix(self, transform_matrix):
+        tmatrix = np.array(transform_matrix)
+        self.transform_matrix = self.transform_matrix.dot(tmatrix)
+
+
+    def reset_matrix(self):
+        self.transform_matrix = np.identity(4)
+
+
+    def print_matrix(self):
+        print(self.transform_matrix)
+
+
+    def shear_x(self, theta):
+        shear_mat = np.identity(4)
+        shear_mat[0, 1] = np.tan(theta)
+        self.transform_matrix = self.transform_matrix.dot(shear_mat)
+        return shear_mat
+
+
+    def shear_y(self, theta):
+        shear_mat = np.identity(4)
+        shear_mat[1, 0] = np.tan(theta)
+        self.transform_matrix = self.transform_matrix.dot(shear_mat)
+        return shear_mat
+
+
+    def camera(self, *args, **kwargs):
+        def real_camera(position=(0, 0, p5.sketch.size[1] / math.tan(math.pi / 6)),
+                        target_position=(0, 0, 0), up_vector=(0, 1, 0)):
+            self.lookat_matrix = matrix.look_at(
+                np.array(position),
+                np.array(target_position),
+                np.array(up_vector))
+            self.camera_pos = np.array(position)
+
+        if len(args) == 9:  # If using non-tuple arguments
+            kwargs['position'] = args[:3]
+            kwargs['target_position'] = args[3:6]
+            kwargs['up_vector'] = args[6:]
+        elif len(args) <= 3:  # If using tuple arguments
+            if len(args) >= 1:
+                kwargs['position'] = args[0]
+            if len(args) >= 2:
+                kwargs['target_position'] = args[1]
+            if len(args) >= 3:
+                kwargs['up_vector'] = args[2]
+        else:
+            raise ValueError("Unexpected number of arguments passed to camera()")
+
+        real_camera(**kwargs)
+
+
+    def perspective(self, fovy, aspect, near, far):
+        self.projection_matrix = matrix.perspective_matrix(
+            fovy,
+            aspect,
+            near,
+            far
+        )
+
+
+    def ortho(self, left, right, bottom, top, near, far):
+        self.projection_matrix = np.array([
+            [2 / (right - left), 0, 0, -(right + left) / (right - left)],
+            [0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)],
+            [0, 0, -2 / (far - near), -(far + near) / (far - near)],
+            [0, 0, 0, 1],
+        ])
+
+
+    def frustum():
+        raise NotImplementedError

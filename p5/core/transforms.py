@@ -36,28 +36,24 @@ class _MatrixContext(AbstractContextManager):
         pop_matrix()
 
 
-matrix_stack = []
-
-
 def push_matrix():
     """Pushes the current transformation matrix onto the matrix stack.
     """
-    matrix_stack.append(p5.renderer.transform_matrix.copy())
+    p5.renderer.push_matrix()
     return _MatrixContext()
 
 
 def pop_matrix():
     """Pops the current transformation matrix off the matrix stack.
     """
-    assert len(matrix_stack) > 0, "No matrix to pop"
-    p5.renderer.transform_matrix = matrix_stack.pop()
+    p5.renderer.pop_matrix()
 
 
 def reset_transforms():
     """Reset all transformations to their default state.
 
     """
-    p5.renderer.transform_matrix = np.identity(4)
+    p5.renderer.reset_transforms()
 
 
 def translate(x, y, z=0):
@@ -82,9 +78,7 @@ def translate(x, y, z=0):
     :rtype: np.ndarray
 
     """
-    tmat = matrix.translation_matrix(x, y, z)
-    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
-    return tmat
+    return p5.renderer.translate(x, y, z)
 
 
 def rotate(theta, axis=np.array([0, 0, 1])):
@@ -100,10 +94,7 @@ def rotate(theta, axis=np.array([0, 0, 1])):
     :rtype: np.ndarray
 
    """
-    axis = np.array(axis[:])
-    tmat = matrix.rotation_matrix(axis, theta)
-    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
-    return tmat
+    return p5.renderer.rotate(theta)
 
 
 def rotate_x(theta):
@@ -116,7 +107,7 @@ def rotate_x(theta):
     :rtype: np.ndarray
 
     """
-    rotate(theta, axis=np.array([1, 0, 0]))
+    p5.renderer.rotate_x(theta)
 
 
 def rotate_y(theta):
@@ -129,7 +120,7 @@ def rotate_y(theta):
     :rtype: np.ndarray
 
    """
-    rotate(theta, axis=np.array([0, 1, 0]))
+    p5.renderer.rotate_y(theta)
 
 
 def rotate_z(theta):
@@ -140,9 +131,8 @@ def rotate_z(theta):
 
     :returns: The rotation matrix used to apply the transformation.
     :rtype: np.ndarray
-
-   """
-    rotate(theta, axis=np.array([0, 0, 1]))
+    """
+    p5.renderer.rotate_z(theta)
 
 
 def scale(sx, sy=None, sz=None):
@@ -160,14 +150,7 @@ def scale(sx, sy=None, sz=None):
     :returns: The transformation matrix used to appy the transformation.
     :rtype: np.ndarray
     """
-    if sy is None and sz is None:
-        sy = sx
-        sz = sx
-    elif sz is None:
-        sz = 1
-    tmat = matrix.scale_transform(sx, sy, sz)
-    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmat)
-    return tmat
+    return p5.renderer.scale(sx, sy, sz)
 
 
 def apply_matrix(transform_matrix):
@@ -176,20 +159,19 @@ def apply_matrix(transform_matrix):
     :param transform_matrix: The new transform matrix.
     :type transform_matrix: np.ndarray (or a 4×4 list)
     """
-    tmatrix = np.array(transform_matrix)
-    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(tmatrix)
+    p5.renderer.apply_matrix()
 
 
 def reset_matrix():
     """Reset the current transform matrix.
     """
-    p5.renderer.transform_matrix = np.identity(4)
+    p5.renderer.reset_matrix()
 
 
 def print_matrix():
     """Print the transform matrix being used by the sketch.
     """
-    print(p5.renderer.transform_matrix)
+    print(p5.renderer.print_matrix())
 
 
 def shear_x(theta):
@@ -202,10 +184,7 @@ def shear_x(theta):
     :rtype: np.ndarray
 
     """
-    shear_mat = np.identity(4)
-    shear_mat[0, 1] = np.tan(theta)
-    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
-    return shear_mat
+    return p5.renderer.shear_x(theta)
 
 
 def shear_y(theta):
@@ -218,10 +197,7 @@ def shear_y(theta):
     :rtype: np.ndarray
 
     """
-    shear_mat = np.identity(4)
-    shear_mat[1, 0] = np.tan(theta)
-    p5.renderer.transform_matrix = p5.renderer.transform_matrix.dot(shear_mat)
-    return shear_mat
+    return p5.renderer.shear_y(theta)
 
 
 def camera(*args, **kwargs):
@@ -275,29 +251,7 @@ def camera(*args, **kwargs):
     :type up_vector: tuple
 
     """
-    def real_camera(position=(0, 0, p5.sketch.size[1] / math.tan(math.pi / 6)),
-                    target_position=(0, 0, 0), up_vector=(0, 1, 0)):
-        p5.renderer.lookat_matrix = matrix.look_at(
-            np.array(position),
-            np.array(target_position),
-            np.array(up_vector))
-        p5.renderer.camera_pos = np.array(position)
-
-    if len(args) == 9:  # If using non-tuple arguments
-        kwargs['position'] = args[:3]
-        kwargs['target_position'] = args[3:6]
-        kwargs['up_vector'] = args[6:]
-    elif len(args) <= 3:  # If using tuple arguments
-        if len(args) >= 1:
-            kwargs['position'] = args[0]
-        if len(args) >= 2:
-            kwargs['target_position'] = args[1]
-        if len(args) >= 3:
-            kwargs['up_vector'] = args[2]
-    else:
-        raise ValueError("Unexpected number of arguments passed to camera()")
-
-    real_camera(**kwargs)
+    p5.renderer.camera(*args, **kwargs)
 
 
 def perspective(fovy, aspect, near, far):
@@ -316,12 +270,7 @@ def perspective(fovy, aspect, near, far):
     :param far: frustum far plane length
     :type far: float
     """
-    p5.renderer.projection_matrix = matrix.perspective_matrix(
-        fovy,
-        aspect,
-        near,
-        far
-    )
+    p5.renderer.perspective(fovy, aspect, near, far)
 
 
 def ortho(left, right, bottom, top, near, far):
@@ -348,12 +297,7 @@ def ortho(left, right, bottom, top, near, far):
     :param far: camera frustum far plane
     :type far: float
     """
-    p5.renderer.projection_matrix = np.array([
-        [2 / (right - left), 0, 0, -(right + left) / (right - left)],
-        [0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)],
-        [0, 0, -2 / (far - near), -(far + near) / (far - near)],
-        [0, 0, 0, 1],
-    ])
+    p5.renderer.ortho(left, right, bottom, top, near, far)
 
 
 def frustum():
