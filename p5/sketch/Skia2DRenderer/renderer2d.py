@@ -206,3 +206,21 @@ class SkiaRenderer():
     def circle(self, x, y, d):
         self.path.addCircle(x, y, d/2)
         self.render()
+
+    def point(self, x, y):
+        s = self.style.stroke_color
+        f = self.style.fill_color
+        fe = self.style.fill_enabled
+
+        # configure the settings beforehand we render
+        # We draw an arc, and fill it to simulate a point
+        self.style.fill_color = s
+        self.style.fill_enabled = True
+        self.style.stroke_enabled = False
+
+        # This will render the point
+        self.arc(x, y, self.style.stroke_weight/2, self.style.stroke_weight/2, 0, TWO_PI, False)
+
+        self.style.fill_color = f
+        self.style.fill_enabled = fe
+        self.style.stroke_enabled = True

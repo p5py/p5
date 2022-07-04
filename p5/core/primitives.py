@@ -50,14 +50,17 @@ def point(x, y, z=0):
     :rtype: PShape
 
     """
-    if p5.renderer.stroke_cap == SQUARE:
-        pass
-    elif p5.renderer.stroke_cap == PROJECT:
-        return square((x, y, z), p5.renderer.stroke_weight, mode='CENTER')
-    elif p5.renderer.stroke_cap == ROUND:
-        return circle((x, y, z), p5.renderer.stroke_weight / 2, mode='CENTER')
-    raise ValueError('Unknown stroke_cap value')
-
+    if builtins.current_renderer == 'vispy':
+        if p5.renderer.stroke_cap == SQUARE:
+            pass
+        elif p5.renderer.stroke_cap == PROJECT:
+            return square((x, y, z), p5.renderer.stroke_weight, mode='CENTER')
+        elif p5.renderer.stroke_cap == ROUND:
+            return circle((x, y, z), p5.renderer.stroke_weight / 2, mode='CENTER')
+        raise ValueError('Unknown stroke_cap value')
+    elif builtins.current_renderer == 'skia':
+        if p5.renderer.style.stroke_enabled:
+            p5.renderer.point(x, y)
 
 def line(*args):
     """Returns a line.
@@ -707,8 +710,6 @@ def circle(*args, mode=None):
         x, y = coordinate
         p5.renderer.circle(x, y, diameter)
 
-
-
 def ellipse_mode(mode='CENTER'):
     """Change the ellipse and circle drawing mode for the p5.renderer.
 
@@ -720,7 +721,6 @@ def ellipse_mode(mode='CENTER'):
 
     """
     p5.renderer.style.ellipse_mode = mode
-
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape
