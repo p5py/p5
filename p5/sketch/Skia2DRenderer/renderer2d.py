@@ -226,7 +226,7 @@ class SkiaRenderer():
         self.path.close()
         self.render()
 
-    def rect(self, args):
+    def rect(self, *args):
         x, y, w, h = args[:4]
         args = args[4:]
         tl = args[0] if len(args) >= 1 else None

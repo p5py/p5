@@ -457,7 +457,7 @@ def rect(*args, mode=None):
 
     elif builtins.current_renderer == 'skia':
         vals = mode_adjust(args[0], args[1], args[2], args[3], mode if mode is not None else p5.renderer.style.rect_mode)
-        p5.renderer.rect((vals['x'], vals['y'], vals['w'], vals['h']) + args[4:])
+        p5.renderer.rect(*(vals['x'], vals['y'], vals['w'], vals['h']) + args[4:])
 
 
 def square(*args, mode=None):
@@ -494,19 +494,23 @@ def square(*args, mode=None):
     :raises ValueError: When the mode is set to 'CORNERS'
 
     """
-    if len(args) == 2:
-        coordinate, side_length = args
-    elif len(args) == 3:
-        coordinate, side_length = args[:2], args[2]
-    else:
-        raise ValueError("Unexpected number of arguments passed to square()")
+    if builtins.current_renderer == 'vispy':
+        if len(args) == 2:
+            coordinate, side_length = args
+        elif len(args) == 3:
+            coordinate, side_length = args[:2], args[2]
+        else:
+            raise ValueError("Unexpected number of arguments passed to square()")
 
-    if mode is None:
-        mode = p5.renderer.style.rect_mode
+        if mode is None:
+            mode = p5.renderer.style.rect_mode
 
-    if mode == 'CORNERS':
-        raise ValueError("Cannot draw square with {} mode".format(mode))
-    return rect(coordinate, side_length, side_length, mode=mode)
+        if mode == 'CORNERS':
+            raise ValueError("Cannot draw square with {} mode".format(mode))
+        return rect(coordinate, side_length, side_length, mode=mode)
+    elif builtins.current_renderer == 'skia':
+        rect(*args)
+
 
 
 def rect_mode(mode='CORNER'):
