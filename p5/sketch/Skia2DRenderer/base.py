@@ -1,5 +1,4 @@
 import builtins
-from calendar import c
 from p5.core import p5
 
 import contextlib, glfw, skia
@@ -8,7 +7,7 @@ from time import time
 
 from ..events import handler_names
 from .handlers import *
-
+from .util import *
 
 def _dummy(*args, **kwargs):
     """Eat all arguments, do nothing."""
@@ -150,7 +149,7 @@ class SkiaSketch:
         self.setup_method()
         self.poll_events()
 
-        p5.renderer.render(rewind=False)
+        p5.renderer.render()
         self.surface.flushAndSubmit()
         glfw.swap_buffers(self.window)
 
