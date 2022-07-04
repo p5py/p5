@@ -302,13 +302,17 @@ def triangle(*args):
         p1, p2, p3 = args
     else:
         raise ValueError("Unexpected number of arguments passed to triangle()")
+    if builtins.current_renderer == 'vispy':
+        path = [
+            Point(*p1),
+            Point(*p2),
+            Point(*p3)
+        ]
+        p5.renderer.triangle(path)
+    elif builtins.current_renderer == 'skia':
+        if should_draw():
+            p5.renderer.triangle(*p1, *p2, *p3)
 
-    path = [
-        Point(*p1),
-        Point(*p2),
-        Point(*p3)
-    ]
-    p5.renderer.triangle(path)
 
 
 def quad(*args):
@@ -509,7 +513,8 @@ def square(*args, mode=None):
             raise ValueError("Cannot draw square with {} mode".format(mode))
         return rect(coordinate, side_length, side_length, mode=mode)
     elif builtins.current_renderer == 'skia':
-        rect(*args)
+        if should_draw():
+            rect(*args)
 
 
 

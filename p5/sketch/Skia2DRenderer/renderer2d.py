@@ -279,3 +279,12 @@ class SkiaRenderer():
         self.path.close()
 
         self.render()
+
+    def triangle(self, *args):
+        x1, y1, x2, y2, x3, y3 = args
+        self.path.moveTo(x1, y1)
+        self.path.lineTo(x2, y2)
+        self.path.lineTo(x3, y3)
+        self.path.close()
+
+        self.render()
