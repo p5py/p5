@@ -63,13 +63,6 @@ class SkiaRenderer():
 
         self.canvas.clear(skia.Color4f(*self.style.background_color))
 
-    def rect(self, x, y, w, h):
-        self.path.moveTo(x, y)
-        self.path.lineTo(x + w, y)
-        self.path.lineTo(x + w, y + h)
-        self.path.lineTo(x, y + h)
-        self.render()
-
     def render_circle(self, x, y, radius):
         self.path.addCircle(x, y, radius)
         self.render()
@@ -224,3 +217,65 @@ class SkiaRenderer():
         self.style.fill_color = f
         self.style.fill_enabled = fe
         self.style.stroke_enabled = True
+
+    def quad(self, x1, y1, x2, y2, x3, y3, x4, y4):
+        self.path.moveTo(x1, y1)
+        self.path.lineTo(x2, y2)
+        self.path.lineTo(x3, y3)
+        self.path.lineTo(x4, y4)
+        self.path.close()
+        self.render()
+
+    def rect(self, args):
+        x, y, w, h = args[:4]
+        args = args[4:]
+        tl = args[0] if len(args) >= 1 else None
+        tr = args[1] if len(args) >= 2 else None
+        br = args[2] if len(args) >= 3 else None
+        bl = args[3] if len(args) >= 4 else None
+
+        if tl is None:
+            self.path.moveTo(x, y)
+            self.path.lineTo(x + w, y)
+            self.path.lineTo(x + w, y + h)
+            self.path.lineTo(x, y + h)
+            self.path.close()
+            self.render()
+            return
+
+        if tr is None:
+            tr = tl
+        if br is None:
+            br = tr
+        if bl is None:
+            bl = br
+
+        absW = abs(w)
+        absH = abs(h)
+        hw = absW / 2
+        hh = absH / 2
+        if absW < 2 * tl: 
+            tl = hw
+        if absH < 2 * tl:
+            tl = hh
+        if absW < 2 * tr:
+            tr = hw
+        if absH < 2 * tr:
+            tr = hh
+        if absW < 2 * br:
+            br = hw
+        if absH < 2 * br:
+            br = hh
+        if absW < 2 * bl:
+            bl = hw
+        if absH < 2 * bl:
+            bl = hh
+
+        self.path.moveTo(x + tl, y)
+        self.path.arcTo(x + w, y, x + w, y + h, tr)
+        self.path.arcTo(x + w, y + h, x, y + h, br)
+        self.path.arcTo(x, y + h, x, y, bl)
+        self.path.arcTo(x, y, x + w, y, tl)
+        self.path.close()
+
+        self.render()

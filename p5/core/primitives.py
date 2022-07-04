@@ -62,6 +62,7 @@ def point(x, y, z=0):
         if p5.renderer.style.stroke_enabled:
             p5.renderer.point(x, y)
 
+
 def line(*args):
     """Returns a line.
 
@@ -365,7 +366,14 @@ def quad(*args):
         Point(*p3),
         Point(*p4)
     ]
-    p5.renderer.quad(path)
+    if builtins.current_renderer == 'vispy':
+        p5.renderer.quad(path)
+    elif builtins.current_renderer == 'skia':
+        x1, y1 = p1
+        x2, y2 = p2
+        x3, y3 = p3
+        x4, y4 = p4
+        p5.renderer.quad(x1, y1, x2, y2, x3, y3, x4, y4)
 
 
 def rect(*args, mode=None):
@@ -406,44 +414,50 @@ def rect(*args, mode=None):
     :returns: A rectangle.
     :rtype: p5.PShape
 
+    TODO: Update docs for rect, we support border radius as well
     """
-    if len(args) == 4:
-        coordinate, args = args[:2], args[2:]
-    elif len(args) == 3:
-        coordinate, args = args[0], args[1:]
-    else:
-        raise ValueError("Unexpected number of arguments passed to rect()")
+    if builtins.current_renderer == 'vispy':
+        if len(args) == 4:
+            coordinate, args = args[:2], args[2:]
+        elif len(args) == 3:
+            coordinate, args = args[0], args[1:]
+        elif builtins.current_renderer == 'vispy':
+            raise ValueError("Unexpected number of arguments passed to rect()")
 
-    if mode is None:
-        mode = p5.renderer.style.rect_mode
+        if mode is None:
+            mode = p5.renderer.style.rect_mode
 
-    if mode == 'CORNER':
-        corner = coordinate
-        width, height = args
-    elif mode == 'CENTER':
-        center = Point(*coordinate)
-        width, height = args
-        corner = Point(center.x - width / 2, center.y - height / 2, center.z)
-    elif mode == 'RADIUS':
-        center = Point(*coordinate)
-        half_width, half_height = args
-        corner = Point(center.x - half_width, center.y - half_height, center.z)
-        width = 2 * half_width
-        height = 2 * half_height
-    elif mode == 'CORNERS':
-        corner = Point(*coordinate)
-        corner_2, = args
-        corner_2 = Point(*corner_2)
-        width = corner_2.x - corner.x
-        height = corner_2.y - corner.y
-    else:
-        raise ValueError("Unknown rect mode {}".format(mode))
+        if mode == 'CORNER':
+            corner = coordinate
+            width, height = args
+        elif mode == 'CENTER':
+            center = Point(*coordinate)
+            width, height = args
+            corner = Point(center.x - width / 2, center.y - height / 2, center.z)
+        elif mode == 'RADIUS':
+            center = Point(*coordinate)
+            half_width, half_height = args
+            corner = Point(center.x - half_width, center.y - half_height, center.z)
+            width = 2 * half_width
+            height = 2 * half_height
+        elif mode == 'CORNERS':
+            corner = Point(*coordinate)
+            corner_2, = args
+            corner_2 = Point(*corner_2)
+            width = corner_2.x - corner.x
+            height = corner_2.y - corner.y
+        else:
+            raise ValueError("Unknown rect mode {}".format(mode))
 
-    p1 = Point(*corner)
-    p2 = Point(p1.x + width, p1.y, p1.z)
-    p3 = Point(p2.x, p2.y + height, p2.z)
-    p4 = Point(p1.x, p3.y, p3.z)
-    return quad(p1, p2, p3, p4)
+        p1 = Point(*corner)
+        p2 = Point(p1.x + width, p1.y, p1.z)
+        p3 = Point(p2.x, p2.y + height, p2.z)
+        p4 = Point(p1.x, p3.y, p3.z)
+        return quad(p1, p2, p3, p4)
+
+    elif builtins.current_renderer == 'skia':
+        vals = mode_adjust(args[0], args[1], args[2], args[3], mode if mode is not None else p5.renderer.style.rect_mode)
+        p5.renderer.rect((vals['x'], vals['y'], vals['w'], vals['h']) + args[4:])
 
 
 def square(*args, mode=None):
@@ -710,6 +724,7 @@ def circle(*args, mode=None):
         x, y = coordinate
         p5.renderer.circle(x, y, diameter)
 
+
 def ellipse_mode(mode='CENTER'):
     """Change the ellipse and circle drawing mode for the p5.renderer.
 
@@ -721,6 +736,7 @@ def ellipse_mode(mode='CENTER'):
 
     """
     p5.renderer.style.ellipse_mode = mode
+
 
 def create_shape(kind=None, *args, **kwargs):
     """Create a new PShape
