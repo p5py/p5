@@ -28,10 +28,18 @@ class SkiaRenderer():
         self.canvas = None
         self.paint = None
         self.style = Style2D()
+        self.style_stack = []
+        self.matrix_stack = []
         self.path = None
         self.font = skia.Font()
         self.typeface = skia.Typeface.MakeDefault()
         self.font.setTypeface(self.typeface)
+
+    def push_matrix(self):
+        self.canvas.save()
+
+    def pop_matrix(self):
+        self.canvas.restore()
 
     def _acute_arc_to_bezier(self, start, size):
         alpha = size / 2
@@ -62,10 +70,6 @@ class SkiaRenderer():
         self.path = path
 
         self.canvas.clear(skia.Color4f(*self.style.background_color))
-
-    def render_circle(self, x, y, radius):
-        self.path.addCircle(x, y, radius)
-        self.render()
 
     def render_text(self, text, x, y):
         # full path works relative does not
