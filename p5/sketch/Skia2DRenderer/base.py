@@ -126,7 +126,6 @@ class SkiaSketch:
                 builtins.frame_count += 1
                 with self.surface as self.canvas:
                     self.draw_method()
-                    p5.renderer.render()
                 self.surface.flushAndSubmit()
                 glfw.swap_buffers(self.window)
                 last_render_call_time = time()
