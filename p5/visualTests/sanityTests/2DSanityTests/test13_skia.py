@@ -31,4 +31,4 @@ def drawBand(v, w, x, y, z, ypos, barWidth):
                         rect(i + j*barWidth, ypos, barWidth, height/2)
 
 if __name__ == '__main__':
-        run()
+        run(renderer='skia')

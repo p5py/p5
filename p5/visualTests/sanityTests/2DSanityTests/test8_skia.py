@@ -19,12 +19,13 @@ def draw():
         translate(width/2, height/2)
         scale(s)
         fill(51)
-        rect((-25, -25), 50, 50)
+        rect(-25, -25, 50, 50)
 
         translate(75, 0)
         fill(255)
         scale(s)
-        rect((-25, -25), 50, 50)
+        rect(-25, -25, 50, 50)
 
 if __name__ == '__main__':
-        run()
+        print("Translate not yet implemented")
+        # run(renderer='skia')

@@ -28,4 +28,4 @@ def draw():
                         point(x + spacer / 2, y + spacer / 2)
 
 if __name__ == '__main__':
-        run()
+        run(renderer='skia')

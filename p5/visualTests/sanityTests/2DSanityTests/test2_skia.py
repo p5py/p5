@@ -21,4 +21,4 @@ def draw_circle(x, radius, level):
         draw_circle(x + radius / 2, radius / 2, level)
 
 if __name__ == '__main__':
-    run()
+    run(renderer='skia')

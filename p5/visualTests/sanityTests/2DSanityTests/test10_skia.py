@@ -31,4 +31,5 @@ def segment(x, y, a):
         line((0, 0), (segLength, 0))
 
 if __name__ == '__main__':
-        run()
+        print("Translate not implemented yet")
+        # run(renderer='skia')

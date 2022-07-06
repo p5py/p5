@@ -29,4 +29,5 @@ def draw():
         rect((-dim/2, -dim/2), dim, dim)
 
 if __name__ == '__main__':
-        run()
+        # run(renderer='skia')
+        print("Translate not implemented yet")

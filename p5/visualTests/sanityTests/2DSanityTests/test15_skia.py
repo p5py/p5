@@ -30,4 +30,4 @@ def drawGradient(x, y):
                 h = (h + 1) % 360
 
 if __name__ == '__main__':
-        run(frame_rate=1)
+        run(renderer='skia', frame_rate=1)

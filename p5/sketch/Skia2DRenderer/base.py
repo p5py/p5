@@ -16,7 +16,6 @@ def _dummy(*args, **kwargs):
 
 class SkiaSketch:
     def __init__(self, setup_method, draw_method, handlers=dict(), frame_rate=60):
-        self.frame_count = 0
         self._size = (600, 400)
         self.setup_method = setup_method
         self.draw_method = draw_method

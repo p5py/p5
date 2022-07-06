@@ -31,4 +31,4 @@ def draw():
                 line((i, y1), (i, y2))
 
 if __name__ == '__main__':
-        run()
+        run(renderer='skia')

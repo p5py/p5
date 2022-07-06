@@ -31,4 +31,4 @@ def draw():
     rect(width*0.25, height*0.1, width * 0.5, height * 0.8)
 
 if __name__ == '__main__':
-    run()
+    run(renderer='skia')

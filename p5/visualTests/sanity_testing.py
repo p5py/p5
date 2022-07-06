@@ -12,6 +12,9 @@ test_names_3d = [f'{dirname}/sanityTests/3DSanityTests/{name}' for name in
                  os.listdir(os.path.join(dirname, 'sanityTests/3DSanityTests'))
                  if name not in ['__init__.py', '__pycache__']]
 
+test_names_3d.sort()
+test_names_2d.sort()
+
 print('============================= Running 2D tests =============================')
 for name in test_names_2d:
     print('Running', name)

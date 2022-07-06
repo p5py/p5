@@ -43,4 +43,4 @@ def setGradient(x, y, w, h, c1, c2, axis):
                         line((i, y), (i, y+h))
 
 if __name__ == '__main__':
-        run()
+        run(renderer='skia')
