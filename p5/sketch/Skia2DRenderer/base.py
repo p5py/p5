@@ -110,7 +110,6 @@ class SkiaSketch:
 
     def main_loop(self):
         last_render_call_time = 0
-
         # Before starting the main while loop, check whether no_loop is called
         # If called we have to render a frame once
         # Set redraw and looping to False
@@ -122,8 +121,6 @@ class SkiaSketch:
                 and (self.looping or self.redraw)
                 and (time() - last_render_call_time) > 1 / self.frame_rate
             ):
-                # Reset the transformations before each draw call
-                p5.renderer.reset_matrix()
                 builtins.frame_count += 1
                 with self.surface as self.canvas:
                     self.draw_method()
@@ -135,7 +132,12 @@ class SkiaSketch:
                 # Now don't render the next one
                 if self.redraw:
                     self.redraw = False
-                
+
+                # Reset every style values back to default
+                # TODO: Find a way to reset values of Graphic objects as well,
+                # TODO: we can probably emit event after each loop to notify all graphics object
+                p5.renderer.reset()
+
             self.poll_events()
             while len(self.handler_queue) != 0:
                 function, event = self.handler_queue.pop(0)
@@ -150,7 +152,6 @@ class SkiaSketch:
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
         self.setup_method()
         self.poll_events()
-
         p5.renderer.render()
         self.surface.flushAndSubmit()
         glfw.swap_buffers(self.window)
