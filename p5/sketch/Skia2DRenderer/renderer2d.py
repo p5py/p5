@@ -56,7 +56,10 @@ class SkiaRenderer():
         self.canvas.scale(x, y)
 
     def shear_x(self, theta):
-        pass
+        self.apply_matrix(np.array([1, tan(theta), 0, 0, 1, 0, 0, 0, 1]).reshape(3, 3))
+
+    def shear_y(self, theta):
+        self.apply_matrix(np.array([1, 0, 0, tan(theta), 1, 0, 0, 0, 1]).reshape(3, 3))
 
     def apply_matrix(self, transform_matrix):
         if transform_matrix.shape != (3, 3):
