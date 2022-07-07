@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from OpenGL import GL
 
 from p5 import p5
+import numpy as np
 from p5.pmath.utils import *
 
 
@@ -48,6 +49,20 @@ class SkiaRenderer():
 
     def translate(self, x, y, z):
         self.canvas.translate(x, y)
+
+    def scale(self, x, y=None, z=None):
+        if not y:
+            y = x
+        self.canvas.scale(x, y)
+
+    def shear_x(self, theta):
+        pass
+
+    def apply_matrix(self, transform_matrix):
+        if transform_matrix.shape != (3, 3):
+            raise ValueError("Expected a (3,3) shaped matrix instead received", transform_matrix.shape)
+        curr = np.array([*self.canvas.getTotalMatrix()]).reshape(3, 3)
+        self.canvas.setMatrix(skia.Matrix(np.matmul(curr, transform_matrix)))
 
     def reset_matrix(self):
         self.canvas.resetMatrix()
@@ -213,7 +228,7 @@ class SkiaRenderer():
         self.render()
 
     def circle(self, x, y, d):
-        self.path.addCircle(x, y, d/2)
+        self.path.addCircle(x, y, d / 2)
         self.render()
 
     def point(self, x, y):
@@ -228,7 +243,7 @@ class SkiaRenderer():
         self.style.stroke_enabled = False
 
         # This will render the point
-        self.arc(x, y, self.style.stroke_weight/2, self.style.stroke_weight/2, 0, TWO_PI, False)
+        self.arc(x, y, self.style.stroke_weight / 2, self.style.stroke_weight / 2, 0, TWO_PI, False)
 
         self.style.fill_color = f
         self.style.fill_enabled = fe
@@ -270,7 +285,7 @@ class SkiaRenderer():
         absH = abs(h)
         hw = absW / 2
         hh = absH / 2
-        if absW < 2 * tl: 
+        if absW < 2 * tl:
             tl = hw
         if absH < 2 * tl:
             tl = hh
