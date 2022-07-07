@@ -124,7 +124,7 @@ def text(*args, wrap_at=None):
     is_stroke_valid = False  # True when stroke_weight != 0
     is_min_filter = False   # True when stroke_weight <0
     if p5.renderer.style.stroke_enabled:
-        stroke_weight = p5.renderer.stroke_weight
+        stroke_weight = p5.renderer.style.stroke_weight
         if stroke_weight < 0:
             stroke_weight = abs(stroke_weight)
             is_min_filter = True

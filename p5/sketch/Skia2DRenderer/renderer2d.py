@@ -44,25 +44,6 @@ class Style2D:
         elif j == BEVEL:
             self.stroke_join = skia.Paint.kBevel_Join
 
-    def reset(self):
-        self.background_color = (0.8, 0.8, 0.8, 1.0)
-        self.fill_enabled = True
-        self.stroke_enabled = True
-        self.fill_color = (1, 1, 1, 1)
-        self.stroke_color = (0, 0, 0)
-        self.stroke_weight = 1
-
-        self.tint_color = (0, 0, 0)
-        self.tint_enabled = False
-        self.ellipse_mode = "CENTER"
-        self.rect_mode = "CORNER"
-        self.color_parse_mode = "RGB"
-        self.color_range = (255, 255, 255, 255)
-
-        self.stroke_cap = skia.Paint.kRound_Cap
-        self.stroke_join = skia.Paint.kMiter_Join
-
-
 class SkiaRenderer():
     def __init__(self):
         self.canvas = None
@@ -190,13 +171,16 @@ class SkiaRenderer():
 
         curr_fill = self.style.fill_color
         curr_fill_enabled = self.style.fill_enabled
+        curr_stroke_enabled = self.style.stroke_enabled
 
         self.style.fill_enabled = True
+        self.style.stroke_enabled = False
         self.style.fill_color = Color(*args, **kwargs).normalized
         self.rect(0, 0, *p5.sketch.size)
 
         self.style.fill_color = curr_fill
         self.style.fill_enabled = curr_fill_enabled
+        self.style.stroke_enabled = curr_stroke_enabled
 
         self.pop_matrix()
 
@@ -224,7 +208,6 @@ class SkiaRenderer():
         self.path.rewind()
 
     def reset(self):
-        self.style.reset()
         self.reset_matrix()
         self.font.setSize(15)
 
