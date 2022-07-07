@@ -5,6 +5,7 @@ from OpenGL import GL
 from p5 import p5
 import numpy as np
 from p5.pmath.utils import *
+from p5.core.color import Color
 
 
 @dataclass
@@ -99,7 +100,7 @@ class SkiaRenderer():
         self.paint = paint
         self.path = path
 
-        self.canvas.clear(skia.Color4f(*self.style.background_color))
+        self.clear()
 
     def render_text(self, text, x, y):
         # full path works relative does not
@@ -140,7 +141,26 @@ class SkiaRenderer():
         self.canvas.drawImage(img, *args)
 
     def clear(self):
-        self.canvas.clear(skia.Color4f(*self.style.background_color))
+        # Our screen will go black or all the pixels would be transparent
+        self.canvas.clear(skia.Color(0, 0, 0, 0))
+
+    def background(self, *args, **kwargs):
+        # TODO: Add if args == pImage check
+        # TODO: Add blend mode logic later
+        self.push_matrix()
+        self.reset_matrix()
+
+        curr_fill = self.style.fill_color
+        curr_fill_enabled = self.style.fill_enabled
+
+        self.style.fill_enabled = True
+        self.style.fill_color = Color(*args, **kwargs).normalized
+        self.rect(0, 0, *p5.sketch.size)
+
+        self.style.fill_color = curr_fill
+        self.style.fill_enabled = curr_fill_enabled
+
+        self.pop_matrix()
 
     def render(self, fill=True, stroke=True):
         """

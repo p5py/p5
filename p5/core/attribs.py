@@ -170,31 +170,33 @@ def background(*args, **kwargs):
         sketch do not match.
 
     """
-    if len(args) == 1 and isinstance(args[0], PImage):
-        background_image = args[0]
-        sketch_size = (builtins.width, builtins.height)
+    if builtins.current_renderer == 'vispy':
+        if len(args) == 1 and isinstance(args[0], PImage):
+            background_image = args[0]
+            sketch_size = (builtins.width, builtins.height)
 
-        if sketch_size != background_image.size:
-            msg = "Image dimension {} and sketch dimension {} do not match"
-            raise ValueError(msg.format(background_image.size, sketch_size))
+            if sketch_size != background_image.size:
+                msg = "Image dimension {} and sketch dimension {} do not match"
+                raise ValueError(msg.format(background_image.size, sketch_size))
+
+            with push_style():
+                no_tint()
+                image_mode('corner')
+                with push_matrix():
+                    image(background_image, (0, 0))
+
+            return background_image
 
         with push_style():
-            no_tint()
-            image_mode('corner')
+            background_color = Color(*args, **kwargs)
+            fill(background_color)
+            no_stroke()
+
             with push_matrix():
-                image(background_image, (0, 0))
-
-        return background_image
-
-    with push_style():
-        background_color = Color(*args, **kwargs)
-        fill(background_color)
-        no_stroke()
-
-        with push_matrix():
-            p5.renderer.style.background_color = background_color.normalized
-            p5.renderer.clear()
-
+                p5.renderer.style.background_color = background_color.normalized
+                p5.renderer.clear()
+    else:
+        p5.renderer.background(*args, **kwargs)
 
 def clear():
     """
