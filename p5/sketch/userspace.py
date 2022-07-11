@@ -259,7 +259,6 @@ def exit(*args, **kwargs):
             from vispy import app
             p5.sketch.show(visible=False)
             app.quit()
-    sys.exit(*args, **kwargs)
 
 
 def no_cursor():
