@@ -108,6 +108,8 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
         if normed:
             alpha = 1 
         else:
+            # Color object are sometimes created before we initialise the renderer
+            # So we have to check if the renderer is None or not
             alpha = p5.renderer.style.color_range[3] if p5.renderer else 255
 
     hsb = None

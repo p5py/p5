@@ -364,13 +364,14 @@ def quad(*args):
     else:
         raise ValueError("Unexpected number of arguments passed to quad()")
 
-    path = [
-        Point(*p1),
-        Point(*p2),
-        Point(*p3),
-        Point(*p4)
-    ]
+
     if builtins.current_renderer == 'vispy':
+        path = [
+            Point(*p1),
+            Point(*p2),
+            Point(*p3),
+            Point(*p4)
+        ]
         p5.renderer.quad(path)
     elif builtins.current_renderer == 'skia':
         x1, y1 = p1
@@ -425,7 +426,7 @@ def rect(*args, mode=None):
             coordinate, args = args[:2], args[2:]
         elif len(args) == 3:
             coordinate, args = args[0], args[1:]
-        elif builtins.current_renderer == 'vispy':
+        else:
             raise ValueError("Unexpected number of arguments passed to rect()")
 
         if mode is None:

@@ -171,7 +171,7 @@ def reset_matrix():
 def print_matrix():
     """Print the transform matrix being used by the sketch.
     """
-    print(p5.renderer.print_matrix())
+    p5.renderer.print_matrix()
 
 
 def shear_x(theta):

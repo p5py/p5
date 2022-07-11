@@ -196,7 +196,6 @@ def run(
         from p5.sketch.Skia2DRenderer.renderer2d import SkiaRenderer
 
         builtins.current_renderer = renderer
-        # import sketch here
         if mode == "P2D":
             p5.mode = "P2D"
             p5.renderer = SkiaRenderer()
@@ -390,8 +389,8 @@ def set_frame_rate(fps):
         fps (int): Number of frames to be displayed per second
 
     """
-    if builtins.current_renderer in ["vispy"]:
-        raise NotImplementedError("set_frame_rate is not present in vispy")
+    if builtins.current_renderer != 'skia':
+        raise NotImplementedError("set_frame_rate is only supported in skia")
 
     p5.sketch.frame_rate = fps
     

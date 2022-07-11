@@ -33,7 +33,7 @@ from contextlib import contextmanager
 from p5.core.constants import Z_EPSILON
 from p5.core.geometry import Geometry
 from ..Vispy2DRenderer.shape import PShape
-from ..Vispy2DRenderer.renderer2d import Style2D
+from ..Vispy2DRenderer.openglrenderer import Style2D
 
 from p5.pmath.matrix import translation_matrix
 from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, COLOR_WHITE
@@ -86,9 +86,7 @@ class Renderer3D(OpenGLRenderer):
         self.normal_prog = Program(src_normal.vert, src_normal.frag)
         self.phong_prog = Program(src_phong.vert, src_phong.frag)
         self.lookat_matrix = np.identity(4)
-        self.style_stack = []
-        self.matrix_stack = []
-        
+
         # Camera position
         self.camera_pos = np.zeros(3)
         # Lights
@@ -451,17 +449,6 @@ class Renderer3D(OpenGLRenderer):
         self.const_falloff.add(self.curr_constant_falloff)
         self.linear_falloff.add(self.curr_linear_falloff)
         self.quadratic_falloff.add(self.curr_quadratic_falloff)
-
-    def push_matrix(self):
-        """Pushes the current transformation matrix onto the matrix stack.
-        """
-        self.matrix_stack.append(self.transform_matrix.copy())
-
-    def pop_matrix(self):
-        """Pops the current transformation matrix off the matrix stack.
-        """
-        assert len(self.matrix_stack) > 0, "No matrix to pop"
-        self.transform_matrix = self.matrix_stack.pop()
     
     def reset_transforms(self):
         """Reset all transformations to their default state.

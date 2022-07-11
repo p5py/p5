@@ -36,22 +36,6 @@ from .shape import PShape, Arc
 from p5.core.constants import SType
 from dataclasses import dataclass
 
-@dataclass
-class Style2D:
-    background_color = (0.8, 0.8, 0.8, 1.0)
-    fill_color = COLOR_WHITE
-    fill_enabled = True
-    stroke_color = COLOR_BLACK
-    stroke_enabled = True
-    stroke_weight = 1
-    tint_color = COLOR_BLACK
-    tint_enabled = False
-    ellipse_mode = "CENTER"
-    rect_mode = "CORNER"
-    color_parse_mode = "RGB"
-    color_range = (255, 255, 255, 255)
-
-    
 
 class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
@@ -60,9 +44,6 @@ class VispyRenderer2D(OpenGLRenderer):
         self.texture_prog['texcoord'] = self.fbuf_texcoords
         self.line_prog = None
         self.modelview_matrix = np.identity(4)
-        self.style_stack = []
-        self.matrix_stack = []
-        self.style = Style2D()
 
     def reset_view(self):
         self.viewport = (
@@ -396,17 +377,6 @@ class VispyRenderer2D(OpenGLRenderer):
         """Render a Pshape"""
         self.render_shape(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
 
-    def push_matrix(self):
-        """Pushes the current transformation matrix onto the matrix stack.
-        """
-        self.matrix_stack.append(self.transform_matrix.copy())
-
-    def pop_matrix(self):
-        """Pops the current transformation matrix off the matrix stack.
-        """
-        assert len(self.matrix_stack) > 0, "No matrix to pop"
-        self.transform_matrix = self.matrix_stack.pop()
-    
     def reset_transforms(self):
         """Reset all transformations to their default state.
 
@@ -434,26 +404,21 @@ class VispyRenderer2D(OpenGLRenderer):
         self.transform_matrix = self.transform_matrix.dot(tmat)
         return tmat
 
-
     def apply_matrix(self, transform_matrix):
         tmatrix = np.array(transform_matrix)
         self.transform_matrix = self.transform_matrix.dot(tmatrix)
 
-
     def reset_matrix(self):
         self.transform_matrix = np.identity(4)
 
-
     def print_matrix(self):
         print(self.transform_matrix)
-
 
     def shear_x(self, theta):
         shear_mat = np.identity(4)
         shear_mat[0, 1] = np.tan(theta)
         self.transform_matrix = self.transform_matrix.dot(shear_mat)
         return shear_mat
-
 
     def shear_y(self, theta):
         shear_mat = np.identity(4)

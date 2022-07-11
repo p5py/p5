@@ -29,7 +29,6 @@ class SkiaRenderer():
         self.paint = None
         self.style = Style2D()
         self.style_stack = []
-        self.matrix_stack = []
         self.path = None
         self.font = skia.Font()
         self.typeface = skia.Typeface.MakeDefault()

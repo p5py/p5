@@ -4,7 +4,7 @@ from ..core import p5
 import builtins
 
 
-def read_shader(filename, renderer_name=None):
+def read_shader(filename):
     """Reads a shader in string mode and returns the content"""
 
     return pkgutil.get_data(

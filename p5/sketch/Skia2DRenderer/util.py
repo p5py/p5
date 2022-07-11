@@ -7,6 +7,7 @@ from ...core import p5
 def mode_adjust(a, b, c, d, mode):
     if mode == 'CORNER':
         return {'x': a, 'y': b, 'w': c, 'h': d}
+    # TODO: Add documentation for CORNERS mode
     elif mode == 'CORNERS':
         return {'x': a, 'y': b, 'w': c - a, 'h': d - b}
     elif mode == 'RADIUS':
