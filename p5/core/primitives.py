@@ -461,7 +461,12 @@ def rect(*args, mode=None):
         return quad(p1, p2, p3, p4)
 
     elif builtins.current_renderer == 'skia':
-        vals = mode_adjust(args[0], args[1], args[2], args[3], mode if mode is not None else p5.renderer.style.rect_mode)
+        if len(args) == 4:
+            x, y, w, h = args
+        elif len(args) == 3:
+            x, y = args[0]
+            w, h = args[1:]
+        vals = mode_adjust(x, y, w, h, mode if mode is not None else p5.renderer.style.rect_mode)
         p5.renderer.rect(*(vals['x'], vals['y'], vals['w'], vals['h']) + args[4:])
 
 
