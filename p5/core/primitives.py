@@ -515,7 +515,12 @@ def square(*args, mode=None):
         return rect(coordinate, side_length, side_length, mode=mode)
     elif builtins.current_renderer == 'skia':
         if should_draw():
-            rect(*args)
+            if len(args) == 2:
+                x, y = args[0]
+                side = args[1]
+            elif len(args) == 3:
+                x, y, side = args
+            rect(x, y, side, side)
 
 
 
