@@ -19,6 +19,3 @@ def draw_circle(x, radius, level):
         level = level - 1
         draw_circle(x - radius / 2, radius / 2, level)
         draw_circle(x + radius / 2, radius / 2, level)
-
-if __name__ == '__main__':
-    run()

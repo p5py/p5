@@ -1,7 +1,9 @@
 from p5 import *
 
+
 def setup():
     size(640, 360)
+
 
 def draw():
     background(0)
@@ -21,6 +23,3 @@ def draw():
         no_fill()
         stroke(255)
         sphere(280)
-
-if __name__ == '__main__':
-    run(mode='P3D')
