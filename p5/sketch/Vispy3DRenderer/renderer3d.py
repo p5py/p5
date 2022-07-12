@@ -35,6 +35,7 @@ from ..Vispy2DRenderer.shape import PShape
 from ..Vispy2DRenderer.openglrenderer import Style2D
 
 from p5.pmath.matrix import translation_matrix
+from p5.pmath import matrix
 from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, COLOR_WHITE
 from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
 from p5.core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
