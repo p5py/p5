@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from sys import stderr
 import numpy as np
 import math
-from p5.pmath import matrix
 
 import builtins
 
@@ -281,10 +280,6 @@ class Renderer3D(OpenGLRenderer):
                 self._add_to_draw_queue_simple(
                     stype, vertices, idx, stroke if stype == 'lines' else fill)
 
-    def shape(self, vertices, contours, shape_type, *args):
-        """Render a PShape"""
-        self.render(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
-
     def add_to_draw_queue(self, stype, vertices, edges, faces,
                           fill=None, stroke=None, normals=None, material=None):
         """Add the given vertex data to the draw queue.
@@ -449,73 +444,15 @@ class Renderer3D(OpenGLRenderer):
         self.const_falloff.add(self.curr_constant_falloff)
         self.linear_falloff.add(self.curr_linear_falloff)
         self.quadratic_falloff.add(self.curr_quadratic_falloff)
-    
-    def reset_transforms(self):
-        """Reset all transformations to their default state.
 
-        """
-        self.transform_matrix = np.identity(4)
-    
-    def translate(self, x, y, z=0):
-        tmat = matrix.translation_matrix(x, y, z)
-        self.transform_matrix = self.transform_matrix.dot(tmat)
-        return tmat
-    
-    def rotate(self, theta, axis=np.array([0, 0, 1])):
-        axis = np.array(axis[:])
-        tmat = matrix.rotation_matrix(axis, theta)
-        self.transform_matrix = self.transform_matrix.dot(tmat)
-        return tmat
-        
-        
     def rotate_x(self, theta):
         self.rotate(theta, axis=np.array([1, 0, 0]))
-
 
     def rotate_y(self, theta):
         self.rotate(theta, axis=np.array([0, 1, 0]))
 
-
     def rotate_z(self, theta):
         self.rotate(theta, axis=np.array([0, 0, 1]))
-
-    def scale(self, sx, sy=None, sz=None):
-        if sy is None and sz is None:
-            sy = sx
-            sz = sx
-        elif sz is None:
-            sz = 1
-        tmat = matrix.scale_transform(sx, sy, sz)
-        self.transform_matrix = self.transform_matrix.dot(tmat)
-        return tmat
-
-
-    def apply_matrix(self, transform_matrix):
-        tmatrix = np.array(transform_matrix)
-        self.transform_matrix = self.transform_matrix.dot(tmatrix)
-
-
-    def reset_matrix(self):
-        self.transform_matrix = np.identity(4)
-
-
-    def print_matrix(self):
-        print(self.transform_matrix)
-
-
-    def shear_x(self, theta):
-        shear_mat = np.identity(4)
-        shear_mat[0, 1] = np.tan(theta)
-        self.transform_matrix = self.transform_matrix.dot(shear_mat)
-        return shear_mat
-
-
-    def shear_y(self, theta):
-        shear_mat = np.identity(4)
-        shear_mat[1, 0] = np.tan(theta)
-        self.transform_matrix = self.transform_matrix.dot(shear_mat)
-        return shear_mat
-
 
     def camera(self, *args, **kwargs):
         def real_camera(position=(0, 0, p5.sketch.size[1] / math.tan(math.pi / 6)),
@@ -542,7 +479,6 @@ class Renderer3D(OpenGLRenderer):
 
         real_camera(**kwargs)
 
-
     def perspective(self, fovy, aspect, near, far):
         self.projection_matrix = matrix.perspective_matrix(
             fovy,
@@ -551,7 +487,6 @@ class Renderer3D(OpenGLRenderer):
             far
         )
 
-
     def ortho(self, left, right, bottom, top, near, far):
         self.projection_matrix = np.array([
             [2 / (right - left), 0, 0, -(right + left) / (right - left)],
@@ -559,7 +494,6 @@ class Renderer3D(OpenGLRenderer):
             [0, 0, -2 / (far - near), -(far + near) / (far - near)],
             [0, 0, 0, 1],
         ])
-
 
     def frustum(self):
         raise NotImplementedError

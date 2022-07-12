@@ -31,10 +31,9 @@ from vispy.gloo import VertexBuffer
 from contextlib import contextmanager
 from .shaders2d import src_texture
 from .shaders2d import src_line
-from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE, COLOR_BLACK
+from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 from .shape import PShape, Arc
 from p5.core.constants import SType
-from dataclasses import dataclass
 
 
 class VispyRenderer2D(OpenGLRenderer):
@@ -372,56 +371,3 @@ class VispyRenderer2D(OpenGLRenderer):
         mode = args[4]
 
         self.render_shape(Arc(center, dim, start_angle, stop_angle, mode))
-
-    def shape(self, vertices, contours, shape_type, *args):
-        """Render a Pshape"""
-        self.render_shape(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
-
-    def reset_transforms(self):
-        """Reset all transformations to their default state.
-
-        """
-        self.transform_matrix = np.identity(4)
-    
-    def translate(self, x, y, z=0):
-        tmat = matrix.translation_matrix(x, y, z)
-        self.transform_matrix = self.transform_matrix.dot(tmat)
-        return tmat
-    
-    def rotate(self, theta, axis=np.array([0, 0, 1])):
-        axis = np.array(axis[:])
-        tmat = matrix.rotation_matrix(axis, theta)
-        self.transform_matrix = self.transform_matrix.dot(tmat)
-        return tmat
-    
-    def scale(self, sx, sy=None, sz=None):
-        if sy is None and sz is None:
-            sy = sx
-            sz = sx
-        elif sz is None:
-            sz = 1
-        tmat = matrix.scale_transform(sx, sy, sz)
-        self.transform_matrix = self.transform_matrix.dot(tmat)
-        return tmat
-
-    def apply_matrix(self, transform_matrix):
-        tmatrix = np.array(transform_matrix)
-        self.transform_matrix = self.transform_matrix.dot(tmatrix)
-
-    def reset_matrix(self):
-        self.transform_matrix = np.identity(4)
-
-    def print_matrix(self):
-        print(self.transform_matrix)
-
-    def shear_x(self, theta):
-        shear_mat = np.identity(4)
-        shear_mat[0, 1] = np.tan(theta)
-        self.transform_matrix = self.transform_matrix.dot(shear_mat)
-        return shear_mat
-
-    def shear_y(self, theta):
-        shear_mat = np.identity(4)
-        shear_mat[1, 0] = np.tan(theta)
-        self.transform_matrix = self.transform_matrix.dot(shear_mat)
-        return shear_mat

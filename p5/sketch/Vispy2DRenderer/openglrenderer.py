@@ -3,7 +3,8 @@ import numpy as np
 
 from p5.core import p5
 from p5.core.constants import SType, ROUND, MITER
-from .shape import Arc
+from p5.pmath import matrix
+from .shape import Arc, PShape
 
 from dataclasses import dataclass
 from vispy.gloo import Program, VertexBuffer, FrameBuffer, IndexBuffer
@@ -362,3 +363,59 @@ class OpenGLRenderer(ABC):
         """
         assert len(self.matrix_stack) > 0, "No matrix to pop"
         self.transform_matrix = self.matrix_stack.pop()
+
+    def scale(self, sx, sy=None, sz=None):
+        if sy is None and sz is None:
+            sy = sx
+            sz = sx
+        elif sz is None:
+            sz = 1
+        tmat = matrix.scale_transform(sx, sy, sz)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+
+    def apply_matrix(self, transform_matrix):
+        tmatrix = np.array(transform_matrix)
+        self.transform_matrix = self.transform_matrix.dot(tmatrix)
+
+    def reset_matrix(self):
+        self.transform_matrix = np.identity(4)
+
+    def print_matrix(self):
+        print(self.transform_matrix)
+
+    def shear_x(self, theta):
+        shear_mat = np.identity(4)
+        shear_mat[0, 1] = np.tan(theta)
+        self.transform_matrix = self.transform_matrix.dot(shear_mat)
+        return shear_mat
+
+    def shear_y(self, theta):
+        shear_mat = np.identity(4)
+        shear_mat[1, 0] = np.tan(theta)
+        self.transform_matrix = self.transform_matrix.dot(shear_mat)
+        return shear_mat
+
+    def reset_transforms(self):
+        """Reset all transformations to their default state.
+
+        """
+        self.transform_matrix = np.identity(4)
+
+    def translate(self, x, y, z=0):
+        tmat = matrix.translation_matrix(x, y, z)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+
+    def rotate(self, theta, axis=np.array([0, 0, 1])):
+        axis = np.array(axis[:])
+        tmat = matrix.rotation_matrix(axis, theta)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+
+    def render(self, shape):
+        pass
+
+    def shape(self, vertices, contours, shape_type, *args):
+        """Render a PShape"""
+        self.render(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
