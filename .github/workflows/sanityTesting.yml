@@ -26,6 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
           pip install .
+          sudo apt-get install x11-utils
       - name: Run headless tests
         uses: GabrielBB/xvfb-action@v1
         with:

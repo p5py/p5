@@ -1,11 +1,13 @@
 from p5 import *
 
+def setup():
+    size(640, 360)
+
 def draw():
 
     if frame_count > 30:
         exit()
     # Sets the screen to be 640 pixels wide and 360 pixels high
-    size(640, 360)
 
     # Set the background to black and turn off the fill color
     background(0)
