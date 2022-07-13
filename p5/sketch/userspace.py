@@ -248,7 +248,7 @@ def exit(*args, **kwargs):
     that necessary cleanup steps are performed before exiting the
     sketch.
 
-    :param args: positional argumets to pass to Python's builtin
+    :param args: positional arguments to pass to Python's builtin
         `exit()` function.
 
     :param kwargs: keyword-arguments to pass to Python's builtin
