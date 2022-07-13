@@ -35,6 +35,8 @@ def _dummy(*args, **kwargs):
     """
     pass
 
+class ExitException(Exception):
+    pass
 
 class VispySketch(app.Canvas):
     """The main sketch instance.
@@ -71,6 +73,7 @@ class VispySketch(app.Canvas):
         self.setup_method = setup_method
         self.draw_method = draw_method
 
+        self.exiting = False
         self.looping = None
         self.redraw = None
         self.setup_done = False
@@ -93,32 +96,39 @@ class VispySketch(app.Canvas):
         self.measure_fps(callback=lambda _: None)
         builtins.frame_rate = round(self.fps, 2)
 
-        with p5.renderer.draw_loop():
-            if not self.setup_done:
-                builtins.frame_count += 1
-                self.setup_method()
-                self.setup_done = True
-                self.show(visible=True)
-                if self.redraw is None:
+        try:
+            with p5.renderer.draw_loop():
+                if not self.setup_done:
+                    builtins.frame_count += 1
+                    self.setup_method()
+                    self.setup_done = True
+                    self.show(visible=True)
+                    if self.redraw is None:
+                        self.redraw = False
+                    if self.looping is None:
+                        self.looping = True
+
+                elif self.redraw:
+                    builtins.frame_count += 1
+                    self.draw_method()
                     self.redraw = False
-                if self.looping is None:
-                    self.looping = True
+                elif self.looping:
+                    builtins.frame_count += 1
+                    self.draw_method()
+                    self.redraw = False
+                elif not self.looping:
+                    pass
 
-            elif self.redraw:
-                builtins.frame_count += 1
-                self.draw_method()
-                self.redraw = False
-            elif self.looping:
-                builtins.frame_count += 1
-                self.draw_method()
-                self.redraw = False
-            elif not self.looping:
-                pass
+                if self.exiting:
+                    raise ExitException()
 
-            while len(self.handler_queue) != 0:
-                function, event = self.handler_queue.pop(0)
-                event._update_builtins()
-                function(event)
+                while len(self.handler_queue) != 0:
+                    function, event = self.handler_queue.pop(0)
+                    event._update_builtins()
+                    function(event)
+        except ExitException:
+            self.close()
+            return
 
         if self._save_flag:
             self._save_buffer()
@@ -199,3 +209,6 @@ class VispySketch(app.Canvas):
 
     # def on_stylus(self, event):
     #     self._enqueue_event('stylus', event)
+
+    def exit(self):
+        self.exiting = True

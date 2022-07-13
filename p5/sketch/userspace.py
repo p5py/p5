@@ -256,9 +256,7 @@ def exit(*args, **kwargs):
     """
     if not (p5.sketch is None):
         if builtins.current_renderer == "vispy":
-            from vispy import app
-            p5.sketch.show(visible=False)
-            app.quit()
+            p5.sketch.exit()
 
 
 def no_cursor():
