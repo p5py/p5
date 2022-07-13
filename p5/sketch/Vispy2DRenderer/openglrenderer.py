@@ -412,10 +412,3 @@ class OpenGLRenderer(ABC):
         tmat = matrix.rotation_matrix(axis, theta)
         self.transform_matrix = self.transform_matrix.dot(tmat)
         return tmat
-
-    def render(self, shape):
-        pass
-
-    def shape(self, vertices, contours, shape_type, *args):
-        """Render a PShape"""
-        self.render(PShape(vertices=vertices, contours=contours, shape_type=shape_type))

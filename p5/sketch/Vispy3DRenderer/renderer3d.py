@@ -498,3 +498,7 @@ class Renderer3D(OpenGLRenderer):
 
     def frustum(self):
         raise NotImplementedError
+
+    def shape(self, vertices, contours, shape_type, *args):
+        """Render a PShape"""
+        self.render(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
