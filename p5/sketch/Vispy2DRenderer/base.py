@@ -35,9 +35,6 @@ def _dummy(*args, **kwargs):
     """
     pass
 
-class ExitException(Exception):
-    pass
-
 class VispySketch(app.Canvas):
     """The main sketch instance.
 
