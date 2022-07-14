@@ -184,7 +184,7 @@ class PShape:
     @stroke_join.setter
     def stroke_join(self, stroke):
         if stroke == "auto":
-            self._stroke_join = p5.renderer.stroke_join
+            self._stroke_join = p5.renderer.style.stroke_join
         else:
             self._stroke_join = stroke
 
@@ -195,7 +195,7 @@ class PShape:
     @stroke_cap.setter
     def stroke_cap(self, stroke):
         if stroke == "auto":
-            self._stroke_cap = p5.renderer.stroke_cap
+            self._stroke_cap = p5.renderer.style.stroke_cap
         else:
             self._stroke_cap = stroke
 

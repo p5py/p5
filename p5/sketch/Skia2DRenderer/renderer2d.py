@@ -6,6 +6,7 @@ from p5 import p5
 import numpy as np
 from p5.pmath.utils import *
 from p5.core.color import Color
+from p5.core.constants import ROUND, SQUARE, PROJECT, MITER, BEVEL
 
 
 @dataclass
@@ -24,6 +25,25 @@ class Style2D:
     color_parse_mode = "RGB"
     color_range = (255, 255, 255, 255)
 
+    stroke_cap = skia.Paint.kRound_Cap
+    stroke_join = skia.Paint.kMiter_Join
+
+    def set_stroke_cap(self, c):
+        if c == ROUND:
+            self.stroke_cap = skia.Paint.kRound_Cap
+        elif c == SQUARE:
+            self.stroke_cap = skia.Paint.kButt_Cap
+        elif c == PROJECT:
+            self.stroke_cap = skia.Paint.kSquare_Cap
+
+    def set_stroke_join(self, j):
+        if j == ROUND:
+            self.stroke_join = skia.Paint.kRound_Join
+        elif j == MITER:
+            self.stroke_join = skia.Paint.kMiter_Join
+        elif j == BEVEL:
+            self.stroke_join = skia.Paint.kBevel_Join
+
     def reset(self):
         self.background_color = (0.8, 0.8, 0.8, 1.0)
         self.fill_enabled = True
@@ -38,6 +58,9 @@ class Style2D:
         self.rect_mode = "CORNER"
         self.color_parse_mode = "RGB"
         self.color_range = (255, 255, 255, 255)
+
+        self.stroke_cap = skia.Paint.kRound_Cap
+        self.stroke_join = skia.Paint.kMiter_Join
 
 
 class SkiaRenderer():
@@ -184,11 +207,15 @@ class SkiaRenderer():
         # TODO: Check, do we really have to setColor, and setStyle on each render call
         # TODO: Explore ways to do this, such that it works with pGraphics as well
         if self.style.fill_enabled and fill:
+            self.paint.setStrokeCap(self.style.stroke_cap)
+            self.paint.setStrokeJoin(self.style.stroke_join)
             self.paint.setStyle(skia.Paint.kFill_Style)
             self.paint.setColor(skia.Color4f(*self.style.fill_color))
             self.canvas.drawPath(self.path, self.paint)
 
         if self.style.stroke_enabled and stroke:
+            self.paint.setStrokeCap(self.style.stroke_cap)
+            self.paint.setStrokeJoin(self.style.stroke_join)
             self.paint.setStyle(skia.Paint.kStroke_Style)
             self.paint.setColor(skia.Color4f(*self.style.stroke_color))
             self.paint.setStrokeWidth(self.style.stroke_weight)
