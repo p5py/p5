@@ -34,12 +34,25 @@ class SkiaRenderer():
         self.typeface = skia.Typeface.MakeDefault()
         self.font.setTypeface(self.typeface)
 
+    # Transforms functions
     def push_matrix(self):
         self.canvas.save()
 
     def pop_matrix(self):
         self.canvas.restore()
 
+    def rotate(self, theta):
+        # angles are always in radians in p5py
+        # TODO: add angle mode
+        self.canvas.rotate(theta * 180 / PI)
+
+    def translate(self, x, y, z):
+        self.canvas.translate(x, y)
+
+    def reset_matrix(self):
+        self.canvas.resetMatrix()
+
+    # Rendering functions
     def _acute_arc_to_bezier(self, start, size):
         alpha = size / 2
         cos_alpha = cos(alpha)
@@ -291,3 +304,7 @@ class SkiaRenderer():
         self.path.close()
 
         self.render()
+
+    # Fonts functions
+
+    # Images functions
