@@ -96,43 +96,40 @@ class VispySketch(app.Canvas):
         self.measure_fps(callback=lambda _: None)
         builtins.frame_rate = round(self.fps, 2)
 
-        try:
-            with p5.renderer.draw_loop():
-                if not self.setup_done:
-                    builtins.frame_count += 1
-                    self.setup_method()
-                    self.setup_done = True
-                    self.show(visible=True)
-                    if self.redraw is None:
-                        self.redraw = False
-                    if self.looping is None:
-                        self.looping = True
-
-                elif self.redraw:
-                    builtins.frame_count += 1
-                    self.draw_method()
+        with p5.renderer.draw_loop():
+            if not self.setup_done:
+                builtins.frame_count += 1
+                self.setup_method()
+                self.setup_done = True
+                self.show(visible=True)
+                if self.redraw is None:
                     self.redraw = False
-                elif self.looping:
-                    builtins.frame_count += 1
-                    self.draw_method()
-                    self.redraw = False
-                elif not self.looping:
-                    pass
+                if self.looping is None:
+                    self.looping = True
 
-                if self.exiting:
-                    raise ExitException()
+            elif self.redraw:
+                builtins.frame_count += 1
+                self.draw_method()
+                self.redraw = False
+            elif self.looping:
+                builtins.frame_count += 1
+                self.draw_method()
+                self.redraw = False
+            elif not self.looping:
+                pass
 
-                while len(self.handler_queue) != 0:
-                    function, event = self.handler_queue.pop(0)
-                    event._update_builtins()
-                    function(event)
-        except ExitException:
-            self.close()
-            return
+            while len(self.handler_queue) != 0:
+                function, event = self.handler_queue.pop(0)
+                event._update_builtins()
+                function(event)
 
         if self._save_flag:
             self._save_buffer()
         self.update()
+
+        if (self.exiting):
+            self.close()
+            return
 
     def _save_buffer(self):
         """Save the renderer buffer to the given file.
@@ -154,6 +151,7 @@ class VispySketch(app.Canvas):
         self._save_flag = True
 
     def on_close(self, event):
+        self.timer.stop()
         app.quit()
 
     def on_draw(self, event):
