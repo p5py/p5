@@ -19,9 +19,5 @@ def draw():
     if whichBar != lastBar:
         barX = whichBar * barWidth
         fill(mouse_x, height, height)
-        rect((barX, 0), barWidth, height)
+        rect(barX, 0, barWidth, height)
         lastBar = whichBar
-
-
-if __name__ == '__main__':
-    run()

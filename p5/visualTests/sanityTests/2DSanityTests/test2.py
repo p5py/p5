@@ -12,7 +12,6 @@ def draw():
     draw_circle(width / 2, 280, 6)
 
 def draw_circle(x, radius, level):
-    background(200)
     tt = 126 * level / 4.0
     fill(tt)
     ellipse((x, height / 2), radius * 2, radius * 2)
@@ -20,6 +19,3 @@ def draw_circle(x, radius, level):
         level = level - 1
         draw_circle(x - radius / 2, radius / 2, level)
         draw_circle(x + radius / 2, radius / 2, level)
-
-if __name__ == '__main__':
-    run()

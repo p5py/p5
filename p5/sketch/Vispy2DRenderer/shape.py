@@ -173,7 +173,7 @@ class PShape:
     @stroke_weight.setter
     def stroke_weight(self, stroke):
         if stroke == "auto":
-            self._stroke_weight = p5.renderer.stroke_weight
+            self._stroke_weight = p5.renderer.style.stroke_weight
         else:
             self._stroke_weight = stroke
 

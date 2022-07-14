@@ -31,8 +31,23 @@ from .events import handler_names
 from ..core import p5
 from ..pmath import matrix
 
-__all__ = ['no_loop', 'loop', 'redraw', 'size', 'title', 'no_cursor',
-           'cursor', 'exit', 'draw', 'setup', 'run', 'save_frame', 'save']
+__all__ = [
+    "no_loop",
+    "loop",
+    "redraw",
+    "size",
+    "title",
+    "no_cursor",
+    "cursor",
+    "exit",
+    "draw",
+    "setup",
+    "run",
+    "save_frame",
+    "save",
+    "is_looping",
+    "set_frame_rate"
+]
 
 builtins.width = 360
 builtins.height = 360
@@ -42,6 +57,7 @@ builtins.pixel_y_density = 1
 builtins.title = "p5"
 builtins.frame_count = -1
 builtins.frame_rate = None
+# TODO: Implement focussed for Vispy, only implemented in Skia2DRenderer
 builtins.focused = True
 
 builtins.mouse_button = None
@@ -50,12 +66,17 @@ builtins.mouse_x = 0
 builtins.mouse_y = 0
 builtins.pmouse_x = 0
 builtins.pmouse_y = 0
+# TODO: Add docs for moved_x and moved_y
+builtins.moved_x = 0
+builtins.moved_y = 0
+
 builtins.key = None
 builtins.key_is_pressed = False
 
 builtins.pixels = None
 builtins.start_time = 0
 builtins.current_renderer = None
+
 
 def _fix_interface(func):
     """Make sure that `func` takes at least one argument as input.
@@ -96,8 +117,9 @@ def setup():
     pass
 
 
-def run(sketch_setup=None, sketch_draw=None,
-        frame_rate=60, mode="P2D", renderer="vispy"):
+def run(
+    sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer="vispy"
+):
     """Run a sketch.
 
     if no `sketch_setup` and `sketch_draw` are specified, p5 automatically
@@ -115,18 +137,17 @@ def run(sketch_setup=None, sketch_draw=None,
     :type frame_rate: int :math:`\geq 1`
 
     """
-
     # get the user-defined setup(), draw(), and handler functions.
     if sketch_setup is not None:
         setup_method = sketch_setup
-    elif hasattr(__main__, 'setup'):
+    elif hasattr(__main__, "setup"):
         setup_method = __main__.setup
     else:
         setup_method = setup
 
     if sketch_draw is not None:
         draw_method = sketch_draw
-    elif hasattr(__main__, 'draw'):
+    elif hasattr(__main__, "draw"):
         draw_method = __main__.draw
     else:
         draw_method = draw
@@ -139,18 +160,21 @@ def run(sketch_setup=None, sketch_draw=None,
 
     if renderer == "vispy":
         import vispy
-        vispy.use('glfw')
+
+        vispy.use("glfw")
         from p5.sketch.Vispy2DRenderer.base import VispySketch
         from vispy import app
+
         builtins.current_renderer = "vispy"
 
         if mode == "P2D":
-            p5.mode = 'P2D'
+            p5.mode = "P2D"
             from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
             p5.renderer = VispyRenderer2D()
         elif mode == "P3D":
-            p5.mode = 'P3D'
+            p5.mode = "P3D"
             from p5.sketch.Vispy3DRenderer.renderer3d import Renderer3D
+
             p5.renderer = Renderer3D()
         else:
             ValueError("Invalid Mode %s" % mode)
@@ -167,6 +191,18 @@ def run(sketch_setup=None, sketch_draw=None,
 
         app.run()
         exit()
+    elif renderer == "skia":
+        from p5.sketch.Skia2DRenderer.base import SkiaSketch
+        from p5.sketch.Skia2DRenderer.renderer2d import SkiaRenderer
+
+        builtins.current_renderer = renderer
+        if mode == "P2D":
+            p5.mode = "P2D"
+            p5.renderer = SkiaRenderer()
+        elif mode == "P3D":
+            raise NotImplementedError("3D mode is not available in skia")
+        p5.sketch = SkiaSketch(setup_method, draw_method, handlers, frame_rate)
+        p5.sketch.start()
     else:
         raise NotImplementedError("Invalid Renderer %s" % renderer)
 
@@ -200,9 +236,8 @@ def size(width, height):
     if p5.mode == "P3D":
         eye = np.array((0, 0, height / math.tan(math.pi / 6)))
         p5.renderer.lookat_matrix = matrix.look_at(
-            eye,
-            np.array((0, 0, 0)),
-            np.array((0, 1, 0)))
+            eye, np.array((0, 0, 0)), np.array((0, 1, 0))
+        )
         p5.renderer.camera_pos = eye
 
 
@@ -260,13 +295,12 @@ def exit(*args, **kwargs):
 
 
 def no_cursor():
-    """Hide the mouse cursor.
-    """
+    """Hide the mouse cursor."""
     # window.set_mouse_visible(False)
     raise NotImplementedError
 
 
-def cursor(cursor_type='ARROW'):
+def cursor(cursor_type="ARROW"):
     """Set the cursor to the specified type.
 
     :param cursor_type: The cursor type to be used (defaults to
@@ -290,7 +324,7 @@ def cursor(cursor_type='ARROW'):
     raise NotImplementedError
 
 
-def save(filename='screen.png'):
+def save(filename="screen.png"):
     """Save an image from the display window.
 
     Saves an image from the display window. Append a file extension to
@@ -340,3 +374,24 @@ def save_frame(filename="screen.png"):
     # saved image (instead of using the default sequencing) --abhikpal
     # (2018-08-14)
     p5.sketch.queue_screenshot(filename)
+
+
+# TODO: Add support to calculate the current frame_rate
+# TODO: Deprecate set_frame_rate and use frame_rate(), current frame_rate should return as per p5.js API
+def set_frame_rate(fps):
+    """Sets the frame_rate for the current sketch
+
+    Args:
+        fps (int): Number of frames to be displayed per second
+
+    """
+    if builtins.current_renderer != 'skia':
+        raise NotImplementedError("set_frame_rate is only supported in skia")
+
+    p5.sketch.frame_rate = fps
+    
+    
+def is_looping():
+    """Returns the current looping state of the sketch
+    """
+    return p5.sketch.looping

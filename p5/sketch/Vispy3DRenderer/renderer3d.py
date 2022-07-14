@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from sys import stderr
 import numpy as np
 import math
-from p5.pmath import matrix
 
 import builtins
 
@@ -33,12 +32,15 @@ from contextlib import contextmanager
 from p5.core.constants import Z_EPSILON
 from p5.core.geometry import Geometry
 from ..Vispy2DRenderer.shape import PShape
+from ..Vispy2DRenderer.openglrenderer import Style2D
 
 from p5.pmath.matrix import translation_matrix
-from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, Style, COLOR_WHITE
+from p5.pmath import matrix
+from ..Vispy2DRenderer.openglrenderer import OpenGLRenderer, get_render_primitives, to_3x3, COLOR_WHITE
 from .shaders3d import src_default, src_fbuffer, src_normal, src_phong
 from p5.core.material import BasicMaterial, NormalMaterial, BlinnPhongMaterial
 
+from p5.core import p5
 
 class GlslList:
     """List of objects to be used in glsl
@@ -69,7 +71,7 @@ class GlslList:
 
 
 @dataclass
-class Style3D(Style):
+class Style3D(Style2D):
     ambient = np.array([0.2] * 3)
     diffuse = np.array([0.6] * 3)
     specular = np.array([0.8] * 3)
@@ -279,10 +281,6 @@ class Renderer3D(OpenGLRenderer):
                 self._add_to_draw_queue_simple(
                     stype, vertices, idx, stroke if stype == 'lines' else fill)
 
-    def shape(self, vertices, contours, shape_type, *args):
-        """Render a PShape"""
-        self.render(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
-
     def add_to_draw_queue(self, stype, vertices, edges, faces,
                           fill=None, stroke=None, normals=None, material=None):
         """Add the given vertex data to the draw queue.
@@ -447,3 +445,60 @@ class Renderer3D(OpenGLRenderer):
         self.const_falloff.add(self.curr_constant_falloff)
         self.linear_falloff.add(self.curr_linear_falloff)
         self.quadratic_falloff.add(self.curr_quadratic_falloff)
+
+    def rotate_x(self, theta):
+        self.rotate(theta, axis=np.array([1, 0, 0]))
+
+    def rotate_y(self, theta):
+        self.rotate(theta, axis=np.array([0, 1, 0]))
+
+    def rotate_z(self, theta):
+        self.rotate(theta, axis=np.array([0, 0, 1]))
+
+    def camera(self, *args, **kwargs):
+        def real_camera(position=(0, 0, p5.sketch.size[1] / math.tan(math.pi / 6)),
+                        target_position=(0, 0, 0), up_vector=(0, 1, 0)):
+            self.lookat_matrix = matrix.look_at(
+                np.array(position),
+                np.array(target_position),
+                np.array(up_vector))
+            self.camera_pos = np.array(position)
+
+        if len(args) == 9:  # If using non-tuple arguments
+            kwargs['position'] = args[:3]
+            kwargs['target_position'] = args[3:6]
+            kwargs['up_vector'] = args[6:]
+        elif len(args) <= 3:  # If using tuple arguments
+            if len(args) >= 1:
+                kwargs['position'] = args[0]
+            if len(args) >= 2:
+                kwargs['target_position'] = args[1]
+            if len(args) >= 3:
+                kwargs['up_vector'] = args[2]
+        else:
+            raise ValueError("Unexpected number of arguments passed to camera()")
+
+        real_camera(**kwargs)
+
+    def perspective(self, fovy, aspect, near, far):
+        self.projection_matrix = matrix.perspective_matrix(
+            fovy,
+            aspect,
+            near,
+            far
+        )
+
+    def ortho(self, left, right, bottom, top, near, far):
+        self.projection_matrix = np.array([
+            [2 / (right - left), 0, 0, -(right + left) / (right - left)],
+            [0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)],
+            [0, 0, -2 / (far - near), -(far + near) / (far - near)],
+            [0, 0, 0, 1],
+        ])
+
+    def frustum(self):
+        raise NotImplementedError
+
+    def shape(self, vertices, contours, shape_type, *args):
+        """Render a PShape"""
+        self.render(PShape(vertices=vertices, contours=contours, shape_type=shape_type))

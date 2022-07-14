@@ -1,11 +1,13 @@
 from p5 import *
 
+def setup():
+    size(640, 360)
+
 def draw():
 
     if frame_count > 30:
         exit()
     # Sets the screen to be 640 pixels wide and 360 pixels high
-    size(640, 360)
 
     # Set the background to black and turn off the fill color
     background(0)
@@ -28,7 +30,4 @@ def draw():
     # coordinates of the upper-left corner and the second and third
     # parameter is the width and height
     stroke(255, 153, 0)
-    rect((width*0.25, height*0.1), width * 0.5, height * 0.8)
-
-if __name__ == '__main__':
-    run()
+    rect(width*0.25, height*0.1, width * 0.5, height * 0.8)
