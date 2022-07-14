@@ -266,11 +266,6 @@ class OpenGLRenderer(ABC):
         self.vertex_buffer = VertexBuffer()
         self.index_buffer = IndexBuffer()
 
-        # Renderer Globals: Curves
-        self.stroke_weight = 1
-        self.stroke_cap = ROUND
-        self.stroke_join = MITER
-
         # Renderer Globals
         # VIEW MATRICES, ETC
         #

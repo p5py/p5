@@ -102,7 +102,7 @@ def stroke_cap(c):
 
     """
     if c in [SQUARE, PROJECT, ROUND]:
-        p5.renderer.stroke_cap = c
+        p5.renderer.style.set_stroke_cap(c)
     else:
         raise ValueError("Invalid Stroke Cap %s" % c)
 
@@ -118,7 +118,7 @@ def stroke_join(j):
 
     """
     if j in [MITER, BEVEL, ROUND]:
-        p5.renderer.stroke_join = j
+        p5.renderer.style.stroke_join = j
     else:
         raise ValueError("Invalid Stroke Cap %s" % j)
 
