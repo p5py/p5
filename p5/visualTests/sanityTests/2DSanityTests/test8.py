@@ -27,6 +27,3 @@ def draw():
 
 def mouse_pressed():
     redraw()
-
-if __name__ == '__main__':
-    run()

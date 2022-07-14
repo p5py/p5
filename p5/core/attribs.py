@@ -85,7 +85,7 @@ def stroke_weight(thickness):
     :type weight: int
 
     """
-    p5.renderer.stroke_weight = thickness
+    p5.renderer.style.stroke_weight = thickness
 
 
 def no_stroke():

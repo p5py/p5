@@ -3,7 +3,8 @@ import numpy as np
 
 from p5.core import p5
 from p5.core.constants import SType, ROUND, MITER
-from .shape import Arc
+from p5.pmath import matrix
+from .shape import Arc, PShape
 
 from dataclasses import dataclass
 from vispy.gloo import Program, VertexBuffer, FrameBuffer, IndexBuffer
@@ -219,20 +220,23 @@ def get_render_primitives(shape):
             render_primitives.extend(_get_borders(shape))
     return render_primitives
 
-
 @dataclass
-class Style:
+class Style2D:
     background_color = (0.8, 0.8, 0.8, 1.0)
     fill_color = COLOR_WHITE
     fill_enabled = True
     stroke_color = COLOR_BLACK
     stroke_enabled = True
+    stroke_weight = 1
     tint_color = COLOR_BLACK
     tint_enabled = False
+    ellipse_mode = "CENTER"
+    rect_mode = "CORNER"
+    color_parse_mode = "RGB"
+    color_range = (255, 255, 255, 255)
+
 
 # Abstract class that contains common code for OpenGL renderers
-
-
 class OpenGLRenderer(ABC):
     def __init__(self, src_fbuffer, src_default):
         self.fbuffer_prog = Program(src_fbuffer.vert, src_fbuffer.frag)
@@ -262,10 +266,6 @@ class OpenGLRenderer(ABC):
         self.vertex_buffer = VertexBuffer()
         self.index_buffer = IndexBuffer()
 
-        # Renderer Globals: STYLE/MATERIAL PROPERTIES
-        #
-        self.style = Style()
-
         # Renderer Globals: Curves
         self.stroke_weight = 1
         self.stroke_cap = ROUND
@@ -282,6 +282,9 @@ class OpenGLRenderer(ABC):
         # Renderer Globals: RENDERING
         self.draw_queue = []
 
+        self.style = Style2D()
+        self.style_stack = []
+        self.matrix_stack = []
 
     def render_default(self, draw_type, draw_queue):
         # 1. Get the maximum number of vertices persent in the shapes
@@ -349,3 +352,63 @@ class OpenGLRenderer(ABC):
         # need np.newaxis to broadcast the vector because each row represents a vertex
         dehomogenized = product / product[:,3][:,np.newaxis]
         return dehomogenized[:,:3] # Return the first three rows of the result
+
+    def push_matrix(self):
+        """Pushes the current transformation matrix onto the matrix stack.
+        """
+        self.matrix_stack.append(self.transform_matrix.copy())
+
+    def pop_matrix(self):
+        """Pops the current transformation matrix off the matrix stack.
+        """
+        assert len(self.matrix_stack) > 0, "No matrix to pop"
+        self.transform_matrix = self.matrix_stack.pop()
+
+    def scale(self, sx, sy=None, sz=None):
+        if sy is None and sz is None:
+            sy = sx
+            sz = sx
+        elif sz is None:
+            sz = 1
+        tmat = matrix.scale_transform(sx, sy, sz)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+
+    def apply_matrix(self, transform_matrix):
+        tmatrix = np.array(transform_matrix)
+        self.transform_matrix = self.transform_matrix.dot(tmatrix)
+
+    def reset_matrix(self):
+        self.transform_matrix = np.identity(4)
+
+    def print_matrix(self):
+        print(self.transform_matrix)
+
+    def shear_x(self, theta):
+        shear_mat = np.identity(4)
+        shear_mat[0, 1] = np.tan(theta)
+        self.transform_matrix = self.transform_matrix.dot(shear_mat)
+        return shear_mat
+
+    def shear_y(self, theta):
+        shear_mat = np.identity(4)
+        shear_mat[1, 0] = np.tan(theta)
+        self.transform_matrix = self.transform_matrix.dot(shear_mat)
+        return shear_mat
+
+    def reset_transforms(self):
+        """Reset all transformations to their default state.
+
+        """
+        self.transform_matrix = np.identity(4)
+
+    def translate(self, x, y, z=0):
+        tmat = matrix.translation_matrix(x, y, z)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat
+
+    def rotate(self, theta, axis=np.array([0, 0, 1])):
+        axis = np.array(axis[:])
+        tmat = matrix.rotation_matrix(axis, theta)
+        self.transform_matrix = self.transform_matrix.dot(tmat)
+        return tmat

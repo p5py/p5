@@ -22,7 +22,3 @@ def draw_target(xloc, yloc, size, num):
     for i in range(num):
         fill(i * grayvalues)
         ellipse((xloc, yloc), size - i * steps, size - i * steps)
-
-
-if __name__ == '__main__':
-    run()

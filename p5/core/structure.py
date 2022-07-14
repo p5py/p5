@@ -18,14 +18,9 @@
 from contextlib import AbstractContextManager
 from copy import deepcopy
 
-from . import primitives
-from . import color
 from . import p5
 
 from contextlib import AbstractContextManager
-
-style_stack = []
-
 
 class _StyleContext(AbstractContextManager):
     def __exit__(self, exc_type, exc_value, traceback):
@@ -64,19 +59,14 @@ def push_style():
 
     """
     renderer_styles = deepcopy(p5.renderer.style)
-    shape_modes = (primitives._ellipse_mode, primitives._rect_mode)
-    color_settings = (color.color_parse_mode, color.color_range)
-
-    style_stack.append((renderer_styles, shape_modes, color_settings))
+    p5.renderer.style_stack.append(renderer_styles)
     return _StyleContext()
 
 
 def pop_style():
     """Restores previously pushed style settings
     """
-    assert len(style_stack) > 0, "No styles to pop"
-    renderer_styles, shape_modes, color_settings = style_stack.pop()
+    assert len(p5.renderer.style_stack) > 0, "No styles to pop"
+    renderer_styles = p5.renderer.style_stack.pop()
 
     p5.renderer.style = renderer_styles
-    primitives._ellipse_mode, primitives._rect_mode = shape_modes
-    color.color_parse_mode, color.color_range = color_settings

@@ -32,8 +32,8 @@ from contextlib import contextmanager
 from .shaders2d import src_texture
 from .shaders2d import src_line
 from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
-from p5.core.constants import SType
 from .shape import PShape, Arc
+from p5.core.constants import SType
 
 
 class VispyRenderer2D(OpenGLRenderer):
