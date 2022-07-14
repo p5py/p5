@@ -283,11 +283,9 @@ def exit(*args, **kwargs):
     that necessary cleanup steps are performed before exiting the
     sketch.
 
-    :param args: positional arguments to pass to Python's builtin
-        `exit()` function.
+    :param args: positional arguments are ignored.
 
-    :param kwargs: keyword-arguments to pass to Python's builtin
-        `exit()` function.
+    :param kwargs: keyword-arguments are ignored.
     """
     if not (p5.sketch is None):
         if builtins.current_renderer == "vispy":
