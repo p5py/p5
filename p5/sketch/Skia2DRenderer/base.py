@@ -122,6 +122,8 @@ class SkiaSketch:
                 and (self.looping or self.redraw)
                 and (time() - last_render_call_time) > 1 / self.frame_rate
             ):
+                # Reset the transformations before each draw call
+                p5.renderer.reset_matrix()
                 builtins.frame_count += 1
                 with self.surface as self.canvas:
                     self.draw_method()
