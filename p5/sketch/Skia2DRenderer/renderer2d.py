@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from p5 import p5
 from p5.core.attribs import stroke, fill
 from p5.core.color import Color
-from p5.core.constants import ROUND, SQUARE, PROJECT, MITER, BEVEL, POINTS
-from p5.core.primitives import point
+from p5.core import constants
+from p5.core.primitives import point, line
 from p5.pmath.utils import *
 
 @dataclass
@@ -20,8 +20,8 @@ class Style2D:
 
     tint_color = (0, 0, 0)
     tint_enabled = False
-    ellipse_mode = "CENTER"
-    rect_mode = "CORNER"
+    ellipse_mode = constants.CENTER
+    rect_mode = constants.CORNER
     color_parse_mode = "RGB"
     color_range = (255, 255, 255, 255)
 
@@ -29,19 +29,19 @@ class Style2D:
     stroke_join = skia.Paint.kMiter_Join
 
     def set_stroke_cap(self, c):
-        if c == ROUND:
+        if c == constants.ROUND:
             self.stroke_cap = skia.Paint.kRound_Cap
-        elif c == SQUARE:
+        elif c == constants.SQUARE:
             self.stroke_cap = skia.Paint.kButt_Cap
-        elif c == PROJECT:
+        elif c == constants.PROJECT:
             self.stroke_cap = skia.Paint.kSquare_Cap
 
     def set_stroke_join(self, j):
-        if j == ROUND:
+        if j == constants.ROUND:
             self.stroke_join = skia.Paint.kRound_Join
-        elif j == MITER:
+        elif j == constants.MITER:
             self.stroke_join = skia.Paint.kMiter_Join
-        elif j == BEVEL:
+        elif j == constants.BEVEL:
             self.stroke_join = skia.Paint.kBevel_Join
 
 
@@ -241,7 +241,7 @@ class SkiaRenderer():
                 self.path.cubicTo(x + curve['bx'] * rx, y + curve['by'] * ry,
                                   x + curve['cx'] * rx, y + curve['cy'] * ry,
                                   x + curve['dx'] * rx, y + curve['dy'] * ry)
-            if mode == 'PIE' or not mode:
+            if mode == constants.PIE or not mode:
                 self.path.lineTo(x, y)
 
             self.path.close()
@@ -254,10 +254,10 @@ class SkiaRenderer():
                 self.path.cubicTo(x + curve['bx'] * rx, y + curve['by'] * ry,
                                   x + curve['cx'] * rx, y + curve['cy'] * ry,
                                   x + curve['dx'] * rx, y + curve['dy'] * ry)
-            if mode == 'PIE':
+            if mode == constants.PIE:
                 self.path.lineTo(x, y)
                 self.path.close()
-            elif mode == 'CHORD':
+            elif mode == constants.CHORD:
                 self.path.close()
             self.render(fill=False, stroke=True)
 
@@ -378,7 +378,7 @@ class SkiaRenderer():
 
     def end_shape(self, mode, vertices, is_curve, is_bezier, is_quadratic, is_contour, shape_kind):
 
-        close_shape = mode == 'CLOSE'
+        close_shape = mode == constants.CLOSE
         # NOT APPENDING AGAIN
         num_verts = len(vertices)
         if is_curve and shape_kind is None:
@@ -442,13 +442,19 @@ class SkiaRenderer():
                     )
             self._do_fill_stroke_close(close_shape)
         else:
-            if shape_kind == POINTS:
+            if shape_kind == constants.POINTS:
                 for i in range(num_verts):
                     v = vertices[i]
                     if self.style.stroke_enabled:
                         stroke(*v[6])
                     point(v[0], v[1])
-            elif shape_kind == 'TRIANGLES':
+            elif shape_kind == constants.LINES:
+                for i in range(0, num_verts - 1, 2):
+                    v = vertices[i]
+                    if self.style.stroke_enabled:
+                        stroke(*vertices[i + 1][6])
+                    line(v[0], v[1], vertices[i + 1][0], vertices[i + 1][1])
+            elif shape_kind == constants.TRIANGLES:
                 for i in range(0, num_verts - 2, 3):
                     v = vertices[i]
                     self.path.moveTo(v[0], v[1])
@@ -456,28 +462,28 @@ class SkiaRenderer():
                     self.path.lineTo(vertices[i + 2][0], vertices[i + 2][1])
                     self.path.close()
                     if self.style.fill_enabled:
-                        fill(vertices[i + 2][5])
+                        fill(*vertices[i + 2][5])
                         self.render(fill=True, stroke=False, rewind=False)
                     if self.style.stroke_enabled:
-                        stroke(vertices[i + 2][6])
+                        stroke(*vertices[i + 2][6])
                         self.render(fill=False, stroke=True, rewind=True)
-            elif shape_kind == 'TRIANGLE_STRIP':
+            elif shape_kind == constants.TRIANGLE_STRIP:
                 for i in range(num_verts - 1):
                     v = vertices[i]
                     self.path.moveTo(vertices[i + 1][0], vertices[i + 1][1])
                     self.path.lineTo(v[0], v[1])
                     if self.style.stroke_enabled:
-                        stroke(vertices[i + 1][6])
+                        stroke(*vertices[i + 1][6])
                     if self.style.fill_enabled:
-                        fill(vertices[i + 1][5])
+                        fill(*vertices[i + 1][5])
                     if i + 2 < num_verts:
                         self.path.lineTo(vertices[i + 2][0], vertices[i + 2][1])
                         if self.style.stroke_enabled:
-                            stroke(vertices[i + 2][6])
+                            stroke(*vertices[i + 2][6])
                         if self.style.fill_enabled:
-                            fill(vertices[i + 2][5])
+                            fill(*vertices[i + 2][5])
                     self._do_fill_stroke_close(close_shape)
-            elif shape_kind == 'TRIANGLE_FAN':
+            elif shape_kind == constants.TRIANGLE_FAN:
                 if num_verts > 2:
                     for i in range(2, num_verts):
                         v = vertices[i]
@@ -490,17 +496,17 @@ class SkiaRenderer():
                             if (self.style.fill_enabled and v[5] != vertices[i + 1][5]) \
                                     or (self.style.stroke_enabled and v[6] != vertices[i + 1][6]):
                                 if self.style.fill_enabled:
-                                    fill(v[5])
+                                    fill(*v[5])
                                     self.render(fill=True, stroke=False, rewind=False)
-                                    fill(vertices[i + 1][5])
+                                    fill(*vertices[i + 1][5])
                                 if self.style.stroke_enabled:
-                                    stroke(v[6])
+                                    stroke(*v[6])
                                     self.render(fill=False, stroke=True, rewind=True)
-                                    stroke(vertices[i + 1][6])
+                                    stroke(*vertices[i + 1][6])
                                 self.path.close()
                                 self.path.rewind()
                     self._do_fill_stroke_close(close_shape)
-            elif shape_kind == 'QUADS':
+            elif shape_kind == constants.QUADS:
                 for i in range(0, num_verts - 3, 4):
                     v = vertices[i]
                     self.path.moveTo(v[0], v[1])
@@ -508,11 +514,11 @@ class SkiaRenderer():
                         self.path.lineTo(vertices[i + j][0], vertices[i + j][1])
                     self.path.lineTo(v[0], v[1])
                     if self.style.fill_enabled:
-                        fill(vertices[i + 3][5])
+                        fill(*vertices[i + 3][5])
                     if self.style.stroke_enabled:
-                        stroke(vertices[i + 3][6])
+                        stroke(*vertices[i + 3][6])
                     self._do_fill_stroke_close(close_shape)
-            elif shape_kind == 'QUAD_STRIP':
+            elif shape_kind == constants.QUAD_STRIP:
                 if num_verts > 3:
                     for i in range(0, num_verts - 1, 2):
                         v = vertices[i]
@@ -522,9 +528,9 @@ class SkiaRenderer():
                             self.path.lineTo(vertices[i + 1][0], vertices[i + 1][1])
                             self.path.lineTo(vertices[i + 3][0], vertices[i + 3][1])
                             if self.style.fill_enabled:
-                                fill(vertices[i + 3][5])
+                                fill(*vertices[i + 3][5])
                             if self.style.stroke_enabled:
-                                vertices([i + 3][6])
+                                stroke(*vertices[i + 3][6])
                         else:
                             self.path.moveTo(v[0], v[1])
                             self.path.lineTo(vertices[i + 1][0], vertices[i + 1][1])

@@ -226,3 +226,7 @@ CLOSE = "CLOSE"
 
 # Z_EPSILON for meshes and lines in 3D mode
 Z_EPSILON = 2
+
+# arc modes
+PIE = 'PIE'
+CHORD = 'CHORD'
