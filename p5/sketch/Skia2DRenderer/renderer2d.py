@@ -1,13 +1,13 @@
-import contextlib, glfw, skia
+import numpy as np
+import skia
 from dataclasses import dataclass
-from OpenGL import GL
 
 from p5 import p5
-import numpy as np
-from p5.pmath.utils import *
+from p5.core.attribs import stroke, fill
 from p5.core.color import Color
-from p5.core.constants import ROUND, SQUARE, PROJECT, MITER, BEVEL
-
+from p5.core.constants import ROUND, SQUARE, PROJECT, MITER, BEVEL, POINTS
+from p5.core.primitives import point
+from p5.pmath.utils import *
 
 @dataclass
 class Style2D:
@@ -44,6 +44,7 @@ class Style2D:
         elif j == BEVEL:
             self.stroke_join = skia.Paint.kBevel_Join
 
+
 class SkiaRenderer():
     def __init__(self):
         self.canvas = None
@@ -54,6 +55,8 @@ class SkiaRenderer():
         self.font = skia.Font()
         self.typeface = skia.Typeface.MakeDefault()
         self.font.setTypeface(self.typeface)
+
+        self.curve_tightness = 0
 
     # Transforms functions
     def push_matrix(self):
@@ -177,14 +180,13 @@ class SkiaRenderer():
         self.style.stroke_enabled = False
         self.style.fill_color = Color(*args, **kwargs).normalized
         self.rect(0, 0, *p5.sketch.size)
-
         self.style.fill_color = curr_fill
         self.style.fill_enabled = curr_fill_enabled
         self.style.stroke_enabled = curr_stroke_enabled
 
         self.pop_matrix()
 
-    def render(self, fill=True, stroke=True):
+    def render(self, fill=True, stroke=True, rewind=True):
         """
         Draw the path on current canvas using paint
         """
@@ -205,7 +207,8 @@ class SkiaRenderer():
             self.paint.setStrokeWidth(self.style.stroke_weight)
             self.canvas.drawPath(self.path, self.paint)
 
-        self.path.rewind()
+        if rewind:
+            self.path.rewind()
 
     def reset(self):
         self.reset_matrix()
@@ -367,6 +370,175 @@ class SkiaRenderer():
         self.path.close()
 
         self.render()
+
+    def _do_fill_stroke_close(self, close_shape):
+        if close_shape:
+            self.path.close()
+        self.render()
+
+    def end_shape(self, mode, vertices, is_curve, is_bezier, is_quadratic, is_contour, shape_kind):
+
+        close_shape = mode == 'CLOSE'
+        # NOT APPENDING AGAIN
+        num_verts = len(vertices)
+        if is_curve and shape_kind is None:
+            if num_verts > 3:
+                b = []
+                s = 1 - self.curve_tightness
+                self.path.moveTo(vertices[1][0], vertices[1][1])
+                for i in range(1, num_verts - 2):
+                    v = vertices[i]
+                    b.append([v[0], v[1]])
+                    b.append([
+                        v[0] + (s * vertices[i + 1][0] - s * vertices[i - 1][0]) / 6,
+                        v[1] + (s * vertices[i + 1][1] - s * vertices[i - 1][1]) / 6
+                    ])
+                    b.append([
+                        vertices[i + 1][0] + (s * vertices[i][0] - s * vertices[i + 2][0]) / 6,
+                        vertices[i + 1][1] + (s * vertices[i][1] - s * vertices[i + 2][1]) / 6
+                    ])
+                    b.append([vertices[i + 1][0], vertices[i + 1][1]])
+                    self.path.cubicTo(
+                        b[1][0],
+                        b[1][1],
+                        b[2][0],
+                        b[2][1],
+                        b[3][0],
+                        b[3][1]
+                    )
+                if close_shape:
+                    self.path.lineTo(vertices[i + 1][0], vertices[i + 1][1])
+        elif is_bezier and shape_kind is None:
+            for i in range(num_verts):
+                if vertices[i][-1].get('is_vert', None):
+                    if vertices[i][-1].get('move_to', None):
+                        self.path.moveTo(vertices[i][0], vertices[i][1])
+                    else:
+                        self.path.lineTo(vertices[i][0], vertices[i][1])
+                else:
+                    self.path.cubicTo(
+                        vertices[i][0],
+                        vertices[i][1],
+                        vertices[i][2],
+                        vertices[i][3],
+                        vertices[i][4],
+                        vertices[i][5]
+                    )
+            self._do_fill_stroke_close(close_shape)
+
+        elif is_quadratic and shape_kind is None:
+            for i in range(num_verts):
+                if vertices[i][-1].get('is_vert', None):
+                    if vertices[i][-1].get('move_to', None):
+                        self.path.moveTo(vertices[i][0], vertices[i][1])
+                    else:
+                        self.path.lineTo(vertices[i][0], vertices[i][1])
+                else:
+                    self.path.quadTo(
+                        vertices[i][0],
+                        vertices[i][1],
+                        vertices[i][2],
+                        vertices[i][3]
+                    )
+            self._do_fill_stroke_close(close_shape)
+        else:
+            if shape_kind == POINTS:
+                for i in range(num_verts):
+                    v = vertices[i]
+                    if self.style.stroke_enabled:
+                        stroke(*v[6])
+                    point(v[0], v[1])
+            elif shape_kind == 'TRIANGLES':
+                for i in range(0, num_verts - 2, 3):
+                    v = vertices[i]
+                    self.path.moveTo(v[0], v[1])
+                    self.path.lineTo(vertices[i + 1][0], vertices[i + 1][1])
+                    self.path.lineTo(vertices[i + 2][0], vertices[i + 2][1])
+                    self.path.close()
+                    if self.style.fill_enabled:
+                        fill(vertices[i + 2][5])
+                        self.render(fill=True, stroke=False, rewind=False)
+                    if self.style.stroke_enabled:
+                        stroke(vertices[i + 2][6])
+                        self.render(fill=False, stroke=True, rewind=True)
+            elif shape_kind == 'TRIANGLE_STRIP':
+                for i in range(num_verts - 1):
+                    v = vertices[i]
+                    self.path.moveTo(vertices[i + 1][0], vertices[i + 1][1])
+                    self.path.lineTo(v[0], v[1])
+                    if self.style.stroke_enabled:
+                        stroke(vertices[i + 1][6])
+                    if self.style.fill_enabled:
+                        fill(vertices[i + 1][5])
+                    if i + 2 < num_verts:
+                        self.path.lineTo(vertices[i + 2][0], vertices[i + 2][1])
+                        if self.style.stroke_enabled:
+                            stroke(vertices[i + 2][6])
+                        if self.style.fill_enabled:
+                            fill(vertices[i + 2][5])
+                    self._do_fill_stroke_close(close_shape)
+            elif shape_kind == 'TRIANGLE_FAN':
+                if num_verts > 2:
+                    for i in range(2, num_verts):
+                        v = vertices[i]
+                        self.path.moveTo(vertices[0][0], vertices[0][1])
+                        self.path.lineTo(vertices[i - 1][0], vertices[i - 1][1])
+                        self.path.lineTo(v[0], v[1])
+                        self.path.lineTo(vertices[0][0], vertices[0][1])
+
+                        if i < num_verts - 1:
+                            if (self.style.fill_enabled and v[5] != vertices[i + 1][5]) \
+                                    or (self.style.stroke_enabled and v[6] != vertices[i + 1][6]):
+                                if self.style.fill_enabled:
+                                    fill(v[5])
+                                    self.render(fill=True, stroke=False, rewind=False)
+                                    fill(vertices[i + 1][5])
+                                if self.style.stroke_enabled:
+                                    stroke(v[6])
+                                    self.render(fill=False, stroke=True, rewind=True)
+                                    stroke(vertices[i + 1][6])
+                                self.path.close()
+                                self.path.rewind()
+                    self._do_fill_stroke_close(close_shape)
+            elif shape_kind == 'QUADS':
+                for i in range(0, num_verts - 3, 4):
+                    v = vertices[i]
+                    self.path.moveTo(v[0], v[1])
+                    for j in range(1, 4):
+                        self.path.lineTo(vertices[i + j][0], vertices[i + j][1])
+                    self.path.lineTo(v[0], v[1])
+                    if self.style.fill_enabled:
+                        fill(vertices[i + 3][5])
+                    if self.style.stroke_enabled:
+                        stroke(vertices[i + 3][6])
+                    self._do_fill_stroke_close(close_shape)
+            elif shape_kind == 'QUAD_STRIP':
+                if num_verts > 3:
+                    for i in range(0, num_verts - 1, 2):
+                        v = vertices[i]
+                        if i + 3 < num_verts:
+                            self.path.moveTo(vertices[i + 2][0], vertices[i + 2][1])
+                            self.path.lineTo(v[0], v[1])
+                            self.path.lineTo(vertices[i + 1][0], vertices[i + 1][1])
+                            self.path.lineTo(vertices[i + 3][0], vertices[i + 3][1])
+                            if self.style.fill_enabled:
+                                fill(vertices[i + 3][5])
+                            if self.style.stroke_enabled:
+                                vertices([i + 3][6])
+                        else:
+                            self.path.moveTo(v[0], v[1])
+                            self.path.lineTo(vertices[i + 1][0], vertices[i + 1][1])
+                        self._do_fill_stroke_close(close_shape)
+            else:
+                self.path.moveTo(vertices[0][0], vertices[0][1])
+                for i in range(1, num_verts):
+                    v = vertices[i]
+                    if v[-1].get('is_vert', None):
+                        if v[-1].get('move_to', None):
+                            self.path.moveTo(v[0], v[1])
+                        else:
+                            self.path.lineTo(v[0], v[1])
+                self._do_fill_stroke_close(close_shape)
 
     # Fonts functions
 

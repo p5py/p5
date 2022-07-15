@@ -199,9 +199,11 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
 
     return red, green, blue, alpha
 
-
+# NOTE: By default expects a color to be in 255 format, whereas renderer uses color values in normalized forms
 class Color:
-    """Represents a color."""
+    """
+    Represents a color.
+    """
 
     def __init__(self, *args, color_mode=None, normed=False, **kwargs):
         if color_mode is None:

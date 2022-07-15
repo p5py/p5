@@ -35,9 +35,10 @@ __all__ = [
 ]
 
 curve_resolution = 20
-curve_tightness_amount = 0
 
 bezier_resolution = 20
+
+curve_tightness_amount = 0
 
 curve_basis_matrix = [
     [-0.5, 1.5, -1.5, 0.5],

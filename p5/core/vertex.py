@@ -96,6 +96,7 @@ def curve_vertex(x, y, z=0):
     elif builtins.current_renderer == 'skia':
         vertex(x, y)
 
+
 def bezier_vertex(x2, y2, x3, y3, x4, y4):
     """
     Specifies vertex coordinates for Bezier curves
@@ -137,6 +138,7 @@ def bezier_vertex(x2, y2, x3, y3, x4, y4):
         else:
             vertices.append(vert_data)
 
+
 def quadratic_vertex(cx, cy, x3, y3):
     """
     Specifies vertex coordinates for quadratic Bezier curves
@@ -174,6 +176,7 @@ def quadratic_vertex(cx, cy, x3, y3):
         else:
             vertices.append(vert_data)
 
+
 def vertex(x, y, z=0):
     """
     All shapes are constructed by connecting a series of
@@ -201,15 +204,18 @@ def vertex(x, y, z=0):
             vertices.append((x, y, z))
             vertices_types.append(1)
     elif builtins.current_renderer == 'skia':
-        vert_data = [x, y, 0, 0, 0, p5.renderer.style.fill_color, p5.renderer.style.stroke_color, {}]
+        vert_data = [x, y, 0, 0, 0, tuple(255 * c for c in p5.renderer.style.fill_color),
+                     tuple(255 * c for c in p5.renderer.style.stroke_color), {}]
+        vert_data[-1]["is_vert"] = True
         if z:
-            vert_data[-1].move_to = z
+            vert_data[-1]["move_to"] = z
         if is_contour:
             if len(contour_vertices) == 0:
-                vert_data[-1].move_to = True
+                vert_data[-1]["move_to"] = True
             contour_vertices.append(vert_data)
         else:
             vertices.append(vert_data)
+
 
 def begin_contour():
     """
@@ -228,6 +234,7 @@ def begin_contour():
     contour_vertices = []
     contour_vertices_types = []
 
+
 def end_contour():
     """Ends the current contour.
 
@@ -245,8 +252,8 @@ def end_contour():
         curr_contour_vertices, curr_contour_vertices_types = [], []
     elif builtins.current_renderer == 'skia':
         vert_data = list(contour_vertices[0])
-        vert_data[-1].is_vert = contour_vertices[0][-1].get('is_vert', None)
-        vert_data[-1].move_to = False
+        vert_data[-1]["is_vert"] = contour_vertices[0][-1].get('is_vert', None)
+        vert_data[-1]["move_to"] = False
         contour_vertices.append(vert_data)
         global is_first_contour
         if is_first_contour:
@@ -255,6 +262,7 @@ def end_contour():
 
         for vert in contour_vertices:
             vertices.append(vert)
+
 
 def get_curve_vertices(verts):
     if len(verts) == 0:
@@ -286,6 +294,7 @@ def get_curve_vertices(verts):
 
     return shape_vertices
 
+
 def get_bezier_vertices(verts, vert_types):
     if len(verts) == 0:
         return []
@@ -308,6 +317,7 @@ def get_bezier_vertices(verts, vert_types):
                 shape_vertices.append(Point(*p))
     return shape_vertices
 
+
 def get_quadratic_vertices(verts, vert_types):
     if len(verts) == 0:
         return []
@@ -329,6 +339,7 @@ def get_quadratic_vertices(verts, vert_types):
                 shape_vertices.append(Point(*p))
 
     return shape_vertices
+
 
 def end_shape(mode=""):
     """
@@ -384,7 +395,8 @@ def end_shape(mode=""):
         close_shape = mode == 'CLOSE'
         if close_shape and is_contour:
             vertices.append(vertices[0])
-        p5.renderer.end_shape(mode, vertices, is_curve, is_bezier, is_quadratic, is_contour, shape_kind)
+        p5.renderer.end_shape(mode, vertices, is_curve, is_bezier, is_quadratic, is_contour,
+                              None if shape_kind == TESS else shape_kind)
         if close_shape:
             vertices.pop()
 
