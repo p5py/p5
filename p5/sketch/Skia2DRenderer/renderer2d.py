@@ -294,7 +294,7 @@ class SkiaRenderer():
         self.style.stroke_enabled = False
 
         # This will render the point
-        self.arc(x, y, self.style.stroke_weight / 2, self.style.stroke_weight / 2, 0, TWO_PI, False)
+        self.circle(x, y, self.style.stroke_weight)
 
         self.style.fill_color = f
         self.style.fill_enabled = fe
@@ -383,10 +383,10 @@ class SkiaRenderer():
         num_verts = len(vertices)
         if is_curve and shape_kind is None:
             if num_verts > 3:
-                b = []
                 s = 1 - self.curve_tightness
                 self.path.moveTo(vertices[1][0], vertices[1][1])
                 for i in range(1, num_verts - 2):
+                    b = []
                     v = vertices[i]
                     b.append([v[0], v[1]])
                     b.append([
@@ -408,10 +408,11 @@ class SkiaRenderer():
                     )
                 if close_shape:
                     self.path.lineTo(vertices[i + 1][0], vertices[i + 1][1])
+                self._do_fill_stroke_close(close_shape)
         elif is_bezier and shape_kind is None:
             for i in range(num_verts):
                 if vertices[i][-1].get('is_vert', None):
-                    if vertices[i][-1].get('move_to', None):
+                    if vertices[i][-1].get('move_to', None) or self.path.countVerbs() == 0:
                         self.path.moveTo(vertices[i][0], vertices[i][1])
                     else:
                         self.path.lineTo(vertices[i][0], vertices[i][1])
@@ -429,7 +430,7 @@ class SkiaRenderer():
         elif is_quadratic and shape_kind is None:
             for i in range(num_verts):
                 if vertices[i][-1].get('is_vert', None):
-                    if vertices[i][-1].get('move_to', None):
+                    if vertices[i][-1].get('move_to', None) or self.path.countVerbs() == 0:
                         self.path.moveTo(vertices[i][0], vertices[i][1])
                     else:
                         self.path.lineTo(vertices[i][0], vertices[i][1])
@@ -540,7 +541,7 @@ class SkiaRenderer():
                 for i in range(1, num_verts):
                     v = vertices[i]
                     if v[-1].get('is_vert', None):
-                        if v[-1].get('move_to', None):
+                        if v[-1].get('move_to', None) or self.path.countVerbs() == 0:
                             self.path.moveTo(v[0], v[1])
                         else:
                             self.path.lineTo(v[0], v[1])
