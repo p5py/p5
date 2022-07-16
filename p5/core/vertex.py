@@ -22,6 +22,7 @@ from p5.pmath.vector import Point
 from . import p5
 from .constants import TESS
 from ..pmath import curves
+import copy
 
 shape_kind = None
 vertices = []  # stores the vertex coordinates
@@ -240,9 +241,9 @@ def end_contour():
 
     For more info, see :any:`begin_contour`.
     """
+    global is_contour, curr_contour_vertices, curr_contour_vertices_types, is_first_contour
+
     if builtins.current_renderer == 'vispy':
-        global is_contour, curr_contour_vertices, curr_contour_vertices_types
-        is_contour = False
         # Close contour
         curr_contour_vertices.append(curr_contour_vertices[0])
         curr_contour_vertices_types.append(curr_contour_vertices_types[0])
@@ -251,11 +252,13 @@ def end_contour():
         contour_vertices_types.append(curr_contour_vertices_types)
         curr_contour_vertices, curr_contour_vertices_types = [], []
     elif builtins.current_renderer == 'skia':
-        vert_data = list(contour_vertices[0])
+
+        vert_data = copy.deepcopy(contour_vertices[0])
         vert_data[-1]["is_vert"] = contour_vertices[0][-1].get('is_vert', None)
         vert_data[-1]["move_to"] = False
+
         contour_vertices.append(vert_data)
-        global is_first_contour
+
         if is_first_contour:
             vertices.append(vertices[0])
             is_first_contour = False
@@ -353,7 +356,6 @@ def end_shape(mode=""):
 
     """
     global is_bezier, is_curve, is_quadratic, is_contour, is_first_contour
-    assert not is_contour, "begin_contour called without calling end_contour"
     if is_curve or is_bezier or is_quadratic:
         assert shape_kind == TESS, "Should not specify primitive type for a curve"
 
@@ -391,9 +393,10 @@ def end_shape(mode=""):
                 vertices=vertices,
                 contours=contour_vertices,
                 shape_type=shape_kind)
+
     elif builtins.current_renderer == 'skia':
         close_shape = mode == 'CLOSE'
-        if close_shape and is_contour:
+        if close_shape and not is_contour:
             vertices.append(vertices[0])
         p5.renderer.end_shape(mode, vertices, is_curve, is_bezier, is_quadratic, is_contour,
                               None if shape_kind == TESS else shape_kind)
