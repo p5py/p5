@@ -35,7 +35,6 @@ def _dummy(*args, **kwargs):
     """
     pass
 
-
 class VispySketch(app.Canvas):
     """The main sketch instance.
 
@@ -71,6 +70,7 @@ class VispySketch(app.Canvas):
         self.setup_method = setup_method
         self.draw_method = draw_method
 
+        self.exiting = False
         self.looping = None
         self.redraw = None
         self.setup_done = False
@@ -85,6 +85,8 @@ class VispySketch(app.Canvas):
 
         self._save_fname = 'screen'
         self._save_flag = False
+
+        builtins.frame_count = -1
 
         p5.renderer.reset_view()
         p5.renderer.clear()
@@ -124,6 +126,10 @@ class VispySketch(app.Canvas):
             self._save_buffer()
         self.update()
 
+        if (self.exiting):
+            self.close()
+            return
+
     def _save_buffer(self):
         """Save the renderer buffer to the given file.
         """
@@ -144,6 +150,7 @@ class VispySketch(app.Canvas):
         self._save_flag = True
 
     def on_close(self, event):
+        self.timer.stop()
         app.quit()
 
     def on_draw(self, event):
@@ -199,3 +206,6 @@ class VispySketch(app.Canvas):
 
     # def on_stylus(self, event):
     #     self._enqueue_event('stylus', event)
+
+    def exit(self):
+        self.exiting = True

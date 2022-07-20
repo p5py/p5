@@ -276,26 +276,16 @@ def redraw():
         p5.sketch.redraw = True
 
 
-def exit(*args, **kwargs):
+def exit():
     """Exit the sketch.
 
-    `exit()` overrides Python's builtin exit() function and makes sure
-    that necessary cleanup steps are performed before exiting the
-    sketch.
+    `exit()` makes sure that necessary cleanup steps are performed 
+    before exiting the sketch.
 
-    :param args: positional argumets to pass to Python's builtin
-        `exit()` function.
-
-    :param kwargs: keyword-arguments to pass to Python's builtin
-        `exit()` function.
     """
     if not (p5.sketch is None):
         if builtins.current_renderer == "vispy":
-            from vispy import app
-
-            p5.sketch.show(visible=False)
-            app.quit()
-    sys.exit(*args, **kwargs)
+            p5.sketch.exit()
 
 
 def no_cursor():
