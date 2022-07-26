@@ -199,7 +199,8 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
 
     return red, green, blue, alpha
 
-# NOTE: By default expects a color to be in 255 format, whereas renderer uses color values in normalized forms
+# NOTE: By default constructor expects color value to be in [0,255] range
+# which is then normalized to [0,1] range and then used by the renderer instance
 class Color:
     """
     Represents a color.
