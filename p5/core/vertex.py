@@ -208,8 +208,7 @@ def vertex(x, y, z=0):
         vert_data = [x, y, 0, 0, 0, tuple(255 * c for c in p5.renderer.style.fill_color),
                      tuple(255 * c for c in p5.renderer.style.stroke_color), {}]
         vert_data[-1]["is_vert"] = True
-        if z:
-            vert_data[-1]["move_to"] = z
+
         if is_contour:
             if len(contour_vertices) == 0:
                 vert_data[-1]["move_to"] = True
