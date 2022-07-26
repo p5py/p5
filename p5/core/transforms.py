@@ -161,6 +161,7 @@ def apply_matrix(transform_matrix):
     :type transform_matrix: (3 * 3) if skia is the renderer else (4 * 4) np.ndarray or list
 
     """
+    # TODO: Support 4 * 4 matrix transformations in skia
     if isinstance(transform_matrix, list):
         if len(transform_matrix) == 9:
             transform_matrix = np.array(transform_matrix).reshape(3, 3)
