@@ -194,8 +194,6 @@ class SkiaRenderer():
         # TODO: Check, do we really have to setColor, and setStyle on each render call
         # TODO: Explore ways to do this, such that it works with pGraphics as well
         if self.style.fill_enabled and fill:
-            self.paint.setStrokeCap(self.style.stroke_cap)
-            self.paint.setStrokeJoin(self.style.stroke_join)
             self.paint.setStyle(skia.Paint.kFill_Style)
             self.paint.setColor(skia.Color4f(*self.style.fill_color))
             self.canvas.drawPath(self.path, self.paint)
