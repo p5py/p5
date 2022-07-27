@@ -258,6 +258,7 @@ def end_contour():
 
         contour_vertices.append(vert_data)
 
+        # Close the shape before starting the contour
         if is_first_contour:
             vertices.append(vertices[0])
             is_first_contour = False

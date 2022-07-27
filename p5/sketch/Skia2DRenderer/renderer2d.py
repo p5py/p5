@@ -387,6 +387,8 @@ class SkiaRenderer():
                 for i in range(1, num_verts - 2):
                     b = []
                     v = vertices[i]
+                    # logic for curve tightness is borrowed from
+                    # https://github.com/processing/p5.js/blob/9cd186349cdb55c5faf28befff9c0d4a390e02ed/src/core/p5.Renderer2D.js#L767
                     b.append([v[0], v[1]])
                     b.append([
                         v[0] + (s * vertices[i + 1][0] - s * vertices[i - 1][0]) / 6,
