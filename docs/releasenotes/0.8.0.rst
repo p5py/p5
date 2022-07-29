@@ -28,6 +28,19 @@ List of New APIs
 
 All the API previously present are supported as well in skia.
 
+``Here are some profiling results comparing the time taken to draw 100 frames for different sketches``
+
+==============  =====  =======
+Name            Skia   Vispy
+==============  =====  =======
+arcs            2.11s  10.06s
+custom_shapes   1.84s  5.00s
+triangle_strip  2.55s  3.33s
+custom_shapes2  2.02s  4.14s
+curves          1.76s  5.41s
+primitives      1.73s  3.9s
+==============  =====  =======
+
 This release includes contributions from @tushar5526, @niklasr22, @ziyaointl, @nakul-shahdadpuri, @andreasWallner, @janbehrens, @yogeshhk, @cuppajoeman,
 @willtryagain, @parsoyaarihant, @Kartik-byte, @Andy-Python-Programmer, Thank you!
 
