@@ -448,6 +448,7 @@ class PImage:
             other_img = other._img
 
         # todo: implement missing filters -- abhikpal (2018-08-14)
+        #status :missing filters implemented -- Shiwank (2019-04-17) 
         if mode == 'blend':
             self._img = ImageChops.composite(self._img, other_img, self._img)
         elif mode == 'add':
@@ -457,25 +458,103 @@ class PImage:
         elif mode == 'lightest':
             self._img = ImageChops.lighter(self._img, other_img)
         elif mode == 'darkest':
-            self._img = ImageChops.darker(self._img, other_img)
+        		self._img = ImageChops.darker(self._img, other_img)
         elif mode == 'difference':
-            raise NotImplementedError
+        		self._img = ImageChops.difference(self._img, other_img)
+        		#for treating alpha=255 images
+        		for i in range(0,self.size[0]):
+        			for j in range(0,self.size[1]):
+        				self_pixel = self._img.getpixel((i,j))
+        				self._img.putpixel((i,j), (self_pixel[0], self_pixel[1], self_pixel[2], 255))
         elif mode == 'exclusion':
-            raise NotImplementedError
+        		#formula used:
+        		#Target+Blend-2*(Target)*(Blend)      ,0<=Target,Blend<=1
+        		for i in range(0, self.size[0]):
+        			for j in range(0, self.size[1]):
+        				self_pixel = list(self._img.getpixel((i,j)))
+        				other_pixel = list(other_img.getpixel((i,j)))
+        				for k in range(0,len(self_pixel)):
+        					self_pixel[k] = self_pixel[k]/255
+        					other_pixel[k] = other_pixel[k]/255
+        					self_pixel[k] = int(((self_pixel[k]) + (other_pixel[k]) - 2 * (self_pixel[k]) * (other_pixel[k])) * 255)
+        					#alternate formula
+        					#self_pixel[k]=int((0.5-2*(0.5-self_pixel[k])*(0.5-other_pixel[k]))*255)
+        				self._img.putpixel((i, j), (self_pixel[0], self_pixel[1], self_pixel[2], 255))
         elif mode == 'multiply':
             self._img = ImageChops.multiply(self._img, other_img)
         elif mode == 'screen':
             self._img = ImageChops.screen(self._img, other_img)
         elif mode == 'overlay':
-            raise NotImplementedError
+        		#formula used:
+        		#(Target > 0.5)*(1-(1-2*(Target-0.5))*(1-Blend))+(Target <= 0.5) * ((2*Target) * Blend)      ,0<=Target,Blend<=1
+        					
+        		for i in range(0, self.size[0]):
+        			for j in range(0, self.size[1]):
+        				self_pixel = list(self._img.getpixel((i, j)))
+        				other_pixel = list(other_img.getpixel((i, j)))
+        				for k in range(0, len(self_pixel)):
+        					self_pixel[k] = self_pixel[k] / 255
+        					other_pixel[k] = other_pixel[k] / 255
+        					self_pixel[k] = int(((self_pixel[k] > 0.5) * (1 - (1-2 * (self_pixel[k] - 0.5)) * (1 - other_pixel[k])) + (self_pixel[k] <= 0.5) * ((2*self_pixel[k]) * other_pixel[k])) * 255)
+        				self._img.putpixel((i, j), (self_pixel[0], self_pixel[1], self_pixel[2], 255))
         elif mode == 'hard_light':
-            raise NotImplementedError
+        		#formula used:
+        		#(Blend > 0.5)*(1-(1-Target)*(1-2*(Blend-0.5)))+(Blend <= 0.5) * (Target * (2*Blend))      ,0<=Target,Blend<=1
+        					
+        		for i in range(0, self.size[0]):
+        			for j in range(0, self.size[1]):
+        				self_pixel = list(self._img.getpixel((i, j)))
+        				other_pixel = list(other_img.getpixel((i, j)))
+        				for k in range(0, len(self_pixel)):
+        					self_pixel[k] = self_pixel[k] / 255
+        					other_pixel[k] = other_pixel[k] / 255
+        					self_pixel[k] = int(((other_pixel[k] > 0.5) * (1 - ( 1 - self_pixel[k]) * (1 - 2 * (other_pixel[k] - 0.5))) + (other_pixel[k] <= 0.5) * (self_pixel[k] * (2 * other_pixel[k]))) * 255)
+        				self._img.putpixel((i, j), (self_pixel[0], self_pixel[1], self_pixel[2], 255))
         elif mode == 'soft_light':
-            raise NotImplementedError
+        		#formula used:
+        		#(Blend > 0.5)*(1-(1-Target)*(1-(Blend-0.5)))+(Blend <= 0.5) * (Target * (Blend+0.5))      ,0<=Target,Blend<=1
+        					
+        		for i in range(0, self.size[0]):
+        			for j in range(0, self.size[1]):
+        				self_pixel = list(self._img.getpixel((i, j)))
+        				other_pixel = list(other_img.getpixel((i, j)))
+        				for k in range(0, len(self_pixel)):
+        					self_pixel[k] = self_pixel[k] / 255
+        					other_pixel[k] = other_pixel[k] / 255
+        					self_pixel[k] = int(((other_pixel[k] > 0.5) * (1 - (1-self_pixel[k]) * (1 - (other_pixel[k]-0.5))) + (other_pixel[k] <= 0.5) * (self_pixel[k] * (other_pixel[k]+0.5))) * 255)
+        				self._img.putpixel((i,j),(self_pixel[0],self_pixel[1],self_pixel[2],255))
         elif mode == 'dodge':
-            raise NotImplementedError
+        		#formula used:
+        		#Target / (1-Blend)   , 0<=Blend,target<=1
+        				
+        		for i in range(0, self.size[0]):
+        			for j in range(0, self.size[1]):
+        				self_pixel=list(self._img.getpixel((i, j)))
+        				other_pixel=list(other_img.getpixel((i, j)))
+        				for k in range(0, len(self_pixel)):
+        					self_pixel[k] = self_pixel[k] / 255
+        					other_pixel[k] = other_pixel[k] / 255
+        					if(other_pixel[k] == 1):
+        						self_pixel[k] = 255
+        					else:
+        						self_pixel[k] = int((self_pixel[k] / (1-other_pixel[k]))*255)
+        				self._img.putpixel((i, j), (self_pixel[0], self_pixel[1], self_pixel[2], 255))
         elif mode == 'burn':
-            raise NotImplementedError
+        		#formula used:
+        		#1 - (1-Target) / Blend     , 0<=Blend,target<=1 
+        					
+        		for i in range(0, self.size[0]):
+        			for j in range(0, self.size[1]):
+        				self_pixel = list(self._img.getpixel((i, j)))
+        				other_pixel = list(other_img.getpixel((i, j)))
+        				for k in range(0, len(self_pixel)):
+        					self_pixel[k] = self_pixel[k] / 255
+        					other_pixel[k] = other_pixel[k] / 255
+        					if(other_pixel[k] == 0):
+        						self_pixel[k] = 255
+        					else:
+        						self_pixel[k] = int((1 - (1-self_pixel[k]) / other_pixel[k]) * 255)
+        				self._img.putpixel((i, j), (self_pixel[0], self_pixel[1], self_pixel[2], 255))
         else:
             raise KeyError("'{}' blend mode not found".format(mode.upper()))
 
