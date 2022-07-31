@@ -13,13 +13,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        python-version: [ '3.7', '3.8', '3.9' ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           sudo apt-get install python-opengl libglfw3 python3-wheel -y

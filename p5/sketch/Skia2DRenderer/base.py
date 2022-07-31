@@ -81,7 +81,7 @@ class SkiaSketch:
         return window
 
     def skia_surface(self, window, size):
-        self.context = skia.GrContext.MakeGL()
+        self.context = skia.GrDirectContext.MakeGL()
         backend_render_target = skia.GrBackendRenderTarget(
             *size,
             0,  # sampleCnt
