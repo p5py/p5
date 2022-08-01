@@ -35,6 +35,7 @@ is_bezier = False
 is_curve = False
 is_quadratic = False
 is_contour = False
+in_contour = False
 is_first_contour = True
 
 __all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
@@ -229,8 +230,9 @@ def begin_contour():
     for internal shapes, draw vertices shape in counter-clockwise.
 
     """
-    global is_contour, contour_vertices, contour_vertices_types
+    global is_contour, contour_vertices, contour_vertices_types, in_contour
     is_contour = True
+    in_contour = True
     contour_vertices = []
     contour_vertices_types = []
 
@@ -240,8 +242,8 @@ def end_contour():
 
     For more info, see :any:`begin_contour`.
     """
-    global is_contour, curr_contour_vertices, curr_contour_vertices_types, is_first_contour
-
+    global in_contour, curr_contour_vertices, curr_contour_vertices_types, is_first_contour
+    in_contour = False
     if builtins.current_renderer == 'vispy':
         # Close contour
         curr_contour_vertices.append(curr_contour_vertices[0])
@@ -355,9 +357,10 @@ def end_shape(mode=""):
     :type mode: str
 
     """
-    global is_bezier, is_curve, is_quadratic, is_contour, is_first_contour
+    global is_bezier, is_curve, is_quadratic, is_contour, is_first_contour, in_contour
     if is_curve or is_bezier or is_quadratic:
         assert shape_kind == TESS, "Should not specify primitive type for a curve"
+    assert not in_contour, "begin_contour called without calling end_contour"
 
     if len(vertices) == 0:
         return
