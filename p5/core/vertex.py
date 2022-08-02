@@ -244,6 +244,8 @@ def end_contour():
     """
     global in_contour, curr_contour_vertices, curr_contour_vertices_types, is_first_contour
     in_contour = False
+    # https://github.com/p5py/p5/pull/357#discussion_r935221732
+    # is_contour = False
     if builtins.current_renderer == 'vispy':
         # Close contour
         curr_contour_vertices.append(curr_contour_vertices[0])
