@@ -5,7 +5,7 @@ Width and Height
 
 .. raw:: html
 
- <script>
+  <script>
     function setup() {
       var canvas = createCanvas(720, 400);
       canvas.parent('sketch-holder');
@@ -21,8 +21,8 @@ Width and Height
         rect(i, 0, 10, height);
       }
     }
- </script>
- <div id="sketch-holder"></div>
+  </script>
+  <div id="sketch-holder"></div>
 
 
 The ``width`` and ``height`` variables contain the width and height of the display window as defined in the ``size()`` function.
