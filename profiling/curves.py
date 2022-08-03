@@ -12,7 +12,7 @@ def draw():
     bezier_vertex(80, 0, 80, 75, 30, 75)
     end_shape()
 
-    fill('white')
+    fill("white")
     begin_shape()
     vertex(130, 20)
     bezier_vertex(180, 0, 180, 75, 130, 75)
@@ -41,5 +41,5 @@ def draw():
     end_shape()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

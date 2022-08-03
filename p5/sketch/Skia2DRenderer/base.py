@@ -9,6 +9,7 @@ from ..events import handler_names
 from .handlers import *
 from .util import *
 
+
 def _dummy(*args, **kwargs):
     """Eat all arguments, do nothing."""
     pass

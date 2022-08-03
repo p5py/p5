@@ -16,11 +16,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-__title__ = 'p5'
-__description__ = 'Creative coding in Python'
-__url__ = 'https://p5py.github.io'
-__version__ = '0.8.0'
-__author__ = 'Abhik Pal'
-__author_email__ = 'theabhikpal@gmail.com'
-__license__ = ' GNU GPLv3'
-__copyright__ = 'Copyright (C) 2017-2020 Abhik Pal'
+__title__ = "p5"
+__description__ = "Creative coding in Python"
+__url__ = "https://p5py.github.io"
+__version__ = "0.8.0"
+__author__ = "Abhik Pal"
+__author_email__ = "theabhikpal@gmail.com"
+__license__ = " GNU GPLv3"
+__copyright__ = "Copyright (C) 2017-2020 Abhik Pal"

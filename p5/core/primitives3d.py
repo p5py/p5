@@ -46,9 +46,7 @@ POINT_ACCURACY_FACTOR = 10
 
 
 def _draw_on_return(func):
-    """Set shape parameters to default renderer parameters
-
-    """
+    """Set shape parameters to default renderer parameters"""
 
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
@@ -107,7 +105,7 @@ def box(width, height, depth, detail_x=1, detail_y=1):
         [0, 1, 4, 5],  # 0, -1, 0],// -y
         [2, 6, 3, 7],  # 0, +1, 0],// +y
         [0, 2, 1, 3],  # 0, 0, -1],// -z
-        [4, 5, 6, 7]  # 0, 0, +1] // +z
+        [4, 5, 6, 7],  # 0, 0, +1] // +z
     ]
 
     geom.stroke_indices = [
@@ -122,7 +120,7 @@ def box(width, height, depth, detail_x=1, detail_y=1):
         [17, 19],
         [18, 19],
         [20, 21],
-        [22, 23]
+        [22, 23],
     ]
 
     for i in range(len(cube_indices)):
@@ -131,11 +129,7 @@ def box(width, height, depth, detail_x=1, detail_y=1):
         for j in range(4):
             d = cube_index[j]
 
-            octant = [
-                ((d & 1) * 2 - 1) / 2,
-                ((d & 2) - 1) / 2,
-                ((d & 4) / 2 - 1) / 2
-            ]
+            octant = [((d & 1) * 2 - 1) / 2, ((d & 2) - 1) / 2, ((d & 4) / 2 - 1) / 2]
 
             geom.vertices.append(octant)
             geom.uvs.extend([j & 1, (j & 2) / 2])
@@ -250,8 +244,9 @@ def ellipsoid(radius_x, radius_y, radius_z, detail_x=24, detail_y=24):
     return geom
 
 
-def truncated_cone(bottom_radius, top_radius, height,
-                   detail_x, detail_y, bottom_cap, top_cap):
+def truncated_cone(
+    bottom_radius, top_radius, height, detail_x, detail_y, bottom_cap, top_cap
+):
     geom = Geometry(detail_x, detail_y)
 
     bottom_radius = 1 if bottom_radius <= 0 else bottom_radius
@@ -311,45 +306,54 @@ def truncated_cone(bottom_radius, top_radius, height,
     if bottom_cap:
         for jj in range(detail_x):
             nextjj = (jj + 1) % detail_x
-            geom.faces.append([
-                start_index + jj,
-                start_index + detail_x + nextjj,
-                start_index + detail_x + jj
-            ])
+            geom.faces.append(
+                [
+                    start_index + jj,
+                    start_index + detail_x + nextjj,
+                    start_index + detail_x + jj,
+                ]
+            )
 
         start_index += detail_x * 2
 
     for yy in range(detail_y):
         for ii in range(detail_x):
             nextii = (ii + 1) % detail_x
-            geom.faces.append([
-                start_index + ii,
-                start_index + nextii,
-                start_index + detail_x + nextii
-            ])
-            geom.faces.append([
-                start_index + ii,
-                start_index + detail_x + nextii,
-                start_index + detail_x + ii
-            ])
+            geom.faces.append(
+                [
+                    start_index + ii,
+                    start_index + nextii,
+                    start_index + detail_x + nextii,
+                ]
+            )
+            geom.faces.append(
+                [
+                    start_index + ii,
+                    start_index + detail_x + nextii,
+                    start_index + detail_x + ii,
+                ]
+            )
 
         start_index += detail_x
 
     if top_cap:
         start_index += detail_x
         for ii in range(detail_x):
-            geom.faces.append([
-                start_index + ii,
-                start_index + (ii + 1) % detail_x,
-                start_index + detail_x
-            ])
+            geom.faces.append(
+                [
+                    start_index + ii,
+                    start_index + (ii + 1) % detail_x,
+                    start_index + detail_x,
+                ]
+            )
 
     return geom
 
 
 @_draw_on_return
-def cylinder(radius=50, height=50, detail_x=24,
-             detail_y=1, top_cap=True, bottom_cap=True):
+def cylinder(
+    radius=50, height=50, detail_x=24, detail_y=1, top_cap=True, bottom_cap=True
+):
     """
     Draw a cylinder with given radius and height
 
@@ -440,11 +444,7 @@ def torus(radius=50, tube_radius=10, detail_x=24, detail_y=16):
             cosTheta = math.cos(theta)
             sinTheta = math.sin(theta)
 
-            geom.vertices.append([
-                r * cosTheta,
-                r * sinTheta,
-                tube_ratio * sinPhi
-            ])
+            geom.vertices.append([r * cosTheta, r * sinTheta, tube_ratio * sinPhi])
 
         n = [cosPhi * cosTheta, cosPhi * sinTheta, sinPhi]
         geom.vertex_normals.append(n)

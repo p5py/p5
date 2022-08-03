@@ -1,7 +1,9 @@
 from p5 import *
 
+
 def setup():
     size(640, 360)
+
 
 def draw():
 
@@ -24,10 +26,10 @@ def draw():
     # the coordinates of the first endpoint and the second parameter
     # specify the second endpoint
     stroke(0, 153, 255)
-    line((0, height*0.33), (width, height*0.33))
+    line((0, height * 0.33), (width, height * 0.33))
 
     # By default, the first parameter to rect() is the
     # coordinates of the upper-left corner and the second and third
     # parameter is the width and height
     stroke(255, 153, 0)
-    rect(width*0.25, height*0.1, width * 0.5, height * 0.8)
+    rect(width * 0.25, height * 0.1, width * 0.5, height * 0.8)

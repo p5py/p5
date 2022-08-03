@@ -1,8 +1,17 @@
 # This file adds Processing API compatibility
 
-from .curves import bezier_detail, bezier_point, bezier_tangent, curve_point, curve_tightness, curve_detail,\
-    curve_tangent, quadratic_point
+from .curves import (
+    bezier_detail,
+    bezier_point,
+    bezier_tangent,
+    curve_point,
+    curve_tightness,
+    curve_detail,
+    curve_tangent,
+    quadratic_point,
+)
 from .rand import noise_detail, noise_seed, random_uniform, random_seed, random_gaussian
+
 
 def bezierDetail(detailValue):
     """Change the resolution used to draw bezier curves.
@@ -11,6 +20,7 @@ def bezierDetail(detailValue):
     :type detailValue: int
     """
     bezier_detail(detailValue)
+
 
 def bezierPoint(start, control1, control2, stop, parameter):
     """Return the coordinate of a point along a bezier curve.
@@ -37,6 +47,7 @@ def bezierPoint(start, control1, control2, stop, parameter):
 
     """
     return bezier_point(start, control1, control2, stop, parameter)
+
 
 def bezierTangent(start, control1, control2, stop, parameter):
     """Return the tangent at a point along a bezier curve.
@@ -66,6 +77,7 @@ def bezierTangent(start, control1, control2, stop, parameter):
     """
     return bezier_tangent(start, control1, control2, stop, parameter)
 
+
 def curveDetail(detailValue):
     """Change the resolution used to draw bezier curves.
 
@@ -74,6 +86,7 @@ def curveDetail(detailValue):
     """
     curve_detail(detailValue)
 
+
 def curveTightness(amount):
     """Change the curve tightness used to draw curves.
 
@@ -81,6 +94,7 @@ def curveTightness(amount):
     :type amount: int
     """
     curve_tightness(amount)
+
 
 def curvePoint(point1, point2, point3, point4, parameter):
     """Return the coordinates of a point along a curve.
@@ -110,6 +124,7 @@ def curvePoint(point1, point2, point3, point4, parameter):
     """
     return curve_point(point1, point2, point3, point4, parameter)
 
+
 def curveTangent(point1, point2, point3, point4, parameter):
     """Return the tangent at a point along a curve.
 
@@ -137,6 +152,7 @@ def curveTangent(point1, point2, point3, point4, parameter):
     """
     return curve_tangent(point1, point2, point3, point4, parameter)
 
+
 def quadraticPoint(start, control, stop, parameter):
     """Return the coordinates of a point along a bezier curve.
 
@@ -162,6 +178,7 @@ def quadraticPoint(start, control, stop, parameter):
     """
     return quadratic_point(start, control, stop, parameter)
 
+
 def noiseDetail(octaves=4, falloff=0.5):
     """Adjust the level of noise detail produced by noise().
 
@@ -178,6 +195,7 @@ def noiseDetail(octaves=4, falloff=0.5):
     """
     noise_detail(octaves, falloff)
 
+
 def noiseSeed(seed):
     """Set the seed value for :code:`noise()`
 
@@ -191,6 +209,7 @@ def noiseSeed(seed):
 
     """
     noise_seed(seed)
+
 
 def randomUniform(high=1, low=0):
     """Return a uniformly sampled random number.
@@ -206,6 +225,7 @@ def randomUniform(high=1, low=0):
 
     """
     return random_uniform(high, low)
+
 
 def randomGaussian(mean=0, stdDev=1):
     """Return a normally sampled random number.
@@ -224,6 +244,7 @@ def randomGaussian(mean=0, stdDev=1):
 
     """
     return random_gaussian(mean, stdDev)
+
 
 def randomSeed(seed):
     """Set the seed used to generate random numbers.

@@ -8,6 +8,7 @@ import requests
 
 # Synchronous
 
+
 class http_get:
     """
     Performs a synchronous GET request on the given url.
@@ -29,7 +30,9 @@ class http_get:
         except json.JSONDecodeError:
             self.json = data
 
+
 # Synchronous
+
 
 def http_post(url, post_data):
     """
@@ -44,4 +47,3 @@ def http_post(url, post_data):
     data = requests.post(url, post_data)
     data = data.json()
     return data
-    

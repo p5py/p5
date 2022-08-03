@@ -24,10 +24,13 @@ from .utils import PRE_COS
 
 __all__ = [
     # PERLIN NOISE FUNCTIONS
-    'noise', 'noise_detail', 'noise_seed',
-
+    "noise",
+    "noise_detail",
+    "noise_seed",
     # RANDOM NUMBER GENERATION
-    'random_uniform', 'random_gaussian', 'random_seed'
+    "random_uniform",
+    "random_gaussian",
+    "random_seed",
 ]
 
 # Most of the perlin noise code is based on the original Processing

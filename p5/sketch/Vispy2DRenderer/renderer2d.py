@@ -40,7 +40,7 @@ class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
         super().__init__(src_fbuffer, src_default)
         self.texture_prog = Program(src_texture.vert, src_texture.frag)
-        self.texture_prog['texcoord'] = self.fbuf_texcoords
+        self.texture_prog["texcoord"] = self.fbuf_texcoords
         self.line_prog = None
         self.modelview_matrix = np.identity(4)
 
@@ -62,33 +62,30 @@ class VispyRenderer2D(OpenGLRenderer):
 
         cz = (builtins.height / 2) / math.tan(math.radians(30))
         self.projection_matrix = matrix.perspective_matrix(
-            math.radians(60),
-            builtins.width / builtins.height,
-            0.1 * cz,
-            10 * cz
+            math.radians(60), builtins.width / builtins.height, 0.1 * cz, 10 * cz
         )
-        self.modelview_matrix = matrix.translation_matrix(-builtins.width / 2,
-                                                          builtins.height / 2,
-                                                          -cz)
+        self.modelview_matrix = matrix.translation_matrix(
+            -builtins.width / 2, builtins.height / 2, -cz
+        )
         self.modelview_matrix = self.modelview_matrix.dot(
-            matrix.scale_transform(1, -1, 1))
+            matrix.scale_transform(1, -1, 1)
+        )
 
         self.transform_matrix = np.identity(4)
 
-        self.default_prog['modelview'] = self.modelview_matrix.T.flatten()
-        self.default_prog['projection'] = self.projection_matrix.T.flatten()
+        self.default_prog["modelview"] = self.modelview_matrix.T.flatten()
+        self.default_prog["projection"] = self.projection_matrix.T.flatten()
 
-        self.texture_prog['modelview'] = self.modelview_matrix.T.flatten()
-        self.texture_prog['projection'] = self.projection_matrix.T.flatten()
+        self.texture_prog["modelview"] = self.modelview_matrix.T.flatten()
+        self.texture_prog["projection"] = self.projection_matrix.T.flatten()
 
         self.line_prog = Program(src_line.vert, src_line.frag)
 
-        self.line_prog['modelview'] = self.modelview_matrix.T.flatten()
-        self.line_prog['projection'] = self.projection_matrix.T.flatten()
+        self.line_prog["modelview"] = self.modelview_matrix.T.flatten()
+        self.line_prog["projection"] = self.projection_matrix.T.flatten()
         self.line_prog["height"] = builtins.height
 
-        self.fbuffer_tex_front = Texture2D(
-            (builtins.height, builtins.width, 3))
+        self.fbuffer_tex_front = Texture2D((builtins.height, builtins.width, 3))
         self.fbuffer_tex_back = Texture2D((builtins.height, builtins.width, 3))
 
         for buf in [self.fbuffer_tex_front, self.fbuffer_tex_back]:
@@ -98,7 +95,9 @@ class VispyRenderer2D(OpenGLRenderer):
 
     def clear(self, color=True, depth=True):
         """Clear the renderer background."""
-        gloo.set_state(clear_color=self.style.background_color)  # pylint: disable=no-member
+        gloo.set_state(
+            clear_color=self.style.background_color
+        )  # pylint: disable=no-member
         gloo.clear(color=color, depth=depth)  # pylint: disable=no-member
 
     def _comm_toggles(self, state=True):
@@ -106,26 +105,27 @@ class VispyRenderer2D(OpenGLRenderer):
         gloo.set_state(depth_test=state)  # pylint: disable=no-member
 
         if state:
-            gloo.set_state(blend_func=('src_alpha', 'one_minus_src_alpha'))  # pylint: disable=no-member
-            gloo.set_state(depth_func='lequal')  # pylint: disable=no-member
+            gloo.set_state(
+                blend_func=("src_alpha", "one_minus_src_alpha")
+            )  # pylint: disable=no-member
+            gloo.set_state(depth_func="lequal")  # pylint: disable=no-member
 
     @contextmanager
     def draw_loop(self):
-        """The main draw loop context manager.
-        """
+        """The main draw loop context manager."""
 
         self.transform_matrix = np.identity(4)
 
-        self.default_prog['modelview'] = self.modelview_matrix.T.flatten()
-        self.default_prog['projection'] = self.projection_matrix.T.flatten()
+        self.default_prog["modelview"] = self.modelview_matrix.T.flatten()
+        self.default_prog["projection"] = self.projection_matrix.T.flatten()
 
         self.fbuffer.color_buffer = self.fbuffer_tex_back
 
         with self.fbuffer:
             gloo.set_viewport(*self.texture_viewport)  # pylint: disable=no-member
             self._comm_toggles()
-            self.fbuffer_prog['texture'] = self.fbuffer_tex_front
-            self.fbuffer_prog.draw('triangle_strip')
+            self.fbuffer_prog["texture"] = self.fbuffer_tex_front
+            self.fbuffer_prog.draw("triangle_strip")
 
             yield
 
@@ -135,18 +135,22 @@ class VispyRenderer2D(OpenGLRenderer):
         gloo.set_viewport(*self.viewport)  # pylint: disable=no-member
         self._comm_toggles(False)
         self.clear()
-        self.fbuffer_prog['texture'] = self.fbuffer_tex_back
-        self.fbuffer_prog.draw('triangle_strip')
+        self.fbuffer_prog["texture"] = self.fbuffer_tex_back
+        self.fbuffer_prog.draw("triangle_strip")
 
-        self.fbuffer_tex_front, self.fbuffer_tex_back = self.fbuffer_tex_back, self.fbuffer_tex_front
+        self.fbuffer_tex_front, self.fbuffer_tex_back = (
+            self.fbuffer_tex_back,
+            self.fbuffer_tex_front,
+        )
 
-    def _add_to_draw_queue(self, stype, vertices, idx, fill,
-                           stroke, stroke_weight, stroke_cap, stroke_join):
-        """Adds shape of stype to draw queue
-        """
-        if stype == 'lines':
+    def _add_to_draw_queue(
+        self, stype, vertices, idx, fill, stroke, stroke_weight, stroke_cap, stroke_join
+    ):
+        """Adds shape of stype to draw queue"""
+        if stype == "lines":
             self.draw_queue.append(
-                (stype, (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join)))
+                (stype, (vertices, idx, stroke, stroke_weight, stroke_cap, stroke_join))
+            )
         else:
             self.draw_queue.append((stype, (vertices, idx, fill)))
 
@@ -162,12 +166,13 @@ class VispyRenderer2D(OpenGLRenderer):
             stype, vertices, idx = obj
             # Convert 2D vertices to 3D by adding "0" column, needed for further transformations
             if len(vertices[0]) == 2:
-                vertices = np.hstack([vertices,  np.zeros((len(vertices), 1))])
+                vertices = np.hstack([vertices, np.zeros((len(vertices), 1))])
             # Transform vertices
             vertices = self._transform_vertices(
                 np.hstack([vertices, np.ones((len(vertices), 1))]),
                 shape._matrix,
-                self.transform_matrix)
+                self.transform_matrix,
+            )
             # Add to draw queue
             self._add_to_draw_queue(
                 stype,
@@ -177,11 +182,11 @@ class VispyRenderer2D(OpenGLRenderer):
                 stroke,
                 stroke_weight,
                 stroke_cap,
-                stroke_join)
+                stroke_join,
+            )
 
     def flush_geometry(self):
-        """Flush all the shape geometry from the draw queue to the GPU.
-        """
+        """Flush all the shape geometry from the draw queue to the GPU."""
         current_queue = []
         for index, shape in enumerate(self.draw_queue):
             current_shape = self.draw_queue[index][0]
@@ -197,12 +202,12 @@ class VispyRenderer2D(OpenGLRenderer):
         self.draw_queue = []
 
     def render_line(self, queue):
-        '''
+        """
         This rendering algorithm works by tesselating the line into
         multiple triangles.
 
         Reference: https://blog.mapbox.com/drawing-antialiased-lines-with-opengl-8766f34192dc
-        '''
+        """
 
         if len(queue) == 0:
             return
@@ -219,17 +224,9 @@ class VispyRenderer2D(OpenGLRenderer):
         cap_type = []
         color = []
 
-        stroke_cap_codes = {
-            'PROJECT': 0,
-            'SQUARE': 1,
-            'ROUND': 2
-        }
+        stroke_cap_codes = {"PROJECT": 0, "SQUARE": 1, "ROUND": 2}
 
-        stroke_join_codes = {
-            'MITER': 0,
-            'BEVEL': 1,
-            'ROUND': 2
-        }
+        stroke_join_codes = {"MITER": 0, "BEVEL": 1, "ROUND": 2}
 
         for line in queue:
             if len(line[1]) == 0:
@@ -237,9 +234,9 @@ class VispyRenderer2D(OpenGLRenderer):
 
             for segment in line[1]:
                 for i in range(
-                        len(segment) - 1):  # the data is sent to renderer in line segments
-                    for j in [
-                        0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
+                    len(segment) - 1
+                ):  # the data is sent to renderer in line segments
+                    for j in [0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
                         if i + j - 1 >= 0:
                             posPrev.append(line[0][segment[i + j - 1]])
                         else:
@@ -277,18 +274,18 @@ class VispyRenderer2D(OpenGLRenderer):
         cap_type = np.array(cap_type, np.float32)
         color = np.array(color, np.float32)
 
-        self.line_prog['pos'] = gloo.VertexBuffer(pos)
-        self.line_prog['posPrev'] = gloo.VertexBuffer(posPrev)
-        self.line_prog['posCurr'] = gloo.VertexBuffer(posCurr)
-        self.line_prog['posNext'] = gloo.VertexBuffer(posNext)
-        self.line_prog['marker'] = gloo.VertexBuffer(markers)
-        self.line_prog['side'] = gloo.VertexBuffer(side)
-        self.line_prog['linewidth'] = gloo.VertexBuffer(linewidth)
-        self.line_prog['join_type'] = gloo.VertexBuffer(join_type)
-        self.line_prog['cap_type'] = gloo.VertexBuffer(cap_type)
+        self.line_prog["pos"] = gloo.VertexBuffer(pos)
+        self.line_prog["posPrev"] = gloo.VertexBuffer(posPrev)
+        self.line_prog["posCurr"] = gloo.VertexBuffer(posCurr)
+        self.line_prog["posNext"] = gloo.VertexBuffer(posNext)
+        self.line_prog["marker"] = gloo.VertexBuffer(markers)
+        self.line_prog["side"] = gloo.VertexBuffer(side)
+        self.line_prog["linewidth"] = gloo.VertexBuffer(linewidth)
+        self.line_prog["join_type"] = gloo.VertexBuffer(join_type)
+        self.line_prog["cap_type"] = gloo.VertexBuffer(cap_type)
         self.line_prog["color"] = gloo.VertexBuffer(color)
 
-        self.line_prog.draw('triangles')
+        self.line_prog.draw("triangles")
 
     def render_image(self, image, location, size):
         """Render the image.
@@ -304,29 +301,27 @@ class VispyRenderer2D(OpenGLRenderer):
         """
         self.flush_geometry()
 
-        self.texture_prog['fill_color'] = self.style.tint_color if self.style.tint_enabled else COLOR_WHITE
-        self.texture_prog['transform'] = self.transform_matrix.T.flatten()
+        self.texture_prog["fill_color"] = (
+            self.style.tint_color if self.style.tint_enabled else COLOR_WHITE
+        )
+        self.texture_prog["transform"] = self.transform_matrix.T.flatten()
 
         x, y = location
         sx, sy = size
         imx, imy = image.size
-        data = np.zeros(4,
-                        dtype=[('position', np.float32, 2),
-                               ('texcoord', np.float32, 2)])
-        data['texcoord'] = np.array([[0.0, 1.0],
-                                     [1.0, 1.0],
-                                     [0.0, 0.0],
-                                     [1.0, 0.0]],
-                                    dtype=np.float32)
-        data['position'] = np.array([[x, y + sy],
-                                     [x + sx, y + sy],
-                                     [x, y],
-                                     [x + sx, y]],
-                                    dtype=np.float32)
+        data = np.zeros(
+            4, dtype=[("position", np.float32, 2), ("texcoord", np.float32, 2)]
+        )
+        data["texcoord"] = np.array(
+            [[0.0, 1.0], [1.0, 1.0], [0.0, 0.0], [1.0, 0.0]], dtype=np.float32
+        )
+        data["position"] = np.array(
+            [[x, y + sy], [x + sx, y + sy], [x, y], [x + sx, y]], dtype=np.float32
+        )
 
-        self.texture_prog['texture'] = image._texture
+        self.texture_prog["texture"] = image._texture
         self.texture_prog.bind(VertexBuffer(data))
-        self.texture_prog.draw('triangle_strip')
+        self.texture_prog.draw("triangle_strip")
 
     def cleanup(self):
         """Run the clean-up routine for the renderer.
@@ -374,4 +369,6 @@ class VispyRenderer2D(OpenGLRenderer):
 
     def shape(self, vertices, contours, shape_type, *args):
         """Render a Pshape"""
-        self.render_shape(PShape(vertices=vertices, contours=contours, shape_type=shape_type))
+        self.render_shape(
+            PShape(vertices=vertices, contours=contours, shape_type=shape_type)
+        )

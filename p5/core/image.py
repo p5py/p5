@@ -36,21 +36,20 @@ from ..pmath import constrain
 from ..pmath.utils import _is_numeric
 from .structure import push_style
 
-__all__ = ['PImage', 'image', 'load_image', 'image_mode',
-           'load_pixels']
+__all__ = ["PImage", "image", "load_image", "image_mode", "load_pixels"]
 
-_image_mode = 'corner'
+_image_mode = "corner"
 
 
 def _ensure_loaded(func):
-    """Reloads the image if required before calling the function.
+    """Reloads the image if required before calling the function."""
 
-    """
     @functools.wraps(func)
     def rfunc(instance, *args, **kwargs):
         if instance._img_data is None or instance._reload:
             instance._load()
         return func(instance, *args, **kwargs)
+
     return rfunc
 
 
@@ -58,7 +57,7 @@ def _ensure_loaded(func):
 def _restore_color_mode():
     old_mode = color.color_parse_mode
     old_range = color.color_range
-    color.color_mode('RGB', 255, 255, 255, 255)
+    color.color_mode("RGB", 255, 255, 255, 255)
 
     yield
 
@@ -87,14 +86,14 @@ class PImage:
 
     """
 
-    def __init__(self, width, height, fmt='RGBA'):
+    def __init__(self, width, height, fmt="RGBA"):
         self._width = width
         self._height = height
 
         format_map = {
-            'rgb': 'RGB',
-            'rgba': 'RGBA',
-            'alpha': 'L',
+            "rgb": "RGB",
+            "rgba": "RGBA",
+            "alpha": "L",
         }
 
         self._reload = False
@@ -157,9 +156,10 @@ class PImage:
     def _texture(self):
         if self._img_texture is None:
             texdata = self._data.astype(np.float32) / 255.0
-            if builtins.current_renderer == 'vispy':
+            if builtins.current_renderer == "vispy":
                 from vispy.gloo import Texture2D
-                self._img_texture = Texture2D(texdata, interpolation='linear')
+
+                self._img_texture = Texture2D(texdata, interpolation="linear")
         return self._img_texture
 
     @property
@@ -169,8 +169,7 @@ class PImage:
 
     def _load(self):
         if self._img is None:
-            self._img = Image.new(
-                self._img_format, (self._width, self._height))
+            self._img = Image.new(self._img_format, (self._width, self._height))
 
         width, height = self._img.size
         self._width = width
@@ -309,9 +308,7 @@ class PImage:
 
     @_ensure_loaded
     def _set_patch(self, key, patch):
-        """Paste the given patch in the image.
-
-        """
+        """Paste the given patch in the image."""
         # we first ensure that both the source patch and the target
         # image (self) have the same color modes, if not, convert the
         # target.
@@ -331,9 +328,7 @@ class PImage:
         self._img = Image.fromarray(self._img_data, self._img.mode)
 
     def __setitem__(self, key, patch):
-        """Paste the given `patch` into the current image.
-
-        """
+        """Paste the given `patch` into the current image."""
         if len(key) != 2:
             raise KeyError("Invalid image index")
         if _is_numeric(key[0]) and _is_numeric(key[1]):
@@ -377,41 +372,41 @@ class PImage:
         filter_name = kind.lower()
         if param is None:
             default_values = {
-                'threshold': 0.5,
-                'blur': 1.0,
-                'gaussian_blur': 1.0,
-                'box_blur': 1.0,
-                'posterize': 1,
-                'opacity': 0.5,
+                "threshold": 0.5,
+                "blur": 1.0,
+                "gaussian_blur": 1.0,
+                "box_blur": 1.0,
+                "posterize": 1,
+                "opacity": 0.5,
             }
             param = default_values.get(filter_name, None)
 
-        if filter_name in ['blur', 'gaussian_blur']:
+        if filter_name in ["blur", "gaussian_blur"]:
             fim = self._img.filter(ImageFilter.GaussianBlur(radius=param))
             self._img = fim
-        elif filter_name == 'box_blur':
+        elif filter_name == "box_blur":
             self._img = self._img.filter(ImageFilter.BoxBlur(param))
-        elif filter_name in ['gray', 'grey', 'grayscale']:
+        elif filter_name in ["gray", "grey", "grayscale"]:
             self._img = ImageOps.grayscale(self._img)
-        elif filter_name == 'opaque':
+        elif filter_name == "opaque":
             self._img.putalpha(255)
-        elif filter_name == 'opacity':
+        elif filter_name == "opacity":
             self._img.putalpha(int(param * 255))
-        elif filter_name == 'invert':
+        elif filter_name == "invert":
             self._img = ImageOps.invert(self._img)
-        elif filter_name == 'posterize':
+        elif filter_name == "posterize":
             nbits = 0
             while int(param) != 0:
                 param = param >> 1
                 nbits = nbits + 1
             nbits = constrain(nbits, 1, 8)
             self._img = ImageOps.posterize(self._img, nbits)
-        elif filter_name == 'threshold':
+        elif filter_name == "threshold":
             dat = np.asarray(ImageOps.grayscale(self._img)).copy()
             dat[dat < int(128 * param)] = 0
             dat[dat >= int(128 * param)] = 255
             self._img = Image.fromarray(dat)
-        elif filter_name in ['erode', 'dilate']:
+        elif filter_name in ["erode", "dilate"]:
             raise NotImplementedError
         else:
             raise ValueError("Unknown filter")
@@ -438,43 +433,43 @@ class PImage:
         mode = mode.lower()
         assert self.size == other.size, "Images are of different sizes!"
 
-        if self._img.mode != 'RGBA':
-            self._img = self._img.convert('RGBA')
+        if self._img.mode != "RGBA":
+            self._img = self._img.convert("RGBA")
             self._reload = True
 
-        if other._img.mode != 'RGBA':
-            other_img = other._img.convert('RGBA')
+        if other._img.mode != "RGBA":
+            other_img = other._img.convert("RGBA")
         else:
             other_img = other._img
 
         # todo: implement missing filters -- abhikpal (2018-08-14)
-        if mode == 'blend':
+        if mode == "blend":
             self._img = ImageChops.composite(self._img, other_img, self._img)
-        elif mode == 'add':
+        elif mode == "add":
             self._img = ImageChops.add(self._img, other_img)
-        elif mode == 'subtract':
+        elif mode == "subtract":
             self._img = ImageChops.subtract(self._img, other_img)
-        elif mode == 'lightest':
+        elif mode == "lightest":
             self._img = ImageChops.lighter(self._img, other_img)
-        elif mode == 'darkest':
+        elif mode == "darkest":
             self._img = ImageChops.darker(self._img, other_img)
-        elif mode == 'difference':
+        elif mode == "difference":
             raise NotImplementedError
-        elif mode == 'exclusion':
+        elif mode == "exclusion":
             raise NotImplementedError
-        elif mode == 'multiply':
+        elif mode == "multiply":
             self._img = ImageChops.multiply(self._img, other_img)
-        elif mode == 'screen':
+        elif mode == "screen":
             self._img = ImageChops.screen(self._img, other_img)
-        elif mode == 'overlay':
+        elif mode == "overlay":
             raise NotImplementedError
-        elif mode == 'hard_light':
+        elif mode == "hard_light":
             raise NotImplementedError
-        elif mode == 'soft_light':
+        elif mode == "soft_light":
             raise NotImplementedError
-        elif mode == 'dodge':
+        elif mode == "dodge":
             raise NotImplementedError
-        elif mode == 'burn':
+        elif mode == "burn":
             raise NotImplementedError
         else:
             raise KeyError("'{}' blend mode not found".format(mode.upper()))
@@ -549,11 +544,11 @@ def image(*args, size=None):
     lx, ly = location
     sx, sy = size
 
-    if _image_mode == 'center':
+    if _image_mode == "center":
         lx = int(lx - (sx / 2))
         ly = int(ly - (sy / 2))
 
-    if _image_mode == 'corners':
+    if _image_mode == "corners":
         sx = sx - lx
         sy = sy - ly
 
@@ -589,7 +584,7 @@ def image_mode(mode):
     """
     global _image_mode
 
-    if mode.lower() not in ['corner', 'center', 'corners']:
+    if mode.lower() not in ["corner", "center", "corners"]:
         raise ValueError("Unknown image mode!")
     _image_mode = mode.lower()
 
@@ -612,7 +607,7 @@ def load_image(filename):
     :rtype: :class:`p5.PImage`
 
     """
-    if (re.match(r'\w+://', filename)):
+    if re.match(r"\w+://", filename):
         with urllib.request.urlopen(filename) as url:
             f = io.BytesIO(url.read())
             img = Image.open(f)
@@ -634,9 +629,9 @@ def load_pixels():
     to the image are written to the main display.
 
     """
-    pixels = PImage(builtins.width, builtins.height, 'RGB')
+    pixels = PImage(builtins.width, builtins.height, "RGB")
     # sketch.renderer.flush_geometry()
-    pixel_data = p5.renderer.fbuffer.read(mode='color', alpha=False)
+    pixel_data = p5.renderer.fbuffer.read(mode="color", alpha=False)
 
     pixels._img = Image.fromarray(pixel_data)
     builtins.pixels = pixels
@@ -646,7 +641,7 @@ def load_pixels():
     yield
 
     with push_style():
-        image_mode('corner')
+        image_mode("corner")
         p5.renderer.style.tint_enabled = False
         image(builtins.pixels, (0, 0))
 

@@ -252,13 +252,13 @@ class MouseEvent(Event):
         x = max(min(builtins.width, x), 0)
         y = max(min(builtins.height, builtins.height - y), 0)
         dx, dy = self._raw.delta
-        
+
         self.x = max(min(builtins.width, x), 0)
         self.y = max(min(builtins.height, builtins.height - y), 0)
 
         self.position = Position(x, y)
-        
-        # TODO: scroll should be renamed as delta 
+
+        # TODO: scroll should be renamed as delta
         # https://p5js.org/reference/#/p5/mouseWheel
         self.scroll = Position(int(dx), int(dy))
 

@@ -7,9 +7,9 @@ def setup():
     size(640, 360)
 
     global dim
-    dim = width / 2;
+    dim = width / 2
     background(0)
-    color_mode('HSB', 360, 100, 100)
+    color_mode("HSB", 360, 100, 100)
     no_stroke()
 
 

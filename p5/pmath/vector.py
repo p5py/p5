@@ -20,12 +20,12 @@ from collections import namedtuple
 import numpy as np
 from numpy.random import random
 
-__all__ = ['Vector', 'Point']
+__all__ = ["Vector", "Point"]
 
 # Floating point precision for vectors.
 EPSILON = 1e-8
 
-Point = namedtuple('Point', ['x', 'y', 'z'])
+Point = namedtuple("Point", ["x", "y", "z"])
 Point.__new__.__defaults__ = (None, None, 0)
 
 
@@ -321,8 +321,9 @@ class Vector(Point):
         :rtype: float
 
         """
-        return np.arccos((np.dot(self._array, other._array)) /
-                         (self.magnitude * other.magnitude))
+        return np.arccos(
+            (np.dot(self._array, other._array)) / (self.magnitude * other.magnitude)
+        )
 
     @property
     def magnitude(self):
@@ -413,8 +414,7 @@ class Vector(Point):
 
     @classmethod
     def random_2D(cls):
-        """Return a random 2D unit vector.
-        """
+        """Return a random 2D unit vector."""
         x, y = 2 * (random(2) - 0.5)
         vec = cls(x, y)
         vec.normalize()
@@ -422,8 +422,7 @@ class Vector(Point):
 
     @classmethod
     def random_3D(cls):
-        """Return a new random 3D unit vector.
-        """
+        """Return a new random 3D unit vector."""
         x, y, z = random(3)
         vec = cls(x, y, z)
         vec.normalize()
@@ -459,14 +458,13 @@ class Vector(Point):
             yield k
 
     def __eq__(self, other):
-        if hasattr(other, '_array') and self._array.shape == other._array.shape:
+        if hasattr(other, "_array") and self._array.shape == other._array.shape:
             return np.all(np.absolute(self._array - other._array) < EPSILON)
         return False
 
     def __neq__(self, other):
-        if hasattr(other, '_array') and self._array.shape == other._array.shape:
-            return not np.all(np.absolute(
-                self._array - other._array) < EPSILON)
+        if hasattr(other, "_array") and self._array.shape == other._array.shape:
+            return not np.all(np.absolute(self._array - other._array) < EPSILON)
         return True
 
     def __repr__(self):

@@ -24,8 +24,12 @@ def draw():
     global bx, by, boxSize, overBox, locked, xOffset, yOffset
 
     # Test if the cursor is over the box
-    if (mouse_x > bx - boxSize and mouse_x < bx + boxSize and
-            mouse_y > by - boxSize and mouse_y < by + boxSize):
+    if (
+        mouse_x > bx - boxSize
+        and mouse_x < bx + boxSize
+        and mouse_y > by - boxSize
+        and mouse_y < by + boxSize
+    ):
         overBox = True
 
         if not locked:

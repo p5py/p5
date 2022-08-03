@@ -3,12 +3,14 @@ from p5 import *
 bar_width = 20
 last_bar = None
 
+
 def setup():
     size(640, 360)
     title("Brightness")
-    color_mode('HSB', width, 100, height)
+    color_mode("HSB", width, 100, height)
     no_stroke()
     background(0)
+
 
 def draw():
     global last_bar

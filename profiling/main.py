@@ -4,17 +4,18 @@ import cProfile
 import p5
 
 filenames = [
-    'arcs',
-    'custom_shapes',
-    'triangle_strip',
-    'custom_shapes2',
-    'curves',
-    'primitives']
+    "arcs",
+    "custom_shapes",
+    "triangle_strip",
+    "custom_shapes2",
+    "curves",
+    "primitives",
+]
 max_frames = 100
 e = SystemExit()
 
 for name in filenames:
-    p5 = importlib.import_module('p5')
+    p5 = importlib.import_module("p5")
     module = importlib.import_module(name)
     curr_frames = 0
 
@@ -34,9 +35,9 @@ for name in filenames:
         elapsed_time = time.process_time() - start_time
         print(
             "{0} took {1} seconds to render {2} frames".format(
-                name,
-                elapsed_time,
-                max_frames))
+                name, elapsed_time, max_frames
+            )
+        )
         e = curr_e
     pr.disable()
     pr.dump_stats(name + ".prof")

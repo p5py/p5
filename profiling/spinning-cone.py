@@ -23,5 +23,5 @@ def draw():
     # cone(200, 400)
 
 
-if __name__ == '__main__':
-    run(mode='P3D')
+if __name__ == "__main__":
+    run(mode="P3D")

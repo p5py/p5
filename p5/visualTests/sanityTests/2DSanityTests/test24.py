@@ -17,4 +17,4 @@ def draw():
     fill(255, 204)
     inverseX = width - mouse_x
     inverseY = height - mouse_y
-    rect((inverseX, height / 2), (inverseY / 2) + 10, (inverseY / 2) + 10);
+    rect((inverseX, height / 2), (inverseY / 2) + 10, (inverseY / 2) + 10)

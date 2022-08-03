@@ -7,7 +7,7 @@ lastBar = -1
 def setup():
     size(640, 360)
     stroke(255, 160)
-    color_mode('HSB', height, height, height)
+    color_mode("HSB", height, height, height)
     no_stroke()
     background(0)
 

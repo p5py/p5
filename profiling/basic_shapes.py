@@ -38,7 +38,7 @@ def draw():
     arc((479, 300), 280, 280, PI, TWO_PI)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pr = cProfile.Profile()
     pr.enable()
     try:
