@@ -95,9 +95,9 @@ class VispyRenderer2D(OpenGLRenderer):
 
     def clear(self, color=True, depth=True):
         """Clear the renderer background."""
-        gloo.set_state(
+        gloo.set_state(  # pylint: disable=no-member
             clear_color=self.style.background_color
-        )  # pylint: disable=no-member
+        )
         gloo.clear(color=color, depth=depth)  # pylint: disable=no-member
 
     def _comm_toggles(self, state=True):
@@ -105,9 +105,9 @@ class VispyRenderer2D(OpenGLRenderer):
         gloo.set_state(depth_test=state)  # pylint: disable=no-member
 
         if state:
-            gloo.set_state(
+            gloo.set_state(  # pylint: disable=no-member
                 blend_func=("src_alpha", "one_minus_src_alpha")
-            )  # pylint: disable=no-member
+            )
             gloo.set_state(depth_func="lequal")  # pylint: disable=no-member
 
     @contextmanager
