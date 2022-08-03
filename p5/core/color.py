@@ -180,17 +180,17 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
     if not (hsb is None):
         h, s, b = hsb
         if not normed:
-            h = constrain(h / p5.renderer.style.color_range[0] if p5.renderer else 255, 0, 1)
-            s = constrain(s / p5.renderer.style.color_range[1] if p5.renderer else 255, 0, 1)
-            b = constrain(b / p5.renderer.style.color_range[2] if p5.renderer else 255, 0, 1)
+            h = constrain(h / (p5.renderer.style.color_range[0] if p5.renderer else 255), 0, 1)
+            s = constrain(s / (p5.renderer.style.color_range[1] if p5.renderer else 255), 0, 1)
+            b = constrain(b / (p5.renderer.style.color_range[2] if p5.renderer else 255), 0, 1)
         red, green, blue = colorsys.hsv_to_rgb(h, s, b)
 
     if not (rgb is None):
         r, g, b = rgb
         if not normed:
-            red = constrain(r / p5.renderer.style.color_range[0] if p5.renderer else 255, 0, 1)
-            green = constrain(g / p5.renderer.style.color_range[1] if p5.renderer else 255, 0, 1)
-            blue = constrain(b / p5.renderer.style.color_range[2] if p5.renderer else 255, 0, 1)
+            red = constrain(r / (p5.renderer.style.color_range[0] if p5.renderer else 255), 0, 1)
+            green = constrain(g / (p5.renderer.style.color_range[1] if p5.renderer else 255), 0, 1)
+            blue = constrain(b / (p5.renderer.style.color_range[2] if p5.renderer else 255), 0, 1)
         else:
             red, green, blue = r, g, b
 
@@ -199,9 +199,12 @@ def parse_color(*args, color_mode='RGB', normed=False, **kwargs):
 
     return red, green, blue, alpha
 
-
+# NOTE: By default constructor expects color value to be in [0,255] range
+# which is then normalized to [0,1] range and then used by the renderer instance
 class Color:
-    """Represents a color."""
+    """
+    Represents a color.
+    """
 
     def __init__(self, *args, color_mode=None, normed=False, **kwargs):
         if color_mode is None:
@@ -220,7 +223,6 @@ class Color:
         else:
             r, g, b, a = parse_color(*args, color_mode=color_mode,
                                      normed=normed, **kwargs)
-
         self._red = r
         self._green = g
         self._blue = b

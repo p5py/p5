@@ -16,10 +16,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import builtins
+
+from p5.pmath.vector import Point
 from . import p5
 from .constants import TESS
 from ..pmath import curves
-from p5.pmath.vector import Point
+import copy
 
 shape_kind = None
 vertices = []  # stores the vertex coordinates
@@ -32,6 +35,8 @@ is_bezier = False
 is_curve = False
 is_quadratic = False
 is_contour = False
+in_contour = False
+is_first_contour = True
 
 __all__ = ['begin_shape', 'end_shape', 'begin_contour', 'end_contour',
            'curve_vertex', 'bezier_vertex', 'quadratic_vertex', 'vertex']
@@ -83,13 +88,15 @@ def curve_vertex(x, y, z=0):
 
     if p5.mode == "3D":
         return
-    else:
+    if builtins.current_renderer == 'vispy':
         if is_contour:
             curr_contour_vertices.append((x, y, z))
             curr_contour_vertices_types.append(2)
         else:
             vertices.append((x, y, z))  # False attribute if the vertex is
             vertices_types.append(2)
+    elif builtins.current_renderer == 'skia':
+        vertex(x, y)
 
 
 def bezier_vertex(x2, y2, x3, y3, x4, y4):
@@ -119,13 +126,19 @@ def bezier_vertex(x2, y2, x3, y3, x4, y4):
 
     if p5.mode == "3D":
         return
-    else:
+    if builtins.current_renderer == 'vispy':
         if is_contour:
             curr_contour_vertices.append((x2, y2, x3, y3, x4, y4))
             curr_contour_vertices_types.append(3)
         else:
             vertices.append((x2, y2, x3, y3, x4, y4))
             vertices_types.append(3)
+    elif builtins.current_renderer == 'skia':
+        vert_data = [x2, y2, x3, y3, x4, y4, {"is_vert": False}]
+        if is_contour:
+            contour_vertices.append(vert_data)
+        else:
+            vertices.append(vert_data)
 
 
 def quadratic_vertex(cx, cy, x3, y3):
@@ -145,18 +158,25 @@ def quadratic_vertex(cx, cy, x3, y3):
     :type y3: float
 
     """
-    global is_quadratic
-    is_quadratic = True
 
     if p5.mode == "3D":
         return
-    else:
+    global is_quadratic
+    is_quadratic = True
+
+    if builtins.current_renderer == 'vispy':
         if is_contour:
             curr_contour_vertices.append((cx, cy, x3, y3))
             curr_contour_vertices_types.append(4)
         else:
             vertices.append((cx, cy, x3, y3))
             vertices_types.append(3)
+    elif builtins.current_renderer == 'skia':
+        vert_data = [cx, cy, x3, y3, {"is_vert": False}]
+        if is_contour:
+            contour_vertices.append(vert_data)
+        else:
+            vertices.append(vert_data)
 
 
 def vertex(x, y, z=0):
@@ -178,13 +198,24 @@ def vertex(x, y, z=0):
     """
     if p5.mode == "3D":
         return
-    else:
+    if builtins.current_renderer == 'vispy':
         if is_contour:
             curr_contour_vertices.append((x, y, z))
             curr_contour_vertices_types.append(1)
         else:
             vertices.append((x, y, z))
             vertices_types.append(1)
+    elif builtins.current_renderer == 'skia':
+        vert_data = [x, y, 0, 0, 0, tuple(255 * c for c in p5.renderer.style.fill_color),
+                     tuple(255 * c for c in p5.renderer.style.stroke_color), {}]
+        vert_data[-1]["is_vert"] = True
+
+        if is_contour:
+            if len(contour_vertices) == 0:
+                vert_data[-1]["move_to"] = True
+            contour_vertices.append(vert_data)
+        else:
+            vertices.append(vert_data)
 
 
 def begin_contour():
@@ -199,8 +230,9 @@ def begin_contour():
     for internal shapes, draw vertices shape in counter-clockwise.
 
     """
-    global is_contour, contour_vertices, contour_vertices_types
+    global is_contour, contour_vertices, contour_vertices_types, in_contour
     is_contour = True
+    in_contour = True
     contour_vertices = []
     contour_vertices_types = []
 
@@ -210,15 +242,33 @@ def end_contour():
 
     For more info, see :any:`begin_contour`.
     """
-    global is_contour, curr_contour_vertices, curr_contour_vertices_types
-    is_contour = False
-    # Close contour
-    curr_contour_vertices.append(curr_contour_vertices[0])
-    curr_contour_vertices_types.append(curr_contour_vertices_types[0])
-    # Save contour
-    contour_vertices.append(curr_contour_vertices)
-    contour_vertices_types.append(curr_contour_vertices_types)
-    curr_contour_vertices, curr_contour_vertices_types = [], []
+    global in_contour, curr_contour_vertices, curr_contour_vertices_types, is_first_contour
+    in_contour = False
+    # https://github.com/p5py/p5/pull/357#discussion_r935221732
+    # is_contour = False
+    if builtins.current_renderer == 'vispy':
+        # Close contour
+        curr_contour_vertices.append(curr_contour_vertices[0])
+        curr_contour_vertices_types.append(curr_contour_vertices_types[0])
+        # Save contour
+        contour_vertices.append(curr_contour_vertices)
+        contour_vertices_types.append(curr_contour_vertices_types)
+        curr_contour_vertices, curr_contour_vertices_types = [], []
+    elif builtins.current_renderer == 'skia':
+
+        vert_data = copy.deepcopy(contour_vertices[0])
+        vert_data[-1]["is_vert"] = contour_vertices[0][-1].get('is_vert', None)
+        vert_data[-1]["move_to"] = False
+
+        contour_vertices.append(vert_data)
+
+        # Close the shape before starting the contour
+        if is_first_contour:
+            vertices.append(vertices[0])
+            is_first_contour = False
+
+        for vert in contour_vertices:
+            vertices.append(vert)
 
 
 def get_curve_vertices(verts):
@@ -309,10 +359,10 @@ def end_shape(mode=""):
     :type mode: str
 
     """
-    global is_bezier, is_curve, is_quadratic, is_contour
-    assert not is_contour, "begin_contour called without calling end_contour"
+    global is_bezier, is_curve, is_quadratic, is_contour, is_first_contour, in_contour
     if is_curve or is_bezier or is_quadratic:
         assert shape_kind == TESS, "Should not specify primitive type for a curve"
+    assert not in_contour, "begin_contour called without calling end_contour"
 
     if len(vertices) == 0:
         return
@@ -321,34 +371,45 @@ def end_shape(mode=""):
             not p5.renderer.style.fill_enabled):
         return
 
-    # if the shape is closed, the first element is also the last element
-    if mode == 'CLOSE':
-        vertices.append(vertices[0])
-        vertices_types.append(vertices_types[0])
+    if builtins.current_renderer == 'vispy':
+        # if the shape is closed, the first element is also the last element
+        if mode == 'CLOSE':
+            vertices.append(vertices[0])
+            vertices_types.append(vertices_types[0])
 
-    if is_curve:
-        if len(vertices) > 3:
-            p5.renderer.shape(vertices=get_curve_vertices(vertices),
-                              contours=[
-                                  get_curve_vertices(c) for c in contour_vertices],
+        if is_curve:
+            if len(vertices) > 3:
+                p5.renderer.shape(vertices=get_curve_vertices(vertices),
+                                  contours=[
+                                      get_curve_vertices(c) for c in contour_vertices],
+                                  shape_type=TESS)
+        elif is_bezier:
+            p5.renderer.shape(vertices=get_bezier_vertices(vertices, vertices_types),
+                              contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
+                                        for i in range(len(contour_vertices))],
                               shape_type=TESS)
-    elif is_bezier:
-        p5.renderer.shape(vertices=get_bezier_vertices(vertices, vertices_types),
-                          contours=[get_bezier_vertices(contour_vertices[i], contour_vertices_types[i])
-                                    for i in range(len(contour_vertices))],
-                          shape_type=TESS)
-    elif is_quadratic:
-        p5.renderer.shape(vertices=get_quadratic_vertices(vertices, vertices_types),
-                          contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
-                                    for i in range(len(contour_vertices))],
-                          shape_type=TESS)
-    else:
-        p5.renderer.shape(
-            vertices=vertices,
-            contours=contour_vertices,
-            shape_type=shape_kind)
+        elif is_quadratic:
+            p5.renderer.shape(vertices=get_quadratic_vertices(vertices, vertices_types),
+                              contours=[get_quadratic_vertices(contour_vertices[i], contour_vertices_types[i])
+                                        for i in range(len(contour_vertices))],
+                              shape_type=TESS)
+        else:
+            p5.renderer.shape(
+                vertices=vertices,
+                contours=contour_vertices,
+                shape_type=shape_kind)
+
+    elif builtins.current_renderer == 'skia':
+        close_shape = mode == 'CLOSE'
+        if close_shape and not is_contour:
+            vertices.append(vertices[0])
+        p5.renderer.end_shape(mode, vertices, is_curve, is_bezier, is_quadratic, is_contour,
+                              None if shape_kind == TESS else shape_kind)
+        if close_shape:
+            vertices.pop()
 
     is_bezier = False
     is_curve = False
     is_quadratic = False
     is_contour = False
+    is_first_contour = True

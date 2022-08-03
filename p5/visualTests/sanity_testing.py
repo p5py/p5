@@ -11,11 +11,11 @@ renderers_2D = {
 if __name__ == '__main__':
     run(renderer='vispy', mode='P2D')
         """,
-#     "skia":
-#         """
-# if __name__ == '__main__':
-#     run(renderer='skia', mode='P2D')
-#         """
+    "skia":
+        """
+if __name__ == '__main__':
+    run(renderer='skia', mode='P2D')
+        """
 }
 
 renderers_3D = {

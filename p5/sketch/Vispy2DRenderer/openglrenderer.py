@@ -234,6 +234,14 @@ class Style2D:
     rect_mode = "CORNER"
     color_parse_mode = "RGB"
     color_range = (255, 255, 255, 255)
+    stroke_cap = ROUND
+    stroke_join = MITER
+    
+    def set_stroke_cap(self, c):
+        self.stroke_cap = c
+
+    def set_stroke_join(self, j):
+        self.stroke_join = j
 
 
 # Abstract class that contains common code for OpenGL renderers
@@ -265,11 +273,6 @@ class OpenGLRenderer(ABC):
 
         self.vertex_buffer = VertexBuffer()
         self.index_buffer = IndexBuffer()
-
-        # Renderer Globals: Curves
-        self.stroke_weight = 1
-        self.stroke_cap = ROUND
-        self.stroke_join = MITER
 
         # Renderer Globals
         # VIEW MATRICES, ETC

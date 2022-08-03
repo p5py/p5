@@ -154,12 +154,22 @@ def scale(sx, sy=None, sz=None):
 
 
 def apply_matrix(transform_matrix):
-    """Apply the given matrix to the sketch's transform matrix..
+    """
+    Apply the given matrix to the sketch's transform matrix.
 
     :param transform_matrix: The new transform matrix.
-    :type transform_matrix: np.ndarray (or a 4×4 list)
+    :type transform_matrix: (3 * 3) if skia is the renderer else (4 * 4) np.ndarray or list
+
     """
-    p5.renderer.apply_matrix()
+    # TODO: Support 4 * 4 matrix transformations in skia
+    if isinstance(transform_matrix, list):
+        if len(transform_matrix) == 9:
+            transform_matrix = np.array(transform_matrix).reshape(3, 3)
+        elif len(transform_matrix) == 16:
+            transform_matrix = np.array(transform_matrix).reshape(4, 4)
+        else:
+            transform_matrix = np.array(transform_matrix)
+    p5.renderer.apply_matrix(transform_matrix)
 
 
 def reset_matrix():

@@ -51,12 +51,12 @@ def point(x, y, z=0):
 
     """
     if builtins.current_renderer == 'vispy':
-        if p5.renderer.stroke_cap == SQUARE:
+        if p5.renderer.style.stroke_cap == SQUARE:
             pass
-        elif p5.renderer.stroke_cap == PROJECT:
-            return square((x, y, z), p5.renderer.stroke_weight, mode='CENTER')
-        elif p5.renderer.stroke_cap == ROUND:
-            return circle((x, y, z), p5.renderer.stroke_weight / 2, mode='CENTER')
+        elif p5.renderer.style.stroke_cap == PROJECT:
+            return square((x, y, z), p5.renderer.style.stroke_weight, mode='CENTER')
+        elif p5.renderer.style.stroke_cap == ROUND:
+            return circle((x, y, z), p5.renderer.style.stroke_weight / 2, mode='CENTER')
         raise ValueError('Unknown stroke_cap value')
     elif builtins.current_renderer == 'skia':
         if p5.renderer.style.stroke_enabled:
