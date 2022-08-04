@@ -32,4 +32,4 @@ def draw():
     end_shape()
 
 
-run(mode='P3D')
+run(mode="P3D")

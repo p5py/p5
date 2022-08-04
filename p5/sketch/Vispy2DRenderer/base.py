@@ -31,9 +31,9 @@ from ..events import handler_names
 
 
 def _dummy(*args, **kwargs):
-    """Eat all arguments, do nothing.
-    """
+    """Eat all arguments, do nothing."""
     pass
+
 
 class VispySketch(app.Canvas):
     """The main sketch instance.
@@ -56,13 +56,12 @@ class VispySketch(app.Canvas):
 
     """
 
-    def __init__(self, setup_method, draw_method,
-                 handlers=dict(), frame_rate=60):
+    def __init__(self, setup_method, draw_method, handlers=dict(), frame_rate=60):
         app.Canvas.__init__(
             self,
             title=builtins.title,
             size=(builtins.width, builtins.height),
-            keys='interactive',
+            keys="interactive",
             resizable=True,
         )
 
@@ -83,7 +82,7 @@ class VispySketch(app.Canvas):
 
         self.handler_queue = []
 
-        self._save_fname = 'screen'
+        self._save_fname = "screen"
         self._save_flag = False
 
         builtins.frame_count = -1
@@ -126,14 +125,13 @@ class VispySketch(app.Canvas):
             self._save_buffer()
         self.update()
 
-        if (self.exiting):
+        if self.exiting:
             self.close()
             return
 
     def _save_buffer(self):
-        """Save the renderer buffer to the given file.
-        """
-        img_data = p5.renderer.fbuffer.read(mode='color', alpha=False)
+        """Save the renderer buffer to the given file."""
+        img_data = p5.renderer.fbuffer.read(mode="color", alpha=False)
         img = Image.fromarray(img_data)
         img.save(self._save_fname)
         self._save_flag = False
@@ -144,8 +142,7 @@ class VispySketch(app.Canvas):
         self._save_buffer()
 
     def queue_screenshot(self, filename):
-        """Save the current frame
-        """
+        """Save the current frame"""
         self._save_fname = filename
         self._save_flag = True
 
@@ -170,36 +167,36 @@ class VispySketch(app.Canvas):
 
     def on_key_press(self, event):
         kev = KeyEvent(event, active=True)
-        self._enqueue_event('key_pressed', kev)
+        self._enqueue_event("key_pressed", kev)
 
     def on_key_release(self, event):
         kev = KeyEvent(event)
-        self._enqueue_event('key_released', kev)
-        if not (event.text == ''):
-            self._enqueue_event('key_typed', kev)
+        self._enqueue_event("key_released", kev)
+        if not (event.text == ""):
+            self._enqueue_event("key_typed", kev)
 
     def on_mouse_press(self, event):
         mev = MouseEvent(event, active=True)
-        self._enqueue_event('mouse_pressed', mev)
+        self._enqueue_event("mouse_pressed", mev)
 
     def on_mouse_double_click(self, event):
         mev = MouseEvent(event)
-        self._enqueue_event('mouse_double_clicked', mev)
+        self._enqueue_event("mouse_double_clicked", mev)
 
     def on_mouse_release(self, event):
         mev = MouseEvent(event)
-        self._enqueue_event('mouse_released', mev)
-        self._enqueue_event('mouse_clicked', mev)
+        self._enqueue_event("mouse_released", mev)
+        self._enqueue_event("mouse_clicked", mev)
 
     def on_mouse_move(self, event):
         mev = MouseEvent(event, active=builtins.mouse_is_pressed)
-        self._enqueue_event('mouse_moved', mev)
+        self._enqueue_event("mouse_moved", mev)
         if builtins.mouse_is_pressed:
-            self._enqueue_event('mouse_dragged', mev)
+            self._enqueue_event("mouse_dragged", mev)
 
     def on_mouse_wheel(self, event):
         mev = MouseEvent(event, active=builtins.mouse_is_pressed)
-        self._enqueue_event('mouse_wheel', mev)
+        self._enqueue_event("mouse_wheel", mev)
 
     # def on_touch(self, event):
     #     self._enqueue_event('touch', event)

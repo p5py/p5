@@ -2,14 +2,17 @@ from p5 import *
 
 MAX_FRAMES = 30
 
+
 def setup():
     size(640, 360)
     no_stroke()
+
 
 def draw():
     if frame_count > MAX_FRAMES:
         exit()
     draw_circle(width / 2, 280, 6)
+
 
 def draw_circle(x, radius, level):
     tt = 126 * level / 4.0

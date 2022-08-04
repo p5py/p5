@@ -208,10 +208,10 @@ def perspective_matrix(field_of_view, aspect_ratio, near_plane, far_plane):
          plane is the same as the far plane.
 
     """
-    assert not math.isclose(near_plane, 0), \
-        "Near plane cannot be at zero."
-    assert not math.isclose(near_plane, far_plane), \
-        "Near plane and far plane can't be same"
+    assert not math.isclose(near_plane, 0), "Near plane cannot be at zero."
+    assert not math.isclose(
+        near_plane, far_plane
+    ), "Near plane and far plane can't be same"
     f = 1 / math.tan(field_of_view / 2)
     mat = np.identity(4)
     mat[0, 0] = f / aspect_ratio

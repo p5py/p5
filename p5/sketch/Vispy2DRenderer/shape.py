@@ -31,28 +31,23 @@ from p5.pmath.vector import Point
 from p5.pmath.utils import SINCOS
 from p5.core import p5
 
-__all__ = ['PShape']
+__all__ = ["PShape"]
 
 
 def _ensure_editable(func):
-    """A decorater that ensures that a shape is in 'edit' mode.
-
-    """
+    """A decorater that ensures that a shape is in 'edit' mode."""
 
     @functools.wraps(func)
     def editable_method(instance, *args, **kwargs):
         if not instance._in_edit_mode:
-            raise ValueError(
-                '{} only works in edit mode'.format(
-                    func.__name__))
+            raise ValueError("{} only works in edit mode".format(func.__name__))
         return func(instance, *args, **kwargs)
 
     return editable_method
 
 
 def _apply_transform(func):
-    """Apply the matrix transformation to the shape.
-    """
+    """Apply the matrix transformation to the shape."""
 
     @functools.wraps(func)
     def mfunc(instance, *args, **kwargs):
@@ -64,8 +59,7 @@ def _apply_transform(func):
 
 
 def _call_on_children(func):
-    """Call the method on all child shapes
-    """
+    """Call the method on all child shapes"""
 
     @functools.wraps(func)
     def rfunc(instance, *args, **kwargs):
@@ -100,11 +94,19 @@ class PShape:
 
     """
 
-    def __init__(self, fill_color='auto',
-                 stroke_color='auto', stroke_weight="auto",
-                 stroke_join="auto", stroke_cap="auto",
-                 visible=False,
-                 children=None, contours=tuple(), vertices=tuple(), shape_type=SType.TESS):
+    def __init__(
+        self,
+        fill_color="auto",
+        stroke_color="auto",
+        stroke_weight="auto",
+        stroke_join="auto",
+        stroke_cap="auto",
+        visible=False,
+        children=None,
+        contours=tuple(),
+        vertices=tuple(),
+        shape_type=SType.TESS,
+    ):
         # basic properties of the shape
         self._fill = None
         self._stroke = None
@@ -138,16 +140,18 @@ class PShape:
         if isinstance(value, Color):  # Is Color, no need to parse
             color = value
         else:  # Not Color, attempt to parse it
-            if name == 'stroke' and p5.renderer.style.stroke_enabled:
-                color = Color(*p5.renderer.style.stroke_color,
-                              color_mode='RGBA', normed=True)
-            if name == 'fill' and p5.renderer.style.fill_enabled:
-                color = Color(*p5.renderer.style.fill_color,
-                              color_mode='RGBA', normed=True)
+            if name == "stroke" and p5.renderer.style.stroke_enabled:
+                color = Color(
+                    *p5.renderer.style.stroke_color, color_mode="RGBA", normed=True
+                )
+            if name == "fill" and p5.renderer.style.fill_enabled:
+                color = Color(
+                    *p5.renderer.style.fill_color, color_mode="RGBA", normed=True
+                )
 
-        if name == 'stroke':
+        if name == "stroke":
             self._stroke = color
-        elif name == 'fill':
+        elif name == "fill":
             self._fill = color
 
     @property
@@ -156,7 +160,7 @@ class PShape:
 
     @fill.setter
     def fill(self, new_color):
-        self._set_color('fill', new_color)
+        self._set_color("fill", new_color)
 
     @property
     def stroke(self):
@@ -164,7 +168,7 @@ class PShape:
 
     @stroke.setter
     def stroke(self, new_color):
-        self._set_color('stroke', new_color)
+        self._set_color("stroke", new_color)
 
     @property
     def stroke_weight(self):
@@ -278,9 +282,7 @@ class PShape:
 
     @_call_on_children
     def reset_matrix(self):
-        """Reset the transformation matrix associated with the shape.
-
-        """
+        """Reset the transformation matrix associated with the shape."""
         self._matrix = np.identity(4)
 
     @_call_on_children
@@ -453,26 +455,40 @@ POINT_ACCURACY_FACTOR = 10
 
 
 class Arc(PShape):
-    def __init__(self, center, radii, start_angle, stop_angle,
-                 mode=None, fill_color='auto',
-                 stroke_color='auto', stroke_weight="auto",
-                 stroke_join="auto", stroke_cap="auto", **kwargs):
+    def __init__(
+        self,
+        center,
+        radii,
+        start_angle,
+        stop_angle,
+        mode=None,
+        fill_color="auto",
+        stroke_color="auto",
+        stroke_weight="auto",
+        stroke_join="auto",
+        stroke_cap="auto",
+        **kwargs
+    ):
         self._center = center
         self._radii = radii
         self._start_angle = start_angle
         self._stop_angle = stop_angle
         self.arc_mode = mode
 
-        gl_type = SType.TESS if mode in [
-            'OPEN', 'CHORD'] else SType.TRIANGLE_FAN
-        super().__init__(fill_color=fill_color,
-                         stroke_color=stroke_color, stroke_weight=stroke_weight,
-                         stroke_join=stroke_join, stroke_cap=stroke_cap, shape_type=gl_type, **kwargs)
+        gl_type = SType.TESS if mode in ["OPEN", "CHORD"] else SType.TRIANGLE_FAN
+        super().__init__(
+            fill_color=fill_color,
+            stroke_color=stroke_color,
+            stroke_weight=stroke_weight,
+            stroke_join=stroke_join,
+            stroke_cap=stroke_cap,
+            shape_type=gl_type,
+            **kwargs
+        )
         self._tessellate()
 
     def _tessellate(self):
-        """Generate vertex and face data using radii.
-        """
+        """Generate vertex and face data using radii."""
         rx = self._radii[0]
         ry = self._radii[1]
 
@@ -484,9 +500,10 @@ class Arc(PShape):
         c2y = c1y + ry
         s2 = p5.renderer.transform_matrix.dot(np.array([c2x, c2y, 0, 1]))
 
-        sdiff = (s2 - s1)
-        size_acc = (np.sqrt(np.sum(sdiff * sdiff)) *
-                    math.pi * 2) / POINT_ACCURACY_FACTOR
+        sdiff = s2 - s1
+        size_acc = (
+            np.sqrt(np.sum(sdiff * sdiff)) * math.pi * 2
+        ) / POINT_ACCURACY_FACTOR
 
         acc = min(MAX_POINT_ACCURACY, max(MIN_POINT_ACCURACY, int(size_acc)))
         inc = int(len(SINCOS) / acc)
@@ -495,19 +512,17 @@ class Arc(PShape):
         start_index = int((self._start_angle / (math.pi * 2)) * sclen)
         end_index = int((self._stop_angle / (math.pi * 2)) * sclen)
 
-        vertices = [(c1x, c1y, 0)] if self.arc_mode in ['PIE', None] else []
+        vertices = [(c1x, c1y, 0)] if self.arc_mode in ["PIE", None] else []
         for idx in range(start_index, end_index, inc):
             i = idx % sclen
-            vertices.append((
-                c1x + rx * SINCOS[i][1],
-                c1y + ry * SINCOS[i][0],
-                0
-            ))
-        vertices.append((
-            c1x + rx * SINCOS[end_index % sclen][1],
-            c1y + ry * SINCOS[end_index % sclen][0],
-            0
-        ))
-        if self.arc_mode == 'CHORD' or self.arc_mode == 'PIE':
+            vertices.append((c1x + rx * SINCOS[i][1], c1y + ry * SINCOS[i][0], 0))
+        vertices.append(
+            (
+                c1x + rx * SINCOS[end_index % sclen][1],
+                c1y + ry * SINCOS[end_index % sclen][0],
+                0,
+            )
+        )
+        if self.arc_mode == "CHORD" or self.arc_mode == "PIE":
             vertices.append(vertices[0])
         self.vertices = vertices

@@ -29,9 +29,22 @@ from . import p5
 
 from ..sketch.Skia2DRenderer.util import should_draw, mode_adjust
 
-__all__ = ['point', 'line', 'arc', 'triangle', 'quad',
-           'rect', 'square', 'circle', 'ellipse', 'ellipse_mode',
-           'rect_mode', 'bezier', 'curve', 'create_shape']
+__all__ = [
+    "point",
+    "line",
+    "arc",
+    "triangle",
+    "quad",
+    "rect",
+    "square",
+    "circle",
+    "ellipse",
+    "ellipse_mode",
+    "rect_mode",
+    "bezier",
+    "curve",
+    "create_shape",
+]
 
 
 def point(x, y, z=0):
@@ -50,15 +63,15 @@ def point(x, y, z=0):
     :rtype: PShape
 
     """
-    if builtins.current_renderer == 'vispy':
+    if builtins.current_renderer == "vispy":
         if p5.renderer.style.stroke_cap == SQUARE:
             pass
         elif p5.renderer.style.stroke_cap == PROJECT:
-            return square((x, y, z), p5.renderer.style.stroke_weight, mode='CENTER')
+            return square((x, y, z), p5.renderer.style.stroke_weight, mode="CENTER")
         elif p5.renderer.style.stroke_cap == ROUND:
-            return circle((x, y, z), p5.renderer.style.stroke_weight / 2, mode='CENTER')
-        raise ValueError('Unknown stroke_cap value')
-    elif builtins.current_renderer == 'skia':
+            return circle((x, y, z), p5.renderer.style.stroke_weight / 2, mode="CENTER")
+        raise ValueError("Unknown stroke_cap value")
+    elif builtins.current_renderer == "skia":
         if p5.renderer.style.stroke_enabled:
             p5.renderer.point(x, y)
 
@@ -103,10 +116,7 @@ def line(*args):
     else:
         raise ValueError("Unexpected number of arguments passed to line()")
 
-    path = [
-        Point(*p1),
-        Point(*p2)
-    ]
+    path = [Point(*p1), Point(*p2)]
     p5.renderer.line(path)
 
 
@@ -170,9 +180,19 @@ def bezier(*args):
     if len(args) == 4:
         start, control_point_1, control_point_2, stop = args
     elif len(args) == 8:
-        start, control_point_1, control_point_2, stop = args[:2], args[2:4], args[4:6], args[6:]
+        start, control_point_1, control_point_2, stop = (
+            args[:2],
+            args[2:4],
+            args[4:6],
+            args[6:],
+        )
     elif len(args) == 12:
-        start, control_point_1, control_point_2, stop = args[:3], args[3:6], args[6:9], args[9:]
+        start, control_point_1, control_point_2, stop = (
+            args[:3],
+            args[3:6],
+            args[6:9],
+            args[9:],
+        )
     else:
         raise ValueError("Unexpected number of arguments passed to bezier()")
 
@@ -180,8 +200,7 @@ def bezier(*args):
     steps = curves.bezier_resolution
     for i in range(steps + 1):
         t = i / steps
-        p = curves.bezier_point(start, control_point_1,
-                                control_point_2, stop, t)
+        p = curves.bezier_point(start, control_point_1, control_point_2, stop, t)
         vertices.append(p[:3])
 
     p5.renderer.bezier(vertices)
@@ -245,11 +264,9 @@ def curve(*args):
     if len(args) == 4:
         point_1, point_2, point_3, point_4 = args
     elif len(args) == 8:
-        point_1, point_2, point_3, point_4 = args[:
-                                                  2], args[2:4], args[4:6], args[6:]
+        point_1, point_2, point_3, point_4 = args[:2], args[2:4], args[4:6], args[6:]
     elif len(args) == 12:
-        point_1, point_2, point_3, point_4 = args[:
-                                                  3], args[3:6], args[6:9], args[9:]
+        point_1, point_2, point_3, point_4 = args[:3], args[3:6], args[6:9], args[9:]
     else:
         raise ValueError("Unexpected number of arguments passed to curve()")
 
@@ -302,17 +319,12 @@ def triangle(*args):
         p1, p2, p3 = args
     else:
         raise ValueError("Unexpected number of arguments passed to triangle()")
-    if builtins.current_renderer == 'vispy':
-        path = [
-            Point(*p1),
-            Point(*p2),
-            Point(*p3)
-        ]
+    if builtins.current_renderer == "vispy":
+        path = [Point(*p1), Point(*p2), Point(*p3)]
         p5.renderer.triangle(path)
-    elif builtins.current_renderer == 'skia':
+    elif builtins.current_renderer == "skia":
         if should_draw():
             p5.renderer.triangle(*p1, *p2, *p3)
-
 
 
 def quad(*args):
@@ -364,16 +376,10 @@ def quad(*args):
     else:
         raise ValueError("Unexpected number of arguments passed to quad()")
 
-
-    if builtins.current_renderer == 'vispy':
-        path = [
-            Point(*p1),
-            Point(*p2),
-            Point(*p3),
-            Point(*p4)
-        ]
+    if builtins.current_renderer == "vispy":
+        path = [Point(*p1), Point(*p2), Point(*p3), Point(*p4)]
         p5.renderer.quad(path)
-    elif builtins.current_renderer == 'skia':
+    elif builtins.current_renderer == "skia":
         x1, y1 = p1
         x2, y2 = p2
         x3, y3 = p3
@@ -421,7 +427,7 @@ def rect(*args, mode=None):
 
     TODO: Update docs for rect, we support border radius as well
     """
-    if builtins.current_renderer == 'vispy':
+    if builtins.current_renderer == "vispy":
         if len(args) == 4:
             coordinate, args = args[:2], args[2:]
         elif len(args) == 3:
@@ -432,22 +438,22 @@ def rect(*args, mode=None):
         if mode is None:
             mode = p5.renderer.style.rect_mode
 
-        if mode == 'CORNER':
+        if mode == "CORNER":
             corner = coordinate
             width, height = args
-        elif mode == 'CENTER':
+        elif mode == "CENTER":
             center = Point(*coordinate)
             width, height = args
             corner = Point(center.x - width / 2, center.y - height / 2, center.z)
-        elif mode == 'RADIUS':
+        elif mode == "RADIUS":
             center = Point(*coordinate)
             half_width, half_height = args
             corner = Point(center.x - half_width, center.y - half_height, center.z)
             width = 2 * half_width
             height = 2 * half_height
-        elif mode == 'CORNERS':
+        elif mode == "CORNERS":
             corner = Point(*coordinate)
-            corner_2, = args
+            (corner_2,) = args
             corner_2 = Point(*corner_2)
             width = corner_2.x - corner.x
             height = corner_2.y - corner.y
@@ -460,14 +466,16 @@ def rect(*args, mode=None):
         p4 = Point(p1.x, p3.y, p3.z)
         return quad(p1, p2, p3, p4)
 
-    elif builtins.current_renderer == 'skia':
+    elif builtins.current_renderer == "skia":
         if len(args) == 4:
             x, y, w, h = args
         elif len(args) == 3:
             x, y = args[0]
             w, h = args[1:]
-        vals = mode_adjust(x, y, w, h, mode if mode is not None else p5.renderer.style.rect_mode)
-        p5.renderer.rect(*(vals['x'], vals['y'], vals['w'], vals['h']) + args[4:])
+        vals = mode_adjust(
+            x, y, w, h, mode if mode is not None else p5.renderer.style.rect_mode
+        )
+        p5.renderer.rect(*(vals["x"], vals["y"], vals["w"], vals["h"]) + args[4:])
 
 
 def square(*args, mode=None):
@@ -504,7 +512,7 @@ def square(*args, mode=None):
     :raises ValueError: When the mode is set to 'CORNERS'
 
     """
-    if builtins.current_renderer == 'vispy':
+    if builtins.current_renderer == "vispy":
         if len(args) == 2:
             coordinate, side_length = args
         elif len(args) == 3:
@@ -515,10 +523,10 @@ def square(*args, mode=None):
         if mode is None:
             mode = p5.renderer.style.rect_mode
 
-        if mode == 'CORNERS':
+        if mode == "CORNERS":
             raise ValueError("Cannot draw square with {} mode".format(mode))
         return rect(coordinate, side_length, side_length, mode=mode)
-    elif builtins.current_renderer == 'skia':
+    elif builtins.current_renderer == "skia":
         if should_draw():
             if len(args) == 2:
                 x, y = args[0]
@@ -528,8 +536,7 @@ def square(*args, mode=None):
             rect(x, y, side, side)
 
 
-
-def rect_mode(mode='CORNER'):
+def rect_mode(mode="CORNER"):
     """Change the rect and square drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing rects. Should be one of
@@ -598,28 +605,30 @@ def arc(*args, mode=None, ellipse_mode=None):
     else:
         emode = ellipse_mode
 
-    if builtins.current_renderer == 'vispy':
-        if emode == 'CORNER':
+    if builtins.current_renderer == "vispy":
+        if emode == "CORNER":
             corner = Point(*coordinate)
             dim = Point(width / 2, height / 2)
             center = (corner.x + dim.x, corner.y + dim.y, corner.z)
-        elif emode == 'CENTER':
+        elif emode == "CENTER":
             center = Point(*coordinate)
             dim = Point(width / 2, height / 2)
-        elif emode == 'RADIUS':
+        elif emode == "RADIUS":
             center = Point(*coordinate)
             dim = Point(width, height)
         else:
             raise ValueError("Unknown arc mode {}".format(emode))
         p5.renderer.arc(center, dim, start_angle, stop_angle, mode)
 
-    elif builtins.current_renderer == 'skia':
+    elif builtins.current_renderer == "skia":
         if not should_draw() or start_angle == stop_angle:
             return
         x, y = coordinate[0], coordinate[1]
         vals = mode_adjust(x, y, width, height, emode)
         # TODO: normalize_arc_angles
-        p5.renderer.arc(vals['x'], vals['y'], vals['w'], vals['h'], start_angle, stop_angle, mode)
+        p5.renderer.arc(
+            vals["x"], vals["y"], vals["w"], vals["h"], start_angle, stop_angle, mode
+        )
 
 
 def ellipse(*args, mode=None):
@@ -671,26 +680,27 @@ def ellipse(*args, mode=None):
     if mode is None:
         mode = p5.renderer.style.ellipse_mode
 
-    if builtins.current_renderer == 'vispy':
-        if mode == 'CORNERS':
+    if builtins.current_renderer == "vispy":
+        if mode == "CORNERS":
             corner = Point(*coordinate)
-            corner_2, = args
+            (corner_2,) = args
             corner_2 = Point(*corner_2)
             width = corner_2.x - corner.x
             height = corner_2.y - corner.y
-            mode = 'CORNER'
+            mode = "CORNER"
         else:
             width, height = args
-        return arc(coordinate, width, height, 0, math.pi *
-                   2, mode='CHORD', ellipse_mode=mode)
+        return arc(
+            coordinate, width, height, 0, math.pi * 2, mode="CHORD", ellipse_mode=mode
+        )
 
-    elif builtins.current_renderer == 'skia':
+    elif builtins.current_renderer == "skia":
         if not should_draw():
             return
         x, y = coordinate
         w, h = args
         vals = mode_adjust(x, y, w, h, mode)
-        p5.renderer.ellipse(vals['x'], vals['y'], vals['w'], vals['h'])
+        p5.renderer.ellipse(vals["x"], vals["y"], vals["w"], vals["h"])
 
 
 def circle(*args, mode=None):
@@ -736,16 +746,16 @@ def circle(*args, mode=None):
 
     if mode is None:
         mode = p5.renderer.style.ellipse_mode
-    if builtins.current_renderer == 'vispy':
-        if mode == 'CORNERS':
+    if builtins.current_renderer == "vispy":
+        if mode == "CORNERS":
             raise ValueError("Cannot create circle in CORNERS mode")
         return ellipse(coordinate, diameter, diameter, mode=mode)
-    elif builtins.current_renderer == 'skia':
+    elif builtins.current_renderer == "skia":
         x, y = coordinate
         p5.renderer.circle(x, y, diameter)
 
 
-def ellipse_mode(mode='CENTER'):
+def ellipse_mode(mode="CENTER"):
     """Change the ellipse and circle drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing ellipses. Should be one of
@@ -784,22 +794,32 @@ def create_shape(kind=None, *args, **kwargs):
     """
 
     # TODO: add 'box', 'sphere' support
-    valid_values = {None, 'point', 'line', 'triangle', 'quad',
-                    'rect', 'square', 'ellipse', 'circle', 'arc', }
+    valid_values = {
+        None,
+        "point",
+        "line",
+        "triangle",
+        "quad",
+        "rect",
+        "square",
+        "ellipse",
+        "circle",
+        "arc",
+    }
 
     def empty_shape(*args, **kwargs):
         return PShape()
 
     shape_map = {
-        'arc': arc,
-        'circle': circle,
-        'ellipse': ellipse,
-        'line': line,
-        'point': point,
-        'quad': quad,
-        'rect': rect,
-        'square': square,
-        'triangle': triangle,
+        "arc": arc,
+        "circle": circle,
+        "ellipse": ellipse,
+        "line": line,
+        "point": point,
+        "quad": quad,
+        "rect": rect,
+        "square": square,
+        "triangle": triangle,
         None: empty_shape,
     }
 

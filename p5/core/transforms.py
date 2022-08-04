@@ -24,11 +24,26 @@ from ..pmath import matrix
 
 from . import p5
 
-__all__ = ['push_matrix', 'pop_matrix', 'reset_transforms',
-           'translate', 'rotate', 'rotate_x', 'rotate_y',
-           'rotate_z', 'scale', 'shear_x', 'shear_y',
-           'camera', 'frustum', 'ortho', 'perspective',
-           'print_matrix', 'reset_matrix', 'apply_matrix']
+__all__ = [
+    "push_matrix",
+    "pop_matrix",
+    "reset_transforms",
+    "translate",
+    "rotate",
+    "rotate_x",
+    "rotate_y",
+    "rotate_z",
+    "scale",
+    "shear_x",
+    "shear_y",
+    "camera",
+    "frustum",
+    "ortho",
+    "perspective",
+    "print_matrix",
+    "reset_matrix",
+    "apply_matrix",
+]
 
 
 class _MatrixContext(AbstractContextManager):
@@ -37,22 +52,18 @@ class _MatrixContext(AbstractContextManager):
 
 
 def push_matrix():
-    """Pushes the current transformation matrix onto the matrix stack.
-    """
+    """Pushes the current transformation matrix onto the matrix stack."""
     p5.renderer.push_matrix()
     return _MatrixContext()
 
 
 def pop_matrix():
-    """Pops the current transformation matrix off the matrix stack.
-    """
+    """Pops the current transformation matrix off the matrix stack."""
     p5.renderer.pop_matrix()
 
 
 def reset_transforms():
-    """Reset all transformations to their default state.
-
-    """
+    """Reset all transformations to their default state."""
     p5.renderer.reset_transforms()
 
 
@@ -93,7 +104,7 @@ def rotate(theta, axis=np.array([0, 0, 1])):
     :returns: The rotation matrix used to apply the transformation.
     :rtype: np.ndarray
 
-   """
+    """
     return p5.renderer.rotate(theta)
 
 
@@ -119,7 +130,7 @@ def rotate_y(theta):
     :returns: The rotation matrix used to apply the transformation.
     :rtype: np.ndarray
 
-   """
+    """
     p5.renderer.rotate_y(theta)
 
 
@@ -173,14 +184,12 @@ def apply_matrix(transform_matrix):
 
 
 def reset_matrix():
-    """Reset the current transform matrix.
-    """
+    """Reset the current transform matrix."""
     p5.renderer.reset_matrix()
 
 
 def print_matrix():
-    """Print the transform matrix being used by the sketch.
-    """
+    """Print the transform matrix being used by the sketch."""
     p5.renderer.print_matrix()
 
 

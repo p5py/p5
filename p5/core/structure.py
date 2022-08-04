@@ -22,6 +22,7 @@ from . import p5
 
 from contextlib import AbstractContextManager
 
+
 class _StyleContext(AbstractContextManager):
     def __exit__(self, exc_type, exc_value, traceback):
         pop_style()
@@ -64,8 +65,7 @@ def push_style():
 
 
 def pop_style():
-    """Restores previously pushed style settings
-    """
+    """Restores previously pushed style settings"""
     assert len(p5.renderer.style_stack) > 0, "No styles to pop"
     renderer_styles = p5.renderer.style_stack.pop()
 

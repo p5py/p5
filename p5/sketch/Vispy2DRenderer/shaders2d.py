@@ -20,18 +20,22 @@
 from collections import namedtuple
 from ..util import read_shader
 
-ShaderSource = namedtuple('ShaderSource', 'vert frag')
+ShaderSource = namedtuple("ShaderSource", "vert frag")
 
 src_default = ShaderSource(
-    read_shader('Vispy2DRenderer/shaders/2d/default2d.vert'),
-    read_shader('Vispy2DRenderer/shaders/common/default.frag'))
+    read_shader("Vispy2DRenderer/shaders/2d/default2d.vert"),
+    read_shader("Vispy2DRenderer/shaders/common/default.frag"),
+)
 src_texture = ShaderSource(
-    read_shader('Vispy2DRenderer/shaders/2d/texture.vert'),
-    read_shader('Vispy2DRenderer/shaders/2d/texture.frag'))
+    read_shader("Vispy2DRenderer/shaders/2d/texture.vert"),
+    read_shader("Vispy2DRenderer/shaders/2d/texture.frag"),
+)
 # Shader sources to draw framebuffers textues.
 src_fbuffer = ShaderSource(
-    read_shader('Vispy2DRenderer/shaders/common/fbuffer.vert'),
-    read_shader('Vispy2DRenderer/shaders/common/fbuffer.frag'))
+    read_shader("Vispy2DRenderer/shaders/common/fbuffer.vert"),
+    read_shader("Vispy2DRenderer/shaders/common/fbuffer.frag"),
+)
 src_line = ShaderSource(
-    read_shader('Vispy2DRenderer/shaders/2d/stroke.vert'),
-    read_shader('Vispy2DRenderer/shaders/2d/stroke.frag'))
+    read_shader("Vispy2DRenderer/shaders/2d/stroke.vert"),
+    read_shader("Vispy2DRenderer/shaders/2d/stroke.frag"),
+)

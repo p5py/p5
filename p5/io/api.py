@@ -28,7 +28,7 @@ def httpPost(url, postData):
     return http_post(url, postData)
 
 
-def loadTable(path, mode='csv'):
+def loadTable(path, mode="csv"):
     """
     Calls Table class and returns a Table class object
 

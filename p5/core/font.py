@@ -29,10 +29,18 @@ from .structure import push_style
 
 from . import p5
 
-__all__ = ['create_font', 'load_font', 'text', 'text_font',
-           'text_align', 'text_leading', 'text_size', 'text_width',
-           'text_ascent', 'text_descent'
-           ]
+__all__ = [
+    "create_font",
+    "load_font",
+    "text",
+    "text_font",
+    "text_align",
+    "text_leading",
+    "text_size",
+    "text_width",
+    "text_ascent",
+    "text_descent",
+]
 
 _font_family = ImageFont.load_default()
 _text_align_x = "LEFT"
@@ -53,9 +61,9 @@ def create_font(name, size=10):
 
     """
 
-    if name.endswith('ttf') or name.endswith('otf'):
+    if name.endswith("ttf") or name.endswith("otf"):
         font = ImageFont.truetype(name, size)
-    elif name.endswith('pil'):
+    elif name.endswith("pil"):
         font = ImageFont.load(name)
     else:
         raise NotImplementedError("Font type not supported.")
@@ -64,9 +72,7 @@ def create_font(name, size=10):
 
 
 def load_font(font_name):
-    """Loads the given font into a font object
-
-    """
+    """Loads the given font into a font object"""
     return create_font(font_name)
 
 
@@ -122,7 +128,7 @@ def text(*args, wrap_at=None):
         size = _font_family.getsize(text_string)
 
     is_stroke_valid = False  # True when stroke_weight != 0
-    is_min_filter = False   # True when stroke_weight <0
+    is_min_filter = False  # True when stroke_weight <0
     if p5.renderer.style.stroke_enabled:
         stroke_weight = p5.renderer.style.stroke_weight
         if stroke_weight < 0:
@@ -147,10 +153,8 @@ def text(*args, wrap_at=None):
 
     if multiline:
         canvas_draw.multiline_text(
-            text_xy,
-            text_string,
-            font=_font_family,
-            spacing=_text_leading)
+            text_xy, text_string, font=_font_family, spacing=_text_leading
+        )
     else:
         canvas_draw.text(text_xy, text_string, font=_font_family)
 
@@ -247,9 +251,8 @@ def text_size(size):
     global _font_family
 
     # reload the font with new size
-    if hasattr(_font_family, 'path'):
-        if _font_family.path.endswith(
-                'ttf') or _font_family.path.endswith('otf'):
+    if hasattr(_font_family, "path"):
+        if _font_family.path.endswith("ttf") or _font_family.path.endswith("otf"):
             _font_family = ImageFont.truetype(_font_family.path, size)
     else:
         raise ValueError("text_size is not supported for Bitmap Fonts")

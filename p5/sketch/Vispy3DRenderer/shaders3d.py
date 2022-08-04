@@ -20,18 +20,22 @@
 from collections import namedtuple
 from ..util import read_shader
 
-ShaderSource = namedtuple('ShaderSource', 'vert frag')
+ShaderSource = namedtuple("ShaderSource", "vert frag")
 
 src_default = ShaderSource(
-    read_shader('Vispy3DRenderer/shaders/3d/default3d.vert'),
-    read_shader('Vispy3DRenderer/shaders/common/default.frag'))
+    read_shader("Vispy3DRenderer/shaders/3d/default3d.vert"),
+    read_shader("Vispy3DRenderer/shaders/common/default.frag"),
+)
 # Shader sources to draw framebuffers textues.
 src_fbuffer = ShaderSource(
-    read_shader('Vispy3DRenderer/shaders/common/fbuffer.vert'),
-    read_shader('Vispy3DRenderer/shaders/common/fbuffer.frag'))
+    read_shader("Vispy3DRenderer/shaders/common/fbuffer.vert"),
+    read_shader("Vispy3DRenderer/shaders/common/fbuffer.frag"),
+)
 src_normal = ShaderSource(
-    read_shader('Vispy3DRenderer/shaders/3d/normal.vert'),
-    read_shader('Vispy3DRenderer/shaders/3d/normal.frag'))
+    read_shader("Vispy3DRenderer/shaders/3d/normal.vert"),
+    read_shader("Vispy3DRenderer/shaders/3d/normal.frag"),
+)
 src_phong = ShaderSource(
-    read_shader('Vispy3DRenderer/shaders/3d/phong.vert'),
-    read_shader('Vispy3DRenderer/shaders/3d/phong.frag'))
+    read_shader("Vispy3DRenderer/shaders/3d/phong.vert"),
+    read_shader("Vispy3DRenderer/shaders/3d/phong.frag"),
+)

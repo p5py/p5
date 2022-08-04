@@ -2,6 +2,7 @@
 
 from .userspace import no_loop, save_frame
 
+
 def noLoop():
     """Stop draw() from being continuously called.
 
@@ -13,6 +14,7 @@ def noLoop():
 
     """
     no_loop()
+
 
 def saveFrame():
     """Save a numbered sequence of images whenever the function is run.

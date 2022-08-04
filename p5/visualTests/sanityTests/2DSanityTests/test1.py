@@ -38,7 +38,11 @@ class Vehicle:
         with push_matrix():
             translate(*self.pos)
             rotate(theta)
-            triangle((0, -self.size * 2), (-self.size, self.size * 2), (self.size, self.size * 2))
+            triangle(
+                (0, -self.size * 2),
+                (-self.size, self.size * 2),
+                (self.size, self.size * 2),
+            )
 
 
 def setup():

@@ -25,7 +25,7 @@ def pie_chart(diameter, data):
             diameter,
             diameter,
             lastAngle,
-            lastAngle + radians(angles[i])
+            lastAngle + radians(angles[i]),
         )
 
         lastAngle += radians(angles[i])

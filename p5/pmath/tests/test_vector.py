@@ -10,7 +10,6 @@ c = Vector(1, 1)
 
 
 class TestVector(unittest.TestCase):
-
     def test_properties(self):
         self.assertEqual(a.x, 2)
         self.assertEqual(a.y, 3)

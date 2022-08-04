@@ -51,7 +51,7 @@ def set_item(key, value):
     if os.path.isfile(item_file_path):
         os.remove(item_file_path)
 
-    with open(item_file_path, 'wb') as f:
+    with open(item_file_path, "wb") as f:
         pickle.dump(value, f)
 
 
@@ -73,7 +73,7 @@ def clear_storage():
     """
     Clears all storage items set with store_item()
     """
-    if (os.path.isdir(local_storage_path)):
+    if os.path.isdir(local_storage_path):
         for filename in os.listdir(local_storage_path):
             file_path = os.path.join(local_storage_path, filename)
             os.remove(file_path)

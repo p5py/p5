@@ -202,7 +202,7 @@ def on_key_char(window, text):
     # no regular _on_key_press events. Currently ignored!
     if len(input_state.next_key_events) == 0:
         return
-    
+
     (action, key, mod) = input_state.next_key_events.pop(0)
     input_state.next_key_text[key] = text
 

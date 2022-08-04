@@ -27,13 +27,13 @@ import math
 
 class Geometry:
     """
-    Geometry class for all 3D shapes
+        Geometry class for all 3D shapes
 
-:param detail_x: number of triangle subdivisions in x-dimension
-:type detail_x: integer
+    :param detail_x: number of triangle subdivisions in x-dimension
+    :type detail_x: integer
 
-:param detail_y: number of triangle subdivisions in y-dimension
-:type detail_y: integer
+    :param detail_y: number of triangle subdivisions in y-dimension
+    :type detail_y: integer
 
     """
 
@@ -133,8 +133,9 @@ class Geometry:
                 self.vertex_normals[vertex_index] += face_normal
 
         for iv in range(len(self.vertices)):
-            self.vertex_normals[iv] = self.vertex_normals[iv] / \
-                np.linalg.norm(self.vertex_normals[iv])
+            self.vertex_normals[iv] = self.vertex_normals[iv] / np.linalg.norm(
+                self.vertex_normals[iv]
+            )
 
     def edges_to_vertices(self):
         self.line_vertices = []
@@ -157,6 +158,5 @@ class Geometry:
             dirAdd.append(1)
             dirSub.append(-1)
 
-            self.line_normals.extend(
-                [dirAdd, dirSub, dirAdd, dirAdd, dirSub, dirSub])
+            self.line_normals.extend([dirAdd, dirSub, dirAdd, dirAdd, dirSub, dirSub])
             self.line_vertices.extend([a, b, c, c, b, d])

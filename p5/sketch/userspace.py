@@ -46,7 +46,7 @@ __all__ = [
     "save_frame",
     "save",
     "is_looping",
-    "set_frame_rate"
+    "set_frame_rate",
 ]
 
 builtins.width = 360
@@ -170,6 +170,7 @@ def run(
         if mode == "P2D":
             p5.mode = "P2D"
             from p5.sketch.Vispy2DRenderer.renderer2d import VispyRenderer2D
+
             p5.renderer = VispyRenderer2D()
         elif mode == "P3D":
             p5.mode = "P3D"
@@ -279,7 +280,7 @@ def redraw():
 def exit():
     """Exit the sketch.
 
-    `exit()` makes sure that necessary cleanup steps are performed 
+    `exit()` makes sure that necessary cleanup steps are performed
     before exiting the sketch.
 
     """
@@ -379,13 +380,12 @@ def set_frame_rate(fps):
         fps (int): Number of frames to be displayed per second
 
     """
-    if builtins.current_renderer != 'skia':
+    if builtins.current_renderer != "skia":
         raise NotImplementedError("set_frame_rate is only supported in skia")
 
     p5.sketch.frame_rate = fps
-    
-    
+
+
 def is_looping():
-    """Returns the current looping state of the sketch
-    """
+    """Returns the current looping state of the sketch"""
     return p5.sketch.looping

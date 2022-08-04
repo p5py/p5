@@ -15,5 +15,5 @@ def draw():
     circle((56, 246), 55)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

@@ -47,8 +47,12 @@ def draw():
 def key_pressed():
     global letterHeight, newletter, x, y
     #  If the key is between 'A'(65) to 'Z' and 'a' to 'z'(122)
-    if ord(str(key)) >= ord(str("A")) and ord(str(key)) <= ord(str("Z")) or ord(str(key)) >= ord(str("a")) and ord(
-            str(key)) <= ord(str("z")):
+    if (
+        ord(str(key)) >= ord(str("A"))
+        and ord(str(key)) <= ord(str("Z"))
+        or ord(str(key)) >= ord(str("a"))
+        and ord(str(key)) <= ord(str("z"))
+    ):
         keyIndex = 0
         if ord(str(key)) <= ord(str("Z")):
             keyIndex = ord(str(key)) - ord(str("A"))

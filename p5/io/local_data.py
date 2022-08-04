@@ -10,7 +10,7 @@ class Table:
         """
         Initializes Table object when given the path to a CSV file.
         """
-        file = open(path, 'r')
+        file = open(path, "r")
         lines = file.readlines()
         data = []
         for line in lines:
@@ -118,25 +118,25 @@ class Table:
         return self.get_array()
 
 
-def load_table(path, mode='csv'):
+def load_table(path, mode="csv"):
     """
     Calls Table class and returns a Table class object
-    
+
     :param path: Path to file
     :type path: string
 
     :param mode: Type of File csv/ssv/tsv.
     :type mode: string
-    
+
     :returns: A table object
     :rtype: object
 
     """
-    if mode == 'csv':
-        seperator = ','
-    if mode == 'ssv':
-        seperator = ';'
-    if mode == 'tsv':
-        seperator = '\t'
+    if mode == "csv":
+        seperator = ","
+    if mode == "ssv":
+        seperator = ";"
+    if mode == "tsv":
+        seperator = "\t"
     table = Table(path, seperator)
     return table

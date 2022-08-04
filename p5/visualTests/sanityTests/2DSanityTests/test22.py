@@ -17,7 +17,16 @@ def setup():
     index = 0
     for y in range(int(highCount)):
         for x in range(int(wideCount)):
-            mods.append(Module(x * unit, y * unit, unit / 2, unit / 2, random_uniform(0.05, 0.8), unit))
+            mods.append(
+                Module(
+                    x * unit,
+                    y * unit,
+                    unit / 2,
+                    unit / 2,
+                    random_uniform(0.05, 0.8),
+                    unit,
+                )
+            )
 
 
 def draw():

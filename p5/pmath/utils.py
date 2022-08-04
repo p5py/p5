@@ -29,22 +29,41 @@ import numpy as np
 
 __all__ = [
     # TRIG FUNCTIONS
-    'sin', 'cos', 'tan', 'degrees', 'radians',
-
+    "sin",
+    "cos",
+    "tan",
+    "degrees",
+    "radians",
     # INVERSE TRIG FUNCTIONS
-    'asin', 'acos', 'atan', 'atan2',
-
+    "asin",
+    "acos",
+    "atan",
+    "atan2",
     # TRIG CONSTANTS
-    'TWO_PI', 'PI', 'HALF_PI', 'QUARTER_PI', 'TAU', 'HALF_TAU',
-
+    "TWO_PI",
+    "PI",
+    "HALF_PI",
+    "QUARTER_PI",
+    "TAU",
+    "HALF_TAU",
     # MATH FUNCTIONS FROM THE STANDARD LIBRARY (abs and round are
     # available in builtins.)
-    'ceil', 'floor', 'exp', 'log', 'sqrt',
-
+    "ceil",
+    "floor",
+    "exp",
+    "log",
+    "sqrt",
     # MATH FUNCTIONS DEFINED HERE
-
-    'constrain', 'lerp', 'remap', 'normalize', 'distance', 'dist',
-    'magnitude', 'mag', 'sq', 'fract',
+    "constrain",
+    "lerp",
+    "remap",
+    "normalize",
+    "distance",
+    "dist",
+    "magnitude",
+    "mag",
+    "sq",
+    "fract",
 ]
 
 TWO_PI = 2 * math.pi

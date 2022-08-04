@@ -2,26 +2,63 @@
 
 from .structure import push_style, pop_style
 from .primitives import rect_mode, ellipse_mode
-from .transforms import push_matrix, pop_matrix, reset_matrix, reset_transforms, shear_x, shear_y, \
-    rotate_x, rotate_y, rotate_z, apply_matrix, print_matrix
+from .transforms import (
+    push_matrix,
+    pop_matrix,
+    reset_matrix,
+    reset_transforms,
+    shear_x,
+    shear_y,
+    rotate_x,
+    rotate_y,
+    rotate_z,
+    apply_matrix,
+    print_matrix,
+)
 from .color import color_mode
 from .attribs import no_fill, no_tint, no_stroke, stroke_cap, stroke_join, stroke_weight
 from .image import load_image, load_pixels, save_frame, image_mode
-from .font import create_font, load_font, text_font, text_size, text_width, text_descent, text_align, \
-    text_ascent, text_leading
+from .font import (
+    create_font,
+    load_font,
+    text_font,
+    text_size,
+    text_width,
+    text_descent,
+    text_align,
+    text_ascent,
+    text_leading,
+)
 from .constants import TESS
-from .vertex import begin_shape, begin_contour, curve_vertex, bezier_vertex, end_contour, end_shape, quadratic_vertex
+from .vertex import (
+    begin_shape,
+    begin_contour,
+    curve_vertex,
+    bezier_vertex,
+    end_contour,
+    end_shape,
+    quadratic_vertex,
+)
 from .material import normal_material, basic_material, blinn_phong_material
-from .light import ambient_light, directional_light, point_light, light_falloff, light_specular
+from .light import (
+    ambient_light,
+    directional_light,
+    point_light,
+    light_falloff,
+    light_specular,
+)
+
 
 def push():
-    """	The push() function saves the current drawing style settings and transformations"""
+    """The push() function saves the current drawing style settings and transformations"""
     push_matrix()
     push_style()
+
 
 def pop():
     pop_style()
     pop_matrix()
+
 
 def pushStyle():
     """Save the current style settings and then restores them on exit.
@@ -58,12 +95,11 @@ def pushStyle():
 
 
 def popStyle():
-    """Restores previously pushed style settings
-    """
+    """Restores previously pushed style settings"""
     pop_style()
 
 
-def rectMode(mode='CORNER'):
+def rectMode(mode="CORNER"):
     """Change the rect and square drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing rects. Should be one of
@@ -76,7 +112,7 @@ def rectMode(mode='CORNER'):
     rect_mode(mode)
 
 
-def ellipseMode(mode='CENTER'):
+def ellipseMode(mode="CENTER"):
     """Change the ellipse and circle drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing ellipses. Should be one of
@@ -90,21 +126,17 @@ def ellipseMode(mode='CENTER'):
 
 
 def pushMatrix():
-    """Pushes the current transformation matrix onto the matrix stack.
-    """
+    """Pushes the current transformation matrix onto the matrix stack."""
     push_matrix()
 
 
 def popMatrix():
-    """Pops the current transformation matrix off the matrix stack.
-    """
+    """Pops the current transformation matrix off the matrix stack."""
     pop_matrix()
 
 
 def resetTransforms():
-    """Reset all transformations to their default state.
-
-    """
+    """Reset all transformations to their default state."""
     reset_transforms()
 
 
@@ -130,7 +162,7 @@ def rotateY(theta):
     :returns: The rotation matrix used to apply the transformation.
     :rtype: np.ndarray
 
-   """
+    """
     return rotate_y(theta)
 
 
@@ -143,7 +175,7 @@ def rotateZ(theta):
     :returns: The rotation matrix used to apply the transformation.
     :rtype: np.ndarray
 
-   """
+    """
     return rotate_z(theta)
 
 
@@ -157,14 +189,12 @@ def applyMatrix(transformMatrix):
 
 
 def resetMatrix():
-    """Reset the current transform matrix.
-    """
+    """Reset the current transform matrix."""
     reset_matrix()
 
 
 def printMatrix():
-    """Print the transform matrix being used by the sketch.
-    """
+    """Print the transform matrix being used by the sketch."""
     print_matrix()
 
 
@@ -353,9 +383,7 @@ def createFont(name, size=10):
 
 
 def loadFont(font_name):
-    """Loads the given font into a font object
-
-    """
+    """Loads the given font into a font object"""
     return load_font(font_name)
 
 

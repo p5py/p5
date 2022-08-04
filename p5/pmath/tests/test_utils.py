@@ -1,17 +1,9 @@
 import unittest
 
-from p5.pmath.utils import (
-    constrain,
-    lerp,
-    remap,
-    normalize,
-    magnitude,
-    distance,
-    sq)
+from p5.pmath.utils import constrain, lerp, remap, normalize, magnitude, distance, sq
 
 
 class TestUtils(unittest.TestCase):
-
     def test_constrain(self):
         self.assertEqual(constrain(5, 0, 10), 5)
         self.assertEqual(constrain(-10, 0, 10), 0)

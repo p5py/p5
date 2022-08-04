@@ -3,14 +3,15 @@ from ..sketch.util import ensure_p3d, scale_tuple
 import numpy as np
 
 __all__ = [
-    'normal_material',
-    'basic_material',
-    'blinn_phong_material',
-    'ambient',
-    'emissive',
-    'diffuse',
-    'shininess',
-    'specular']
+    "normal_material",
+    "basic_material",
+    "blinn_phong_material",
+    "ambient",
+    "emissive",
+    "diffuse",
+    "shininess",
+    "specular",
+]
 
 
 class BasicMaterial:
@@ -80,7 +81,8 @@ def blinn_phong_material():
     ensure_p3d("blinn_phong_material")
     rend = p5.renderer.style
     p5.renderer.style.material = BlinnPhongMaterial(
-        rend.ambient, rend.diffuse, rend.specular, rend.shininess)
+        rend.ambient, rend.diffuse, rend.specular, rend.shininess
+    )
 
 
 def ambient(r, g, b):
@@ -95,9 +97,8 @@ def ambient(r, g, b):
     :param b: blue channel
     :type b: float
     """
-    ensure_p3d('ambient')
-    p5.renderer.style.ambient = np.array(
-        scale_tuple((r, g, b)), dtype=np.float32)
+    ensure_p3d("ambient")
+    p5.renderer.style.ambient = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def emissive(r, g, b):
@@ -112,7 +113,7 @@ def emissive(r, g, b):
     :param b: blue channel
     :type b: float
     """
-    ensure_p3d('emissive')
+    ensure_p3d("emissive")
     return diffuse(*scale_tuple((r, g, b)))
 
 
@@ -128,9 +129,8 @@ def diffuse(r, g, b):
     :param b: blue channel
     :type b: float
     """
-    ensure_p3d('diffuse')
-    p5.renderer.style.diffuse = np.array(
-        scale_tuple((r, g, b)), dtype=np.float32)
+    ensure_p3d("diffuse")
+    p5.renderer.style.diffuse = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
 def shininess(p):
@@ -141,7 +141,7 @@ def shininess(p):
     :param p: exponent of the cosine term in the `Blinn-Phong Reflection Model <https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_reflection_model>`_
     :type p: float
     """
-    ensure_p3d('shininess')
+    ensure_p3d("shininess")
     p5.renderer.style.shininess = p
 
 
@@ -150,8 +150,8 @@ def specular(r, g, b):
 
     Should be used together with :any:`light_specular`.
     """
-    ensure_p3d('specular')
-    p5.renderer.style.specular = np.array(
-        scale_tuple((r, g, b)), dtype=np.float32)
+    ensure_p3d("specular")
+    p5.renderer.style.specular = np.array(scale_tuple((r, g, b)), dtype=np.float32)
+
 
 # TODO: Document default values for material functions in renderer3D

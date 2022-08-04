@@ -89,5 +89,5 @@ def draw():
     end_shape(CLOSE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

@@ -22,7 +22,7 @@ def draw():
     vertex(20, 20)
     vertex(20, -20)
     end_contour()
-    end_shape('CLOSE')
+    end_shape("CLOSE")
 
 
 run(mode="P2D")

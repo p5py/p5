@@ -28,9 +28,19 @@ from .constants import SQUARE, PROJECT, ROUND, MITER, BEVEL
 
 from . import p5
 
-__all__ = ['background', 'clear', 'fill', 'no_fill',
-           'stroke', 'no_stroke', 'tint', 'no_tint',
-           'stroke_weight', 'stroke_cap', 'stroke_join']
+__all__ = [
+    "background",
+    "clear",
+    "fill",
+    "no_fill",
+    "stroke",
+    "no_stroke",
+    "tint",
+    "no_tint",
+    "stroke_weight",
+    "stroke_cap",
+    "stroke_join",
+]
 
 
 def fill(*fill_args, **fill_kwargs):
@@ -170,7 +180,7 @@ def background(*args, **kwargs):
         sketch do not match.
 
     """
-    if builtins.current_renderer == 'vispy':
+    if builtins.current_renderer == "vispy":
         if len(args) == 1 and isinstance(args[0], PImage):
             background_image = args[0]
             sketch_size = (builtins.width, builtins.height)
@@ -181,7 +191,7 @@ def background(*args, **kwargs):
 
             with push_style():
                 no_tint()
-                image_mode('corner')
+                image_mode("corner")
                 with push_matrix():
                     image(background_image, (0, 0))
 
@@ -197,6 +207,7 @@ def background(*args, **kwargs):
                 p5.renderer.clear()
     else:
         p5.renderer.background(*args, **kwargs)
+
 
 def clear():
     """

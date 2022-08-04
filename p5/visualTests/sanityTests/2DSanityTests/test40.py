@@ -14,13 +14,13 @@ class FlowField:
         field = []
         noise_seed(randrange(10000))
         offset = 0.1
-        xoff = yoff = 0.
+        xoff = yoff = 0.0
         for r in range(self.rows):
             field.append([])
             yoff += offset
             for _ in range(self.cols):
                 # option 1
-                theta = remap(noise(xoff, yoff), (0., 1.), (0., TWO_PI))
+                theta = remap(noise(xoff, yoff), (0.0, 1.0), (0.0, TWO_PI))
                 # option 2 - fixed field
                 # theta = remap(sin(xoff)+cos(yoff), (-2, 2), (0, TWO_PI))
                 field[r].append(Vector(cos(theta), sin(theta)))
@@ -51,7 +51,7 @@ class FlowField:
 
 
 class Vehicle:
-    def __init__(self, pos_x, pos_y, max_speed=4., max_force=0.1):
+    def __init__(self, pos_x, pos_y, max_speed=4.0, max_force=0.1):
         self.pos = Vector(pos_x, pos_y)
         self.vel = Vector(0, 0)
         self.acc = Vector(0, 0)
@@ -95,7 +95,7 @@ class Vehicle:
             self.pos.y = -self.size
 
     def display(self):
-        theta = self.vel.angle + PI/2
+        theta = self.vel.angle + PI / 2
         fill(177)
         stroke(200)
         with push_matrix():
@@ -104,7 +104,7 @@ class Vehicle:
             triangle(
                 (0, -self.size * 2),
                 (-self.size, self.size * 2),
-                (self.size, self.size * 2)
+                (self.size, self.size * 2),
             )
 
     def run(self):
@@ -119,8 +119,15 @@ def setup():
     global debug, flowfield, vehicles, width, height
     debug = True
     flowfield = FlowField(20)
-    vehicles = [Vehicle(randrange(width), randrange(height), random_uniform(5, 20), random_uniform(0.3, 0.6))
-                for _ in range(120)]
+    vehicles = [
+        Vehicle(
+            randrange(width),
+            randrange(height),
+            random_uniform(5, 20),
+            random_uniform(0.3, 0.6),
+        )
+        for _ in range(120)
+    ]
 
 
 def draw():
