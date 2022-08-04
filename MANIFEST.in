@@ -1,3 +1,4 @@
-include LICENSE.txt
+include LICENSE
 recursive-include p5/sketch/Vispy2DRenderer/shaders *
 recursive-include p5/sketch/Vispy3DRenderer/shaders *
+include requirements.txt
