@@ -12,6 +12,7 @@ Bug Fixes
 - #308
 - #309
 - #355
+- #352
 
 New Features
 ------------
@@ -42,6 +43,6 @@ primitives      1.73s  3.9s
 ==============  =====  =======
 
 This release includes contributions from @tushar5526, @niklasr22, @ziyaointl, @nakul-shahdadpuri, @andreasWallner, @janbehrens, @yogeshhk, @cuppajoeman,
-@willtryagain, @parsoyaarihant, @Kartik-byte, @Andy-Python-Programmer, Thank you!
+@willtryagain, @parsoyaarihant, @Kartik-byte, @Andy-Python-Programmer, @Mr-Sunglasses, Thank you!
 
 
