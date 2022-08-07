@@ -2,7 +2,7 @@ from abc import ABC
 import numpy as np
 
 from p5.core import p5
-from p5.core.constants import SType, ROUND, MITER
+from p5.core.constants import SType, ROUND, MITER, LEFT, TOP
 from p5.pmath import matrix
 from .shape import Arc, PShape
 
@@ -288,8 +288,8 @@ class OpenGLRenderer(ABC):
 
         # typography variables
         self.font_family = ImageFont.load_default()
-        self.text_align_x = "LEFT"
-        self.text_align_y = "TOP"
+        self.text_align_x = LEFT
+        self.text_align_y = TOP
         self.text_leading = 0
 
     def render_default(self, draw_type, draw_queue):

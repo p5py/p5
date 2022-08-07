@@ -33,7 +33,7 @@ from .shaders2d import src_texture
 from .shaders2d import src_line
 from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 from .shape import PShape, Arc
-from p5.core.constants import SType
+from p5.core.constants import SType, LEFT, TOP, RIGHT, BOTTOM, CENTER
 
 import textwrap
 from PIL import ImageFont, ImageChops, ImageFilter, ImageDraw, Image
@@ -465,18 +465,18 @@ class VispyRenderer2D(OpenGLRenderer):
 
         width, height = new_size
         position = list(position)
-        if self.text_align_x == "LEFT":
+        if self.text_align_x == LEFT:
             position[0] += 0
-        elif self.text_align_x == "RIGHT":
+        elif self.text_align_x == RIGHT:
             position[0] -= width
-        elif self.text_align_x == "CENTER":
+        elif self.text_align_x == CENTER:
             position[0] -= width / 2
 
-        if self.text_align_y == "TOP":
+        if self.text_align_y == TOP:
             position[1] += 0
-        elif self.text_align_y == "BOTTOM":
+        elif self.text_align_y == BOTTOM:
             position[1] -= height
-        elif self.text_align_y == "CENTER":
+        elif self.text_align_y == CENTER:
             position[1] -= height / 2
 
         with push_style():
