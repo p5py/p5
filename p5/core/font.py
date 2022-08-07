@@ -102,7 +102,7 @@ def text(*args, wrap_at=None):
     return p5.renderer.text(text_string, position, wrap_at)
 
 
-def text_font(font):
+def text_font(font, size=10):
     """Set current text font.
 
     :param font:
