@@ -284,6 +284,8 @@ class OpenGLRenderer(ABC):
         self.style_stack = []
         self.matrix_stack = []
 
+        self.curve_tightness = 0
+
     def render_default(self, draw_type, draw_queue):
         # 1. Get the maximum number of vertices persent in the shapes
         # in the draw queue.

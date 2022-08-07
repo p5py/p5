@@ -22,6 +22,7 @@
 from collections.abc import Iterable
 from functools import wraps
 from ..pmath import Point
+from ..core import p5
 
 __all__ = [
     # BEZIER METHODS
@@ -40,8 +41,6 @@ __all__ = [
 curve_resolution = 20
 
 bezier_resolution = 20
-
-curve_tightness_amount = 0
 
 curve_basis_matrix = [
     [-0.5, 1.5, -1.5, 0.5],
@@ -193,8 +192,7 @@ def curve_tightness(amount):
     :param amount: new curve tightness amount.
     :type amount: int
     """
-    global curve_tightness_amount
-    curve_tightness_amount = amount
+    p5.renderer.curve_tightness = amount
     _reinit_curve_matrices()
 
 
@@ -334,4 +332,3 @@ def quadratic_point(start, control, stop, parameter):
 # Set the default values.
 bezier_detail(20)
 curve_detail(20)
-curve_tightness(0)
