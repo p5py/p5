@@ -16,6 +16,8 @@ from OpenGL.GLU import (
     gluTessVertex,
 )
 
+from PIL import ImageFont
+
 # Useful constants
 COLOR_WHITE = (1, 1, 1, 1)
 COLOR_BLACK = (0, 0, 0, 1)
@@ -283,6 +285,12 @@ class OpenGLRenderer(ABC):
         self.style = Style2D()
         self.style_stack = []
         self.matrix_stack = []
+
+        # typography variables
+        self.font_family = ImageFont.load_default()
+        self.text_align_x = "LEFT"
+        self.text_align_y = "TOP"
+        self.text_leading = 0
 
     def render_default(self, draw_type, draw_queue):
         # 1. Get the maximum number of vertices persent in the shapes

@@ -35,6 +35,11 @@ from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 from .shape import PShape, Arc
 from p5.core.constants import SType
 
+import textwrap
+from PIL import ImageFont, ImageChops, ImageFilter, ImageDraw, Image
+from p5.core.image import image, PImage
+from p5.core.structure import push_style
+
 
 class VispyRenderer2D(OpenGLRenderer):
     def __init__(self):
@@ -372,3 +377,136 @@ class VispyRenderer2D(OpenGLRenderer):
         self.render_shape(
             PShape(vertices=vertices, contours=contours, shape_type=shape_type)
         )
+
+    def create_font(self, name, size=10):
+        """Create the given font at the appropriate size.
+
+        :param name: Filename of the font file (only pil, otf and ttf
+            fonts are supported.)
+        :type name: str
+
+        :param size: Font size (only required when `name` refers to a
+            truetype font; defaults to None)
+        :type size: int | None
+
+        """
+
+        if name.endswith("ttf") or name.endswith("otf"):
+            font = ImageFont.truetype(name, size)
+        elif name.endswith("pil"):
+            font = ImageFont.load(name)
+        else:
+            raise NotImplementedError("Font type not supported.")
+        return font
+
+    def load_font(self, font_name):
+        """Loads the given font into a font object"""
+        return self.create_font(font_name)
+
+    def text(self, text_string, position, wrap_at):
+
+        multiline = False
+        if not (wrap_at is None):
+            text_string = textwrap.fill(text_string, wrap_at)
+            size = self.font_family.getsize_multiline(text_string)
+            multiline = True
+        elif "\n" in text_string:
+            multiline = True
+            size = list(self.font_family.getsize_multiline(text_string))
+            size[1] += self.text_leading * text_string.count("\n")
+        else:
+            size = self.font_family.getsize(text_string)
+
+        is_stroke_valid = False  # True when stroke_weight != 0
+        is_min_filter = False  # True when stroke_weight <0
+        if self.style.stroke_enabled:
+            stroke_weight = self.style.stroke_weight
+            if stroke_weight < 0:
+                stroke_weight = abs(stroke_weight)
+                is_min_filter = True
+
+            if stroke_weight > 0:
+                if stroke_weight % 2 == 0:
+                    stroke_weight += 1
+                is_stroke_valid = True
+
+        if is_stroke_valid:
+            new_size = list(map(lambda x: x + 2 * stroke_weight, size))
+            is_stroke_valid = True
+            text_xy = (stroke_weight, stroke_weight)
+        else:
+            new_size = size
+            text_xy = (0, 0)
+
+        canvas = Image.new("RGBA", new_size, color=(0, 0, 0, 0))
+        canvas_draw = ImageDraw.Draw(canvas)
+
+        if multiline:
+            canvas_draw.multiline_text(
+                text_xy,
+                text_string,
+                font=self.font_family,
+                spacing=self.text_leading,
+            )
+        else:
+            canvas_draw.text(text_xy, text_string, font=self.font_family)
+
+        text_image = PImage(*new_size)
+        text_image._img = canvas
+
+        if is_stroke_valid:
+            if is_min_filter:
+                canvas_dilate = canvas.filter(ImageFilter.MinFilter(stroke_weight))
+            else:
+                canvas_dilate = canvas.filter(ImageFilter.MaxFilter(stroke_weight))
+            canvas_stroke = ImageChops.difference(canvas, canvas_dilate)
+            text_stroke_image = PImage(*new_size)
+            text_stroke_image._img = canvas_stroke
+
+        width, height = new_size
+        position = list(position)
+        if self.text_align_x == "LEFT":
+            position[0] += 0
+        elif self.text_align_x == "RIGHT":
+            position[0] -= width
+        elif self.text_align_x == "CENTER":
+            position[0] -= width / 2
+
+        if self.text_align_y == "TOP":
+            position[1] += 0
+        elif self.text_align_y == "BOTTOM":
+            position[1] -= height
+        elif self.text_align_y == "CENTER":
+            position[1] -= height / 2
+
+        with push_style():
+            if self.style.fill_enabled:
+                self.style.tint_enabled = True
+                self.style.tint_color = self.style.fill_color
+                image(text_image, position)
+            if self.style.stroke_enabled and is_stroke_valid:
+                self.style.tint_enabled = True
+                self.style.tint_color = self.style.stroke_color
+                image(text_stroke_image, position)
+
+        return text_string
+
+    def text_size(self, size):
+        if hasattr(self.font_family, "path"):
+            if self.font_family.path.endswith("ttf") or self.font_family.path.endswith(
+                "otf"
+            ):
+                self.font_family = ImageFont.truetype(self.font_family.path, size)
+        else:
+            raise ValueError("text_size is not supported for Bitmap Fonts")
+
+    def text_width(self, text):
+        return self.font_family.getsize(text)[0]
+
+    def text_ascent(self):
+        ascent, descent = self.font_family.getmetrics()
+        return ascent
+
+    def text_descent(self):
+        ascent, descent = self.font_family.getmetrics()
+        return descent
