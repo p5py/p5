@@ -56,8 +56,6 @@ class SkiaRenderer:
         self.font = skia.Font()
         self.typeface = skia.Typeface.MakeDefault()
         self.font.setTypeface(self.typeface)
-        # TODO: Implement curve tightness from curves.py
-        #  use curve_tightness from the renderer instance or style object instead of global variable
         self.curve_tightness = 0
 
     # Transforms functions
