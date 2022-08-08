@@ -42,11 +42,6 @@ __all__ = [
     "text_descent",
 ]
 
-_font_family = ImageFont.load_default()
-_text_align_x = "LEFT"
-_text_align_y = "TOP"
-_text_leading = 0
-
 
 def create_font(name, size=10):
     """Create the given font at the appropriate size.
@@ -60,20 +55,12 @@ def create_font(name, size=10):
     :type size: int | None
 
     """
-
-    if name.endswith("ttf") or name.endswith("otf"):
-        font = ImageFont.truetype(name, size)
-    elif name.endswith("pil"):
-        font = ImageFont.load(name)
-    else:
-        raise NotImplementedError("Font type not supported.")
-
-    return font
+    return p5.renderer.create_font(name, size)
 
 
 def load_font(font_name):
     """Loads the given font into a font object"""
-    return create_font(font_name)
+    return p5.renderer.load_font(font_name)
 
 
 def text(*args, wrap_at=None):
@@ -112,91 +99,7 @@ def text(*args, wrap_at=None):
 
     if len(text_string) == 0:
         return
-
-    global _font_family, _text_leading
-
-    multiline = False
-    if not (wrap_at is None):
-        text_string = textwrap.fill(text_string, wrap_at)
-        size = _font_family.getsize_multiline(text_string)
-        multiline = True
-    elif "\n" in text_string:
-        multiline = True
-        size = list(_font_family.getsize_multiline(text_string))
-        size[1] += _text_leading * text_string.count("\n")
-    else:
-        size = _font_family.getsize(text_string)
-
-    is_stroke_valid = False  # True when stroke_weight != 0
-    is_min_filter = False  # True when stroke_weight <0
-    if p5.renderer.style.stroke_enabled:
-        stroke_weight = p5.renderer.style.stroke_weight
-        if stroke_weight < 0:
-            stroke_weight = abs(stroke_weight)
-            is_min_filter = True
-
-        if stroke_weight > 0:
-            if stroke_weight % 2 == 0:
-                stroke_weight += 1
-            is_stroke_valid = True
-
-    if is_stroke_valid:
-        new_size = list(map(lambda x: x + 2 * stroke_weight, size))
-        is_stroke_valid = True
-        text_xy = (stroke_weight, stroke_weight)
-    else:
-        new_size = size
-        text_xy = (0, 0)
-
-    canvas = Image.new("RGBA", new_size, color=(0, 0, 0, 0))
-    canvas_draw = ImageDraw.Draw(canvas)
-
-    if multiline:
-        canvas_draw.multiline_text(
-            text_xy, text_string, font=_font_family, spacing=_text_leading
-        )
-    else:
-        canvas_draw.text(text_xy, text_string, font=_font_family)
-
-    text_image = PImage(*new_size)
-    text_image._img = canvas
-
-    if is_stroke_valid:
-        if is_min_filter:
-            canvas_dilate = canvas.filter(ImageFilter.MinFilter(stroke_weight))
-        else:
-            canvas_dilate = canvas.filter(ImageFilter.MaxFilter(stroke_weight))
-        canvas_stroke = ImageChops.difference(canvas, canvas_dilate)
-        text_stroke_image = PImage(*new_size)
-        text_stroke_image._img = canvas_stroke
-
-    width, height = new_size
-    position = list(position)
-    if _text_align_x == "LEFT":
-        position[0] += 0
-    elif _text_align_x == "RIGHT":
-        position[0] -= width
-    elif _text_align_x == "CENTER":
-        position[0] -= width / 2
-
-    if _text_align_y == "TOP":
-        position[1] += 0
-    elif _text_align_y == "BOTTOM":
-        position[1] -= height
-    elif _text_align_y == "CENTER":
-        position[1] -= height / 2
-
-    with push_style():
-        if p5.renderer.style.fill_enabled:
-            p5.renderer.style.tint_enabled = True
-            p5.renderer.style.tint_color = p5.renderer.style.fill_color
-            image(text_image, position)
-        if p5.renderer.style.stroke_enabled and is_stroke_valid:
-            p5.renderer.style.tint_enabled = True
-            p5.renderer.style.tint_color = p5.renderer.style.stroke_color
-            image(text_stroke_image, position)
-
-    return text_string
+    return p5.renderer.text(text_string, position, wrap_at)
 
 
 def text_font(font, size=10):
@@ -206,8 +109,7 @@ def text_font(font, size=10):
     :type font: PIL.ImageFont.ImageFont
 
     """
-    global _font_family
-    _font_family = font
+    p5.renderer.font_family = font
 
 
 def text_align(align_x, align_y=None):
@@ -220,12 +122,9 @@ def text_align(align_x, align_y=None):
     :type align_y: string
 
     """
-
-    global _text_align_x, _text_align_y
-    _text_align_x = align_x
-
+    p5.renderer.text_align_x = align_x
     if align_y:
-        _text_align_y = align_y
+        p5.renderer.text_align_y = align_y
 
 
 def text_leading(leading):
@@ -236,8 +135,7 @@ def text_leading(leading):
 
     """
 
-    global _text_leading
-    _text_leading = leading
+    p5.renderer.text_leading = leading
 
 
 def text_size(size):
@@ -248,14 +146,8 @@ def text_size(size):
 
     """
 
-    global _font_family
-
     # reload the font with new size
-    if hasattr(_font_family, "path"):
-        if _font_family.path.endswith("ttf") or _font_family.path.endswith("otf"):
-            _font_family = ImageFont.truetype(_font_family.path, size)
-    else:
-        raise ValueError("text_size is not supported for Bitmap Fonts")
+    p5.renderer.text_size(size)
 
 
 def text_width(text):
@@ -269,7 +161,7 @@ def text_width(text):
 
     """
 
-    return _font_family.getsize(text)[0]
+    return p5.renderer.text_width(text)
 
 
 def text_ascent():
@@ -279,9 +171,7 @@ def text_ascent():
     :rtype: float
 
     """
-    global _font_family
-    ascent, descent = _font_family.getmetrics()
-    return ascent
+    return p5.renderer.text_ascent()
 
 
 def text_descent():
@@ -291,7 +181,4 @@ def text_descent():
     :rtype: float
 
     """
-
-    global _font_family
-    ascent, descent = _font_family.getmetrics()
-    return descent
+    return p5.renderer.text_descent()

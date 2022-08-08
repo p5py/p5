@@ -40,6 +40,11 @@ CENTER = "CENTER"
 CORNER = "CORNER"
 CORNERS = "CORNERS"
 
+LEFT = "LEFT"
+RIGHT = "RIGHT"
+TOP = "TOP"
+BOTTOM = "BOTTOM"
+
 # Colors
 colour_codes = {
     "indianred": "#CD5C5C",
