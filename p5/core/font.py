@@ -139,7 +139,7 @@ def text_size(size):
     """
 
     # reload the font with new size
-    p5.renderer.style.text_size(size)
+    p5.renderer.text_size(size)
 
 
 def text_width(text):
@@ -153,7 +153,7 @@ def text_width(text):
 
     """
 
-    return p5.renderer.style.text_width(text)
+    return p5.renderer.text_width(text)
 
 
 def text_ascent():

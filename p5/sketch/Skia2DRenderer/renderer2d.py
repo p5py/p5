@@ -136,20 +136,23 @@ class SkiaRenderer:
 
         self.clear()
 
-    def text(self, text, x, y, max_width=None, max_height=None):
+    def render_text(self, text, x, y):
         # full path works relative does not
         # assert (typeface is not None), "should not be NULL"
         # handle alignment manually
+        if self.style.stroke_enabled and self.style.stroke_set:
+            self.paint.setStyle(skia.Paint.kStroke_Style)
+            self.paint.setColor(skia.Color4f(*self.style.stroke_color))
+            self.paint.setStrokeWidth(self.style.stroke_weight)
+            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+
         if self.style.fill_enabled:
             self.paint.setStyle(skia.Paint.kFill_Style)
             self.paint.setColor(skia.Color4f(*self.style.fill_color))
             self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
-        if self.style.stroke_enabled:
-            self.paint.setStyle(skia.Paint.kStroke_Style)
-            self.paint.setColor(skia.Color4f(*self.style.stroke_color))
-            self.paint.setStrokeWidth(self.style.stroke_weight)
-            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+    def text(self, text, x, y, max_width=None, max_height=None):
+        self.render_text(text, x, y)
 
     def load_font(self, path):
         """
@@ -157,14 +160,14 @@ class SkiaRenderer:
         Absolute path of the font file
         returns: skia.Typeface
         """
-        typeface = skia.Typeface.MakeFromFile(path)
+        typeface = skia.Typeface().MakeFromFile(path=path)
         return typeface
 
     def text_font(self, font, size=10):
         """
         Sets the current font to be used for rendering text
         """
-        self.style.text_font.setTypeface(self.typeface)
+        self.style.text_font.setTypeface(font)
 
     def text_size(self, size):
         self.style.text_font.setSize(size)
