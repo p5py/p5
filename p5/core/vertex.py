@@ -291,7 +291,7 @@ def get_curve_vertices(verts):
     if len(verts) == 0:
         return []
 
-    s = 1 - curves.curve_tightness_amount
+    s = 1 - p5.renderer.curve_tightness
     shape_vertices = [(verts[1][0], verts[1][1], 0.0)]
     steps = curves.curve_resolution
 
