@@ -40,6 +40,7 @@ __all__ = [
     "no_cursor",
     "cursor",
     "exit",
+    "preload",
     "draw",
     "setup",
     "run",
@@ -96,6 +97,15 @@ def _fix_interface(func):
         return func
 
 
+def preload():
+    """
+    Called directly before setup(), the preload() function is used to handle loading of external files.
+    If a preload function is defined, setup() will wait until any load calls within have finished.
+    Nothing besides load calls (loadImage, loadJSON, loadFont, loadStrings, etc.) should be inside the preload function.
+    """
+    pass
+
+
 def draw():
     """Continuously execute code defined inside.
 
@@ -118,7 +128,12 @@ def setup():
 
 
 def run(
-    sketch_setup=None, sketch_draw=None, frame_rate=60, mode="P2D", renderer="vispy"
+    sketch_preload=None,
+    sketch_setup=None,
+    sketch_draw=None,
+    frame_rate=60,
+    mode="P2D",
+    renderer="vispy",
 ):
     """Run a sketch.
 
@@ -137,7 +152,14 @@ def run(
     :type frame_rate: int :math:`\geq 1`
 
     """
-    # get the user-defined setup(), draw(), and handler functions.
+    # get the user-defined setup(), draw(), preload() and handler functions.
+    if sketch_preload is not None:
+        preload_method = sketch_preload
+    elif hasattr(__main__, "setup"):
+        preload_method = __main__.preload
+    else:
+        preload_method = preload
+
     if sketch_setup is not None:
         setup_method = sketch_setup
     elif hasattr(__main__, "setup"):
@@ -188,6 +210,7 @@ def run(
         builtins.pixel_y_density = physical_height // height
         builtins.start_time = time.perf_counter()
 
+        preload_method()
         p5.sketch.timer.start()
 
         app.run()
@@ -203,6 +226,7 @@ def run(
         elif mode == "P3D":
             raise NotImplementedError("3D mode is not available in skia")
         p5.sketch = SkiaSketch(setup_method, draw_method, handlers, frame_rate)
+        preload_method()
         p5.sketch.start()
     else:
         raise NotImplementedError("Invalid Renderer %s" % renderer)

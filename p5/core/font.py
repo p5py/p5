@@ -101,7 +101,7 @@ def text_font(font, size=10):
     :type font: PIL.ImageFont.ImageFont
 
     """
-    p5.renderer.style.font_family = font
+    p5.renderer.text_font(font, size)
 
 
 def text_align(align_x, align_y=None):
