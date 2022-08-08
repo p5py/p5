@@ -238,6 +238,12 @@ class Style2D:
     stroke_cap = ROUND
     stroke_join = MITER
 
+    # typography variables
+    font_family = ImageFont.load_default()
+    text_align_x = LEFT
+    text_align_y = TOP
+    text_leading = 0
+
     def set_stroke_cap(self, c):
         self.stroke_cap = c
 
@@ -287,15 +293,6 @@ class OpenGLRenderer(ABC):
         self.matrix_stack = []
 
         self.curve_tightness = 0
-        
-        # typography variables
-        self.font_family = ImageFont.load_default()
-        self.text_align_x = LEFT
-        self.text_align_y = TOP
-        self.text_leading = 0
-
-
-
 
     def render_default(self, draw_type, draw_queue):
         # 1. Get the maximum number of vertices persent in the shapes

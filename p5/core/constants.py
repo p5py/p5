@@ -44,6 +44,7 @@ LEFT = "LEFT"
 RIGHT = "RIGHT"
 TOP = "TOP"
 BOTTOM = "BOTTOM"
+BASELINE = "BASELINE"
 
 # Colors
 colour_codes = {

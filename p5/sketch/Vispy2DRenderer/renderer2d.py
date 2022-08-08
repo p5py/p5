@@ -408,14 +408,14 @@ class VispyRenderer2D(OpenGLRenderer):
         multiline = False
         if not (wrap_at is None):
             text_string = textwrap.fill(text_string, wrap_at)
-            size = self.font_family.getsize_multiline(text_string)
+            size = self.style.font_family.getsize_multiline(text_string)
             multiline = True
         elif "\n" in text_string:
             multiline = True
-            size = list(self.font_family.getsize_multiline(text_string))
-            size[1] += self.text_leading * text_string.count("\n")
+            size = list(self.style.font_family.getsize_multiline(text_string))
+            size[1] += self.style.text_leading * text_string.count("\n")
         else:
-            size = self.font_family.getsize(text_string)
+            size = self.style.font_family.getsize(text_string)
 
         is_stroke_valid = False  # True when stroke_weight != 0
         is_min_filter = False  # True when stroke_weight <0
@@ -445,11 +445,11 @@ class VispyRenderer2D(OpenGLRenderer):
             canvas_draw.multiline_text(
                 text_xy,
                 text_string,
-                font=self.font_family,
-                spacing=self.text_leading,
+                font=self.style.style.font_family,
+                spacing=self.style.text_leading,
             )
         else:
-            canvas_draw.text(text_xy, text_string, font=self.font_family)
+            canvas_draw.text(text_xy, text_string, font=self.style.font_family)
 
         text_image = PImage(*new_size)
         text_image._img = canvas
@@ -465,18 +465,18 @@ class VispyRenderer2D(OpenGLRenderer):
 
         width, height = new_size
         position = list(position)
-        if self.text_align_x == LEFT:
+        if self.style.text_align_x == LEFT:
             position[0] += 0
-        elif self.text_align_x == RIGHT:
+        elif self.style.text_align_x == RIGHT:
             position[0] -= width
-        elif self.text_align_x == CENTER:
+        elif self.style.text_align_x == CENTER:
             position[0] -= width / 2
 
-        if self.text_align_y == TOP:
+        if self.style.text_align_y == TOP:
             position[1] += 0
-        elif self.text_align_y == BOTTOM:
+        elif self.style.text_align_y == BOTTOM:
             position[1] -= height
-        elif self.text_align_y == CENTER:
+        elif self.style.text_align_y == CENTER:
             position[1] -= height / 2
 
         with push_style():
@@ -492,21 +492,23 @@ class VispyRenderer2D(OpenGLRenderer):
         return text_string
 
     def text_size(self, size):
-        if hasattr(self.font_family, "path"):
-            if self.font_family.path.endswith("ttf") or self.font_family.path.endswith(
-                "otf"
-            ):
-                self.font_family = ImageFont.truetype(self.font_family.path, size)
+        if hasattr(self.style.font_family, "path"):
+            if self.style.font_family.path.endswith(
+                "ttf"
+            ) or self.style.font_family.path.endswith("otf"):
+                self.style.font_family = ImageFont.truetype(
+                    self.style.font_family.path, size
+                )
         else:
             raise ValueError("text_size is not supported for Bitmap Fonts")
 
     def text_width(self, text):
-        return self.font_family.getsize(text)[0]
+        return self.style.font_family.getsize(text)[0]
 
     def text_ascent(self):
-        ascent, descent = self.font_family.getmetrics()
+        ascent, descent = self.style.font_family.getmetrics()
         return ascent
 
     def text_descent(self):
-        ascent, descent = self.font_family.getmetrics()
+        ascent, descent = self.style.font_family.getmetrics()
         return descent

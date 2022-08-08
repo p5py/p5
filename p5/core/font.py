@@ -15,18 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import textwrap
-
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-from PIL import ImageFilter
-from PIL import ImageChops
-
-from .image import image
-from .image import PImage
-from .structure import push_style
-
+import builtins
 from . import p5
 
 __all__ = [
@@ -99,7 +88,10 @@ def text(*args, wrap_at=None):
 
     if len(text_string) == 0:
         return
-    return p5.renderer.text(text_string, position, wrap_at)
+    if builtins.current_renderer == "vispy":
+        return p5.renderer.text(text_string, position, wrap_at)
+    elif builtins.current_renderer == "skia":
+        return p5.renderer.text(text_string, *position, wrap_at)
 
 
 def text_font(font, size=10):
@@ -109,7 +101,7 @@ def text_font(font, size=10):
     :type font: PIL.ImageFont.ImageFont
 
     """
-    p5.renderer.font_family = font
+    p5.renderer.style.font_family = font
 
 
 def text_align(align_x, align_y=None):
@@ -122,9 +114,9 @@ def text_align(align_x, align_y=None):
     :type align_y: string
 
     """
-    p5.renderer.text_align_x = align_x
+    p5.renderer.style.text_align_x = align_x
     if align_y:
-        p5.renderer.text_align_y = align_y
+        p5.renderer.style.text_align_y = align_y
 
 
 def text_leading(leading):
@@ -135,7 +127,7 @@ def text_leading(leading):
 
     """
 
-    p5.renderer.text_leading = leading
+    p5.renderer.style.text_leading = leading
 
 
 def text_size(size):
@@ -147,7 +139,7 @@ def text_size(size):
     """
 
     # reload the font with new size
-    p5.renderer.text_size(size)
+    p5.renderer.style.text_size(size)
 
 
 def text_width(text):
@@ -161,7 +153,7 @@ def text_width(text):
 
     """
 
-    return p5.renderer.text_width(text)
+    return p5.renderer.style.text_width(text)
 
 
 def text_ascent():

@@ -29,6 +29,17 @@ class Style2D:
     stroke_cap = skia.Paint.kRound_Cap
     stroke_join = skia.Paint.kMiter_Join
 
+    # Flag that holds whether stroke() is called user
+    stroke_set = False
+    # Flag that holds whether fill() is called user
+    fill_set = False
+    text_font = skia.Font()
+    text_leading = 0
+    text_size = 15
+    text_align = (constants.LEFT, constants.TOP)
+    text_wrap = None
+    text_baseline = constants.BASELINE
+
     def set_stroke_cap(self, c):
         if c == constants.ROUND:
             self.stroke_cap = skia.Paint.kRound_Cap
@@ -53,9 +64,7 @@ class SkiaRenderer:
         self.style = Style2D()
         self.style_stack = []
         self.path = None
-        self.font = skia.Font()
-        self.typeface = skia.Typeface.MakeDefault()
-        self.font.setTypeface(self.typeface)
+        self.style.text_font = skia.Font()
         self.curve_tightness = 0
 
     # Transforms functions
@@ -127,21 +136,20 @@ class SkiaRenderer:
 
         self.clear()
 
-    def render_text(self, text, x, y):
+    def text(self, text, x, y, max_width=None, max_height=None):
         # full path works relative does not
         # assert (typeface is not None), "should not be NULL"
         # handle alignment manually
         if self.style.fill_enabled:
             self.paint.setStyle(skia.Paint.kFill_Style)
-            self.paint.setColor(self.style.fill_color)
-            self.canvas.drawPath(self.path, self.paint)
+            self.paint.setColor(skia.Color4f(*self.style.fill_color))
+            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
         if self.style.stroke_enabled:
             self.paint.setStyle(skia.Paint.kStroke_Style)
-            self.paint.setColor(self.style.stroke_color)
+            self.paint.setColor(skia.Color4f(*self.style.stroke_color))
             self.paint.setStrokeWidth(self.style.stroke_weight)
-            self.canvas.drawPath(self.path, self.paint)
-        self.canvas.drawSimpleText(text, x, y, self.font, self.paint)
+            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
     def load_font(self, path):
         """
@@ -152,15 +160,14 @@ class SkiaRenderer:
         typeface = skia.Typeface.MakeFromFile(path)
         return typeface
 
-    def set_font(self, font):
+    def text_font(self, font, size=10):
         """
         Sets the current font to be used for rendering text
         """
-        self.typeface = font
-        self.font.setTypeface(self.typeface)
+        self.style.text_font.setTypeface(self.typeface)
 
-    def set_font_size(self, size):
-        self.font.setSize(size)
+    def text_size(self, size):
+        self.style.text_font.setSize(size)
 
     def render_image(self, img, *args):
         self.canvas.drawImage(img, *args)
@@ -213,7 +220,7 @@ class SkiaRenderer:
 
     def reset(self):
         self.reset_matrix()
-        self.font.setSize(15)
+        self.style.text_font.setSize(15)
 
     def line(self, path):
         x1, y1, x2, y2 = path[0].x, path[0].y, path[1].x, path[1].y
