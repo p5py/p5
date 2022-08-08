@@ -220,7 +220,6 @@ class SkiaRenderer:
 
     def reset(self):
         self.reset_matrix()
-        self.style.text_font.setSize(15)
 
     def line(self, path):
         x1, y1, x2, y2 = path[0].x, path[0].y, path[1].x, path[1].y
