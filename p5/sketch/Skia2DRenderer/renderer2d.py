@@ -223,6 +223,8 @@ class SkiaRenderer:
 
     def reset(self):
         self.reset_matrix()
+        #NOTE: We have to handle PGraphics stroke_set as well separately
+        self.style.stroke_set = False
 
     def line(self, path):
         x1, y1, x2, y2 = path[0].x, path[0].y, path[1].x, path[1].y
