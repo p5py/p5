@@ -2,7 +2,8 @@ from p5 import *
 import os
 font = None
 
-dirname = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+dirname = os.path.dirname(os.path.realpath(__file__))
+
 def preload():
     global font
     # TODO: Use bunch of different fonts formats like otf,rtf etc
