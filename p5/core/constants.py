@@ -40,6 +40,7 @@ CENTER = "CENTER"
 CORNER = "CORNER"
 CORNERS = "CORNERS"
 
+# Typography Setting Options
 LEFT = "LEFT"
 RIGHT = "RIGHT"
 TOP = "TOP"
