@@ -31,8 +31,6 @@ class Style2D:
 
     # Flag that holds whether stroke() is called user
     stroke_set = False
-    # Flag that holds whether fill() is called user
-    fill_set = False
     text_font = skia.Font()
     text_leading = 0
     text_size = 15
@@ -151,8 +149,8 @@ class SkiaRenderer:
             self.paint.setColor(skia.Color4f(*self.style.fill_color))
             self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
-    def text(self, text, x, y, max_width=None, max_height=None):
-        self.render_text(text, x, y)
+    def text(self, text, position, max_width=None, max_height=None):
+        self.render_text(text, *position)
 
     def load_font(self, path):
         """
@@ -163,10 +161,12 @@ class SkiaRenderer:
         typeface = skia.Typeface().MakeFromFile(path=path)
         return typeface
 
-    def text_font(self, font, size=10):
+    def text_font(self, font, size=None):
         """
         Sets the current font to be used for rendering text
         """
+        if size:
+            self.style.text_size = size
         self.style.text_font.setTypeface(font)
 
     def text_size(self, size):

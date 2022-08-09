@@ -88,13 +88,10 @@ def text(*args, wrap_at=None):
 
     if len(text_string) == 0:
         return
-    if builtins.current_renderer == "vispy":
-        return p5.renderer.text(text_string, position, wrap_at)
-    elif builtins.current_renderer == "skia":
-        return p5.renderer.text(text_string, *position, wrap_at)
+    return p5.renderer.text(text_string, position, wrap_at)
 
 
-def text_font(font, size=10):
+def text_font(font, size=None):
     """Set current text font.
 
     :param font:
