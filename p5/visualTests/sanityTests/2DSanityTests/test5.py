@@ -5,6 +5,7 @@ font = None
 dirname = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 def preload():
     global font
+    # TODO: Use bunch of different fonts formats like otf,rtf etc
     font_path = f"{dirname}/TestAssets/TestFont.ttf"
     font = load_font(font_path)
 
