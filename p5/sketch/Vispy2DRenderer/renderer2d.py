@@ -493,6 +493,8 @@ class VispyRenderer2D(OpenGLRenderer):
 
     def text_font(self, font, size):
         self.style.font_family = font
+        if size:
+            self.text_size(size)
 
     def text_size(self, size):
         if hasattr(self.style.font_family, "path"):
