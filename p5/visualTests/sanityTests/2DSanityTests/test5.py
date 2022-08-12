@@ -1,8 +1,10 @@
 from p5 import *
 import os
+
 font = None
 
 dirname = os.path.dirname(os.path.realpath(__file__))
+
 
 def preload():
     global font
@@ -10,8 +12,10 @@ def preload():
     font_path = f"{dirname}/TestAssets/TestFont.ttf"
     font = load_font(font_path)
 
+
 def setup():
     size(640, 360)
+
 
 def draw():
     global font
@@ -33,4 +37,3 @@ def draw():
     text_size(40)
     stroke_weight(5)
     text("Processing is Fun", mouse_x + 300, mouse_y + 300)
-

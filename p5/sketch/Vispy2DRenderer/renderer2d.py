@@ -517,3 +517,6 @@ class VispyRenderer2D(OpenGLRenderer):
     def text_descent(self):
         ascent, descent = self.style.font_family.getmetrics()
         return descent
+
+    def text_style(self):
+        raise "Not Implemented error in Vispy"

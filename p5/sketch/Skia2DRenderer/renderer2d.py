@@ -31,12 +31,13 @@ class Style2D:
 
     # Flag that holds whether stroke() is called user
     stroke_set = False
-    text_font = skia.Font()
+    text_font = skia.Font(skia.Typeface())
     text_leading = 0
     text_size = 15
     text_align = (constants.LEFT, constants.TOP)
     text_wrap = None
     text_baseline = constants.BASELINE
+    text_style = constants.NORMAL
 
     def set_stroke_cap(self, c):
         if c == constants.ROUND:
@@ -62,7 +63,6 @@ class SkiaRenderer:
         self.style = Style2D()
         self.style_stack = []
         self.path = None
-        self.style.text_font = skia.Font()
         self.curve_tightness = 0
 
     # Transforms functions
@@ -167,10 +167,34 @@ class SkiaRenderer:
         """
         if size:
             self.style.text_size = size
-        self.style.text_font.setTypeface(font)
+        if isinstance(font, str):
+            self.style.text_font.setTypeface(skia.Typeface.MakeFromName(font))
+        else:
+            self.style.text_font.setTypeface(font)
 
     def text_size(self, size):
         self.style.text_font.setSize(size)
+
+    def text_style(self, s):
+        skia_font_style = None
+        if s == constants.BOLD:
+            skia_font_style = skia.FontStyle.Bold()
+        elif s == constants.BOLDITALIC:
+            skia_font_style = skia.FontStyle.BoldItalic()
+        elif s == constants.ITALIC:
+            skia_font_style = skia.FontStyle.BoldItalic()
+        elif s == constants.NORMAL:
+            skia_font_style = skia.FontStyle.Normal()
+        else:
+            return self.style.text_style
+
+        self.style.text_style = s
+        # skia.Font.
+        family_name = self.style.text_font.getTypeface().getFamilyName()
+        typeface = skia.Typeface.MakeFromName(family_name, skia_font_style)
+        self.style.text_font.setTypeface(typeface)
+
+        return self.style.text_style
 
     def render_image(self, img, *args):
         self.canvas.drawImage(img, *args)
@@ -223,7 +247,7 @@ class SkiaRenderer:
 
     def reset(self):
         self.reset_matrix()
-        #NOTE: We have to handle PGraphics stroke_set as well separately
+        # NOTE: We have to handle PGraphics stroke_set as well separately
         self.style.stroke_set = False
 
     def line(self, path):

@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import builtins
 from . import p5
 
 __all__ = [
@@ -29,6 +28,7 @@ __all__ = [
     "text_width",
     "text_ascent",
     "text_descent",
+    "text_style",
 ]
 
 
@@ -94,7 +94,8 @@ def text(*args, wrap_at=None):
 def text_font(font, size=None):
     """Set current text font.
 
-    :param font:
+    :param font: PIL.ImageFont.ImageFont for Vispy, Object|String: a font loaded via loadFont(), or a String
+    representing a web safe font (a font that is generally available across all systems)
     :type font: PIL.ImageFont.ImageFont
 
     """
@@ -171,3 +172,17 @@ def text_descent():
 
     """
     return p5.renderer.text_descent()
+
+
+def text_style(s):
+    """
+    Sets/Gets the style of the text for system fonts to NORMAL, ITALIC, BOLD or BOLDITALIC
+    For non-system fonts (opentype, truetype, etc.) please load styled fonts instead.
+
+    :param s: Style for the font
+    :type s: NORMAL | ITALIC | BOLD | BOLDITALIC
+
+    :returns: Current text style
+    :rtype: NORMAL | ITALIC | BOLD | BOLDITALIC
+    """
+    return p5.renderer.text_style(s)
