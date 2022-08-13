@@ -29,6 +29,16 @@ class Style2D:
     stroke_cap = skia.Paint.kRound_Cap
     stroke_join = skia.Paint.kMiter_Join
 
+    # Flag that holds whether stroke() is called user
+    stroke_set = False
+    text_font = skia.Font(skia.Typeface())
+    text_leading = 0
+    text_size = 15
+    text_align = (constants.LEFT, constants.TOP)
+    text_wrap = None
+    text_baseline = constants.BASELINE
+    text_style = constants.NORMAL
+
     def set_stroke_cap(self, c):
         if c == constants.ROUND:
             self.stroke_cap = skia.Paint.kRound_Cap
@@ -53,9 +63,6 @@ class SkiaRenderer:
         self.style = Style2D()
         self.style_stack = []
         self.path = None
-        self.font = skia.Font()
-        self.typeface = skia.Typeface.MakeDefault()
-        self.font.setTypeface(self.typeface)
         self.curve_tightness = 0
 
     # Transforms functions
@@ -131,17 +138,19 @@ class SkiaRenderer:
         # full path works relative does not
         # assert (typeface is not None), "should not be NULL"
         # handle alignment manually
+        if self.style.stroke_enabled and self.style.stroke_set:
+            self.paint.setStyle(skia.Paint.kStroke_Style)
+            self.paint.setColor(skia.Color4f(*self.style.stroke_color))
+            self.paint.setStrokeWidth(self.style.stroke_weight)
+            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+
         if self.style.fill_enabled:
             self.paint.setStyle(skia.Paint.kFill_Style)
-            self.paint.setColor(self.style.fill_color)
-            self.canvas.drawPath(self.path, self.paint)
+            self.paint.setColor(skia.Color4f(*self.style.fill_color))
+            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
-        if self.style.stroke_enabled:
-            self.paint.setStyle(skia.Paint.kStroke_Style)
-            self.paint.setColor(self.style.stroke_color)
-            self.paint.setStrokeWidth(self.style.stroke_weight)
-            self.canvas.drawPath(self.path, self.paint)
-        self.canvas.drawSimpleText(text, x, y, self.font, self.paint)
+    def text(self, text, position, max_width=None, max_height=None):
+        self.render_text(text, *position)
 
     def load_font(self, path):
         """
@@ -149,18 +158,43 @@ class SkiaRenderer:
         Absolute path of the font file
         returns: skia.Typeface
         """
-        typeface = skia.Typeface.MakeFromFile(path)
+        typeface = skia.Typeface().MakeFromFile(path=path)
         return typeface
 
-    def set_font(self, font):
+    def text_font(self, font, size=None):
         """
         Sets the current font to be used for rendering text
         """
-        self.typeface = font
-        self.font.setTypeface(self.typeface)
+        if size:
+            self.style.text_size = size
+        if isinstance(font, str):
+            self.style.text_font.setTypeface(skia.Typeface.MakeFromName(font))
+        else:
+            self.style.text_font.setTypeface(font)
 
-    def set_font_size(self, size):
-        self.font.setSize(size)
+    def text_size(self, size):
+        self.style.text_font.setSize(size)
+
+    def text_style(self, s):
+        skia_font_style = None
+        if s == constants.BOLD:
+            skia_font_style = skia.FontStyle.Bold()
+        elif s == constants.BOLDITALIC:
+            skia_font_style = skia.FontStyle.BoldItalic()
+        elif s == constants.ITALIC:
+            skia_font_style = skia.FontStyle.BoldItalic()
+        elif s == constants.NORMAL:
+            skia_font_style = skia.FontStyle.Normal()
+        else:
+            return self.style.text_style
+
+        self.style.text_style = s
+        # skia.Font.
+        family_name = self.style.text_font.getTypeface().getFamilyName()
+        typeface = skia.Typeface.MakeFromName(family_name, skia_font_style)
+        self.style.text_font.setTypeface(typeface)
+
+        return self.style.text_style
 
     def render_image(self, img, *args):
         self.canvas.drawImage(img, *args)
@@ -213,7 +247,8 @@ class SkiaRenderer:
 
     def reset(self):
         self.reset_matrix()
-        self.font.setSize(15)
+        # NOTE: We have to handle PGraphics stroke_set as well separately
+        self.style.stroke_set = False
 
     def line(self, path):
         x1, y1, x2, y2 = path[0].x, path[0].y, path[1].x, path[1].y

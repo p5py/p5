@@ -85,6 +85,7 @@ def stroke(*color_args, **color_kwargs):
     """
     stroke_color = Color(*color_args, **color_kwargs)
     p5.renderer.style.stroke_enabled = True
+    p5.renderer.style.stroke_set = True
     p5.renderer.style.stroke_color = stroke_color.normalized
 
 

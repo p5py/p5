@@ -15,18 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import textwrap
-
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-from PIL import ImageFilter
-from PIL import ImageChops
-
-from .image import image
-from .image import PImage
-from .structure import push_style
-
 from . import p5
 
 __all__ = [
@@ -40,6 +28,7 @@ __all__ = [
     "text_width",
     "text_ascent",
     "text_descent",
+    "text_style",
 ]
 
 
@@ -102,14 +91,15 @@ def text(*args, wrap_at=None):
     return p5.renderer.text(text_string, position, wrap_at)
 
 
-def text_font(font, size=10):
+def text_font(font, size=None):
     """Set current text font.
 
-    :param font:
+    :param font: PIL.ImageFont.ImageFont for Vispy, Object|String: a font loaded via loadFont(), or a String
+    representing a web safe font (a font that is generally available across all systems)
     :type font: PIL.ImageFont.ImageFont
 
     """
-    p5.renderer.font_family = font
+    p5.renderer.text_font(font, size)
 
 
 def text_align(align_x, align_y=None):
@@ -122,9 +112,9 @@ def text_align(align_x, align_y=None):
     :type align_y: string
 
     """
-    p5.renderer.text_align_x = align_x
+    p5.renderer.style.text_align_x = align_x
     if align_y:
-        p5.renderer.text_align_y = align_y
+        p5.renderer.style.text_align_y = align_y
 
 
 def text_leading(leading):
@@ -135,7 +125,7 @@ def text_leading(leading):
 
     """
 
-    p5.renderer.text_leading = leading
+    p5.renderer.style.text_leading = leading
 
 
 def text_size(size):
@@ -182,3 +172,17 @@ def text_descent():
 
     """
     return p5.renderer.text_descent()
+
+
+def text_style(s):
+    """
+    Sets/Gets the style of the text for system fonts to NORMAL, ITALIC, BOLD or BOLDITALIC
+    For non-system fonts (opentype, truetype, etc.) please load styled fonts instead.
+
+    :param s: Style for the font
+    :type s: NORMAL | ITALIC | BOLD | BOLDITALIC
+
+    :returns: Current text style
+    :rtype: NORMAL | ITALIC | BOLD | BOLDITALIC
+    """
+    return p5.renderer.text_style(s)
