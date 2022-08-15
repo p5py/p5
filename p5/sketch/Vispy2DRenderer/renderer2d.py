@@ -445,7 +445,7 @@ class VispyRenderer2D(OpenGLRenderer):
             canvas_draw.multiline_text(
                 text_xy,
                 text_string,
-                font=self.style.style.font_family,
+                font=self.style.font_family,
                 spacing=self.style.text_leading,
             )
         else:

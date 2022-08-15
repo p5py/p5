@@ -32,7 +32,7 @@ class Style2D:
     # Flag that holds whether stroke() is called user
     stroke_set = False
     text_font = skia.Font(skia.Typeface())
-    text_leading = 0
+    text_leading = 15
     text_size = 15
     text_align_x = constants.LEFT
     text_align_y = constants.BOTTOM
@@ -135,12 +135,18 @@ class SkiaRenderer:
 
         self.clear()
 
-    def render_text(self, text, x, y):
-        # full path works relative does not
-        # assert (typeface is not None), "should not be NULL"
-        # handle alignment manually
+    def render_text(self, texts, x, y):
+        '''
+        :param text: List of strings to be rendered
+        :type text: list
+        '''
+        if not texts: return
+
+        text, texts = texts[0], texts[1:]
+
         text_width = self.style.text_font.measureText(text)
         text_height = self.style.text_font.getSize()
+
         if self.style.text_align_x == constants.CENTER:
             x -= text_width / 2
         elif self.style.text_align_x == constants.RIGHT:
@@ -162,8 +168,17 @@ class SkiaRenderer:
             self.paint.setColor(skia.Color4f(*self.style.fill_color))
             self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
+        # Draw the remaining texts
+        self.render_text(texts, x, y + self.style.text_leading + text_height)
+
+
+
     def text(self, text, position, max_width=None, max_height=None):
-        self.render_text(text, *position)
+        if not text: return
+
+        # Multiline pythonic strings and to handle '\n'
+        texts = [txt for txt in text.split('\n')]
+        self.render_text(texts, *position)
 
     def load_font(self, path):
         """
@@ -208,6 +223,9 @@ class SkiaRenderer:
         self.style.text_font.setTypeface(typeface)
 
         return self.style.text_style
+
+    def text_width(self, text):
+        return self.style.text_font.measureText(text)
 
     def render_image(self, img, *args):
         self.canvas.drawImage(img, *args)

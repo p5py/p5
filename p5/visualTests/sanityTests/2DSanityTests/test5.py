@@ -20,7 +20,13 @@ def setup():
 def draw():
     global font
     background(255)
-    text("Processing is Fun", mouse_x, mouse_y)
+    test_text = '''
+    processing
+    
+is
+fun     
+'''
+    text(test_text, mouse_x, mouse_y)
     text_font(font)
     text_align(CENTER, TOP)
     stroke(0)
@@ -40,3 +46,5 @@ def draw():
     text_size(40)
     stroke_weight(5)
     text("Processing is Fun", mouse_x + 300, mouse_y + 300)
+
+    print(text_width("Processing is Fun"))
