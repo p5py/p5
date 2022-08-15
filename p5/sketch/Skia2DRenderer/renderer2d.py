@@ -34,7 +34,8 @@ class Style2D:
     text_font = skia.Font(skia.Typeface())
     text_leading = 0
     text_size = 15
-    text_align = (constants.LEFT, constants.TOP)
+    text_align_x = constants.LEFT
+    text_align_y = constants.BOTTOM
     text_wrap = None
     text_baseline = constants.BASELINE
     text_style = constants.NORMAL
@@ -138,6 +139,18 @@ class SkiaRenderer:
         # full path works relative does not
         # assert (typeface is not None), "should not be NULL"
         # handle alignment manually
+        text_width = self.style.text_font.measureText(text)
+        text_height = self.style.text_font.getSize()
+        if self.style.text_align_x == constants.CENTER:
+            x -= text_width / 2
+        elif self.style.text_align_x == constants.RIGHT:
+            x -= text_width
+
+        if self.style.text_align_y == constants.CENTER:
+            y += text_height / 2
+        elif self.style.text_align_y == constants.TOP:
+            y += text_height
+
         if self.style.stroke_enabled and self.style.stroke_set:
             self.paint.setStyle(skia.Paint.kStroke_Style)
             self.paint.setColor(skia.Color4f(*self.style.stroke_color))
