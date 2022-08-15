@@ -4,7 +4,7 @@ import os
 font = None
 
 dirname = os.path.dirname(os.path.realpath(__file__))
-
+print(dirname)
 
 def preload():
     global font
@@ -19,6 +19,7 @@ def setup():
 
 def draw():
     global font
+    text_font(font)
     background(255)
     test_text = '''
     processing
@@ -27,7 +28,6 @@ is
 fun     
 '''
     text(test_text, mouse_x, mouse_y)
-    text_font(font)
     text_align(CENTER, TOP)
     stroke(0)
     text_size(20)
