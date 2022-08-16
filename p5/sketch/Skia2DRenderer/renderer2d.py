@@ -228,6 +228,12 @@ class SkiaRenderer:
     def text_width(self, text):
         return self.style.text_font.measureText(text)
 
+    def text_ascent(self):
+        return abs(self.style.text_font.getMetrics().fAscent)
+
+    def text_descent(self):
+        return self.style.text_font.getMetrics().fDescent
+
     def render_image(self, img, *args):
         self.canvas.drawImage(img, *args)
 
