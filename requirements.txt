@@ -1,6 +1,6 @@
 freetype-py==2.1.0.post1
 glfw==1.11.2
-numpy==1.18.5
+numpy>=1.18.5
 Pillow==9.0.1
 vispy==0.10.0
 PyOpenGL-accelerate==3.1.5
