@@ -136,48 +136,49 @@ class SkiaRenderer:
         self.clear()
 
     def render_text(self, texts, x, y):
-        '''
+        """
         :param text: List of strings to be rendered
         :type text: list
-        '''
-        if not texts: return
+        """
+        if not texts:
+            return
 
-        text, texts = texts[0], texts[1:]
-
-        text_width = self.style.text_font.measureText(text)
+        # text_height remains same
         text_height = self.style.text_font.getSize()
 
-        if self.style.text_align_x == constants.CENTER:
-            x -= text_width / 2
-        elif self.style.text_align_x == constants.RIGHT:
-            x -= text_width
+        for i, text in enumerate(texts):
+            text_width = self.style.text_font.measureText(text)
 
-        if self.style.text_align_y == constants.CENTER:
-            y += text_height / 2
-        elif self.style.text_align_y == constants.TOP:
-            y += text_height
+            if self.style.text_align_x == constants.CENTER:
+                x -= text_width / 2
+            elif self.style.text_align_x == constants.RIGHT:
+                x -= text_width
 
-        if self.style.stroke_enabled and self.style.stroke_set:
-            self.paint.setStyle(skia.Paint.kStroke_Style)
-            self.paint.setColor(skia.Color4f(*self.style.stroke_color))
-            self.paint.setStrokeWidth(self.style.stroke_weight)
-            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+            if self.style.text_align_y == constants.CENTER:
+                y += text_height / 2
+            elif self.style.text_align_y == constants.TOP:
+                y += text_height
 
-        if self.style.fill_enabled:
-            self.paint.setStyle(skia.Paint.kFill_Style)
-            self.paint.setColor(skia.Color4f(*self.style.fill_color))
-            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+            if self.style.stroke_enabled and self.style.stroke_set:
+                self.paint.setStyle(skia.Paint.kStroke_Style)
+                self.paint.setColor(skia.Color4f(*self.style.stroke_color))
+                self.paint.setStrokeWidth(self.style.stroke_weight)
+                self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
-        # Draw the remaining texts
-        self.render_text(texts, x, y + self.style.text_leading + text_height)
+            if self.style.fill_enabled:
+                self.paint.setStyle(skia.Paint.kFill_Style)
+                self.paint.setColor(skia.Color4f(*self.style.fill_color))
+                self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
 
-
+            # If there are more text, add the previous text's height and text_leading to y
+            y += self.style.text_leading + text_height
 
     def text(self, text, position, max_width=None, max_height=None):
-        if not text: return
+        if not text:
+            return
 
         # Multiline pythonic strings and to handle '\n'
-        texts = [txt for txt in text.split('\n')]
+        texts = [txt for txt in text.split("\n")]
         self.render_text(texts, *position)
 
     def load_font(self, path):
