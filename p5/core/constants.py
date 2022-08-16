@@ -50,6 +50,8 @@ NORMAL = "NORMAL"
 ITALIC = "ITALIC"
 BOLD = "BOLD"
 BOLDITALIC = "BOLDITALIC"
+WORD = "WORD"
+CHAR = "CHAR"
 
 # Colors
 colour_codes = {

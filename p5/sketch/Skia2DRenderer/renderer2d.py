@@ -39,6 +39,7 @@ class Style2D:
     text_wrap = None
     text_baseline = constants.BASELINE
     text_style = constants.NORMAL
+    text_wrap_style = constants.WORD
 
     def set_stroke_cap(self, c):
         if c == constants.ROUND:
@@ -149,26 +150,30 @@ class SkiaRenderer:
         for i, text in enumerate(texts):
             text_width = self.style.text_font.measureText(text)
 
+            # Don't modfiy the current x, y values for mode adjust for each text in texts
+            nx = x
+            ny = y
+
             if self.style.text_align_x == constants.CENTER:
-                x -= text_width / 2
+                nx -= text_width / 2
             elif self.style.text_align_x == constants.RIGHT:
-                x -= text_width
+                nx -= text_width
 
             if self.style.text_align_y == constants.CENTER:
-                y += text_height / 2
+                ny -= text_height / 2
             elif self.style.text_align_y == constants.TOP:
-                y += text_height
+                ny -= text_height
 
             if self.style.stroke_enabled and self.style.stroke_set:
                 self.paint.setStyle(skia.Paint.kStroke_Style)
                 self.paint.setColor(skia.Color4f(*self.style.stroke_color))
                 self.paint.setStrokeWidth(self.style.stroke_weight)
-                self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+                self.canvas.drawSimpleText(text, nx, ny, self.style.text_font, self.paint)
 
             if self.style.fill_enabled:
                 self.paint.setStyle(skia.Paint.kFill_Style)
                 self.paint.setColor(skia.Color4f(*self.style.fill_color))
-                self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+                self.canvas.drawSimpleText(text, nx, ny, self.style.text_font, self.paint)
 
             # If there are more text, add the previous text's height and text_leading to y
             y += self.style.text_leading + text_height
@@ -177,8 +182,53 @@ class SkiaRenderer:
         if not text:
             return
 
-        # Multiline pythonic strings and to handle '\n'
-        texts = [txt for txt in text.split("\n")]
+        texts = []
+
+        def process_text(text):
+            """
+            Breaks a string according to the wrap mode and appends it to texts
+            :param text: String to be processed
+            :type text: str
+            """
+            if not text:
+                return
+            # use binary search to find the largest substring that fits within the max_width
+            low = 0
+            high = len(text) - 1
+            id = 0
+            while low <= high:
+                mid = (low + high) // 2
+                width = self.style.text_font.measureText(text[: mid + 1])
+                # print(low, mid, high, width)
+                id = low
+                if width == max_width:
+                    id = mid
+                    break
+                elif width < max_width:
+                    low = mid + 1
+                else:
+                    high = mid - 1
+
+            # Adjust id for 'WORD' mode
+            if (
+                self.style.text_wrap_style == constants.WORD
+                and id + 1 < len(text)
+                and text[id + 1] != " "
+            ):
+                id = text.rfind(" ", 0, id)
+
+            if id == -1:
+                return
+
+            texts.append(text[: id + 1])
+            process_text(text[id + 1 :])
+
+        for txt in text.split("\n"):
+            if not max_width:
+                texts.append(txt)
+                continue
+            process_text(txt)
+
         self.render_text(texts, *position)
 
     def load_font(self, path):
@@ -233,6 +283,11 @@ class SkiaRenderer:
 
     def text_descent(self):
         return self.style.text_font.getMetrics().fDescent
+
+    def text_wrap(self, wrap_style):
+        if wrap_style not in [constants.WORD, constants.CHAR]:
+            raise ValueError("text_wrap should be either 'CHAR' or 'WORD'")
+        self.style.text_wrap_style = wrap_style
 
     def render_image(self, img, *args):
         self.canvas.drawImage(img, *args)

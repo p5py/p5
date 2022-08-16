@@ -519,4 +519,7 @@ class VispyRenderer2D(OpenGLRenderer):
         return descent
 
     def text_style(self):
-        raise NotImplementedError("Not Implemented error in Vispy")
+        raise NotImplementedError("Not Implemented in Vispy")
+
+    def text_wrap(self):
+        raise NotImplementedError("Not Implemented in Vispy")
