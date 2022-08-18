@@ -445,7 +445,7 @@ class VispyRenderer2D(OpenGLRenderer):
             canvas_draw.multiline_text(
                 text_xy,
                 text_string,
-                font=self.style.style.font_family,
+                font=self.style.font_family,
                 spacing=self.style.text_leading,
             )
         else:
@@ -519,4 +519,7 @@ class VispyRenderer2D(OpenGLRenderer):
         return descent
 
     def text_style(self):
-        raise NotImplementedError("Not Implemented error in Vispy")
+        raise NotImplementedError("Not Implemented in Vispy")
+
+    def text_wrap(self):
+        raise NotImplementedError("Not Implemented in Vispy")

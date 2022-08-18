@@ -32,12 +32,14 @@ class Style2D:
     # Flag that holds whether stroke() is called user
     stroke_set = False
     text_font = skia.Font(skia.Typeface())
-    text_leading = 0
+    text_leading = 15
     text_size = 15
-    text_align = (constants.LEFT, constants.TOP)
+    text_align_x = constants.LEFT
+    text_align_y = constants.BOTTOM
     text_wrap = None
     text_baseline = constants.BASELINE
     text_style = constants.NORMAL
+    text_wrap_style = constants.WORD
 
     def set_stroke_cap(self, c):
         if c == constants.ROUND:
@@ -134,23 +136,100 @@ class SkiaRenderer:
 
         self.clear()
 
-    def render_text(self, text, x, y):
-        # full path works relative does not
-        # assert (typeface is not None), "should not be NULL"
-        # handle alignment manually
-        if self.style.stroke_enabled and self.style.stroke_set:
-            self.paint.setStyle(skia.Paint.kStroke_Style)
-            self.paint.setColor(skia.Color4f(*self.style.stroke_color))
-            self.paint.setStrokeWidth(self.style.stroke_weight)
-            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+    def render_text(self, texts, x, y):
+        """
+        :param text: List of strings to be rendered
+        :type text: list
+        """
+        if not texts:
+            return
 
-        if self.style.fill_enabled:
-            self.paint.setStyle(skia.Paint.kFill_Style)
-            self.paint.setColor(skia.Color4f(*self.style.fill_color))
-            self.canvas.drawSimpleText(text, x, y, self.style.text_font, self.paint)
+        # text_height remains same
+        text_height = self.style.text_font.getSize()
+
+        for i, text in enumerate(texts):
+            text_width = self.style.text_font.measureText(text)
+
+            # Don't modfiy the current x, y values for mode adjust for each text in texts
+            nx = x
+            ny = y
+
+            if self.style.text_align_x == constants.CENTER:
+                nx -= text_width / 2
+            elif self.style.text_align_x == constants.RIGHT:
+                nx -= text_width
+
+            if self.style.text_align_y == constants.CENTER:
+                ny -= text_height / 2
+            elif self.style.text_align_y == constants.TOP:
+                ny -= text_height
+
+            if self.style.stroke_enabled and self.style.stroke_set:
+                self.paint.setStyle(skia.Paint.kStroke_Style)
+                self.paint.setColor(skia.Color4f(*self.style.stroke_color))
+                self.paint.setStrokeWidth(self.style.stroke_weight)
+                self.canvas.drawSimpleText(text, nx, ny, self.style.text_font, self.paint)
+
+            if self.style.fill_enabled:
+                self.paint.setStyle(skia.Paint.kFill_Style)
+                self.paint.setColor(skia.Color4f(*self.style.fill_color))
+                self.canvas.drawSimpleText(text, nx, ny, self.style.text_font, self.paint)
+
+            # If there are more text, add the previous text's height and text_leading to y
+            y += self.style.text_leading + text_height
 
     def text(self, text, position, max_width=None, max_height=None):
-        self.render_text(text, *position)
+        if not text:
+            return
+
+        texts = []
+
+        def process_text(text):
+            """
+            Breaks a string according to the wrap mode and appends it to texts
+            :param text: String to be processed
+            :type text: str
+            """
+            if not text:
+                return
+            # use binary search to find the largest substring that fits within the max_width
+            low = 0
+            high = len(text) - 1
+            id = 0
+            while low <= high:
+                mid = (low + high) // 2
+                width = self.style.text_font.measureText(text[: mid + 1])
+                # print(low, mid, high, width)
+                id = low
+                if width == max_width:
+                    id = mid
+                    break
+                elif width < max_width:
+                    low = mid + 1
+                else:
+                    high = mid - 1
+
+            # Adjust id for 'WORD' mode
+            if (
+                self.style.text_wrap_style == constants.WORD
+                and id + 1 < len(text)
+                and text[id + 1] != " "
+            ):
+                id = text.rfind(" ", 0, id)
+
+            if id == -1:
+                return
+
+            texts.append(text[: id + 1])
+            process_text(text[id + 1 :])
+
+        for txt in text.split("\n"):
+            if not max_width:
+                texts.append(txt)
+                continue
+            process_text(txt)
+
+        self.render_text(texts, *position)
 
     def load_font(self, path):
         """
@@ -195,6 +274,20 @@ class SkiaRenderer:
         self.style.text_font.setTypeface(typeface)
 
         return self.style.text_style
+
+    def text_width(self, text):
+        return self.style.text_font.measureText(text)
+
+    def text_ascent(self):
+        return abs(self.style.text_font.getMetrics().fAscent)
+
+    def text_descent(self):
+        return self.style.text_font.getMetrics().fDescent
+
+    def text_wrap(self, wrap_style):
+        if wrap_style not in [constants.WORD, constants.CHAR]:
+            raise ValueError("text_wrap should be either 'CHAR' or 'WORD'")
+        self.style.text_wrap_style = wrap_style
 
     def render_image(self, img, *args):
         self.canvas.drawImage(img, *args)

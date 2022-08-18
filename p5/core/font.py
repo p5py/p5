@@ -29,6 +29,7 @@ __all__ = [
     "text_ascent",
     "text_descent",
     "text_style",
+    "text_wrap",
 ]
 
 
@@ -186,3 +187,17 @@ def text_style(s):
     :rtype: NORMAL | ITALIC | BOLD | BOLDITALIC
     """
     return p5.renderer.text_style(s)
+
+
+def text_wrap(wrap_style):
+    """
+    Specifies how lines of text are wrapped within a text box. This requires a wrap_at set on the text area,
+    specified in text() as parameter wrap_at. WORD wrap style only breaks lines at spaces. A single string without
+    spaces that exceeds the boundaries of the canvas or text area is not truncated, and will overflow the desired area,
+    disappearing at the canvas edge. CHAR wrap style breaks lines wherever needed to stay within the text box.
+    WORD is the default wrap style, and both styles will still break lines at any line breaks (\n) specified in the
+    original text.
+    :param wrap_style: One of the wrap style mode 'CHAR' or 'WORD'
+    :type wrap_style: str
+    """
+    p5.renderer.text_wrap(wrap_style)
