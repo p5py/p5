@@ -48,6 +48,8 @@ __all__ = [
     "save",
     "is_looping",
     "set_frame_rate",
+    # TODO: Add docs for pixel density
+    "pixel_density",
 ]
 
 builtins.width = 360
@@ -413,3 +415,8 @@ def set_frame_rate(fps):
 def is_looping():
     """Returns the current looping state of the sketch"""
     return p5.sketch.looping
+
+
+def pixel_density():
+    """Returns the current pixel density"""
+    return builtins.pixel_x_density * builtins.pixel_y_density
