@@ -168,12 +168,16 @@ class SkiaRenderer:
                 self.paint.setStyle(skia.Paint.kStroke_Style)
                 self.paint.setColor(skia.Color4f(*self.style.stroke_color))
                 self.paint.setStrokeWidth(self.style.stroke_weight)
-                self.canvas.drawSimpleText(text, nx, ny, self.style.text_font, self.paint)
+                self.canvas.drawSimpleText(
+                    text, nx, ny, self.style.text_font, self.paint
+                )
 
             if self.style.fill_enabled:
                 self.paint.setStyle(skia.Paint.kFill_Style)
                 self.paint.setColor(skia.Color4f(*self.style.fill_color))
-                self.canvas.drawSimpleText(text, nx, ny, self.style.text_font, self.paint)
+                self.canvas.drawSimpleText(
+                    text, nx, ny, self.style.text_font, self.paint
+                )
 
             # If there are more text, add the previous text's height and text_leading to y
             y += self.style.text_leading + text_height
