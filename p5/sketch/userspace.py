@@ -48,7 +48,6 @@ __all__ = [
     "save",
     "is_looping",
     "set_frame_rate",
-    # TODO: Add docs for pixel density
     "pixel_density",
 ]
 

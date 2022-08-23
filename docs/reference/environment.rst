@@ -16,6 +16,10 @@ title()
 
 .. autofunction:: title
 
+pixel_density()
+===============
+
+.. autofunction:: pixel_density
 
 height, width
 =============
@@ -58,3 +62,4 @@ the sketch. The frame rate can only be set when the sketch is run by
 passing in the optional :code:`frame_rate` keyword argument to the
 :code:`run()` function. See the :code:`run()` function's reference
 page for details.
+
