@@ -36,7 +36,7 @@ from ..pmath import constrain
 from ..pmath.utils import _is_numeric
 from .structure import push_style
 
-import constants
+from . import constants
 
 __all__ = ["PImage", "image", "load_image", "image_mode", "load_pixels"]
 
