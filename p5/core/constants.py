@@ -243,3 +243,7 @@ Z_EPSILON = 2
 # arc modes
 PIE = "PIE"
 CHORD = "CHORD"
+
+# color parse modes
+RGB = "RGB"
+HSB = "HSB"

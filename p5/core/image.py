@@ -36,9 +36,9 @@ from ..pmath import constrain
 from ..pmath.utils import _is_numeric
 from .structure import push_style
 
-__all__ = ["PImage", "image", "load_image", "image_mode", "load_pixels"]
+import constants
 
-_image_mode = "corner"
+__all__ = ["PImage", "image", "load_image", "image_mode", "load_pixels"]
 
 
 def _ensure_loaded(func):
@@ -57,7 +57,7 @@ def _ensure_loaded(func):
 def _restore_color_mode():
     old_mode = color.color_parse_mode
     old_range = color.color_range
-    color.color_mode("RGB", 255, 255, 255, 255)
+    color.color_mode(constants.RGB, 255, 255, 255, 255)
 
     yield
 
@@ -510,22 +510,8 @@ def image(*args, size=None):
     :param img: the image to be displayed.
     :type img: p5.Image
 
-    :param location: location of the image on the screen (depending on the
-        current image mode, 'corner', 'center', 'corners', this could
-        represent the coordinate of the top-left corner, center,
-        top-left corner respectively.)
-    :type location: tuple | list | np.ndarray | p5.Vector
-
-    :param size: target size of the image or the bottom-right image
-        corner when the image mode is set to 'corners'. By default,
-        the value is set according to the current image size.
-
-    :type size: tuple | list
-
     """
-    if len(args) == 2:
-        img, location = args
-    elif len(args) == 3:
+    if len(args) == 3:
         img, location = args[0], args[1:]
     elif len(args) == 5:
         img, location, size = args[0], args[1:3], args[3:]
@@ -544,11 +530,11 @@ def image(*args, size=None):
     lx, ly = location
     sx, sy = size
 
-    if _image_mode == "center":
+    if p5.renderer.style.image_mode == constants.CENTER:
         lx = int(lx - (sx / 2))
         ly = int(ly - (sy / 2))
 
-    if _image_mode == "corners":
+    if p5.renderer.style.image_mode == constants.CORNERS:
         sx = sx - lx
         sy = sy - ly
 
@@ -582,11 +568,10 @@ def image_mode(mode):
         Check for typoes.
 
     """
-    global _image_mode
 
     if mode.lower() not in ["corner", "center", "corners"]:
         raise ValueError("Unknown image mode!")
-    _image_mode = mode.lower()
+    p5.renderer.style.image_mode = mode.lower()
 
 
 def load_image(filename):
@@ -629,7 +614,7 @@ def load_pixels():
     to the image are written to the main display.
 
     """
-    pixels = PImage(builtins.width, builtins.height, "RGB")
+    pixels = PImage(builtins.width, builtins.height, constants.RGB)
     # sketch.renderer.flush_geometry()
     pixel_data = p5.renderer.fbuffer.read(mode="color", alpha=False)
 
@@ -641,7 +626,7 @@ def load_pixels():
     yield
 
     with push_style():
-        image_mode("corner")
+        image_mode(constants.CORNER)
         p5.renderer.style.tint_enabled = False
         image(builtins.pixels, (0, 0))
 

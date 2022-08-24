@@ -2,7 +2,7 @@ from abc import ABC
 import numpy as np
 
 from p5.core import p5
-from p5.core.constants import SType, ROUND, MITER, LEFT, TOP
+from p5.core.constants import SType, ROUND, MITER, LEFT, TOP, CORNER, CENTER, RGB
 from p5.pmath import matrix
 from .shape import Arc, PShape
 
@@ -231,9 +231,9 @@ class Style2D:
     stroke_weight = 1
     tint_color = COLOR_BLACK
     tint_enabled = False
-    ellipse_mode = "CENTER"
-    rect_mode = "CORNER"
-    color_parse_mode = "RGB"
+    ellipse_mode = CENTER
+    rect_mode = CORNER
+    color_parse_mode = RGB
     color_range = (255, 255, 255, 255)
     stroke_cap = ROUND
     stroke_join = MITER
@@ -243,6 +243,8 @@ class Style2D:
     text_align_x = LEFT
     text_align_y = TOP
     text_leading = 0
+
+    image_mode = CORNER
 
     def set_stroke_cap(self, c):
         self.stroke_cap = c
