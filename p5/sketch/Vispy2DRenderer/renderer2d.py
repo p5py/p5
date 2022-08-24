@@ -483,11 +483,11 @@ class VispyRenderer2D(OpenGLRenderer):
             if self.style.fill_enabled:
                 self.style.tint_enabled = True
                 self.style.tint_color = self.style.fill_color
-                image(text_image, position)
+                image(text_image, *position)
             if self.style.stroke_enabled and is_stroke_valid:
                 self.style.tint_enabled = True
                 self.style.tint_color = self.style.stroke_color
-                image(text_stroke_image, position)
+                image(text_stroke_image, *position)
 
         return text_string
 
