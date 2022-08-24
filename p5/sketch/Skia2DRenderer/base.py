@@ -89,8 +89,7 @@ class SkiaSketch:
             width, height = glfw.get_framebuffer_size(window)
         else:
             raise ValueError(
-                "Both window and size can't be None, This is probably an error within p5 "
-                "instead of the sketch"
+                "Both window and size can't be None, This is probably an error within p5 instead of the sketch"
             )
         backend_render_target = skia.GrBackendRenderTarget(
             width,
