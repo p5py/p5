@@ -35,6 +35,7 @@ class SkiaSketch:
         self.path = skia.Path()
 
         self.frame_rate = frame_rate
+        self.pixel_density = 1
 
         """
         resized : (boolean) 
@@ -200,6 +201,10 @@ class SkiaSketch:
         """
 
         # Callback handler for frame buffer resize events
+        builtins.pixel_x_density = width / self.size[0]
+        builtins.pixel_y_density = height / self.size[1]
+        self.pixel_density = width * height // (self.size[0] * self.size[1])
+
         GL.glViewport(0, 0, width, height)
         self.create_surface(size=(width, height))
         # with self.surface as self.canvas:
