@@ -495,6 +495,9 @@ def image(*args, size=None):
     should be explicitly mentioned). The color of an image may be
     modified with the :meth:`p5.tint` function.
 
+    :param img: the image to be displayed.
+    :type img: p5.Image
+
     :param x: x-coordinate of the image by default
     :type float:
 
@@ -506,9 +509,6 @@ def image(*args, size=None):
 
     :param h: height to display the image by default
     :type float:
-
-    :param img: the image to be displayed.
-    :type img: p5.Image
 
     """
     if len(args) == 3:
