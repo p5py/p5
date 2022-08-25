@@ -41,6 +41,8 @@ class Style2D:
     text_style = constants.NORMAL
     text_wrap_style = constants.WORD
 
+    image_mode = constants.CORNER
+
     def set_stroke_cap(self, c):
         if c == constants.ROUND:
             self.stroke_cap = skia.Paint.kRound_Cap

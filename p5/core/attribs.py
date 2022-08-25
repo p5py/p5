@@ -194,7 +194,7 @@ def background(*args, **kwargs):
                 no_tint()
                 image_mode("corner")
                 with push_matrix():
-                    image(background_image, (0, 0))
+                    image(background_image, *(0, 0))
 
             return background_image
 
