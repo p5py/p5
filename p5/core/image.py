@@ -15,35 +15,151 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import contextlib
-import functools
-
-import builtins
-
-import io
-import re
-import urllib
-
-import numpy as np
-from PIL import Image
-from PIL import ImageFilter
-from PIL import ImageChops
-from PIL import ImageOps
 from . import p5
+from abc import ABC, abstractmethod
 
-from . import color
-from ..pmath import constrain
-from ..pmath.utils import _is_numeric
-from .structure import push_style
+__all__ = ["image", "load_image", "image_mode", "load_pixels", "update_pixels"]
 
-from . import constants
+class PImage(ABC):
+    """Image class for p5.
 
-__all__ = ["PImage", "image", "load_image", "image_mode", "load_pixels"]
+    Note that the image "behaves" like a 2-D list and hence, doesn't
+    expose special methods for copying / pasting / cropping. All of
+    these operations can be done by using appropriate indexing into
+    the array. See the :meth:`p5.PImage.__getitem__` and
+    :meth:`p5.PImage.__setitem__` methods for details.
 
+    :param width: width of the image.
+    :type width: int
 
-class PImage:
-    pass
+    :param height: height of the image.
+    :type height:
 
+    :param fmt: color format to use for the image. Should be one of
+        {'RGB', 'RGBA', 'ALPHA'}. Defaults to 'RGBA'
+
+    :type fmt: str
+
+    """
+
+    @property
+    @abstractmethod
+    def width(self):
+        """The width of the image
+
+        :rtype: int
+        """
+        pass
+
+    @width.setter
+    @abstractmethod
+    def width(self, new_width):
+        pass
+
+    @property
+    @abstractmethod
+    def height(self):
+        """The height of the image
+
+        :rtype: int
+        """
+        pass
+
+    @height.setter
+    @abstractmethod
+    def height(self, new_height):
+        pass
+
+    @property
+    @abstractmethod
+    def size(self):
+        """The size of the image
+
+        :rtype: (int, int) tuple
+        """
+        pass
+
+    @size.setter
+    @abstractmethod
+    def size(self, new_size):
+        pass
+
+    @property
+    @abstractmethod
+    def aspect_ratio(self):
+        """Return the aspect ratio of the image.
+
+        :rtype: float | int
+        """
+        pass
+
+    @abstractmethod
+    def load_pixels(self):
+        """Load internal pixel data for the image.
+
+        By default image data is only loaded lazily, i.e., right
+        before displaying an image on the screen. Use this method to
+        manually load the internal image data.
+
+        """
+        pass
+
+    @abstractmethod
+    def update_pixels(self):
+        """
+        Updates the display window with the data in the pixels[] array.
+        Use in conjunction with loadPixels()
+        """
+
+    @abstractmethod
+    def mask(self, image):
+        raise NotImplementedError
+
+    @abstractmethod
+    def filter(self, kind, param=None):
+        """Filter the image.
+
+        :param kind: The kind of filter to use on the image. Should be
+            one of { 'threshold', 'gray', 'opaque', 'invert',
+            'posterize', 'blur', 'erode', 'dilate', }
+
+        :type kind: str
+
+        :param param: optional parameter for the filter in use
+            (defaults to None). Only required for 'threshold' (the
+            threshold to use, param should be a value between 0 and 1;
+            defaults to 0.5), 'posterize' (limiting value for each
+            channel should be between 2 and 255), and 'blur' (gaussian
+            blur radius, defaults to 1.0).
+
+        :type param: int | float | None
+
+        """
+        pass
+
+    @abstractmethod
+    def blend(self, other, mode):
+        """Blend the specified image using the given blend mode.
+
+        :param other: The image to be blended to the current image.
+        :type other: p5.PImage
+
+        :param mode: Blending mode to use. Should be one of { 'BLEND',
+            'ADD', 'SUBTRACT', 'LIGHTEST', 'DARKEST', 'MULTIPLY',
+            'SCREEN',}
+        :type mode: str
+
+        :raises AssertionError: When the dimensions of img do not
+            match the dimensions of the current image.
+
+        :raises KeyError: When the blend mode is invalid.
+
+        """
+        pass
+
+    @abstractmethod
+    def save(self, file_name):
+        pass
 
 def image(*args, size=None):
     """Draw an image to the display window.
@@ -138,7 +254,8 @@ def load_pixels():
 
 def update_pixels():
     """
-    Updates the display window with the data in the pixels[] array. Use in conjunction with loadPixels(). If you're only reading pixels from the array, there's no need to call updatePixels() — updating is only necessary to apply changes. updatePixels() should be called anytime the pixels array is manipulated or set() is called, and only changes made with set() or direct changes to pixels[] will occur.
+    Updates the display window with the data in the pixels[] array.
+    Use in conjunction with loadPixels()
     """
     p5.renderer.update_pixels()
 

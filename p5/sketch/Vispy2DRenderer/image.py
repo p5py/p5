@@ -20,7 +20,7 @@ from p5.pmath.utils import _is_numeric
 from p5.core.structure import push_style
 
 from p5.core import constants
-
+from p5.core.image import PImage
 
 def _ensure_loaded(func):
     """Reloads the image if required before calling the function."""
@@ -45,7 +45,7 @@ def _restore_color_mode():
     color.color_mode(old_mode, *old_range)
 
 
-class PImage:
+class PImage(PImage):
     """Image class for p5.
 
     Note that the image "behaves" like a 2-D list and hence, doesn't
@@ -327,6 +327,10 @@ class PImage:
 
         """
         self._load()
+
+    def update_pixels(self):
+        pass
+
 
     def mask(self, image):
         raise NotImplementedError
