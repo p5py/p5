@@ -40,8 +40,8 @@ Images can be loaded and displayed to the screen at their actual size or any oth
     def draw():
         global img
         background(0)
-        image(img, (0, 0))
-        image(img, (0, height / 2), (img.width / 2, img.height / 2))
+        image(img, 0, 0)
+        image(img, 0, height / 2, img.width / 2, img.height / 2)
 
     if __name__ == '__main__':
         run()

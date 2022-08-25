@@ -52,7 +52,7 @@ Loads a "mask" for an image to specify the transparency in different parts of th
 	def draw():
 	    global img
 	    background(0, 102, 153)
-	    image(img, (width / 2, height / 2))
+	    image(img, width / 2, height / 2)
 	    image(img, mouse_x, mouse_y)
 
 	if __name__ == '__main__':

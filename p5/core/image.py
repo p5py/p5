@@ -18,7 +18,7 @@
 from . import p5
 from abc import ABC, abstractmethod
 
-__all__ = ["image", "load_image", "image_mode", "load_pixels", "update_pixels"]
+__all__ = ["PImage", "image", "load_image", "image_mode", "load_pixels", "update_pixels"]
 
 class PImage(ABC):
     """Image class for p5.

@@ -45,12 +45,12 @@ Move the pointer left and right across the image to change its position. This pr
 	def draw():
 		global img, offset, easing
 
-		image(img, (0, 0)) #Display at full opacity
+		image(img, 0, 0) #Display at full opacity
 
 		dx = mouse_x - img.width / 2 - offset
 		offset += dx * easing
 		tint(255, 127)
-		image(img, (offset, 0))
+		image(img, offset, 0)
 
 	if __name__ == '__main__':
 		run()
