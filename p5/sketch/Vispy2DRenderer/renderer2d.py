@@ -32,7 +32,17 @@ from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 
 from p5.core import p5
-from p5.core.constants import SType, LEFT, TOP, RIGHT, BOTTOM, CENTER, CORNERS, CORNER, RGB
+from p5.core.constants import (
+    SType,
+    LEFT,
+    TOP,
+    RIGHT,
+    BOTTOM,
+    CENTER,
+    CORNERS,
+    CORNER,
+    RGB,
+)
 from p5.core.image import image, image_mode
 from p5.core.structure import push_style
 from p5.pmath import matrix

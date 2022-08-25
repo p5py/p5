@@ -22,6 +22,7 @@ from p5.core.structure import push_style
 from p5.core import constants
 from p5.core.image import PImage
 
+
 def _ensure_loaded(func):
     """Reloads the image if required before calling the function."""
 
@@ -330,7 +331,6 @@ class VispyPImage(PImage):
 
     def update_pixels(self):
         pass
-
 
     def mask(self, image):
         raise NotImplementedError
