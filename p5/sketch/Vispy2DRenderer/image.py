@@ -36,8 +36,8 @@ def _ensure_loaded(func):
 
 @contextlib.contextmanager
 def _restore_color_mode():
-    old_mode = color.color_parse_mode
-    old_range = color.color_range
+    old_mode = p5.renderer.style.color_parse_mode
+    old_range = p5.renderer.style.color_range
     color.color_mode(constants.RGB, 255, 255, 255, 255)
 
     yield
@@ -45,7 +45,7 @@ def _restore_color_mode():
     color.color_mode(old_mode, *old_range)
 
 
-class PImage(PImage):
+class VispyPImage(PImage):
     """Image class for p5.
 
     Note that the image "behaves" like a 2-D list and hence, doesn't
@@ -211,7 +211,7 @@ class PImage(PImage):
 
         patch_img = Image.fromarray(patch_data, self._img.mode)
 
-        patch = PImage(patch_width, patch_height)
+        patch = VispyPImage(patch_width, patch_height)
         patch._img_format = self._img_format
         patch._img = patch_img
         return patch

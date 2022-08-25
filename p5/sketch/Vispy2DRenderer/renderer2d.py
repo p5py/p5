@@ -36,7 +36,7 @@ from p5.core.constants import SType, LEFT, TOP, RIGHT, BOTTOM, CENTER, CORNERS, 
 from p5.core.image import image, image_mode
 from p5.core.structure import push_style
 from p5.pmath import matrix
-from .image import PImage
+from .image import VispyPImage
 from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
 from .shaders2d import src_default, src_fbuffer
 from .shaders2d import src_line
@@ -454,7 +454,7 @@ class VispyRenderer2D(OpenGLRenderer):
         else:
             canvas_draw.text(text_xy, text_string, font=self.style.font_family)
 
-        text_image = PImage(*new_size)
+        text_image = VispyPImage(*new_size)
         text_image._img = canvas
 
         if is_stroke_valid:
@@ -463,7 +463,7 @@ class VispyRenderer2D(OpenGLRenderer):
             else:
                 canvas_dilate = canvas.filter(ImageFilter.MaxFilter(stroke_weight))
             canvas_stroke = ImageChops.difference(canvas, canvas_dilate)
-            text_stroke_image = PImage(*new_size)
+            text_stroke_image = VispyPImage(*new_size)
             text_stroke_image._img = canvas_stroke
 
         width, height = new_size
@@ -565,12 +565,12 @@ class VispyRenderer2D(OpenGLRenderer):
         else:
             img = Image.open(filename)
         w, h = img.size
-        pimg = PImage(w, h)
+        pimg = VispyPImage(w, h)
         pimg._img = img
         return pimg
 
     def load_pixels(self):
-        pixels = PImage(builtins.width, builtins.height, RGB)
+        pixels = VispyPImage(builtins.width, builtins.height, RGB)
         # sketch.renderer.flush_geometry()
         pixel_data = self.fbuffer.read(mode="color", alpha=False)
 
