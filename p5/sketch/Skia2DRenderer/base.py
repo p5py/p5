@@ -82,13 +82,22 @@ class SkiaSketch:
         glfw.make_context_current(window)
         return window
 
-    def skia_surface(self, window, size):
+    def skia_surface(self, window=None, size=None):
         self.context = skia.GrDirectContext.MakeGL()
+        if size:
+            width, height = size
+        elif window:
+            width, height = glfw.get_framebuffer_size(window)
+        else:
+            raise ValueError(
+                "Both window and size can't be None, This is probably an error within p5 instead of the sketch"
+            )
         backend_render_target = skia.GrBackendRenderTarget(
-            *size,
+            width,
+            height,
             0,  # sampleCnt
             0,  # stencilBits
-            skia.GrGLFramebufferInfo(0, GL.GL_RGBA8)
+            skia.GrGLFramebufferInfo(0, GL.GL_RGBA8),
         )
         surface = skia.Surface.MakeFromBackendRenderTarget(
             self.context,
