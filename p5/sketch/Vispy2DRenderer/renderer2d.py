@@ -16,29 +16,32 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import numpy as np
-import math
-from p5.pmath import matrix
-from .shaders2d import src_default, src_fbuffer
-
 import builtins
+import io
+import math
+import re
+import textwrap
+import urllib
+from contextlib import contextmanager
 
+import numpy as np
+from PIL import ImageFont, ImageChops, ImageFilter, ImageDraw, Image
 from vispy import gloo
 from vispy.gloo import Program
 from vispy.gloo import Texture2D
 from vispy.gloo import VertexBuffer
 
-from contextlib import contextmanager
-from .shaders2d import src_texture
-from .shaders2d import src_line
-from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
-from .shape import PShape, Arc
-from p5.core.constants import SType, LEFT, TOP, RIGHT, BOTTOM, CENTER
-
-import textwrap
-from PIL import ImageFont, ImageChops, ImageFilter, ImageDraw, Image
-from p5.core.image import image, PImage
+from p5.core import p5
+from p5.core.constants import SType, LEFT, TOP, RIGHT, BOTTOM, CENTER, CORNERS, CORNER, RGB
+from p5.core.image import image, image_mode
 from p5.core.structure import push_style
+from p5.pmath import matrix
+from .image import PImage
+from .openglrenderer import OpenGLRenderer, get_render_primitives, COLOR_WHITE
+from .shaders2d import src_default, src_fbuffer
+from .shaders2d import src_line
+from .shaders2d import src_texture
+from .shape import PShape, Arc
 
 
 class VispyRenderer2D(OpenGLRenderer):
@@ -523,3 +526,69 @@ class VispyRenderer2D(OpenGLRenderer):
 
     def text_wrap(self, text_wrap_style):
         raise NotImplementedError("Not Implemented in Vispy")
+
+    def image(self, *args, size=None):
+        if len(args) == 3:
+            img, location = args[0], args[1:]
+        elif len(args) == 5:
+            img, location, size = args[0], args[1:3], args[3:]
+        else:
+            raise ValueError("Unexpected number of arguments passed to image()")
+
+        if size is None:
+            size = img.size
+        # Add else statement below to resize the img._img first,
+        #   or it will take much time to render large image,
+        #   even when small size is specified to the image
+        else:
+            if size != img.size:
+                img.size = size
+
+        lx, ly = location
+        sx, sy = size
+
+        if self.style.image_mode == CENTER:
+            lx = int(lx - (sx / 2))
+            ly = int(ly - (sy / 2))
+
+        if self.style.image_mode == CORNERS:
+            sx = sx - lx
+            sy = sy - ly
+
+        self.render_image(img, (lx, ly), (sx, sy))
+
+    def load_image(self, filename):
+        if re.match(r"\w+://", filename):
+            with urllib.request.urlopen(filename) as url:
+                f = io.BytesIO(url.read())
+                img = Image.open(f)
+        else:
+            img = Image.open(filename)
+        w, h = img.size
+        pimg = PImage(w, h)
+        pimg._img = img
+        return pimg
+
+    def load_pixels(self):
+        pixels = PImage(builtins.width, builtins.height, RGB)
+        # sketch.renderer.flush_geometry()
+        pixel_data = self.fbuffer.read(mode="color", alpha=False)
+
+        pixels._img = Image.fromarray(pixel_data)
+        builtins.pixels = pixels
+
+        pixels._load()
+
+    def update_pixels(self):
+        with push_style():
+            image_mode(CORNER)
+            self.style.tint_enabled = False
+            image(builtins.pixels, *(0, 0))
+
+        builtins.pixels = None
+
+    def save_frame(self, filename):
+        if filename:
+            p5.sketch.screenshot(filename)
+        else:
+            p5.sketch.screenshot("Screen.png")
