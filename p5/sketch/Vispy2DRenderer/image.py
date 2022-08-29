@@ -27,10 +27,10 @@ def _ensure_loaded(func):
     """Reloads the image if required before calling the function."""
 
     @functools.wraps(func)
-    def rfunc(instance, *args, **kwargs):
-        if instance._img_data is None or instance._reload:
-            instance._load()
-        return func(instance, *args, **kwargs)
+    def rfunc(self, *args, **kwargs):
+        if self._img_data is None or self._reload:
+            self._load()
+        return func(self, *args, **kwargs)
 
     return rfunc
 
