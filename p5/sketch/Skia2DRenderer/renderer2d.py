@@ -205,7 +205,6 @@ class SkiaRenderer:
             while low <= high:
                 mid = (low + high) // 2
                 width = self.style.text_font.measureText(text[: mid + 1])
-                # print(low, mid, high, width)
                 id = low
                 if width == max_width:
                     id = mid

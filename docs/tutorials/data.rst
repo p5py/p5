@@ -576,7 +576,7 @@ The following code retrieves both the running time and movie poster iamge from I
 		global poster, runningtime
 		# Display all the stuff I want to display
 		background(255)
-		image(poster, (10, 10), 164, 250)
+		image(poster, 10, 10, 164, 250)
 		fill(0)
 		text("Shaun the Sheep", (10, 300))
 		text(runningtime, (10, 320))

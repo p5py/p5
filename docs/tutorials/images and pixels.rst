@@ -35,7 +35,7 @@ In addition to user-defined objects (such as Ball), Processing has a bunch of ha
 	def draw():
 		background(0)
 		# Draw the image to the screen at coordinate (0,0)
-		image(img, (0, 0))
+		image(img, 0, 0)
 
 	if __name__ == '__main__':
 		run()
@@ -64,7 +64,7 @@ Once the image is loaded, it is displayed with the ``image()`` function. The ``i
 
 .. code:: python
 
-	image(img, (10,20), (90,60))
+	image(img, 10,20, 90,60)
 
 Your very first image processing filter
 =======================================
@@ -88,7 +88,7 @@ If ``tint()`` receives one argument, only the brightness of the image is affecte
 
 	# The image retains its original state.
 	tint(255)
-	image(sunflower, (0, 0))
+	image(sunflower, 0, 0)
 
 .. image:: ./images_and_pixels-res/tint2.jpg
    :align: left
@@ -97,7 +97,7 @@ If ``tint()`` receives one argument, only the brightness of the image is affecte
 
 	# The image appears darker
 	tint(100)
-	image(sunflower, (0, 0))
+	image(sunflower, 0, 0)
 
 A second argument will change the image's alpha transparency.
 
@@ -108,7 +108,7 @@ A second argument will change the image's alpha transparency.
 
 	# The image is at 50% opacity.
 	tint(100, 127)
-	image(sunflower, (0, 0))
+	image(sunflower, 0, 0)
 
 Three arguments affect the brightness of the red, green, and blue components of each color.
 
@@ -119,7 +119,7 @@ Three arguments affect the brightness of the red, green, and blue components of 
 
 	# None of its red, most of its green, and all of its blue.
 	tint(0, 200, 255)
-	image(sunflower, (0, 0))
+	image(sunflower, 0, 0)
 
 Finally, adding a fourth argument to the method manipulates the alpha (same as with 2). Incidentally, the range of values for tint() can be specified with colorMode().
 
@@ -130,7 +130,7 @@ Finally, adding a fourth argument to the method manipulates the alpha (same as w
 
 	# The image is tinted red and transparent.
 	tint(255, 0, 0, 100)
-	image(sunflower, (0, 0))
+	image(sunflower, 0, 0)
 
 Pixels, pixels, and more pixels
 ===============================
