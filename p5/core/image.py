@@ -25,6 +25,7 @@ __all__ = [
     "image_mode",
     "load_pixels",
     "update_pixels",
+    "create_image",
 ]
 
 
@@ -90,6 +91,11 @@ class PImage(ABC):
     @size.setter
     @abstractmethod
     def size(self, new_size):
+        """
+        set or resize the PImage
+        :param size: size of the image
+        :type size: tuple
+        """
         pass
 
     @property
@@ -271,3 +277,17 @@ def update_pixels():
 
 def save_frame(filename=None):
     p5.renderer.save_frame(filename)
+
+
+def create_image(width, height):
+    """
+    Creates a new p5.Image (the datatype for storing images). This provides a fresh buffer of pixels to play with.
+    Set the size of the buffer with the width and height parameters.
+
+    :param width: Width in pixels
+    :type width: int
+
+    :param height: Height in pixels
+    :type height: int
+    """
+    return p5.renderer.create_image(width, height)

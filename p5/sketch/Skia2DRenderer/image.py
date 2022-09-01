@@ -1,0 +1,121 @@
+from p5.core import constants
+from p5.core import PImage
+import numpy as np
+import skia
+import builtins
+
+
+class SkiaPImage(PImage):
+    def __init__(self, width, height, pixels=None):
+        self._width = width
+        self._height = height
+        self.pixels = (
+            pixels
+            if pixels is not None
+            else np.zeros((width, height, 4), dtype=np.uint8)
+        )
+        self.surface = skia.Surface(self.pixels)
+
+    @property
+    def width(self):
+        return self._width
+
+    @width.setter
+    def width(self, width):
+        self._width = width
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, height):
+        self._height = height
+
+    @property
+    def size(self):
+        return (self.width, self.height)
+
+    @size.setter
+    def size(self, size):
+        self.width, self.height = size
+        self.pixels.resize((*size, 4))
+
+    @property
+    def aspect_ratio(self):
+        return self.width / self.height
+
+    def load_pixels(self):
+        builtins.pixels = self.pixels
+
+    def update_pixels(self):
+        pass
+
+    def mask(self, image):
+        """
+        :param image: Image to be used as make
+        :type image: SkiaPImage
+        """
+        with skia.Surface(self.pixels) as canvas:
+            canvas.drawImage(image.surface.makeImageSnapshot())
+
+    def filter(self, kind, param=0.5):
+        if kind == constants.THRESHOLD:
+            threshold = param * 255
+            mask = np.dot(self.pixels[..., :3], [0.2989, 0.5870, 0.1140]) < threshold
+            self.pixels[:, :, :3][mask] = 1
+
+        if kind == constants.GRAY:
+            mask = np.dot(self.pixels[..., :3], [0.2989, 0.5870, 0.1140])
+            mask = np.array([[i] * 3 for i in mask.flatten()]).reshape(
+                (self.pixels.shape[0], self.pixels.shape[1], 3)
+            )
+            self.pixels[:, :, :3] = mask
+
+        if kind == constants.OPAQUE:
+            self.pixels[..., 3:] = 255
+
+        if kind == constants.INVERT:
+
+            def invert(x):
+                return 255 - x
+
+            self.pixels[..., :3] = invert(self.pixels[..., :3])
+
+        if kind == constants.POSTERIZE:
+            raise NotImplementedError("POSTERIZE is not yet implemented for skia")
+
+        if kind == constants.DILATE:
+            with skia.Surface(self.pixels) as canvas:
+                paint = skia.Paint(ImageFilter=skia.ImageFilters.Dilate())
+                image = self.surface.makeImageSnapshot()
+                canvas.clear()
+                canvas.drawImage(image=image, paint=paint)
+
+        if kind == constants.DILATE:
+            with skia.Surface(self.pixels) as canvas:
+                paint = skia.Paint(ImageFilter=skia.ImageFilters.Erode())
+                image = self.surface.makeImageSnapshot()
+                canvas.clear()
+                canvas.drawImage(image=image, paint=paint)
+
+        if kind == constants.DILATE:
+            with skia.Surface(self.pixels) as canvas:
+                paint = skia.Paint(
+                    ImageFilter=skia.ImageFilters.Blur(sigmaX=param, sigmaY=param)
+                )
+                image = self.surface.makeImageSnapshot()
+                canvas.clear()
+                canvas.drawImage(image=image, paint=paint)
+
+    def blend(self, other, mode):
+        pass
+
+    def save(self, filename):
+        if filename.endswith(".png"):
+            self.surface.makeImageSnapshot().save(filename, skia.kPNG)
+        else:
+            self.surface.makeImageSnapshot().save(filename, skia.kJPEG)
+
+    def get_skia_image(self):
+        return self.surface.makeImageSnapshot()
