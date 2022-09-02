@@ -597,7 +597,7 @@ class VispyRenderer2D(OpenGLRenderer):
 
         builtins.pixels = None
 
-    def save_frame(self, filename):
+    def save_canvas(self, filename, canvas):
         if filename:
             p5.sketch.screenshot(filename)
         else:

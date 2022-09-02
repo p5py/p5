@@ -727,3 +727,12 @@ class SkiaRenderer:
     def load_image(self, filename):
         image = skia.Image.open(filename)
         return SkiaPImage(image.width, image.height, pixels=image.toarray())
+
+    def save_canvas(self, filename, canvas):
+        if canvas:
+            # TODO: Get the surface of the PGraphics object yet to be implemented
+            pass
+        else:
+            canvas = self.canvas
+        image = canvas.getSurface().makeImageSnapshot()
+        image.save(filename)

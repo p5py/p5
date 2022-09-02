@@ -26,6 +26,7 @@ __all__ = [
     "load_pixels",
     "update_pixels",
     "create_image",
+    "save_canvas",
 ]
 
 
@@ -275,8 +276,16 @@ def update_pixels():
     p5.renderer.update_pixels()
 
 
-def save_frame(filename=None):
-    p5.renderer.save_frame(filename)
+def save_canvas(filename=None, canvas=None):
+    """
+    Saves the given Canvas as an image with filename
+    :param filename: filename/path for the image
+    :type filename: str
+
+    :param canvas: Canvas to be saved. If not specified default canvas is used
+    :type canvas: PGraphics
+    """
+    p5.renderer.save_canvas(filename, canvas)
 
 
 def create_image(width, height):
