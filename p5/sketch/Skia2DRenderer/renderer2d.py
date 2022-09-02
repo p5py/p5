@@ -711,7 +711,7 @@ class SkiaRenderer:
     def create_image(self, width, height):
         return SkiaPImage(width, height)
 
-    def image(self, pimage, x, y, w, h):
+    def image(self, pimage, x, y, w=None, h=None):
         if self.style.image_mode == constants.CORNER:
             if w and h:
                 pimage.size = (w, h)
@@ -732,7 +732,7 @@ class SkiaRenderer:
 
     def update_pixels(self):
         self.pimage.update_pixels()
-        self.image(self.pimage)
+        self.image(self.pimage, 0, 0)
 
     def load_image(self, filename):
         image = skia.Image.open(filename)

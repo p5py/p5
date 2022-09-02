@@ -100,9 +100,7 @@ class SkiaPImage(PImage):
 
         if kind == constants.BLUR:
             with skia.Surface(self.pixels) as canvas:
-                paint = skia.Paint(
-                    ImageFilter=skia.ImageFilters.Blur(param, param)
-                )
+                paint = skia.Paint(ImageFilter=skia.ImageFilters.Blur(param, param))
                 image = canvas.getSurface().makeImageSnapshot()
                 canvas.clear(skia.Color(0, 0, 0, 0))
                 canvas.drawImage(image, 0, 0, paint)
@@ -118,4 +116,3 @@ class SkiaPImage(PImage):
 
     def get_skia_image(self):
         return skia.Image.fromarray(self.pixels)
-
