@@ -14,7 +14,6 @@ class SkiaPImage(PImage):
             if pixels is not None
             else np.zeros((width, height, 4), dtype=np.uint8)
         )
-        self.surface = skia.Surface(self.pixels)
 
     @property
     def width(self):
@@ -87,35 +86,36 @@ class SkiaPImage(PImage):
 
         if kind == constants.DILATE:
             with skia.Surface(self.pixels) as canvas:
-                paint = skia.Paint(ImageFilter=skia.ImageFilters.Dilate())
-                image = self.surface.makeImageSnapshot()
-                canvas.clear()
-                canvas.drawImage(image=image, paint=paint)
+                paint = skia.Paint(ImageFilter=skia.ImageFilters.Dilate(param, param))
+                image = canvas.getSurface().makeImageSnapshot()
+                canvas.clear(skia.ColorWHITE)
+                canvas.drawImage(image, 0, 0, paint)
 
-        if kind == constants.DILATE:
+        if kind == constants.ERODE:
             with skia.Surface(self.pixels) as canvas:
-                paint = skia.Paint(ImageFilter=skia.ImageFilters.Erode())
-                image = self.surface.makeImageSnapshot()
-                canvas.clear()
-                canvas.drawImage(image=image, paint=paint)
+                paint = skia.Paint(ImageFilter=skia.ImageFilters.Erode(param, param))
+                image = canvas.getSurface().makeImageSnapshot()
+                canvas.clear(skia.Color(0, 0, 0, 0))
+                canvas.drawImage(image, 0, 0, paint)
 
-        if kind == constants.DILATE:
+        if kind == constants.BLUR:
             with skia.Surface(self.pixels) as canvas:
                 paint = skia.Paint(
-                    ImageFilter=skia.ImageFilters.Blur(sigmaX=param, sigmaY=param)
+                    ImageFilter=skia.ImageFilters.Blur(param, param)
                 )
-                image = self.surface.makeImageSnapshot()
-                canvas.clear()
-                canvas.drawImage(image=image, paint=paint)
+                image = canvas.getSurface().makeImageSnapshot()
+                canvas.clear(skia.Color(0, 0, 0, 0))
+                canvas.drawImage(image, 0, 0, paint)
 
     def blend(self, other, mode):
         pass
 
     def save(self, filename):
         if filename.endswith(".png"):
-            self.surface.makeImageSnapshot().save(filename, skia.kPNG)
+            skia.Image.fromarray(self.pixels).save(filename, skia.kPNG)
         else:
-            self.surface.makeImageSnapshot().save(filename, skia.kJPEG)
+            skia.Image.fromarray(self.pixels).save(filename, skia.kJPEG)
 
     def get_skia_image(self):
-        return self.surface.makeImageSnapshot()
+        return skia.Image.fromarray(self.pixels)
+

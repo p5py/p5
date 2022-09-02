@@ -249,8 +249,8 @@ def load_image(filename):
         file-extennsion is automatically inferred.
     :type filename: str
 
-    :returns: An :class:`p5.PImage` instance with the given image data
-    :rtype: :class:`p5.PImage`
+    :returns: An :class:`PImage` instance with the given image data
+    :rtype: :class:`PImage`
 
     """
     return p5.renderer.load_image(filename)
