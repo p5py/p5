@@ -177,7 +177,7 @@ class PImage(ABC):
         pass
 
 
-def image(*args, size=None):
+def image(img, x, y, w=None, h=None):
     """Draw an image to the display window.
 
     Images must be in the same folder as the sketch (or the image path
@@ -185,22 +185,22 @@ def image(*args, size=None):
     modified with the :meth:`p5.tint` function.
 
     :param img: the image to be displayed.
-    :type img: p5.Image
+    :type img: PImage
 
     :param x: x-coordinate of the image by default
-    :type float:
+    :type x: float
 
     :param y: y-coordinate of the image by default
-    :type float:
+    :type y: float
 
     :param w: width to display the image by default
-    :type float:
+    :type w: float
 
     :param h: height to display the image by default
-    :type float:
+    :type h: float
 
     """
-    p5.renderer.image(*args)
+    p5.renderer.image(img, x, y, w, h)
 
 
 def image_mode(mode):

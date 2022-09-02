@@ -47,6 +47,12 @@ no_tint()
 .. autofunction:: no_tint
    :noindex:
 
+save_canvas()
+-------------
+
+.. autofunction:: save_canvas
+   :noindex:
+
 Pixels
 ======
 

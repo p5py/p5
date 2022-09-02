@@ -711,8 +711,18 @@ class SkiaRenderer:
     def create_image(self, width, height):
         return SkiaPImage(width, height)
 
-    def image(self, pimage, x=0.0, y=0.0):
-        # TODO: Add support to draw images with specific width and height using Rect in skia
+    def image(self, pimage, x, y, w, h):
+        if self.style.image_mode == constants.CORNER:
+            if w and h:
+                pimage.size = (w, h)
+        elif self.style.image_mode == constants.CORNERS:
+            pimage.size = (w - x, h - y)
+        elif self.style.image_mode == constants.CORNERS:
+            if w and h:
+                pimage.size = (w, h)
+            size = pimage.size
+            x += size[0] // 2
+            y += size[1] // 2
         self.canvas.drawImage(pimage.get_skia_image(), x, y)
 
     def load_pixels(self):
