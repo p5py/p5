@@ -717,7 +717,7 @@ class SkiaRenderer:
                 pimage.size = (w, h)
         elif self.style.image_mode == constants.CORNERS:
             pimage.size = (w - x, h - y)
-        elif self.style.image_mode == constants.CORNERS:
+        elif self.style.image_mode == constants.CENTER:
             if w and h:
                 pimage.size = (w, h)
             size = pimage.size

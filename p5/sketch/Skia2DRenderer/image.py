@@ -56,9 +56,10 @@ class SkiaPImage(PImage):
         :type image: SkiaPImage
         """
         with skia.Surface(self.pixels) as canvas:
-            canvas.drawImage(image.surface.makeImageSnapshot())
+            canvas.drawImage(image.get_skia_image())
 
     def filter(self, kind, param=0.5):
+        # https://www.baeldung.com/cs/convert-rgb-to-grayscale#3-luminosity-method
         if kind == constants.THRESHOLD:
             threshold = param * 255
             mask = np.dot(self.pixels[..., :3], [0.2989, 0.5870, 0.1140]) < threshold
@@ -106,7 +107,8 @@ class SkiaPImage(PImage):
                 canvas.drawImage(image, 0, 0, paint)
 
     def blend(self, other, mode):
-        pass
+        # TODO: Implement blend
+        raise NotImplementedError("To be implemented")
 
     def save(self, filename):
         if filename.endswith(".png"):
