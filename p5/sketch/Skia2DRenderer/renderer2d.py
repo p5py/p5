@@ -9,6 +9,8 @@ from p5.core import constants
 from p5.core.primitives import point, line
 from p5.pmath.utils import *
 
+from .image import SkiaPImage
+
 
 @dataclass
 class Style2D:
@@ -68,6 +70,7 @@ class SkiaRenderer:
         self.style_stack = []
         self.path = None
         self.curve_tightness = 0
+        self.pimage = None
 
     # Transforms functions
     def push_matrix(self):
@@ -704,6 +707,42 @@ class SkiaRenderer:
                             self.path.lineTo(v[0], v[1])
                 self._do_fill_stroke_close(close_shape)
 
-    # Fonts functions
-
     # Images functions
+    def create_image(self, width, height):
+        return SkiaPImage(width, height)
+
+    def image(self, pimage, x, y, w=None, h=None):
+        if self.style.image_mode == constants.CORNER:
+            if w and h:
+                pimage.size = (w, h)
+        elif self.style.image_mode == constants.CORNERS:
+            pimage.size = (w - x, h - y)
+        elif self.style.image_mode == constants.CENTER:
+            if w and h:
+                pimage.size = (w, h)
+            size = pimage.size
+            x += size[0] // 2
+            y += size[1] // 2
+        self.canvas.drawImage(pimage.get_skia_image(), x, y)
+
+    def load_pixels(self):
+        c_array = self.canvas.toarray()
+        self.pimage = SkiaPImage(c_array.shape[0], c_array.shape[1], c_array)
+        self.pimage.load_pixels()
+
+    def update_pixels(self):
+        self.pimage.update_pixels()
+        self.image(self.pimage, 0, 0)
+
+    def load_image(self, filename):
+        image = skia.Image.open(filename)
+        return SkiaPImage(image.width, image.height, pixels=image.toarray())
+
+    def save_canvas(self, filename, canvas):
+        if canvas:
+            # TODO: Get the surface of the PGraphics object yet to be implemented
+            pass
+        else:
+            canvas = self.canvas
+        image = canvas.getSurface().makeImageSnapshot()
+        image.save(filename)

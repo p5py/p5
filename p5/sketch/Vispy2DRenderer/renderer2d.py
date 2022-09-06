@@ -537,22 +537,20 @@ class VispyRenderer2D(OpenGLRenderer):
     def text_wrap(self, text_wrap_style):
         raise NotImplementedError("Not Implemented in Vispy")
 
-    def image(self, *args, size=None):
-        if len(args) == 3:
-            img, location = args[0], args[1:]
-        elif len(args) == 5:
-            img, location, size = args[0], args[1:3], args[3:]
-        else:
-            raise ValueError("Unexpected number of arguments passed to image()")
+    def image(self, img, x, y, w, h):
 
-        if size is None:
-            size = img.size
+        location = (x, y)
+        if w is None:
+            w = img.size[0]
+        if h is None:
+            h = img.size[1]
+
+        size = (w, h)
         # Add else statement below to resize the img._img first,
         #   or it will take much time to render large image,
         #   even when small size is specified to the image
-        else:
-            if size != img.size:
-                img.size = size
+        if size != img.size:
+            img.size = size
 
         lx, ly = location
         sx, sy = size
@@ -597,7 +595,7 @@ class VispyRenderer2D(OpenGLRenderer):
 
         builtins.pixels = None
 
-    def save_frame(self, filename):
+    def save_canvas(self, filename, canvas):
         if filename:
             p5.sketch.screenshot(filename)
         else:

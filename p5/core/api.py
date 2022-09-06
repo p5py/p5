@@ -17,7 +17,7 @@ from .transforms import (
 )
 from .color import color_mode
 from .attribs import no_fill, no_tint, no_stroke, stroke_cap, stroke_join, stroke_weight
-from .image import load_image, load_pixels, save_frame, image_mode
+from .image import load_image, load_pixels, save_canvas, image_mode
 from .font import (
     create_font,
     load_font,
@@ -363,8 +363,8 @@ def loadPixels():
     load_pixels()
 
 
-def saveFrame(filename=None):
-    save_frame(filename)
+def saveCanvas(filename=None):
+    save_canvas(filename)
 
 
 def createFont(name, size=10):

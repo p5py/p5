@@ -25,6 +25,8 @@ __all__ = [
     "image_mode",
     "load_pixels",
     "update_pixels",
+    "create_image",
+    "save_canvas",
 ]
 
 
@@ -90,6 +92,11 @@ class PImage(ABC):
     @size.setter
     @abstractmethod
     def size(self, new_size):
+        """
+        set or resize the PImage
+        :param size: size of the image
+        :type size: tuple
+        """
         pass
 
     @property
@@ -170,7 +177,7 @@ class PImage(ABC):
         pass
 
 
-def image(*args, size=None):
+def image(img, x, y, w=None, h=None):
     """Draw an image to the display window.
 
     Images must be in the same folder as the sketch (or the image path
@@ -178,22 +185,22 @@ def image(*args, size=None):
     modified with the :meth:`p5.tint` function.
 
     :param img: the image to be displayed.
-    :type img: p5.Image
+    :type img: PImage
 
     :param x: x-coordinate of the image by default
-    :type float:
+    :type x: float
 
     :param y: y-coordinate of the image by default
-    :type float:
+    :type y: float
 
     :param w: width to display the image by default
-    :type float:
+    :type w: float
 
     :param h: height to display the image by default
-    :type float:
+    :type h: float
 
     """
-    p5.renderer.image(*args)
+    p5.renderer.image(img, x, y, w, h)
 
 
 def image_mode(mode):
@@ -243,8 +250,8 @@ def load_image(filename):
         file-extennsion is automatically inferred.
     :type filename: str
 
-    :returns: An :class:`p5.PImage` instance with the given image data
-    :rtype: :class:`p5.PImage`
+    :returns: An :class:`PImage` instance with the given image data
+    :rtype: :class:`PImage`
 
     """
     return p5.renderer.load_image(filename)
@@ -269,5 +276,27 @@ def update_pixels():
     p5.renderer.update_pixels()
 
 
-def save_frame(filename=None):
-    p5.renderer.save_frame(filename)
+def save_canvas(filename=None, canvas=None):
+    """
+    Saves the given Canvas as an image with filename
+    :param filename: filename/path for the image
+    :type filename: str
+
+    :param canvas: Canvas to be saved. If not specified default canvas is used
+    :type canvas: PGraphics
+    """
+    p5.renderer.save_canvas(filename, canvas)
+
+
+def create_image(width, height):
+    """
+    Creates a new p5.Image (the datatype for storing images). This provides a fresh buffer of pixels to play with.
+    Set the size of the buffer with the width and height parameters.
+
+    :param width: Width in pixels
+    :type width: int
+
+    :param height: Height in pixels
+    :type height: int
+    """
+    return p5.renderer.create_image(width, height)

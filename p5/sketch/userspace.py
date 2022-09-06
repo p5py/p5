@@ -364,7 +364,7 @@ def save(filename="screen.png"):
     """
     # TODO: images saved using ``save()`` should *not* be numbered.
     # --abhikpal (2018-08-14)
-    p5.sketch.screenshot(filename)
+    p5.renderer.save_canvas(filename)
 
 
 def save_frame(filename="screen.png"):
