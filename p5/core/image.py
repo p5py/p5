@@ -184,8 +184,8 @@ def image(img, x, y, w=None, h=None):
     should be explicitly mentioned). The color of an image may be
     modified with the :meth:`p5.tint` function.
 
-    :param img: the image to be displayed.
-    :type img: PImage
+    :param img: PImage | Graphics object to be displayed.
+    :type img: PImage or Graphics
 
     :param x: x-coordinate of the image by default
     :type x: float
@@ -227,7 +227,7 @@ def image_mode(mode):
     :type mode: str
 
     :raises ValueError: When the given image mode is not understood.
-        Check for typoes.
+        Check for types.
 
     """
 
