@@ -600,3 +600,8 @@ class VispyRenderer2D(OpenGLRenderer):
             p5.sketch.screenshot(filename)
         else:
             p5.sketch.screenshot("Screen.png")
+
+    def create_graphics(self, width, height, renderer):
+        raise NotImplementedError(
+            "Vispy Renderer does not support offscreen buffers yet, use 'skia' as your backend renderer"
+        )

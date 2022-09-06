@@ -11,6 +11,8 @@ from p5.pmath.utils import *
 
 from .image import SkiaPImage
 
+from .graphics import SkiaGraphics
+
 
 @dataclass
 class Style2D:
@@ -746,3 +748,8 @@ class SkiaRenderer:
             canvas = self.canvas
         image = canvas.getSurface().makeImageSnapshot()
         image.save(filename)
+
+    def create_graphics(self, width, height, renderer):
+        if renderer != constants.P2D:
+            raise NotImplementedError("Skia is only available for 2D sketches")
+        return SkiaGraphics(width, height)
