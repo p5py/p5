@@ -4,7 +4,6 @@ import numpy as np
 import skia
 import builtins
 
-
 class SkiaPImage(PImage):
     def __init__(self, width, height, pixels=None):
         self._width = width
@@ -12,7 +11,7 @@ class SkiaPImage(PImage):
         self.pixels = (
             pixels
             if pixels is not None
-            else np.zeros((width, height, 4), dtype=np.uint8)
+            else np.zeros((width, height, constants.RGBA_CHANNELS), dtype=np.uint8)
         )
 
     @property
@@ -38,7 +37,7 @@ class SkiaPImage(PImage):
     @size.setter
     def size(self, size):
         self.width, self.height = size
-        self.pixels.resize((*size, 4))
+        self.pixels.resize((*size, constants.RGBA_CHANNELS))
 
     @property
     def aspect_ratio(self):
