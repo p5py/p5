@@ -83,8 +83,33 @@ dependencies (mainly numpy and vispy), so run
 
    $ pip install p5 --user
 
-to install the latest p5 version.
+to install the latest p5 version available on pip.
 
+You could also install p5 from git directly to get the latest features, yet to be released.
+
+.. code:: bash
+
+   $ pip install git+https://github.com/p5py/p5.git#egg=p5
+
+or you could clone the repository and install it.
+
+.. code:: bash
+
+   $ git clone https://github.com/p5py/p5.git
+   $ cd p5
+   $ pip install .
+
+We also recommend you to setup a virtual environment to avoid any dependencies conflicts. You can use this `virtual environment primer <https://realpython.com/python-virtual-environments-a-primer/#how-can-you-work-with-a-python-virtual-environment>`_
+
+**NOTE**: p5 now has a new 2D renderer in beta stage, that could be used by specifying the renderer in run().
+
+.. code:: python
+
+   from p5 import *
+   # .
+   # .
+   # .
+   run(renderer='skia')
 
 Troubleshooting
 ---------------
