@@ -730,7 +730,6 @@ class SkiaRenderer:
         else:
             self.canvas.drawImage(pimage.get_skia_image(), x, y)
 
-
     def load_pixels(self):
         c_array = self.canvas.toarray()
         self.pimage = SkiaPImage(c_array.shape[0], c_array.shape[1], c_array)

@@ -145,7 +145,6 @@ is `False` otherwise.
    if mouse_is_pressed:
        # code to run when the mouse button is held down.
 
-.. code:: python
 
 mouse_button
 ------------

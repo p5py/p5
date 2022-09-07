@@ -6,6 +6,7 @@ from p5.core import p5
 
 import p5 as p5_lib
 
+
 def setup_default_renderer_dec(func):
     def helper(*args, **kwargs):
         current_renderer = p5.renderer
@@ -15,6 +16,7 @@ def setup_default_renderer_dec(func):
         return return_value
 
     return helper
+
 
 def wrap_instance_helper(func):
     def helper(*args, **kwargs):
@@ -63,7 +65,6 @@ def bind(instance, func, as_name=None):
     return bound_method
 
 
-
 methods = [
     # Setting
     p5_lib.background,
@@ -73,7 +74,6 @@ methods = [
     p5_lib.no_fill,
     p5_lib.no_stroke,
     p5_lib.stroke,
-
     # Shape
     p5_lib.arc,
     p5_lib.ellipse,
@@ -84,14 +84,12 @@ methods = [
     p5_lib.line,
     p5_lib.square,
     p5_lib.rect,
-
     # Attributes
     p5_lib.ellipse_mode,
     p5_lib.rect_mode,
     p5_lib.stroke_cap,
     p5_lib.stroke_join,
     p5_lib.stroke_weight,
-
     # Curves
     p5_lib.bezier,
     p5_lib.bezier_detail,
@@ -101,7 +99,6 @@ methods = [
     p5_lib.curve_tightness,
     p5_lib.curve_point,
     p5_lib.curve_tangent,
-
     # Vertex
     p5_lib.begin_contour,
     p5_lib.begin_shape,
@@ -111,7 +108,6 @@ methods = [
     p5_lib.end_shape,
     p5_lib.quadratic_vertex,
     p5_lib.vertex,
-
     # Structure
     p5_lib.push,
     p5_lib.pop,
@@ -119,7 +115,6 @@ methods = [
     p5_lib.pop_matrix,
     p5_lib.push_style,
     p5_lib.pop_style,
-
     # Transform
     p5_lib.apply_matrix,
     p5_lib.reset_matrix,
@@ -128,32 +123,26 @@ methods = [
     p5_lib.shear_x,
     p5_lib.shear_y,
     p5_lib.translate,
-
     # Local Storage
     p5_lib.get_item,
     p5_lib.clear_storage,
     p5_lib.remove_item,
     p5_lib.set_item,
-
     # Image
     p5_lib.save_canvas,
     p5_lib.image,
     p5_lib.tint,
     p5_lib.no_tint,
     p5_lib.image_mode,
-
     p5_lib.load_pixels,
     p5_lib.update_pixels,
-
     p5_lib.noise,
     p5_lib.noise_detail,
     p5_lib.noise_seed,
-
     # Random
     p5_lib.random_seed,
     p5_lib.random_uniform,
     p5_lib.random_gaussian,
-
     # Typography
     p5_lib.text_align,
     p5_lib.text_leading,
@@ -167,9 +156,14 @@ methods = [
     p5_lib.text_font,
 ]
 
+
 def create_graphics_helper(width, height):
     graphics = SkiaGraphics(width, height)
     for method in methods:
-        bind(graphics, setup_default_renderer_dec(wrap_instance_helper(method)), method.__name__)
+        bind(
+            graphics,
+            setup_default_renderer_dec(wrap_instance_helper(method)),
+            method.__name__,
+        )
 
     return graphics
