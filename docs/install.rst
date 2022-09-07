@@ -83,7 +83,7 @@ dependencies (mainly numpy and vispy), so run
 
    $ pip install p5 --user
 
-to install the latest p5 version available on pip.
+to install the latest p5 version
 
 You could also install p5 from git directly to get the latest features, yet to be released.
 
