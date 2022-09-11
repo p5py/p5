@@ -4,6 +4,7 @@ import numpy as np
 import skia
 import builtins
 
+
 class SkiaPImage(PImage):
     def __init__(self, width, height, pixels=None):
         self._width = width

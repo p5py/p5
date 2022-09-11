@@ -10,6 +10,7 @@ from p5.core.primitives import point, line
 from p5.pmath.utils import *
 
 from .image import SkiaPImage
+from .graphics import create_graphics_helper, SkiaGraphics
 
 
 @dataclass
@@ -723,7 +724,11 @@ class SkiaRenderer:
             size = pimage.size
             x += size[0] // 2
             y += size[1] // 2
-        self.canvas.drawImage(pimage.get_skia_image(), x, y)
+
+        if isinstance(pimage, SkiaGraphics):
+            self.canvas.drawImage(pimage.surface.makeImageSnapshot(), x, y)
+        else:
+            self.canvas.drawImage(pimage.get_skia_image(), x, y)
 
     def load_pixels(self):
         c_array = self.canvas.toarray()
@@ -740,9 +745,11 @@ class SkiaRenderer:
 
     def save_canvas(self, filename, canvas):
         if canvas:
-            # TODO: Get the surface of the PGraphics object yet to be implemented
-            pass
-        else:
-            canvas = self.canvas
+            canvas = canvas.canvas
         image = canvas.getSurface().makeImageSnapshot()
         image.save(filename)
+
+    def create_graphics(self, width, height, renderer):
+        if renderer != constants.P2D:
+            raise NotImplementedError("Skia is only available for 2D sketches")
+        return create_graphics_helper(width, height)

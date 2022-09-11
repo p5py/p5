@@ -97,7 +97,8 @@ def text_font(font, size=None):
 
     :param font: PIL.ImageFont.ImageFont for Vispy, Object|String: a font loaded via loadFont(), or a String
     representing a web safe font (a font that is generally available across all systems)
-    :type font: PIL.ImageFont.ImageFont
+
+    :type font: PIL.ImageFont.ImageFont or Font Object
 
     """
     p5.renderer.text_font(font, size)

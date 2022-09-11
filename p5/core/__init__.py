@@ -29,3 +29,4 @@ from .svg import *
 from .material import *
 from .light import *
 from .api import *
+from .graphics import *
