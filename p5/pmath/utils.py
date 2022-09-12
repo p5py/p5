@@ -300,7 +300,7 @@ def sq(number):
     :rtype: float
 
     """
-    return number ** 2
+    return number**2
 
 
 def fract(number):
