@@ -33,17 +33,30 @@ My project specifically focused on improving the efficiency and quality of 2D sk
 
 There was a significant increase in both the efficiency and quality of sketches.
 
-![Profiling results comparing the time taken to draw 100 frames for different sketches](https://cdn-images-1.medium.com/max/2000/1*W9Ml63vS6_EohQ_FFW3ItA.png)*Profiling results comparing the time taken to draw 100 frames for different sketches*
+<div align="center">
 
-![Sketch drawn using skia has better efficiency and aliasing](https://cdn-images-1.medium.com/max/2000/1*jn9y8p19ALRnrTHbqWI7bg.gif)*Sketch drawn using skia has better efficiency and aliasing*
+|                              ![](https://cdn-images-1.medium.com/max/2000/1*W9Ml63vS6_EohQ_FFW3ItA.png)                               |
+|:-------------------------------------------------------------------------------------------------------------------------------------:|
+|                        *Profiling results comparing the time taken to draw 100 frames for different sketches*                         |
 
-![Sketch drawn using Vispy has lower efficiency and more aliasing](https://cdn-images-1.medium.com/max/2000/1*qVFr0f0zMXaHbwQrj6vNDQ.gif)*Sketch drawn using Vispy has lower efficiency and more aliasing*
+|      ![Sketch drawn using skia has better efficiency and aliasing](https://cdn-images-1.medium.com/max/2000/1*jn9y8p19ALRnrTHbqWI7bg.gif)        |
+|:--------------------------------------------------------------------------------------:|
+| *Sketch drawn using skia has better efficiency and aliasing* |
 
-![Skia’s inbuilt support for text led to a more complete typography APIs in p5py which are way more efficient than vispy](https://cdn-images-1.medium.com/max/2000/1*pCX-oNqLEREZKt3Sqx1W_g.gif)*Skia’s inbuilt support for text led to a more complete typography APIs in p5py which are way more efficient than vispy*
+|      ![Skia’s inbuilt support for text led to a more complete typography APIs in p5py which are way more efficient than vispy](https://cdn-images-1.medium.com/max/2000/1*pCX-oNqLEREZKt3Sqx1W_g.gif)        |
+|:--------------------------------------------------------------------------------------:|
+| *Skia’s inbuilt support for text led to a more complete typography APIs in p5py which are way more efficient than vispy* |
 
-![Sketches drawn had very less aliasing as compared to sketches drawn using vispy](https://cdn-images-1.medium.com/max/2000/1*gz9k4NXkraid0KULIKXG5g.gif)*Sketches drawn had very less aliasing as compared to sketches drawn using vispy*
 
-![Sketches drawn using vispy had comparatively more aliasing](https://cdn-images-1.medium.com/max/2000/1*nbooXt6VCFI9OqNtVfnNIg.gif)*Sketches drawn using vispy had comparatively more aliasing*
+|      ![Sketches drawn had very less aliasing as compared to sketches drawn using vispy](https://cdn-images-1.medium.com/max/2000/1*gz9k4NXkraid0KULIKXG5g.gif)        |
+|:--------------------------------------------------------------------------------------:|
+| *Sketches drawn had very less aliasing as compared to sketches drawn using vispy* |
+
+|      ![Sketches drawn using vispy had comparatively more aliasing](https://cdn-images-1.medium.com/max/2000/1*nbooXt6VCFI9OqNtVfnNIg.gif)        |
+|:--------------------------------------------------------------------------------------:|
+| *Sketches drawn using vispy had comparatively more aliasing* |
+
+</div>
 
 We can see there is a boost in the performance and quality of 2D sketches. The library is now refactored to support more renderers in the future, also there are different GHAs set up for housekeeping and CI.
 
