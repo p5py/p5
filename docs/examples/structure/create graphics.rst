@@ -48,19 +48,18 @@ The ``draw_target()`` function makes it easy to draw many distinct targets. Each
 
     def draw():
         fill(0, 12)
-        fill(0, 12);
-        rect(0, 0, width, height);
-        fill(255);
-        no_stroke();
-        ellipse(mouse_x, mouse_y, 60, 60);
+        rect(0, 0, width, height)
+        fill(255)
+        no_stroke()
+        ellipse(mouse_x, mouse_y, 60, 60)
 
-        pg.background(51);
-        pg.no_fill();
-        pg.stroke(255);
-        pg.ellipse(mouse_x - 150, mouse_y - 75, 60, 60);
+        pg.background(51)
+        pg.no_fill()
+        pg.stroke(255)
+        pg.ellipse(mouse_x - 150, mouse_y - 75, 60, 60)
 
-        //Draw the offscreen buffer to the screen with image()
-        image(pg, 150, 75);
+        # Draw the offscreen buffer to the screen with image()
+        image(pg, 150, 75)
 
     if __name__ == '__main__':
           # Create Graphics is only available in skia
