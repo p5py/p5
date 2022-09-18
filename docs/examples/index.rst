@@ -19,6 +19,7 @@ Structure
    structure/redraw
    structure/function
    structure/recursion
+   structure/create graphics
 
 Transform
 #########
