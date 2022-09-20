@@ -4,7 +4,7 @@ numpy
 Pillow==9.0.1
 vispy==0.10.0
 PyOpenGL-accelerate@git+https://github.com/mcfletch/pyopengl.git@227f9c66976d9f5dadf62b9a97e6beaec84831ca#subdirectory=accelerate
-PyOpenGL==3.1.5
+PyOpenGL==3.1.6
 requests>=2.25.0
 dataclasses;python_version=="3.6"
 skia-python>=85.0
