@@ -108,11 +108,8 @@ class SkiaSketch:
 
     # create a new surface everytime
     def create_surface(self, size=None):
-        if not size:
-            size = self._size
-        self._size = size
-        builtins.width, builtins.height = size
         self.surface = self.skia_surface(self.window, size)
+        builtins.width, builtins.height = glfw.get_window_size(self.window)
         self.canvas = self.surface.getCanvas()
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
 
