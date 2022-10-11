@@ -75,9 +75,6 @@ class SkiaSketch:
     def glfw_window(self):
         if not glfw.init():
             raise RuntimeError("glfw.init() failed")
-        glfw.window_hint(glfw.STENCIL_BITS, 8)
-        glfw.window_hint(glfw.SAMPLES, 4)
-        GL.glEnable(GL.GL_MULTISAMPLE)
         window = glfw.create_window(*self._size, "p5py", None, None)
         glfw.make_context_current(window)
         return window
