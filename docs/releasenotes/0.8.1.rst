@@ -1,0 +1,26 @@
+0.8.1
+=====
+
+We are happy to announce the final developmental release under the summer fellowship at `The Processing Foundation <https://processingfoundation.org/>`_.
+The project was supervised by `Mark Zhang <https://github.com/ziyaointl>`_. This release adds on to the experimental 2D renderer using `Skia <https://skia.org/>`_.
+
+
+New Features
+------------
+
+- Typography support for skia `#371 <https://github.com/p5py/p5/issues/371>_.`
+    - p5py now support all types of fonts as found in other processing ports
+    - 5x efficiency in font sketches as compared to vispy renderer
+
+- Image APIs for "skia" `#344 <https://github.com/p5py/p5/issues/379>_.`
+
+- Support for Offscreen buffers `#386 <https://github.com/p5py/p5/issues/386>_.`
+    - create_grahpics is now available in p5py's skia renderer
+
+- Support for python 3.10 
+
+This release includes contributions from @tushar5526, @ziyaointl, @Mr-Sunglasses, Thank you!
+
+PS: There are a lot of good open issues that currently need help and we would love your contributions!
+
+
