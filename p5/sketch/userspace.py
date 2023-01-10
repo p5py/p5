@@ -156,7 +156,7 @@ def run(
     # get the user-defined setup(), draw(), preload() and handler functions.
     if sketch_preload is not None:
         preload_method = sketch_preload
-    elif hasattr(__main__, "setup"):
+    elif hasattr(__main__, "preload"):
         preload_method = __main__.preload
     else:
         preload_method = preload
