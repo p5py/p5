@@ -3,8 +3,7 @@ glfw==1.11.2
 numpy
 Pillow==9.0.1
 vispy==0.10.0
-# See https://github.com/p5py/p5/issues/397 for more info on this
-# PyOpenGL-accelerate@git+https://github.com/mcfletch/pyopengl.git@227f9c66976d9f5dadf62b9a97e6beaec84831ca#subdirectory=accelerate
+PyOpenGL-accelerate==3.1.6
 PyOpenGL==3.1.6
 requests>=2.25.0
 dataclasses;python_version=="3.6"
