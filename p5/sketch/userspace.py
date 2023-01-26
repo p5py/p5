@@ -198,6 +198,7 @@ def run(
         elif mode == "P3D":
             p5.mode = "P3D"
             from p5.sketch.Vispy3DRenderer.renderer3d import Renderer3D
+
             p5.renderer = Renderer3D()
         else:
             ValueError("Invalid Mode %s" % mode)
