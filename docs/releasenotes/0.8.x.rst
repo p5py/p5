@@ -1,0 +1,143 @@
+0.8.0
+=====
+
+We are happy to announce another developmental release under the summer fellowship at `The Processing Foundation <https://processingfoundation.org/>`_.
+The project was supervised by `Mark Zhang <https://github.com/ziyaointl>`_. This release comes with an experimental 2D renderer using `Skia <https://skia.org/>`_.
+The skia 2D renderer shows significance improvements in both rendering and efficiency of the sketches.
+
+Bug Fixes
+--------------
+- #276
+- #311
+- #308
+- #309
+- #355
+- #352
+
+New Features
+------------
+
+- Along with the snake_case convention we support the camelCase convention for most Processing APIs #280
+- New experimental 2D renderer "skia" #344. Skia currently does not support typography and Image APIs, they will be implemented in further releases.
+
+List of New APIs
+----------------------
+  - :any:`frame_rate` sets frame rate for a sketch (only for skia)
+  - :any:`rect` now supports border radius (only for skia)
+  - :any:`CORNERS` CORNERS mode added (only for skia)
+  - :any:`focussed` holds whether the current window is in focus or not (only for skia)
+
+All the API previously present are supported as well in skia.
+
+``Here are some profiling results comparing the time taken to draw 100 frames for different sketches``
+
+==============  =====  =======
+Name            Skia   Vispy
+==============  =====  =======
+arcs            2.11s  10.06s
+custom_shapes   1.84s  5.00s
+triangle_strip  2.55s  3.33s
+custom_shapes2  2.02s  4.14s
+curves          1.76s  5.41s
+primitives      1.73s  3.9s
+==============  =====  =======
+
+This release includes contributions from @tushar5526, @niklasr22, @ziyaointl, @nakul-shahdadpuri, @andreasWallner, @janbehrens, @yogeshhk, @cuppajoeman,
+@willtryagain, @parsoyaarihant, @Kartik-byte, @Andy-Python-Programmer, @Mr-Sunglasses, Thank you!
+
+
+
+
+v0.8.1
+======
+
+We are happy to announce the final developmental release under the
+summer fellowship at `The Processing
+Foundation <https://processingfoundation.org/>`__ The project was
+supervised by `Mark Zhang <https://github.com/ziyaointl>`__. This
+release adds on to the experimental 2D renderer using
+`Skia <https://skia.org>`__.
+
+New Features
+------------
+
+Typography support for skia #371
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+   - p5py now support all types of fonts as found in other processing ports
+   - 5x efficiency in font sketches as compared to vispy renderer
+
+Image APIs for “skia” #344
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Support for Offscreen buffers #386
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+   - create_grahpics is now available in p5py's skia renderer
+
+Support for python 3.10 #395
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+   - Please see the attached note below
+
+This release includes contributions from @tushar5526, @ziyaointl, and
+@Mr-Sunglasses, Thank you!
+
+PS: There are a lot of good open issues that currently need help and we
+would love your contributions!
+
+NOTE
+----
+
+``pyopengl-accelarate`` is omitted from the ``requirements.txt``
+temporarily. See #397 for more information about this. If you are
+looking for better 3D performance you can install it from the
+``requirements.txt`` file.
+
++------------------+------------------+------------------+--------+
+| benchmark        | with             | without          | change |
+|                  | pyo              | pyo              |        |
+|                  | pengl-accelerate | pengl-accelerate |        |
++==================+==================+==================+========+
+| arcs             | 8.944169         | 9.764988         | 9.18%  |
++------------------+------------------+------------------+--------+
+| arm              | 2.612446         | 2.611884         | -0.02% |
++------------------+------------------+------------------+--------+
+| basic_shapes     | 2.629553         | 2.688781         | 2.25%  |
++------------------+------------------+------------------+--------+
+| begin_contour    | 2.684205         | 2.711441         | 1.01%  |
++------------------+------------------+------------------+--------+
+| curves           | 4.766132         | 4.962305         | 4.12%  |
++------------------+------------------+------------------+--------+
+| custom_shapes    | 4.643741         | 4.754362         | 2.38%  |
++------------------+------------------+------------------+--------+
+| custom_shapes2   | 3.75905          | 3.791483         | 0.86%  |
++------------------+------------------+------------------+--------+
+| point_demo       | 2.880713         | 2.939999         | 2.06%  |
++------------------+------------------+------------------+--------+
+| primitives       | 3.651718         | 3.717032         | 1.79%  |
++------------------+------------------+------------------+--------+
+| s                | 9.417307         | 9.437273         | 0.21%  |
+| pinning-cone_p3d |                  |                  |        |
++------------------+------------------+------------------+--------+
+| tetrahedron_p3d  | 8.114283         | 8.203861         | 1.10%  |
++------------------+------------------+------------------+--------+
+| triangle_strip   | 3.228278         | 3.228012         | -0.01% |
++------------------+------------------+------------------+--------+
+| world_p3d        | 26.883501        | 26.991062        | 0.40%  |
++------------------+------------------+------------------+--------+
+
+
+0.8.2
+=====
+
+This is a minor release that fixes a few bugs and adds a few new features.
+
+- `pyopengl-accelarate` upstream issue was fixed and we can install the package now on Linux. 
+- Fixed `preload` bug
