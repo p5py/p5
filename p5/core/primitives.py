@@ -467,6 +467,8 @@ def rect(*args, mode=None):
         return quad(p1, p2, p3, p4)
 
     elif builtins.current_renderer == "skia":
+        # TODO: Add proper parameter handling
+        x = y = w = h = None
         if len(args) == 4:
             x, y, w, h = args
         elif len(args) == 3:
@@ -527,6 +529,8 @@ def square(*args, mode=None):
             raise ValueError("Cannot draw square with {} mode".format(mode))
         return rect(coordinate, side_length, side_length, mode=mode)
     elif builtins.current_renderer == "skia":
+        # TODO: Add proper parameter handling
+        x = y = side = None
         if should_draw():
             if len(args) == 2:
                 x, y = args[0]
