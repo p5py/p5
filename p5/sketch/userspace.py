@@ -254,6 +254,9 @@ def size(width, height):
     :type height: int
 
     """
+    if(builtins.current_renderer == "skia" and not p5.sketch.resized):
+        return
+
     builtins.width = int(width)
     builtins.height = int(height)
     p5.sketch.size = (builtins.width, builtins.height)

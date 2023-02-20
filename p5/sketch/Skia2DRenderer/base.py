@@ -205,7 +205,7 @@ class SkiaSketch:
         Values of width and height may not be equal to the actual window's width and height
         in Retina Display
         """
-
+        self.resized = False
         # Callback handler for frame buffer resize events
         builtins.pixel_x_density = width / self.size[0]
         builtins.pixel_y_density = height / self.size[1]
@@ -213,6 +213,7 @@ class SkiaSketch:
 
         GL.glViewport(0, 0, width, height)
         self.create_surface(size=(width, height))
+        self.setup_method()
         # with self.surface as self.canvas:
         #     # redraw on the canvas/ ( new frame buffer ) after resizing
         #     # and do not rewind/clear the path
