@@ -211,10 +211,18 @@ class SkiaSketch:
         builtins.pixel_y_density = height / self.size[1]
         self.pixel_density = width * height // (self.size[0] * self.size[1])
 
+        # To take in account the contents of the last surface.
+        old_image = self.surface.makeImageSnapshot()
+        old_image = old_image.resize(old_image.width(),old_image.height())
+
         GL.glViewport(0, 0, width, height)
         self.create_surface(size=(width, height))
         self.setup_method()
-        # with self.surface as self.canvas:
+        
+        # Renders the content of the last surface to the newly created
+        with self.surface as self.canvas:
+            self.canvas.drawImage(old_image,0,0)
+
         #     # redraw on the canvas/ ( new frame buffer ) after resizing
         #     # and do not rewind/clear the path
 
