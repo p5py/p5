@@ -266,6 +266,8 @@ def size(width, height):
         )
         p5.renderer.camera_pos = eye
 
+    p5.sketch.poll_events()
+
 
 def no_loop():
     """Stop draw() from being continuously called.
