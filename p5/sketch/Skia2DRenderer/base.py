@@ -215,7 +215,7 @@ class SkiaSketch:
         # To take in account the contents of the last surface.
         old_image = self.surface.makeImageSnapshot()
         old_image = old_image.resize(old_image.width(),old_image.height())
-        old_style = copy.copy(p5.renderer.style)
+        old_style = copy.deepcopy(p5.renderer.style)
 
         GL.glViewport(0, 0, width, height)
         self.create_surface(size=(width, height))
