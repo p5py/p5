@@ -266,7 +266,8 @@ def size(width, height):
         )
         p5.renderer.camera_pos = eye
 
-    p5.sketch.poll_events()
+    if builtins.current_renderer == "skia":
+        p5.sketch.poll_events()
 
 
 def no_loop():
