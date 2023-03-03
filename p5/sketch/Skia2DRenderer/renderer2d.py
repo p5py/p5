@@ -527,7 +527,6 @@ class SkiaRenderer:
     def end_shape(
         self, mode, vertices, is_curve, is_bezier, is_quadratic, is_contour, shape_kind
     ):
-
         close_shape = mode == constants.CLOSE
         # NOT APPENDING AGAIN
         num_verts = len(vertices)

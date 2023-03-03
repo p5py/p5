@@ -417,7 +417,6 @@ class VispyRenderer2D(OpenGLRenderer):
         return self.create_font(font_name)
 
     def text(self, text_string, position, wrap_at):
-
         multiline = False
         if not (wrap_at is None):
             text_string = textwrap.fill(text_string, wrap_at)
@@ -538,7 +537,6 @@ class VispyRenderer2D(OpenGLRenderer):
         raise NotImplementedError("Not Implemented in Vispy")
 
     def image(self, img, x, y, w, h):
-
         location = (x, y)
         if w is None:
             w = img.size[0]

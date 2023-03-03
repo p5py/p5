@@ -258,7 +258,7 @@ def size(width, height):
     # return with no change in size when called from frame buffer resize callback
     # this is to handle setup function re-call during resize
     # Ref: Issue #419
-    if(builtins.current_renderer == "skia" and not p5.sketch.resized):
+    if builtins.current_renderer == "skia" and not p5.sketch.resized:
         return
 
     builtins.width = int(width)

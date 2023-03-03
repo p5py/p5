@@ -321,9 +321,7 @@ class OpenGLRenderer(ABC):
         for vertices, idx, color in draw_queue:
             num_shape_verts = len(vertices)
 
-            data["position"][
-                sidx : (sidx + num_shape_verts),
-            ] = np.array(vertices)
+            data["position"][sidx : (sidx + num_shape_verts),] = np.array(vertices)
 
             color_array = np.array([color] * num_shape_verts)
             data["color"][sidx : sidx + num_shape_verts, :] = color_array
