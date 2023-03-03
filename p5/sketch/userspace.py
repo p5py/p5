@@ -254,6 +254,13 @@ def size(width, height):
     :type height: int
 
     """
+
+    # return with no change in size when called from frame buffer resize callback
+    # this is to handle setup function re-call during resize
+    # Ref: Issue #419
+    if(builtins.current_renderer == "skia" and not p5.sketch.resized):
+        return
+
     builtins.width = int(width)
     builtins.height = int(height)
     p5.sketch.size = (builtins.width, builtins.height)

@@ -5,6 +5,7 @@ import contextlib, glfw, skia
 from OpenGL import GL
 from time import time
 
+import copy
 from ..events import handler_names
 from .handlers import *
 from .util import *
@@ -205,19 +206,33 @@ class SkiaSketch:
         Values of width and height may not be equal to the actual window's width and height
         in Retina Display
         """
-
         # Callback handler for frame buffer resize events
+
+        self.resized = False
         builtins.pixel_x_density = width / self.size[0]
         builtins.pixel_y_density = height / self.size[1]
         self.pixel_density = width * height // (self.size[0] * self.size[1])
 
+        # Creates an Image of current surface and a copy of current style configurations
+        # For the purpose of handling setup_method() re-call 
+        # Ref: Issue #419
+        old_image = self.surface.makeImageSnapshot()
+        old_image = old_image.resize(old_image.width(), old_image.height())
+        old_style = copy.deepcopy(p5.renderer.style)
+
         GL.glViewport(0, 0, width, height)
         self.create_surface(size=(width, height))
-        # with self.surface as self.canvas:
-        #     # redraw on the canvas/ ( new frame buffer ) after resizing
-        #     # and do not rewind/clear the path
+        self.setup_method()
+
+        # Redraws Image on the canvas/ new frame buffer
+        # Previously stored style configurations are restored for
+        # discarding setup_method() style changes
+        p5.renderer.style = old_style
+        with self.surface as self.canvas:
+            self.canvas.drawImage(old_image, 0, 0)
 
         # Tell the program, we have resized the frame buffer
+        # and do not rewind/clear the path
         # Restart the rendering again
         self.resized = True
 
