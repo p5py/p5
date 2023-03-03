@@ -271,7 +271,6 @@ def end_contour():
         contour_vertices_types.append(curr_contour_vertices_types)
         curr_contour_vertices, curr_contour_vertices_types = [], []
     elif builtins.current_renderer == "skia":
-
         vert_data = copy.deepcopy(contour_vertices[0])
         vert_data[-1]["is_vert"] = contour_vertices[0][-1].get("is_vert", None)
         vert_data[-1]["move_to"] = False

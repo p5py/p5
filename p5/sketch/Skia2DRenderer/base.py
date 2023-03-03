@@ -214,7 +214,7 @@ class SkiaSketch:
         self.pixel_density = width * height // (self.size[0] * self.size[1])
 
         # Creates an Image of current surface and a copy of current style configurations
-        # For the purpose of handling setup_method() re-call 
+        # For the purpose of handling setup_method() re-call
         # Ref: Issue #419
         old_image = self.surface.makeImageSnapshot()
         old_image = old_image.resize(old_image.width(), old_image.height())

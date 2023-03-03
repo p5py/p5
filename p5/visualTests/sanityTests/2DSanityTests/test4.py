@@ -6,7 +6,6 @@ def setup():
 
 
 def draw():
-
     if frame_count > 30:
         exit()
     # Sets the screen to be 640 pixels wide and 360 pixels high

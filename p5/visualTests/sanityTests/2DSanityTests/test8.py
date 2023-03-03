@@ -2,6 +2,7 @@ from p5 import *
 
 y = 0
 
+
 # The statements in the setup() function
 # run once when the program begins
 def setup():

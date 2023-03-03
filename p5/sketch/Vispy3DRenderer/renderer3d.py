@@ -384,13 +384,9 @@ class Renderer3D(OpenGLRenderer):
         # it's information to the buffer.
         #
         draw_indices = []
-        data["position"][
-            0:num_vertices,
-        ] = np.array(vertices)
+        data["position"][0:num_vertices,] = np.array(vertices)
         draw_indices.append(idx)
-        data["normal"][
-            0:num_vertices,
-        ] = np.array(normals)
+        data["normal"][0:num_vertices,] = np.array(normals)
         self.vertex_buffer.set_data(data)
         self.index_buffer.set_data(np.hstack(draw_indices))
 
