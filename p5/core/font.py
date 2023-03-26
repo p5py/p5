@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from typing import Optional
 from . import p5
 
 __all__ = [
@@ -33,12 +34,11 @@ __all__ = [
 ]
 
 
-def create_font(name, size=10):
+def create_font(name: str, size: int = 10):
     """Create the given font at the appropriate size.
 
     :param name: Filename of the font file (only pil, otf and ttf
         fonts are supported.)
-    :type name: str
 
     :param size: Font size (only required when `name` refers to a
         truetype font; defaults to None)
@@ -53,7 +53,7 @@ def load_font(font_name):
     return p5.renderer.load_font(font_name)
 
 
-def text(*args, wrap_at=None):
+def text(*args, wrap_at: Optional[int] = None):
     """Draw the given text on the screen and save the image.
 
     :param text_string: text to display

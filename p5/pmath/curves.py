@@ -21,8 +21,11 @@
 
 from collections.abc import Iterable
 from functools import wraps
+from typing import Tuple, Union, Callable
 from ..pmath import Point
 from ..core import p5
+
+FloatOrNTuple = Union[float, Tuple[float, ...]]
 
 __all__ = [
     # BEZIER METHODS
@@ -50,7 +53,7 @@ curve_basis_matrix = [
 ]
 
 
-def typecast_arguments_as_points(func):
+def typecast_arguments_as_points(func: Callable):
     """Typecast all but the last argument of the function as Points."""
 
     @wraps(func)
@@ -63,38 +66,37 @@ def typecast_arguments_as_points(func):
     return decorated
 
 
-def bezier_detail(detail_value):
+def bezier_detail(detail_value: int):
     """Change the resolution used to draw bezier curves.
 
     :param detail_value: New resolution to be used.
-    :type detail_value: int
     """
     global bezier_resolution
     bezier_resolution = max(1, detail_value)
 
 
-def bezier_point(start, control_1, control_2, stop, parameter):
+def bezier_point(
+    start: FloatOrNTuple,
+    control_1: FloatOrNTuple,
+    control_2: FloatOrNTuple,
+    stop: FloatOrNTuple,
+    parameter: float,
+) -> FloatOrNTuple:
     """Return the coordinate of a point along a bezier curve.
 
     :param start: The start point of the bezier curve
-    :type start: float or n-tuple
 
     :param control_1: The first control point of the bezier curve
-    :type control_1: float or n-tuple
 
     :param control_2: The second control point of the bezier curve
-    :type control_2: float or n-tuple
 
     :param stop: The end point of the bezier curve
-    :type stop: float or n-tuple
 
     :param parameter: The parameter for the required location along
         the curve. Should be in the range [0.0, 1.0] where 0 indicates
         the start of the curve and 1 indicates the end of the curve.
-    :type parameter: float
 
     :returns: The coordinate of the point along the bezier curve.
-    :rtype: float or n-tuple
 
     """
     # Package floats into tuples
@@ -110,7 +112,7 @@ def bezier_point(start, control_1, control_2, stop, parameter):
     t = parameter
     t_ = 1 - parameter
     P = [start, control_1, control_2, stop]
-    coeffs = [t_ * t_ * t_, 3 * t * t_ * t_, 3 * t * t * t_, t * t * t]
+    coeffs = [t_ * t_ * t_, 3 * t * t_ * t_, 3 * t * t * t_, t**2 * t]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
     # Unpack answer if input is not iterable
     if not is_iterable:
@@ -118,30 +120,30 @@ def bezier_point(start, control_1, control_2, stop, parameter):
     return ans
 
 
-def bezier_tangent(start, control_1, control_2, stop, parameter):
+def bezier_tangent(
+    start: FloatOrNTuple,
+    control_1: FloatOrNTuple,
+    control_2: FloatOrNTuple,
+    stop: FloatOrNTuple,
+    parameter: float,
+) -> FloatOrNTuple:
     """Return the tangent at a point along a bezier curve.
 
     :param start: The start point of the bezier curve
-    :type start: float or n-tuple.
 
     :param control_1: The first control point of the bezier curve
-    :type control_1: float or n-tuple.
 
     :param control_2: The second control point of the bezier curve
-    :type control_2: float or n-tuple.
 
     :param stop: The end point of the bezier curve
-    :type stop: float or n-tuple.
 
     :param parameter: The parameter for the required tangent location
         along the curve. Should be in the range [0.0, 1.0] where 0
         indicates the start of the curve and 1 indicates the end of
         the curve.
-    :type parameter: float
 
     :returns: The tangent at the required point along the bezier
         curve.
-    :rtype: float or n-tuple
 
     """
     # Package floats into tuples
@@ -162,8 +164,7 @@ def bezier_tangent(start, control_1, control_2, stop, parameter):
         )
 
     ans = tuple(
-        tangent(start[i], control_1[i], control_2[i], stop[i])
-        for i in range(len(start))
+        tangent(j, control_1[i], control_2[i], stop[i]) for i, j in enumerate(start)
     )
     # Unpack answer if input is not iterable
     if not is_iterable:
@@ -176,50 +177,48 @@ def _reinit_curve_matrices():
     pass
 
 
-def curve_detail(detail_value):
+def curve_detail(detail_value: int):
     """Change the resolution used to draw bezier curves.
 
     :param detail_value: New resolution to be used.
-    :type detail_value: int
     """
     global curve_resolution
     curve_resolution = detail_value
 
 
-def curve_tightness(amount):
+def curve_tightness(amount: int):
     """Change the curve tightness used to draw curves.
 
     :param amount: new curve tightness amount.
-    :type amount: int
     """
     p5.renderer.curve_tightness = amount
     _reinit_curve_matrices()
 
 
-def curve_point(point_1, point_2, point_3, point_4, parameter):
+def curve_point(
+    point_1: FloatOrNTuple,
+    point_2: FloatOrNTuple,
+    point_3: FloatOrNTuple,
+    point_4: FloatOrNTuple,
+    parameter: float,
+) -> FloatOrNTuple:
     """Return the coordinates of a point along a curve.
 
     :param point_1: The first control point of the curve.
-    :type point_1: float or n-tuple.
 
     :param point_2: The second control point of the curve.
-    :type point_2: float or n-tuple.
 
     :param point_3: The third control point of the curve.
-    :type point_3: float or n-tuple.
 
     :param point_4: The fourth control point of the curve.
-    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required point location
         along the curve. Should be in the range [0.0, 1.0] where 0
         indicates the start of the curve and 1 indicates the end of
         the curve.
-    :type parameter: float
 
     :returns: The coordinate of the point at the required location
         along the curve.
-    :rtype: float or n-tuple
 
     """
     # Package floats into tuples
@@ -243,29 +242,29 @@ def curve_point(point_1, point_2, point_3, point_4, parameter):
     return ans
 
 
-def curve_tangent(point_1, point_2, point_3, point_4, parameter):
+def curve_tangent(
+    point_1: FloatOrNTuple,
+    point_2: FloatOrNTuple,
+    point_3: FloatOrNTuple,
+    point_4: FloatOrNTuple,
+    parameter: float,
+) -> FloatOrNTuple:
     """Return the tangent at a point along a curve.
 
     :param point_1: The first control point of the curve.
-    :type point_1: float or n-tuple.
 
     :param point_2: The second control point of the curve.
-    :type point_2: float or n-tuple.
 
     :param point_3: The third control point of the curve.
-    :type point_3: float or n-tuple.
 
     :param point_4: The fourth control point of the curve.
-    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required tangent location
         along the curve. Should be in the range [0.0, 1.0] where 0
         indicates the start of the curve and 1 indicates the end of
         the curve.
-    :type parameter: float
 
     :returns: The tangent at the required point along the curve.
-    :rtype: float or n-tuple
 
     """
     # Package floats into tuples
@@ -291,27 +290,24 @@ def curve_tangent(point_1, point_2, point_3, point_4, parameter):
     return ans
 
 
-def quadratic_point(start, control, stop, parameter):
+def quadratic_point(
+    start: FloatOrNTuple, control: FloatOrNTuple, stop: FloatOrNTuple, parameter: float
+) -> FloatOrNTuple:
     """Return the coordinates of a point along a bezier curve.
 
     :param point_1: The start point of the curve.
-    :type point_1: float or n-tuple.
 
     :param point_3: The control point of the curve.
-    :type point_3: float or n-tuple.
 
     :param point_4: The end point of the curve.
-    :type point_4: float or n-tuple.
 
     :param parameter: The parameter for the required point location
         along the curve. Should be in the range [0.0, 1.0] where 0
         indicates the start of the curve and 1 indicates the end of
         the curve.
-    :type parameter: float
 
     :returns: The coordinate of the point at the required location
         along the curve.
-    :rtype: float or n-tuple
 
     """
     is_iterable = isinstance(start, Iterable)
@@ -321,7 +317,7 @@ def quadratic_point(start, control, stop, parameter):
     t = parameter
     t_ = 1 - parameter
     P = [start, control, stop]
-    coeffs = [t_ * t_, 2 * t * t_, t * t]
+    coeffs = [t_ * t_, 2 * t * t_, t**2]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
     # Unpack answer if input is not iterable
     if not is_iterable:

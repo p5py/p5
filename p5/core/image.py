@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from typing import Optional
 from . import p5
 from abc import ABC, abstractmethod
 
@@ -131,14 +132,13 @@ class PImage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def filter(self, kind, param=None):
+    def filter(self, kind: str, param: Optional[float] = None):
         """Filter the image.
 
         :param kind: The kind of filter to use on the image. Should be
             one of { 'threshold', 'gray', 'opaque', 'invert',
             'posterize', 'blur', 'erode', 'dilate', }
 
-        :type kind: str
 
         :param param: optional parameter for the filter in use
             (defaults to None). Only required for 'threshold' (the
@@ -147,13 +147,12 @@ class PImage(ABC):
             channel should be between 2 and 255), and 'blur' (gaussian
             blur radius, defaults to 1.0).
 
-        :type param: int | float | None
 
         """
         pass
 
     @abstractmethod
-    def blend(self, other, mode):
+    def blend(self, other, mode: str):
         """Blend the specified image using the given blend mode.
 
         :param other: The image to be blended to the current image.
@@ -162,7 +161,6 @@ class PImage(ABC):
         :param mode: Blending mode to use. Should be one of { 'BLEND',
             'ADD', 'SUBTRACT', 'LIGHTEST', 'DARKEST', 'MULTIPLY',
             'SCREEN',}
-        :type mode: str
 
         :raises AssertionError: When the dimensions of img do not
             match the dimensions of the current image.
@@ -177,7 +175,9 @@ class PImage(ABC):
         pass
 
 
-def image(img, x, y, w=None, h=None):
+def image(
+    img, x: float, y: float, w: Optional[float] = None, h: Optional[float] = None
+):
     """Draw an image to the display window.
 
     Images must be in the same folder as the sketch (or the image path
@@ -188,16 +188,12 @@ def image(img, x, y, w=None, h=None):
     :type img: PImage or Graphics
 
     :param x: x-coordinate of the image by default
-    :type x: float
 
     :param y: y-coordinate of the image by default
-    :type y: float
 
     :param w: width to display the image by default
-    :type w: float
 
     :param h: height to display the image by default
-    :type h: float
 
     """
     p5.renderer.image(img, x, y, w, h)
@@ -236,7 +232,7 @@ def image_mode(mode):
     p5.renderer.style.image_mode = mode.lower()
 
 
-def load_image(filename):
+def load_image(filename: str):
     """Load an image from the given filename (or URL).
 
     Loads an image into a variable of type PImage. Four types of
@@ -276,11 +272,10 @@ def update_pixels():
     p5.renderer.update_pixels()
 
 
-def save_canvas(filename=None, canvas=None):
+def save_canvas(filename: Optional[str] = None, canvas=None):
     """
     Saves the given Canvas as an image with filename
     :param filename: filename/path for the image
-    :type filename: str
 
     :param canvas: Canvas to be saved. If not specified default canvas is used
     :type canvas: PGraphics
@@ -288,15 +283,13 @@ def save_canvas(filename=None, canvas=None):
     p5.renderer.save_canvas(filename, canvas)
 
 
-def create_image(width, height):
+def create_image(width: int, height: int):
     """
     Creates a new p5.Image (the datatype for storing images). This provides a fresh buffer of pixels to play with.
     Set the size of the buffer with the width and height parameters.
 
     :param width: Width in pixels
-    :type width: int
 
     :param height: Height in pixels
-    :type height: int
     """
     return p5.renderer.create_image(width, height)
