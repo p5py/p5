@@ -320,7 +320,7 @@ class Vector(Point):
         )
 
     @property
-    def magnitude(self):
+    def magnitude(self) -> float:
         """The magnitude of the vector.
 
         Examples::
@@ -348,8 +348,11 @@ class Vector(Point):
         current_magnitude = self.magnitude
         self._array = (new_magnitude * self._array) / current_magnitude
 
+    def mag(self) -> float:
+        return self.magnitude
+
     @property
-    def magnitude_sq(self):
+    def magnitude_sq(self) -> float:
         """The squared magnitude of the vector."""
         return self._array @ self._array
 
