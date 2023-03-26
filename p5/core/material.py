@@ -46,13 +46,10 @@ def basic_material(r: float, g: float, b: float):
     """The default material. Always displays a solid color.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
     """
     ensure_p3d("basic_material")
     fill(r, g, b)
@@ -91,13 +88,10 @@ def ambient(r: float, g: float, b: float):
     """Sets the ambient light color reflected by the next :any:`blinn_phong_material`.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
     """
     ensure_p3d("ambient")
     p5.renderer.style.ambient = np.array(scale_tuple((r, g, b)), dtype=np.float32)
@@ -107,13 +101,10 @@ def emissive(r: float, g: float, b: float):
     """This function is the same as diffuse.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
     """
     ensure_p3d("emissive")
     return diffuse(*scale_tuple((r, g, b)))
@@ -123,13 +114,10 @@ def diffuse(r: float, g: float, b: float):
     """Sets the diffuse light color reflected by the next :any:`blinn_phong_material`.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
     """
     ensure_p3d("diffuse")
     p5.renderer.style.diffuse = np.array(scale_tuple((r, g, b)), dtype=np.float32)
@@ -141,7 +129,6 @@ def shininess(p: float):
     Should be used together with :any:`light_specular` and :any:`specular`.
 
     :param p: exponent of the cosine term in the `Blinn-Phong Reflection Model <https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_reflection_model>`_
-    :type p: float
     """
     ensure_p3d("shininess")
     p5.renderer.style.shininess = p
