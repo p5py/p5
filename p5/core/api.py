@@ -1,51 +1,55 @@
 # This file adds Processing API compatibility for p5py
 
-from .structure import push_style, pop_style
-from .primitives import rect_mode, ellipse_mode
-from .transforms import (
-    push_matrix,
-    pop_matrix,
-    reset_matrix,
-    reset_transforms,
-    shear_x,
-    shear_y,
-    rotate_x,
-    rotate_y,
-    rotate_z,
-    apply_matrix,
-    print_matrix,
-)
+from typing import List, Optional, Union
+
+import numpy as np
+
+from .attribs import no_fill, no_stroke, no_tint, stroke_cap, stroke_join, stroke_weight
 from .color import color_mode
-from .attribs import no_fill, no_tint, no_stroke, stroke_cap, stroke_join, stroke_weight
-from .image import load_image, load_pixels, save_canvas, image_mode
+from .constants import TESS, SType
 from .font import (
     create_font,
     load_font,
-    text_font,
-    text_size,
-    text_width,
-    text_descent,
     text_align,
     text_ascent,
+    text_descent,
+    text_font,
     text_leading,
+    text_size,
+    text_width,
 )
-from .constants import TESS
-from .vertex import (
-    begin_shape,
-    begin_contour,
-    curve_vertex,
-    bezier_vertex,
-    end_contour,
-    end_shape,
-    quadratic_vertex,
-)
-from .material import normal_material, basic_material, blinn_phong_material
+from .image import image_mode, load_image, load_pixels, save_canvas
 from .light import (
     ambient_light,
     directional_light,
-    point_light,
     light_falloff,
     light_specular,
+    point_light,
+)
+from .material import basic_material, blinn_phong_material, normal_material
+from .primitives import ellipse_mode, rect_mode
+from .structure import pop_style, push_style
+from .transforms import (
+    apply_matrix,
+    pop_matrix,
+    print_matrix,
+    push_matrix,
+    reset_matrix,
+    reset_transforms,
+    rotate_x,
+    rotate_y,
+    rotate_z,
+    shear_x,
+    shear_y,
+)
+from .vertex import (
+    begin_contour,
+    begin_shape,
+    bezier_vertex,
+    curve_vertex,
+    end_contour,
+    end_shape,
+    quadratic_vertex,
 )
 
 
@@ -99,28 +103,24 @@ def popStyle():
     pop_style()
 
 
-def rectMode(mode="CORNER"):
+def rectMode(mode: str = "CORNER"):
     """Change the rect and square drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing rects. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
         'CORNER' so calling rect_mode without parameters will reset
         the sketch's rect mode.
-    :type mode: str
-
     """
     rect_mode(mode)
 
 
-def ellipseMode(mode="CENTER"):
+def ellipseMode(mode: str):
     """Change the ellipse and circle drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing ellipses. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
         'CENTER' so calling ellipse_mode without parameters will reset
         the sketch's ellipse mode.
-    :type mode: str
-
     """
     ellipse_mode(mode)
 
@@ -140,50 +140,43 @@ def resetTransforms():
     reset_transforms()
 
 
-def rotateX(theta):
+def rotateX(theta: float) -> np.ndarray:
     """Rotate the view along the x axis.
 
     :param theta: angle by which to rotate (in radians)
-    :type theta: float
 
     :returns: The rotation matrix used to apply the transformation.
-    :rtype: np.ndarray
 
     """
     return rotate_x(theta)
 
 
-def rotateY(theta):
+def rotateY(theta: float) -> np.ndarray:
     """Rotate the view along the y axis.
 
     :param theta: angle by which to rotate (in radians)
-    :type theta: float
 
     :returns: The rotation matrix used to apply the transformation.
-    :rtype: np.ndarray
 
     """
     return rotate_y(theta)
 
 
-def rotateZ(theta):
+def rotateZ(theta: float) -> np.ndarray:
     """Rotate the view along the z axis.
 
     :param theta: angle by which to rotate (in radians)
-    :type theta: float
 
     :returns: The rotation matrix used to apply the transformation.
-    :rtype: np.ndarray
 
     """
     return rotate_z(theta)
 
 
-def applyMatrix(transformMatrix):
+def applyMatrix(transformMatrix: Union[List[List[float]], np.ndarray]):
     """Apply the given matrix to the sketch's transform matrix..
 
     :param transformMatrix: The new transform matrix.
-    :type transformMatrix: np.ndarray (or a 4×4 list)
     """
     apply_matrix(transformMatrix)
 
@@ -198,54 +191,51 @@ def printMatrix():
     print_matrix()
 
 
-def shearX(theta):
+def shearX(theta: float) -> np.ndarray:
     """Shear display along the x-axis.
 
     :param theta: angle to shear by (in radians)
-    :type theta: float
 
     :returns: The shear matrix used to apply the tranformation.
-    :rtype: np.ndarray
 
     """
     return shear_x(theta)
 
 
-def shearY(theta):
+def shearY(theta: float) -> np.ndarray:
     """Shear display along the y-axis.
 
     :param theta: angle to shear by (in radians)
-    :type theta: float
 
     :returns: The shear matrix used to apply the transformation.
-    :rtype: np.ndarray
 
     """
     return shear_y(theta)
 
 
-def colorMode(mode, max1=255, max2=None, max3=None, maxAlpha=255):
+def colorMode(
+    mode: str,
+    max1: int = 255,
+    max2: Optional[int] = None,
+    max3: Optional[int] = None,
+    maxAlpha: int = 255,
+):
     """Set the color mode of the renderer.
 
     :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
         or Hue/Saturation/Brightness
-    :type mode: str
 
     :param max1: Maximum value for the first color channel (default:
         255)
-    :type max1: int
 
     :param max2: Maximum value for the second color channel (default:
         max1)
-    :type max2: int
 
     :param max3: Maximum value for the third color channel (default:
         max1)
-    :type max3: int
 
     :param maxalpha: Maximum value for the alpha channel (default:
         255)
-    :type maxalpha: int
 
     """
     color_mode(mode, max1, max2, max3, maxAlpha)
@@ -256,12 +246,11 @@ def noFill():
     no_fill()
 
 
-def strokeWeight(thickness):
+def strokeWeight(thickness: int):
     """Sets the width of the stroke used for lines, points, and the border around shapes. All widths are set in units of
      pixels.
 
     :param weight: thickness of stroke in pixels
-    :type weight: int
 
     """
     stroke_weight(thickness)
@@ -272,25 +261,23 @@ def noStroke():
     no_stroke()
 
 
-def strokeCap(c):
+def strokeCap(c: str):
     """Sets the style of line endings. The ends are SQUARE,
     PROJECT, and ROUND. The default cap is ROUND.
 
     :param c: either 'SQUARE', 'PROJECT' or 'ROUND'
-    :type c: string
 
     """
     stroke_cap(c)
 
 
-def strokeJoin(j):
+def strokeJoin(j: str):
     """Sets the style of the joints which connect line segments.
     These joints are either mitered, beveled, or rounded and
     specified with the corresponding parameters MITER, BEVEL,
     and ROUND. The default joint is MITER.
 
     :param weight: either 'MITER', 'BEVEL' or 'ROUND'
-    :type j: string
 
     """
     stroke_join(j)
@@ -301,7 +288,7 @@ def noTint():
     no_tint()
 
 
-def imageMode(mode):
+def imageMode(mode: str):
     """Modify the locaton from which the images are drawn.
 
     Modifies the location from which images are drawn by changing the
@@ -322,7 +309,6 @@ def imageMode(mode):
     the image.
 
     :param mode: should be one of ``{'corner', 'center', 'corners'}``
-    :type mode: str
 
     :raises ValueError: When the given image mode is not understood.
         Check for typoes.
@@ -331,7 +317,7 @@ def imageMode(mode):
     image_mode(mode)
 
 
-def loadImage(filename):
+def loadImage(filename: str):
     """Load an image from the given filename.
 
     Loads an image into a variable of type PImage. Four types of
@@ -343,7 +329,6 @@ def loadImage(filename):
 
     :param filename: Filename (or path)of the given image. The
         file-extennsion is automatically inferred.
-    :type filename: str
 
     :returns: An :class:`p5.PImage` instance with the given image data
     :rtype: :class:`p5.PImage`
@@ -367,16 +352,14 @@ def saveCanvas(filename=None):
     save_canvas(filename)
 
 
-def createFont(name, size=10):
+def createFont(name: str, size: Optional[int] = 10):
     """Create the given font at the appropriate size.
 
     :param name: Filename of the font file (only pil, otf and ttf
         fonts are supported.)
-    :type name: str
 
     :param size: Font size (only required when `name` refers to a
         truetype font; defaults to None)
-    :type size: int | None
 
     """
     return create_font(name, size)
@@ -397,14 +380,12 @@ def textFont(font, size=10):
     text_font(font, size)
 
 
-def textAlign(alignX, alignY=None):
+def textAlign(alignX: str, alignY: str = None):
     """Set the alignment of drawing text
 
     :param alignX: "RIGHT", "CENTER" or "LEFT".
-    :type alignX: string
 
     :param alignY: "TOP", "CENTER" or "BOTTOM".
-    :type alignY: string
 
     """
     text_align(alignX, alignY)
@@ -414,30 +395,26 @@ def textLeading(leading):
     """Sets the spacing between lines of text in units of pixels
 
     :param leading: the size in pixels for spacing between lines
-    :type align_x: int
 
     """
     text_leading(leading)
 
 
-def textSize(size):
+def textSize(size: int):
     """Sets the current font size
 
     :param leading: the size of the letters in units of pixels
-    :type align_x: int
 
     """
     text_size(size)
 
 
-def textWidth(text):
+def textWidth(text: str) -> int:
     """Calculates and returns the width of any character or text string
 
     :param text_string: text
-    :type text_string: str
 
     :returns: width of any character or text string
-    :rtype: int
 
     """
     return text_width(text)
@@ -463,16 +440,15 @@ def textDescent():
     return text_descent()
 
 
-def beginShape(kind=TESS):
+def beginShape(kind: SType = TESS):
     """Begin shape drawing.  This is a helpful way of generating custom shapes quickly.
 
     :param kind: TESS, POINTS, LINES, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP, QUADS, or QUAD_STRIP; defaults to TESS
-    :type kind: SType
     """
     begin_shape(kind)
 
 
-def curveVertex(x, y, z=0):
+def curveVertex(x: float, y: float, z: float = 0):
     """
     Specifies vertex coordinates for curves. The first
     and last points in a series of curveVertex() lines
@@ -485,57 +461,44 @@ def curveVertex(x, y, z=0):
     Catmull-Rom splines.
 
     :param x: x-coordinate of the vertex
-    :type x: float
 
     :param y: y-coordinate of the vertex
-    :type y: float
 
     :param z: z-coordinate of the vertex
-    :type z: float
     """
     curve_vertex(x, y, z)
 
 
-def bezierVertex(x2, y2, x3, y3, x4, y4):
+def bezierVertex(x2: float, y2: float, x3: float, y3: float, x4: float, y4: float):
     """
     Specifies vertex coordinates for Bezier curves
 
     :param x2: x-coordinate of the first control point
-    :type x2: float
 
     :param y2: y-coordinate of the first control point
-    :type y2: float
 
     :param x3: x-coordinate of the second control point
-    :type x3: float
 
     :param y3: y-coordinate of the second control point
-    :type y3: float
 
     :param x4: x-coordinate of the anchor point
-    :type x4: float
 
     :param y4: y-coordinate of the anchor point
-    :type y4: float
     """
     bezier_vertex(x2, y2, x3, y3, x4, y4)
 
 
-def quadraticVertex(cx, cy, x3, y3):
+def quadraticVertex(cx: float, cy: float, x3: float, y3: float):
     """
     Specifies vertex coordinates for quadratic Bezier curves
 
     :param cx: x-coordinate of the control point
-    :type cx: float
 
     :param cy: y-coordinate of the control point
-    :type cy: float
 
     :param x3: x-coordinate of the anchor point
-    :type x3: float
 
     :param y3: y-coordinate of the anchor point
-    :type y3: float
 
     """
     quadratic_vertex(cx, cy, x3, y3)
@@ -564,7 +527,7 @@ def endContour():
     end_contour()
 
 
-def endShape(mode=""):
+def endShape(mode: str = ""):
     """
     The endShape() function is the companion to beginShape()
     and may only be called after beginShape(). When endshape()
@@ -572,7 +535,6 @@ def endShape(mode=""):
     to beginShape() is rendered.
 
     :param mode: use CLOSE to close the shape
-    :type mode: str
 
     """
     return end_shape(mode)
@@ -586,17 +548,14 @@ def normalMaterial():
     normal_material()
 
 
-def basicMaterial(r, g, b):
+def basicMaterial(r: float, g: float, b: float):
     """The default material. Always displays a solid color.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
     """
     basic_material(r, g, b)
 
@@ -625,77 +584,62 @@ def blinnPhongMaterial():
     blinn_phong_material()
 
 
-def ambientLight(r, g, b):
+def ambientLight(r: float, g: float, b: float):
     """Adds an ambient light.
 
     Ambient light comes from all directions towards all directions.
     Ambient lights are almost always used in combination with other types of lights.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
     """
     ambient_light(r, g, b)
 
 
-def directionalLight(r, g, b, x, y, z):
+def directionalLight(r: float, g: float, b: float, x: float, y: float, z: float):
     """Adds a directional light.
     Directional light comes from one direction: it is stronger when hitting a surface squarely,
     and weaker if it hits at a gentle angle.
     After hitting a surface, directional light scatters in all directions.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
 
     :param x: x component of the direction vector
-    :type x: float
 
     :param y: y component of the direction vector
-    :type y: float
 
     :param z: z component of the direction vector
-    :type z: float
     """
     directional_light(r, g, b, x, y, z)
 
 
-def pointLight(r, g, b, x, y, z):
+def pointLight(r: float, g: float, b: float, x: float, y: float, z: float):
     """Adds a point light.
     Point light comes from one location and emits to all directions.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
 
     :param x: x component of the location vector
-    :type x: float
 
     :param y: y component of the location vector
-    :type y: float
 
     :param z: z component of the location vector
-    :type z: float
     """
     point_light(r, g, b, x, y, z)
 
 
-def lightFalloff(constant, linear, quadratic):
+def lightFalloff(constant: float, linear: float, quadratic: float):
     """Sets the falloff rates for point lights. Affects only the elements which are created after it in the code.
 
     d = distance from light position to vertex position
@@ -706,18 +650,15 @@ def lightFalloff(constant, linear, quadratic):
     The P3D renderer defaults to (0, 0, 0), i.e. no falloff.
 
     :param constant: coefficient for the constant term
-    :type constant: float
 
     :param linear: coefficient for the linear term
-    :type linear: float
 
     :param quadratic: coefficient for the quadratic term
-    :type quadratic: float
     """
     light_falloff(constant, linear, quadratic)
 
 
-def lightSpecular(r, g, b):
+def lightSpecular(r: float, g: float, b: float):
     """Sets the specular color for lights. Only visible with :any:`p5.blinn_phong_material`. Is set to (0 ,0, 0)
      by default.
     Affects only the elements which are created after it in the code.
@@ -728,12 +669,9 @@ def lightSpecular(r, g, b):
     material qualities set through the `specular()` and `shininess()` functions.
 
     :param r: red channel
-    :type r: float
 
     :param g: green channel
-    :type g: float
 
     :param b: blue channel
-    :type b: float
     """
     light_specular(r, g, b)

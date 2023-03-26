@@ -29,6 +29,8 @@ from ..events import KeyEvent
 from ..events import MouseEvent
 from ..events import handler_names
 
+from typing import Dict, List, Set
+
 
 def _dummy(*args, **kwargs):
     """Eat all arguments, do nothing."""
@@ -56,7 +58,9 @@ class VispySketch(app.Canvas):
 
     """
 
-    def __init__(self, setup_method, draw_method, handlers=dict(), frame_rate=60):
+    def __init__(
+        self, setup_method, draw_method, handlers: Dict = dict(), frame_rate:int=60
+    ):
         app.Canvas.__init__(
             self,
             title=builtins.title,
@@ -172,7 +176,7 @@ class VispySketch(app.Canvas):
     def on_key_release(self, event):
         kev = KeyEvent(event)
         self._enqueue_event("key_released", kev)
-        if not (event.text == ""):
+        if event.text != "":
             self._enqueue_event("key_typed", kev)
 
     def on_mouse_press(self, event):

@@ -1,6 +1,8 @@
+from typing import Any
 from . import p5, fill
 from ..sketch.util import ensure_p3d, scale_tuple
 import numpy as np
+from dataclasses import dataclass
 
 __all__ = [
     "normal_material",
@@ -14,21 +16,21 @@ __all__ = [
 ]
 
 
+@dataclass
 class BasicMaterial:
-    def __init__(self, color):
-        self.color = color
+    color: Any
 
 
 class NormalMaterial:
     pass
 
 
+@dataclass
 class BlinnPhongMaterial:
-    def __init__(self, ambient, diffuse, specular, shininess):
-        self.ambient = ambient
-        self.diffuse = diffuse
-        self.specular = specular
-        self.shininess = shininess
+    ambient: Any
+    diffuse: Any
+    specular: Any
+    shininess: Any
 
 
 def normal_material():
@@ -40,7 +42,7 @@ def normal_material():
     p5.renderer.style.material = NormalMaterial()
 
 
-def basic_material(r, g, b):
+def basic_material(r: float, g: float, b: float):
     """The default material. Always displays a solid color.
 
     :param r: red channel
@@ -85,7 +87,7 @@ def blinn_phong_material():
     )
 
 
-def ambient(r, g, b):
+def ambient(r: float, g: float, b: float):
     """Sets the ambient light color reflected by the next :any:`blinn_phong_material`.
 
     :param r: red channel
@@ -101,7 +103,7 @@ def ambient(r, g, b):
     p5.renderer.style.ambient = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
-def emissive(r, g, b):
+def emissive(r: float, g: float, b: float):
     """This function is the same as diffuse.
 
     :param r: red channel
@@ -117,7 +119,7 @@ def emissive(r, g, b):
     return diffuse(*scale_tuple((r, g, b)))
 
 
-def diffuse(r, g, b):
+def diffuse(r: float, g: float, b: float):
     """Sets the diffuse light color reflected by the next :any:`blinn_phong_material`.
 
     :param r: red channel
@@ -133,7 +135,7 @@ def diffuse(r, g, b):
     p5.renderer.style.diffuse = np.array(scale_tuple((r, g, b)), dtype=np.float32)
 
 
-def shininess(p):
+def shininess(p: float):
     """Sets how glossy the next :any:`blinn_phong_material` is. This only affects the specular term.
 
     Should be used together with :any:`light_specular` and :any:`specular`.

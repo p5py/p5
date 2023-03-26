@@ -15,7 +15,7 @@ intended as a compatibility measure.
 """
 
 
-class Key(object):
+class Key:
     """Represent the identity of a certain key.
 
     This represents one or more names that the key in question is known by.
@@ -27,7 +27,7 @@ class Key(object):
 
     def __init__(self, *names):
         self._names = names
-        self._names_upper = tuple([v.upper() for v in names])
+        self._names_upper = tuple(v.upper() for v in names)
 
     @property
     def name(self):
@@ -38,7 +38,7 @@ class Key(object):
         return self._names[0].__hash__()
 
     def __repr__(self):
-        return "<Key %s>" % ", ".join([repr(v) for v in self._names])
+        return f'<Key {", ".join(repr(v) for v in self._names)}>'
 
     def __eq__(self, other):
         if isinstance(other, str):

@@ -20,6 +20,7 @@
 import __main__
 
 import math
+from typing import Callable
 import numpy as np
 import builtins
 import sys
@@ -80,7 +81,7 @@ builtins.start_time = 0
 builtins.current_renderer = None
 
 
-def _fix_interface(func):
+def _fix_interface(func: Callable):
     """Make sure that `func` takes at least one argument as input.
 
     :returns: a new function that accepts arguments.
@@ -201,7 +202,7 @@ def run(
 
             p5.renderer = Renderer3D()
         else:
-            ValueError("Invalid Mode %s" % mode)
+            ValueError(f"Invalid Mode {mode}")
 
         p5.sketch = VispySketch(setup_method, draw_method, handlers, frame_rate)
         physical_width, physical_height = p5.sketch.physical_size
@@ -230,28 +231,25 @@ def run(
         preload_method()
         p5.sketch.start()
     else:
-        raise NotImplementedError("Invalid Renderer %s" % renderer)
+        raise NotImplementedError(f"Invalid Renderer {renderer}")
 
 
-def title(new_title):
+def title(new_title: str):
     """Set the title of the p5 window.
 
     :param new_title: new title of the window.
-    :type new_title: str
 
     """
     builtins.title = new_title
     p5.sketch.title = new_title
 
 
-def size(width, height):
+def size(width: int, height: int):
     """Resize the sketch window.
 
     :param width: width of the sketch window.
-    :type width: int
 
     :param height: height of the sketch window.
-    :type height: int
 
     """
 
@@ -316,9 +314,8 @@ def exit():
     before exiting the sketch.
 
     """
-    if not (p5.sketch is None):
-        if builtins.current_renderer == "vispy":
-            p5.sketch.exit()
+    if p5.sketch is not None and builtins.current_renderer == "vispy":
+        p5.sketch.exit()
 
 
 def no_cursor():

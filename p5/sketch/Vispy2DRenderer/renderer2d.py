@@ -111,7 +111,7 @@ class VispyRenderer2D(OpenGLRenderer):
             with self.fbuffer:
                 self.clear()
 
-    def clear(self, color=True, depth=True):
+    def clear(self, color: bool = True, depth: bool = True):
         """Clear the renderer background."""
         gloo.set_state(  # pylint: disable=no-member
             clear_color=self.style.background_color
@@ -255,7 +255,7 @@ class VispyRenderer2D(OpenGLRenderer):
                     len(segment) - 1
                 ):  # the data is sent to renderer in line segments
                     for j in [0, 0, 1, 0, 1, 1]:  # all the vertices of triangles
-                        if i + j - 1 >= 0:
+                        if i + j >= 1:
                             posPrev.append(line[0][segment[i + j - 1]])
                         else:
                             posPrev.append(line[0][segment[i + j]])
@@ -418,7 +418,7 @@ class VispyRenderer2D(OpenGLRenderer):
 
     def text(self, text_string, position, wrap_at):
         multiline = False
-        if not (wrap_at is None):
+        if wrap_at is not None:
             text_string = textwrap.fill(text_string, wrap_at)
             size = self.style.font_family.getsize_multiline(text_string)
             multiline = True

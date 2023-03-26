@@ -30,6 +30,8 @@ from p5.pmath import matrix
 from p5.pmath.vector import Point
 from p5.pmath.utils import SINCOS
 from p5.core import p5
+from typing import List, Tuple, Dict, Set
+
 
 __all__ = ["PShape"]
 
@@ -130,7 +132,7 @@ class PShape:
         self.children = children or []
         self.visible = visible
 
-        self.vertices = list(vertices)
+        self.vertices: List = list(vertices)
         self.shape_type = shape_type
         self.contours = [list(c) for c in contours]  # List of all contours
 
@@ -204,7 +206,7 @@ class PShape:
             self._stroke_cap = stroke
 
     @contextlib.contextmanager
-    def edit(self, reset=True):
+    def edit(self, reset: bool = True):
         """Put the shape in edit mode.
 
         :param reset: Toggles whether the shape should be "reset"
@@ -523,6 +525,6 @@ class Arc(PShape):
                 0,
             )
         )
-        if self.arc_mode == "CHORD" or self.arc_mode == "PIE":
+        if self.arc_mode in ["CHORD", "PIE"]:
             vertices.append(vertices[0])
         self.vertices = vertices

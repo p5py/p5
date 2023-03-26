@@ -19,8 +19,14 @@
 import builtins
 from collections import namedtuple
 from enum import IntEnum
+from dataclasses import dataclass
 
-Position = namedtuple("Position", ["x", "y"])
+
+@dataclass
+class Position:
+    x: float
+    y: float
+
 
 handler_names = [
     "key_pressed",
@@ -77,11 +83,11 @@ class MouseButton:
         return self._buttons == other._buttons
 
     def __neq__(self, other):
-        return not (self == other)
+        return self != other
 
     def __repr__(self):
         fstr = ", ".join(self.buttons)
-        return "MouseButton({})".format(fstr)
+        return f"MouseButton({fstr})"
 
     __str__ = __repr__
 
@@ -105,11 +111,11 @@ class Key:
 
     def __eq__(self, other):
         if isinstance(other, str):
-            return other == self.name or other == self.text
+            return other in [self.name, self.text]
         return self.name == other.name and self.text == other.text
 
     def __neq__(self, other):
-        return not (self == other)
+        return self != other
 
     def __str__(self):
         if self.text.isalnum():
@@ -118,7 +124,7 @@ class Key:
             return self.name
 
     def __repr__(self):
-        return "Key({})".format(self.name)
+        return f"Key({self.name})"
 
 
 class Event:
@@ -134,7 +140,7 @@ class Event:
 
     """
 
-    def __init__(self, raw_event, active=False):
+    def __init__(self, raw_event, active: bool = False):
         self._modifiers = list(map(lambda k: k.name, raw_event.modifiers))
         self._active = active
 
@@ -279,6 +285,6 @@ class MouseEvent(Event):
 
     def __repr__(self):
         press = "pressed" if self.pressed else "not-pressed"
-        return "MouseEvent({} at {})".format(press, self.position)
+        return f"MouseEvent({press} at {self.position})"
 
     __str__ = __repr__
