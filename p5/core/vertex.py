@@ -20,7 +20,7 @@ import builtins
 
 from p5.pmath.vector import Point
 from . import p5
-from .constants import TESS
+from .constants import TESS, SType
 from ..pmath import curves
 import copy
 
@@ -50,11 +50,10 @@ __all__ = [
 ]
 
 
-def begin_shape(kind=TESS):
+def begin_shape(kind: SType = TESS):
     """Begin shape drawing.  This is a helpful way of generating custom shapes quickly.
 
     :param kind: TESS, POINTS, LINES, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP, QUADS, or QUAD_STRIP; defaults to TESS
-    :type kind: SType
     """
     global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
     global curr_contour_vertices, curr_contour_vertices_types
@@ -69,7 +68,7 @@ def begin_shape(kind=TESS):
     curr_contour_vertices_types = []
 
 
-def curve_vertex(x, y, z=0):
+def curve_vertex(x: float, y: float, z: float = 0):
     """
     Specifies vertex coordinates for curves. The first
     and last points in a series of curveVertex() lines
@@ -82,13 +81,10 @@ def curve_vertex(x, y, z=0):
     Catmull-Rom splines.
 
     :param x: x-coordinate of the vertex
-    :type x: float
 
     :param y: y-coordinate of the vertex
-    :type y: float
 
     :param z: z-coordinate of the vertex
-    :type z: float
     """
 
     global is_curve
@@ -96,15 +92,15 @@ def curve_vertex(x, y, z=0):
 
     if p5.mode == "3D":
         return
-    if builtins.current_renderer == "vispy":
+    if builtins.current_renderer == "skia":
+        vertex(x, y)
+    elif builtins.current_renderer == "vispy":
         if is_contour:
             curr_contour_vertices.append((x, y, z))
             curr_contour_vertices_types.append(2)
         else:
             vertices.append((x, y, z))  # False attribute if the vertex is
             vertices_types.append(2)
-    elif builtins.current_renderer == "skia":
-        vertex(x, y)
 
 
 def bezier_vertex(x2: float, y2: float, x3: float, y3: float, x4: float, y4: float):
@@ -346,7 +342,7 @@ def get_quadratic_vertices(verts, vert_types):
     return shape_vertices
 
 
-def end_shape(mode=""):
+def end_shape(mode: str = ""):
     """
     The endShape() function is the companion to beginShape()
     and may only be called after beginShape(). When endshape()
@@ -354,7 +350,6 @@ def end_shape(mode=""):
     to beginShape() is rendered.
 
     :param mode: use CLOSE to close the shape
-    :type mode: str
 
     """
     global is_bezier, is_curve, is_quadratic, is_contour, is_first_contour, in_contour

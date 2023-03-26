@@ -20,6 +20,9 @@
 3D geometry class for p5py
 """
 
+
+import itertools
+from typing import List
 from . import p5
 import numpy as np
 import math
@@ -30,32 +33,30 @@ class Geometry:
         Geometry class for all 3D shapes
 
     :param detail_x: number of triangle subdivisions in x-dimension
-    :type detail_x: integer
 
     :param detail_y: number of triangle subdivisions in y-dimension
-    :type detail_y: integer
 
     """
 
-    def __init__(self, detail_x=1, detail_y=1):
-        self.vertices = []
+    def __init__(self, detail_x: int = 1, detail_y: int = 1):
+        self.vertices: List[int] = []
 
-        self.line_vertices = []
+        self.line_vertices: List = []
 
-        self.line_normals = []
+        self.line_normals: List = []
 
-        self.vertex_normals = []
+        self.vertex_normals: List = []
 
-        self.faces = []
+        self.faces: List[List[int]] = []
 
-        self.uvs = []
+        self.uvs: List = []
         # a 2D array containing edge connectivity pattern for create line vertices
         # based on faces for most objects
-        self.edges = []
+        self.edges: List[List[int]] = []
         self.detail_x = detail_x
         self.detail_y = detail_y
 
-        self.stroke_indices = []
+        self.stroke_indices: List = []
 
         self.matrix = np.identity(4)
         self.material = p5.renderer.style.material
@@ -78,14 +79,13 @@ class Geometry:
         """
         self.faces = []
         sliceCount = self.detail_x + 1
-        for i in range(self.detail_y):
-            for j in range(self.detail_x):
-                a = i * sliceCount + j
-                b = i * sliceCount + j + 1
-                c = (i + 1) * sliceCount + j + 1
-                d = (i + 1) * sliceCount + j
-                self.faces.append([a, b, d])
-                self.faces.append([d, b, c])
+        for i, j in itertools.product(range(self.detail_y), range(self.detail_x)):
+            a = i * sliceCount + j
+            b = i * sliceCount + j + 1
+            c = (i + 1) * sliceCount + j + 1
+            d = (i + 1) * sliceCount + j
+            self.faces.append([a, b, d])
+            self.faces.append([d, b, c])
 
     def make_triangle_edges(self):
         """
@@ -111,19 +111,14 @@ class Geometry:
         ln = np.linalg.norm(n)
 
         sinAlpha = ln / (np.linalg.norm(ab) * np.linalg.norm(ac))
-        if sinAlpha > 1:
-            sinAlpha = 1
-
+        sinAlpha = min(sinAlpha, 1)
         return n * math.sin(sinAlpha) / ln
 
     def compute_normals(self):
         """
         Compute normals for every vertex
         """
-        self.vertex_normals = []
-        for iv in range(len(self.vertices)):
-            self.vertex_normals.append([0, 0, 0])
-
+        self.vertex_normals = [[0, 0, 0] for _ in range(len(self.vertices))]
         for f in range(len(self.faces)):
             face = self.faces[f]
             face_normal = self.get_face_normal(f)

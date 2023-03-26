@@ -82,7 +82,7 @@ def text(*args, wrap_at=None):
     """
     if len(args) == 2:
         text_string, position = args
-    elif len(args) == 3 or len(args) == 4:
+    elif len(args) in {3, 4}:
         text_string, position = args[0], args[1:]
     else:
         raise ValueError("Unexpected number of arguments passed to text()")
@@ -130,11 +130,10 @@ def text_leading(leading):
     p5.renderer.style.text_leading = leading
 
 
-def text_size(size):
+def text_size(size: int):
     """Sets the current font size
 
     :param leading: the size of the letters in units of pixels
-    :type align_x: int
 
     """
 
@@ -142,35 +141,31 @@ def text_size(size):
     p5.renderer.text_size(size)
 
 
-def text_width(text):
+def text_width(text: str) -> int:
     """Calculates and returns the width of any character or text string
 
     :param text_string: text
-    :type text_string: str
 
     :returns: width of any character or text string
-    :rtype: int
 
     """
 
     return p5.renderer.text_width(text)
 
 
-def text_ascent():
+def text_ascent() -> float:
     """Returns ascent of the current font at its current size
 
     :returns: ascent of the current font at its current size
-    :rtype: float
 
     """
     return p5.renderer.text_ascent()
 
 
-def text_descent():
+def text_descent() -> float:
     """Returns descent of the current font at its current size
 
     :returns:  descent of the current font at its current size
-    :rtype: float
 
     """
     return p5.renderer.text_descent()
@@ -190,7 +185,7 @@ def text_style(s):
     return p5.renderer.text_style(s)
 
 
-def text_wrap(wrap_style):
+def text_wrap(wrap_style: str):
     """
     Specifies how lines of text are wrapped within a text box. This requires a wrap_at set on the text area,
     specified in text() as parameter wrap_at. WORD wrap style only breaks lines at spaces. A single string without
@@ -199,6 +194,5 @@ def text_wrap(wrap_style):
     WORD is the default wrap style, and both styles will still break lines at any line breaks (\n) specified in the
     original text.
     :param wrap_style: One of the wrap style mode 'CHAR' or 'WORD'
-    :type wrap_style: str
     """
     p5.renderer.text_wrap(wrap_style)
