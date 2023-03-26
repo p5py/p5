@@ -77,24 +77,21 @@ def draw_shape(shape, pos=(0, 0, 0)):
 
 
 @_draw_on_return
-def box(width, height, depth, detail_x=1, detail_y=1):
+def box(
+    width: float, height: float, depth: float, detail_x: int = 1, detail_y: int = 1
+):
     """
     Draw a plane with given a width and height
 
     :param width: width of the box
-    :type width: float
 
     :param height: height of the box
-    :type height: float
 
     :param depth: depth of the box
-    :type depth: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 1
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 1
-    :type detail_y: integer
     """
 
     geom = Geometry(detail_x, detail_y)
@@ -145,21 +142,17 @@ def box(width, height, depth, detail_x=1, detail_y=1):
 
 
 @_draw_on_return
-def plane(width, height, detail_x=1, detail_y=1):
+def plane(width: float, height: float, detail_x: int = 1, detail_y: int = 1):
     """
     Draw a plane with given a width and height
 
     :param width: width of the plane
-    :type width: float
 
     :param height: height of the plane
-    :type height: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 1
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 1
-    :type detail_y: integer
     """
     geom = Geometry(detail_x, detail_y)
 
@@ -250,10 +243,10 @@ def truncated_cone(
     geom = Geometry(detail_x, detail_y)
 
     bottom_radius = 1 if bottom_radius <= 0 else bottom_radius
-    top_radius = 0 if top_radius < 0 else top_radius
+    top_radius = max(top_radius, 0)
     height = bottom_radius if height <= 0 else height
-    detail_x = 3 if detail_x < 3 else detail_x
-    detail_y = 1 if detail_y < 1 else detail_y
+    detail_x = max(detail_x, 3)
+    detail_y = max(detail_y, 1)
 
     start = -2 if bottom_cap else 0
     end = detail_y + (2 if top_cap else 0)
@@ -279,7 +272,7 @@ def truncated_cone(
             v = 1
             ring_radius = top_radius
 
-        if yy == -2 or yy == detail_y + 2:
+        if yy in [-2, detail_y + 2]:
             # center of bottom or top caps
             ring_radius = 0
 
@@ -316,7 +309,7 @@ def truncated_cone(
 
         start_index += detail_x * 2
 
-    for yy in range(detail_y):
+    for _ in range(detail_y):
         for ii in range(detail_x):
             nextii = (ii + 1) % detail_x
             geom.faces.append(

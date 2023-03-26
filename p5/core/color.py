@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-
+from __future__ import annotations
 import colorsys
 import math
+from typing import Optional, Tuple
 
 from ..pmath import lerp
 from ..pmath import constrain
@@ -28,28 +29,29 @@ from . import p5
 __all__ = ["color_mode", "Color"]
 
 
-def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
+def color_mode(
+    mode: str,
+    max_1: int = 255,
+    max_2: Optional[int] = None,
+    max_3: Optional[int] = None,
+    max_alpha: int = 255,
+):
     """Set the color mode of the renderer.
 
     :param mode: One of {'RGB', 'HSB'} corresponding to Red/Green/Blue
         or Hue/Saturation/Brightness
-    :type mode: str
 
     :param max_1: Maximum value for the first color channel (default:
         255)
-    :type max_1: int
 
     :param max_2: Maximum value for the second color channel (default:
         max_1)
-    :type max_2: int
 
     :param max_3: Maximum value for the third color channel (default:
         max_1)
-    :type max_3: int
 
     :param max_alpha: Maximum value for the alpha channel (default:
         255)
-    :type max_alpha: int
 
     """
     if max_2 is None:
@@ -62,7 +64,7 @@ def color_mode(mode, max_1=255, max_2=None, max_3=None, max_alpha=255):
     p5.renderer.style.color_parse_mode = mode
 
 
-def parse_color(*args, color_mode="RGB", normed=False, **kwargs):
+def parse_color(*args, color_mode="RGB", normed=False, **kwargs) -> Tuple:
     """Parses a color from a range of different input formats.
 
     This assumes that the args and kwargs are in the following form:
@@ -103,19 +105,18 @@ def parse_color(*args, color_mode="RGB", normed=False, **kwargs):
         alpha = kwargs["alpha"]
     elif "a" in kwargs:
         alpha = kwargs["a"]
+    elif normed:
+        alpha = 1
     else:
-        if normed:
-            alpha = 1
-        else:
-            # Color object are sometimes created before we initialise the renderer
-            # So we have to check if the renderer is None or not
-            alpha = p5.renderer.style.color_range[3] if p5.renderer else 255
+        # Color object are sometimes created before we initialise the renderer
+        # So we have to check if the renderer is None or not
+        alpha = p5.renderer.style.color_range[3] if p5.renderer else 255
 
     hsb = None
     rgb = None
 
     if len(args) == 1:
-        if isinstance(args[0], int) or isinstance(args[0], float):
+        if isinstance(args[0], (int, float)):
             gray = args[0]
             rgb = gray, gray, gray
         elif isinstance(args[0], str):
@@ -129,7 +130,7 @@ def parse_color(*args, color_mode="RGB", normed=False, **kwargs):
                 elif name in colour_codes.keys():
                     hexadecimal = colour_codes[name]
                 else:
-                    raise ValueError("Invalid colour name %s" % name)
+                    raise ValueError(f"Invalid colour name {name}")
 
                 alpha = 255
                 _r = int(hexadecimal[1:3], 16)
@@ -176,7 +177,7 @@ def parse_color(*args, color_mode="RGB", normed=False, **kwargs):
     else:
         raise ValueError("Failed to parse color.")
 
-    if not (hsb is None):
+    if hsb is not None:
         h, s, b = hsb
         if not normed:
             h = constrain(
@@ -190,7 +191,7 @@ def parse_color(*args, color_mode="RGB", normed=False, **kwargs):
             )
         red, green, blue = colorsys.hsv_to_rgb(h, s, b)
 
-    if not (rgb is None):
+    if rgb is not None:
         r, g, b = rgb
         if not normed:
             red = constrain(
@@ -259,19 +260,16 @@ class Color:
         self._saturation = s
         self._brightness = b
 
-    def lerp(self, target, amount):
+    def lerp(self, target: Color, amount: float) -> Color:
         """Linearly interpolate one color to another by the given amount.
 
         :param target: The target color to lerp to.
-        :type target: Color
 
         :param amount: The amount by which the color should be lerped
             (should be a float between 0 and 1).
-        :type amount: float
 
         :returns: A new color lerped between the current color and the
             other color.
-        :rtype: Color
 
         """
         lerped = (lerp(s, t, amount) for s, t in zip(self.rgba, target.rgba))
@@ -459,9 +457,7 @@ class Color:
         elif p5.renderer.style.color_parse_mode == "HSB":
             return self.brightness
         else:
-            raise ValueError(
-                "Unknown color mode {}".format(p5.renderer.style.color_parse_mode)
-            )
+            raise ValueError(f"Unknown color mode {p5.renderer.style.color_parse_mode}")
 
     @b.setter
     def b(self, value):
@@ -470,9 +466,7 @@ class Color:
         elif p5.renderer.style.color_parse_mode == "HSB":
             self.brightness = value
         else:
-            raise ValueError(
-                "Unknown color mode {}".format(p5.renderer.style.color_parse_mode)
-            )
+            raise ValueError(f"Unknown color mode {p5.renderer.style.color_parse_mode}")
 
     @property
     def hex(self):
