@@ -78,20 +78,16 @@ PERLIN_PI >>= 1
 PERLIN = None
 
 
-def noise(x, y=0, z=0):
+def noise(x: float, y: float = 0, z: float = 0) -> float:
     """Return perlin noise value at the given location.
 
     :param x: x-coordinate in noise space.
-    :type x: float
 
     :param y: y-coordinate in noise space.
-    :type y: float
 
     :param z: z-coordinate in noise space.
-    :type z: float
 
     :returns: The perlin noise value.
-    :rtype: float
 
     """
     # TODO (abhikpal, 2017-08-04)
@@ -161,29 +157,27 @@ def noise(x, y=0, z=0):
         zf *= 2
 
         if xf >= 1:
-            xi = xi + 1
-            xf = xf - 1
+            xi += 1
+            xf -= 1
 
         if yf >= 1:
-            yi = yi + 1
-            yf = yf - 1
+            yi += 1
+            yf -= 1
 
         if zf >= 1:
-            zi = zi + 1
-            zf = zf - 1
+            zi += 1
+            zf -= 1
 
     return r
 
 
-def noise_detail(octaves=4, falloff=0.5):
+def noise_detail(octaves: int = 4, falloff: float = 0.5):
     """Adjust the level of noise detail produced by noise().
 
     :param octaves: The number of octaves to compute the noise for
         (defaults to 4).
-    :type octaves: int
 
     :param falloff:
-    :type falloff: float
 
     :note: For :code:`falloff` values greater than 0.5,
         :code:`noise()` will return values greater than 1.0.
@@ -197,7 +191,7 @@ def noise_detail(octaves=4, falloff=0.5):
     PERLIN_FALLOFF = constrain(falloff, 0, 1)
 
 
-def noise_seed(seed):
+def noise_seed(seed: int):
     """Set the seed value for :code:`noise()`
 
     By default :code:`noise()` produes different values each time the
@@ -206,7 +200,6 @@ def noise_seed(seed):
     sketch is run.
 
     :param seed: The required seed value.
-    :type seed: int
 
     """
     global PERLIN
@@ -214,45 +207,38 @@ def noise_seed(seed):
     PERLIN = None
 
 
-def random_uniform(high=1, low=0):
+def random_uniform(high: float = 1, low: float = 0) -> float:
     """Return a uniformly sampled random number.
 
     :param high: The upper limit on the random value (defaults to 1).
-    :type high: float
 
     :param low: The lowe limit on the random value (defaults to 0).
-    :type low: float
 
     :returns: A random number between :code:`low` and :code:`high`.
-    :rtype: float
 
     """
     return random.uniform(low, high)
 
 
-def random_gaussian(mean=0, std_dev=1):
+def random_gaussian(mean: float = 0, std_dev: float = 1) -> float:
     """Return a normally sampled random number.
 
     :param mean: The mean value to be used for the normal distribution
         (defaults to 0).
-    :type mean: float
 
     :param std_dev: The standard deviation to be used for the normal
         distribution (defaults to 1).
-    :type std_dev: float
 
     :returns: A random number selected from a normal distribution with
         the given :code:`mean` and :code:`std_dev`.
-    :rtype: float
 
     """
     return random.gauss(mean, std_dev)
 
 
-def random_seed(seed):
+def random_seed(seed: int):
     """Set the seed used to generate random numbers.
 
     :param seed: The required seed value.
-    :type seed: int
     """
     random.seed(seed)

@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-
-from collections import namedtuple
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import Optional
 import numpy as np
+from numpy.typing import NDArray
 from numpy.random import random
 
 __all__ = ["Vector", "Point"]
@@ -25,8 +27,12 @@ __all__ = ["Vector", "Point"]
 # Floating point precision for vectors.
 EPSILON = 1e-8
 
-Point = namedtuple("Point", ["x", "y", "z"])
-Point.__new__.__defaults__ = (None, None, 0)
+
+@dataclass
+class Point:
+    x: Optional[float] = None
+    y: Optional[float] = None
+    z: float = 0
 
 
 class Vector(Point):
@@ -47,60 +53,56 @@ class Vector(Point):
         Vector(2.00, 3.00, 4.00)
 
     :param x: The x-component of the vector.
-    :type x: int or float
 
     :param y: The y-component of the vector.
-    :type y: int or float
 
     :param z: The z-component of the vector (0 by default; only
         required for 3D vectors; )
-    :type z: int or float
 
     """
 
-    def __init__(self, x, y, z=0):
-        self._array = np.array([x, y, z], dtype=np.float32)
+    def __init__(self, x: float, y: float, z: float = 0):
+        self._array: NDArray[np.float32] = np.array([x, y, z], dtype=np.float32)
 
     @property
-    def x(self):
+    def x(self) -> float:
         """The x-component of the point."""
         return self._array[0]
 
     @x.setter
-    def x(self, value):
+    def x(self, value: float):
         self._array[0] = value
 
     @property
-    def y(self):
+    def y(self) -> float:
         """The y-component of the point."""
         return self._array[1]
 
     @y.setter
-    def y(self, value):
+    def y(self, value: float):
         self._array[1] = value
 
     @property
-    def z(self):
+    def z(self) -> float:
         """The z-component of the point."""
         return self._array[2]
 
     @z.setter
-    def z(self, value):
+    def z(self, value: float):
         self._array[2] = value
 
-    def distance(self, other):
+    def distance(self, other: Vector) -> float:
         """Return the distance between two points.
 
         :returns: The distance between the current point and the given
             point.
-        :rtype: float
 
         """
-        return np.sqrt(np.sum((self._array - other._array) ** 2))
+        return np.sqrt(((self._array - other._array) ** 2).sum())
 
     dist = distance
 
-    def lerp(self, other, amount):
+    def lerp(self, other: Vector, amount: float) -> Vector:
         """Linearly interpolate from one point to another.
 
         :param other: Point to be interpolate to.
@@ -115,7 +117,7 @@ class Vector(Point):
         x, y, z = self._array + amount * (other._array - self._array)
         return self.__class__(x, y, z)
 
-    def __add__(self, other):
+    def __add__(self, other: Vector):
         """Add the location of one point to that of another.
 
         Examples::
@@ -134,7 +136,7 @@ class Vector(Point):
         x, y, z = self._array + other._array
         return self.__class__(x, y, z)
 
-    def __sub__(self, other):
+    def __sub__(self, other: Vector):
         """Subtract the location of one point from that of another.
 
         Examples::
@@ -152,7 +154,7 @@ class Vector(Point):
         x, y, z = self._array - other._array
         return self.__class__(x, y, z)
 
-    def __mul__(self, k):
+    def __mul__(self, k: float):
         """Multiply the point by a scalar.
 
         Examples::
@@ -178,14 +180,13 @@ class Vector(Point):
             Vector(1.00, 1.50, 3.00)
 
         :param k:
-        :type k: int, float
         :returns: The vector obtained by multiplying each component of
             `self` by k.
 
         :raises TypeError: When `k` is non-numeric.
 
         """
-        if isinstance(k, int) or isinstance(k, float):
+        if isinstance(k, (int, float)):
             x, y, z = k * self._array
             return self.__class__(x, y, z)
         raise TypeError("Can't multiply/divide a point by a non-numeric.")
@@ -201,7 +202,7 @@ class Vector(Point):
         """Divide the vector by a scalar."""
         return self * (1 / other)
 
-    def cross(self, other):
+    def cross(self, other: Vector) -> Vector:
         """Return the cross product of the two vectors.
 
         Examples::
@@ -212,17 +213,15 @@ class Vector(Point):
             Vector(0.00, 0.00, 1.00)
 
         :param other:
-        :type other: Vector
         :returns: The vector perpendicular to both `self` and `other`
             i.e., the vector obtained by taking the cross product of
             `self` and `other`.
-        :rtype: Vector
 
         """
         x, y, z = np.cross(self._array, other._array)
         return self.__class__(x, y, z)
 
-    def dot(self, other):
+    def dot(self, other: Vector) -> float:
         """Compute the dot product of two vectors.
 
         Examples::
@@ -235,9 +234,7 @@ class Vector(Point):
             48
 
         :param other:
-        :type other: Vector
         :returns: The dot product of the two vectors.
-        :rtype: int or float
 
         """
         return np.dot(self._array, other._array)
@@ -291,11 +288,10 @@ class Vector(Point):
     def angle(self, theta):
         self.rotate(theta - self.angle)
 
-    def rotate(self, theta):
+    def rotate(self, theta: float):
         """Rotates the vector by an angle.
 
         :param theta: Angle (in radians).
-        :type theta: float or int
 
         """
         x = self.x * np.cos(theta) - self.y * np.sin(theta)
@@ -303,7 +299,7 @@ class Vector(Point):
         self.x = x
         self.y = y
 
-    def angle_between(self, other):
+    def angle_between(self, other: Vector) -> float:
         """Calculate the angle between two vectors.
 
         Examples::
@@ -315,10 +311,8 @@ class Vector(Point):
             90.0
 
         :param other:
-        :type other: Vector
 
         :returns: The angle between `self` and `other` (in radians)
-        :rtype: float
 
         """
         return np.arccos(
@@ -326,7 +320,7 @@ class Vector(Point):
         )
 
     @property
-    def magnitude(self):
+    def magnitude(self) -> float:
         """The magnitude of the vector.
 
         Examples::
@@ -354,8 +348,11 @@ class Vector(Point):
         current_magnitude = self.magnitude
         self._array = (new_magnitude * self._array) / current_magnitude
 
+    def mag(self) -> float:
+        return self.magnitude
+
     @property
-    def magnitude_sq(self):
+    def magnitude_sq(self) -> float:
         """The squared magnitude of the vector."""
         return np.dot(self._array, self._array)
 
@@ -374,16 +371,16 @@ class Vector(Point):
         self.magnitude = 1
         return self
 
-    def limit(self, upper_limit=None, lower_limit=None):
+    def limit(
+        self, upper_limit: Optional[float] = None, lower_limit: Optional[float] = None
+    ):
         """Limit the magnitude of the vector to the given range.
 
         :param upper_limit: The upper limit for the limiting range
             (defaults to None).
-        :type upper_limit: float
 
         :param lower_limit: The lower limit for the limiting range
             (defaults to None).
-        :type lower_limit: float
 
         """
         magnitude = self.magnitude
@@ -401,12 +398,11 @@ class Vector(Point):
         return self.dot(other)
 
     @classmethod
-    def from_angle(cls, angle):
+    def from_angle(cls, angle: float):
         """Return a new unit vector with the given angle.
 
         :param angle: Angle to be used to create the vector (in
             radians).
-        :type angle: float
         """
         vec = cls.random_2D()
         vec.angle = angle
@@ -428,20 +424,19 @@ class Vector(Point):
         vec.normalize()
         return vec
 
-    def copy(self):
+    def copy(self) -> Vector:
         """Return a copy of the current point.
 
         :returns: A copy of the current point.
-        :rtype: Vector
 
         """
         x, y, z = self._array
         return self.__class__(x, y, z)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: int, value: float):
         self._array[key] = value
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int):
         return self._array[key]
 
     def __iter__(self):
@@ -454,8 +449,7 @@ class Vector(Point):
             [2, 3, 4]
 
         """
-        for k in self._array:
-            yield k
+        yield from self._array
 
     def __eq__(self, other):
         if hasattr(other, "_array") and self._array.shape == other._array.shape:
@@ -469,7 +463,6 @@ class Vector(Point):
 
     def __repr__(self):
         class_name = self.__class__.__name__
-        fvalues = (class_name, self.x, self.y, self.z)
-        return "{}({:.2f}, {:.2f}, {:.2f})".format(*fvalues)
+        return f"{class_name}({self.x:.2f}, {self.y:.2f}, {self.z:.2f})"
 
     __str__ = __repr__
