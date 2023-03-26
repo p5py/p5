@@ -114,7 +114,7 @@ def rectMode(mode: str = "CORNER"):
     rect_mode(mode)
 
 
-def ellipseMode(mode: str):
+def ellipseMode(mode: str = "CENTER"):
     """Change the ellipse and circle drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing ellipses. Should be one of
@@ -380,7 +380,7 @@ def textFont(font, size=10):
     text_font(font, size)
 
 
-def textAlign(alignX: str, alignY: str = None):
+def textAlign(alignX: str, alignY: Optional[str]):
     """Set the alignment of drawing text
 
     :param alignX: "RIGHT", "CENTER" or "LEFT".
