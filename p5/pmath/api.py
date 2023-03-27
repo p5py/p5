@@ -11,9 +11,7 @@ from .curves import (
     quadratic_point,
 )
 from .rand import noise_detail, noise_seed, random_uniform, random_seed, random_gaussian
-from typing import Union, Tuple
-
-FloatOrNTuple = Union[float, Tuple[float, ...]]
+from ..p5types import FloatOrNTuple
 
 
 def bezierDetail(detailValue: int):

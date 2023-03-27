@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
@@ -33,6 +33,9 @@ class Point:
     x: Optional[float] = None
     y: Optional[float] = None
     z: float = 0
+
+    def __iter__(self):
+        return (getattr(self, field.name) for field in fields(self))
 
 
 class Vector(Point):

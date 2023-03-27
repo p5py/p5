@@ -21,11 +21,10 @@
 
 from collections.abc import Iterable
 from functools import wraps
-from typing import Tuple, Union, Callable
+from typing import Callable
 from ..pmath import Point
 from ..core import p5
-
-FloatOrNTuple = Union[float, Tuple[float, ...]]
+from ..p5types import FloatOrNTuple
 
 __all__ = [
     # BEZIER METHODS
