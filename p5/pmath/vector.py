@@ -32,7 +32,6 @@ Point = namedtuple("Point", ["x", "y", "z"])
 Point.__new__.__defaults__ = (None, None, 0)
 
 
-
 class Vector(Point):
     """Describes a vector in two or three dimensional space.
 
