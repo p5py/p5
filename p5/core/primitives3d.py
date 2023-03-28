@@ -77,24 +77,21 @@ def draw_shape(shape, pos=(0, 0, 0)):
 
 
 @_draw_on_return
-def box(width, height, depth, detail_x=1, detail_y=1):
+def box(
+    width: float, height: float, depth: float, detail_x: int = 1, detail_y: int = 1
+):
     """
     Draw a plane with given a width and height
 
     :param width: width of the box
-    :type width: float
 
     :param height: height of the box
-    :type height: float
 
     :param depth: depth of the box
-    :type depth: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 1
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 1
-    :type detail_y: integer
     """
 
     geom = Geometry(detail_x, detail_y)
@@ -145,21 +142,17 @@ def box(width, height, depth, detail_x=1, detail_y=1):
 
 
 @_draw_on_return
-def plane(width, height, detail_x=1, detail_y=1):
+def plane(width: float, height: float, detail_x: int = 1, detail_y: int = 1):
     """
     Draw a plane with given a width and height
 
     :param width: width of the plane
-    :type width: float
 
     :param height: height of the plane
-    :type height: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 1
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 1
-    :type detail_y: integer
     """
     geom = Geometry(detail_x, detail_y)
 
@@ -180,42 +173,40 @@ def plane(width, height, detail_x=1, detail_y=1):
     return geom
 
 
-def sphere(radius=50, detail_x=24, detail_y=16):
+def sphere(radius: float = 50, detail_x: int = 24, detail_y: int = 16):
     """
     Draw a sphere with given radius
 
     :param radius: radius of circle
-    :type radius: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 24
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 16
-    :type detail_y: integer
     """
 
     return ellipsoid(radius, radius, radius, detail_x, detail_y)
 
 
 @_draw_on_return
-def ellipsoid(radius_x, radius_y, radius_z, detail_x=24, detail_y=24):
+def ellipsoid(
+    radius_x: float,
+    radius_y: float,
+    radius_z: float,
+    detail_x: int = 24,
+    detail_y: int = 24,
+):
     """
     Draw an ellipsoid with given radius
 
     :param radius_x: x-radius of ellipsoid
-    :type radius_x: float
 
     :param radius_y: y-radius of ellipsoid
-    :type radius_y: float
 
     :param radius_z: z-radius of ellipsoid
-    :type radius_z: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 24
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 16
-    :type detail_y: integer
     """
     geom = Geometry(detail_x, detail_y)
 
@@ -250,10 +241,10 @@ def truncated_cone(
     geom = Geometry(detail_x, detail_y)
 
     bottom_radius = 1 if bottom_radius <= 0 else bottom_radius
-    top_radius = 0 if top_radius < 0 else top_radius
+    top_radius = max(top_radius, 0)
     height = bottom_radius if height <= 0 else height
-    detail_x = 3 if detail_x < 3 else detail_x
-    detail_y = 1 if detail_y < 1 else detail_y
+    detail_x = max(detail_x, 3)
+    detail_y = max(detail_y, 1)
 
     start = -2 if bottom_cap else 0
     end = detail_y + (2 if top_cap else 0)
@@ -279,7 +270,7 @@ def truncated_cone(
             v = 1
             ring_radius = top_radius
 
-        if yy == -2 or yy == detail_y + 2:
+        if yy in [-2, detail_y + 2]:
             # center of bottom or top caps
             ring_radius = 0
 
@@ -316,7 +307,7 @@ def truncated_cone(
 
         start_index += detail_x * 2
 
-    for yy in range(detail_y):
+    for _ in range(detail_y):
         for ii in range(detail_x):
             nextii = (ii + 1) % detail_x
             geom.faces.append(
@@ -352,28 +343,27 @@ def truncated_cone(
 
 @_draw_on_return
 def cylinder(
-    radius=50, height=50, detail_x=24, detail_y=1, top_cap=True, bottom_cap=True
+    radius: float = 50,
+    height: float = 50,
+    detail_x: int = 24,
+    detail_y: int = 1,
+    top_cap: bool = True,
+    bottom_cap: bool = True,
 ):
     """
     Draw a cylinder with given radius and height
 
     :param radius: radius of the surface
-    :type radius: float
 
     :param height: height of the cylinder
-    :type height: float
 
     :param detail_x: Number of segments, the more segments the smoother geometry. Default is 24
-    :type detail_x: integer
 
     :param detail_y: number of segments in y-dimension, the more segments the smoother geometry. Default is 1
-    :type detail_y: integer
 
     :param bottom_cap: whether to draw the bottom of the cylinder
-    :type bottom_cap: boolean
 
     :param top_cap: whether to draw the top of the cylinder
-    :type top_cap: boolean
     """
 
     geom = truncated_cone(1, 1, 1, detail_x, detail_y, bottom_cap, top_cap)
@@ -386,21 +376,23 @@ def cylinder(
 
 
 @_draw_on_return
-def cone(radius=50, height=50, detail_x=24, detail_y=1, cap=True):
+def cone(
+    radius: float = 50,
+    height: float = 50,
+    detail_x: int = 24,
+    detail_y: int = 1,
+    cap: bool = True,
+):
     """
     Draw a cone with given radius and height
 
     :param radius: radius of the bottom surface
-    :type radius: float
 
     :param height: height of the cone
-    :type height: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 24
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 1
-    :type detail_y: integer
     """
     geom = truncated_cone(1, 0, 1, detail_x, detail_y, cap, False)
 
@@ -412,21 +404,19 @@ def cone(radius=50, height=50, detail_x=24, detail_y=1, cap=True):
 
 
 @_draw_on_return
-def torus(radius=50, tube_radius=10, detail_x=24, detail_y=16):
+def torus(
+    radius: float = 50, tube_radius: float = 10, detail_x: int = 24, detail_y: int = 16
+):
     """
     Draws torus on the window
 
     :param radius: radius of the whole ring
-    :type radius: float
 
     :param tube_radius: radius of the tube
-    :type tube_radius: float
 
     :param detail_x: Optional number of triangle subdivisions in x-dimension. Default is 24
-    :type detail_x: integer
 
     :param detail_y: Optional number of triangle subdivisions in y-dimension. Default is 16
-    :type detail_y: integer
     """
     tube_ratio = tube_radius / radius
     geom = Geometry(detail_x, detail_y)

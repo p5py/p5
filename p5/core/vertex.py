@@ -20,7 +20,7 @@ import builtins
 
 from p5.pmath.vector import Point
 from . import p5
-from .constants import TESS
+from .constants import TESS, SType
 from ..pmath import curves
 import copy
 
@@ -50,11 +50,10 @@ __all__ = [
 ]
 
 
-def begin_shape(kind=TESS):
+def begin_shape(kind: SType = TESS):
     """Begin shape drawing.  This is a helpful way of generating custom shapes quickly.
 
     :param kind: TESS, POINTS, LINES, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP, QUADS, or QUAD_STRIP; defaults to TESS
-    :type kind: SType
     """
     global shape_kind, vertices, contour_vertices, vertices_types, contour_vertices_types, is_contour
     global curr_contour_vertices, curr_contour_vertices_types
@@ -69,7 +68,7 @@ def begin_shape(kind=TESS):
     curr_contour_vertices_types = []
 
 
-def curve_vertex(x, y, z=0):
+def curve_vertex(x: float, y: float, z: float = 0):
     """
     Specifies vertex coordinates for curves. The first
     and last points in a series of curveVertex() lines
@@ -82,13 +81,10 @@ def curve_vertex(x, y, z=0):
     Catmull-Rom splines.
 
     :param x: x-coordinate of the vertex
-    :type x: float
 
     :param y: y-coordinate of the vertex
-    :type y: float
 
     :param z: z-coordinate of the vertex
-    :type z: float
     """
 
     global is_curve
@@ -96,38 +92,32 @@ def curve_vertex(x, y, z=0):
 
     if p5.mode == "3D":
         return
-    if builtins.current_renderer == "vispy":
+    if builtins.current_renderer == "skia":
+        vertex(x, y)
+    elif builtins.current_renderer == "vispy":
         if is_contour:
             curr_contour_vertices.append((x, y, z))
             curr_contour_vertices_types.append(2)
         else:
             vertices.append((x, y, z))  # False attribute if the vertex is
             vertices_types.append(2)
-    elif builtins.current_renderer == "skia":
-        vertex(x, y)
 
 
-def bezier_vertex(x2, y2, x3, y3, x4, y4):
+def bezier_vertex(x2: float, y2: float, x3: float, y3: float, x4: float, y4: float):
     """
     Specifies vertex coordinates for Bezier curves
 
     :param x2: x-coordinate of the first control point
-    :type x2: float
 
     :param y2: y-coordinate of the first control point
-    :type y2: float
 
     :param x3: x-coordinate of the second control point
-    :type x3: float
 
     :param y3: y-coordinate of the second control point
-    :type y3: float
 
     :param x4: x-coordinate of the anchor point
-    :type x4: float
 
     :param y4: y-coordinate of the anchor point
-    :type y4: float
     """
     global is_bezier
     is_bezier = True
@@ -149,21 +139,17 @@ def bezier_vertex(x2, y2, x3, y3, x4, y4):
             vertices.append(vert_data)
 
 
-def quadratic_vertex(cx, cy, x3, y3):
+def quadratic_vertex(cx: float, cy: float, x3: float, y3: float):
     """
     Specifies vertex coordinates for quadratic Bezier curves
 
     :param cx: x-coordinate of the control point
-    :type cx: float
 
     :param cy: y-coordinate of the control point
-    :type cy: float
 
     :param x3: x-coordinate of the anchor point
-    :type x3: float
 
     :param y3: y-coordinate of the anchor point
-    :type y3: float
 
     """
 
@@ -187,7 +173,7 @@ def quadratic_vertex(cx, cy, x3, y3):
             vertices.append(vert_data)
 
 
-def vertex(x, y, z=0):
+def vertex(x: float, y: float, z: float = 0):
     """
     All shapes are constructed by connecting a series of
     vertices. vertex() is used to specify the vertex
@@ -196,13 +182,10 @@ def vertex(x, y, z=0):
     beginShape() and endShape() functions.
 
     :param x: x-coordinate of the vertex
-    :type x: float
 
     :param y: y-coordinate of the vertex
-    :type y: float
 
     :param z: z-coordinate of the vertex
-    :type z: float
     """
     if p5.mode == "3D":
         return
@@ -296,10 +279,7 @@ def get_curve_vertices(verts):
 
     for i in range(1, len(verts) - 2):
         v = verts[i]
-        start = (
-            shape_vertices[len(shape_vertices) - 1][0],
-            shape_vertices[len(shape_vertices) - 1][1],
-        )
+        start = shape_vertices[-1][0], shape_vertices[-1][1]
         c1 = [
             v[0] + (s * verts[i + 1][0] - s * verts[i - 1][0]) / 6,
             v[1] + (s * verts[i + 1][1] - s * verts[i - 1][1]) / 6,
@@ -325,17 +305,14 @@ def get_bezier_vertices(verts, vert_types):
     shape_vertices = []
     steps = curves.curve_resolution
     for i in range(len(verts)):
-        if vert_types[i] == 1 or vert_types[i] == 2:
+        if vert_types[i] in [1, 2]:
             shape_vertices.append((verts[i][0], verts[i][1], 0.0))
         else:
-            start = (
-                shape_vertices[len(shape_vertices) - 1][0],
-                shape_vertices[len(shape_vertices) - 1][1],
-            )
             c1 = [verts[i][0], verts[i][1]]
             c2 = [verts[i][2], verts[i][3]]
             stop = [verts[i][4], verts[i][5]]
 
+            start = shape_vertices[-1][0], shape_vertices[-1][1]
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.bezier_point(start, c1, c2, stop, t)
@@ -350,16 +327,13 @@ def get_quadratic_vertices(verts, vert_types):
     shape_vertices = []
     steps = curves.curve_resolution
     for i in range(len(verts)):
-        if vert_types[i] == 1 or vert_types[i] == 2:
+        if vert_types[i] in [1, 2]:
             shape_vertices.append((verts[i][0], verts[i][1], 0.0))
         else:
-            start = (
-                shape_vertices[len(shape_vertices) - 1][0],
-                shape_vertices[len(shape_vertices) - 1][1],
-            )
             control = [verts[i][0], verts[i][1]]
             stop = [verts[i][2], verts[i][3]]
 
+            start = shape_vertices[-1][0], shape_vertices[-1][1]
             for i in range(steps + 1):
                 t = i / steps
                 p = curves.quadratic_point(start, control, stop, t)
@@ -368,7 +342,7 @@ def get_quadratic_vertices(verts, vert_types):
     return shape_vertices
 
 
-def end_shape(mode=""):
+def end_shape(mode: str = ""):
     """
     The endShape() function is the companion to beginShape()
     and may only be called after beginShape(). When endshape()
@@ -376,7 +350,6 @@ def end_shape(mode=""):
     to beginShape() is rendered.
 
     :param mode: use CLOSE to close the shape
-    :type mode: str
 
     """
     global is_bezier, is_curve, is_quadratic, is_contour, is_first_contour, in_contour
