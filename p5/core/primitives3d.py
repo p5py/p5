@@ -18,6 +18,7 @@
 
 import math
 import functools
+from typing import Callable
 from .geometry import Geometry
 from . import p5
 from ..pmath import matrix
@@ -45,7 +46,7 @@ MAX_POINT_ACCURACY = 200
 POINT_ACCURACY_FACTOR = 10
 
 
-def _draw_on_return(func):
+def _draw_on_return(func: Callable):
     """Set shape parameters to default renderer parameters"""
 
     @functools.wraps(func)
@@ -236,7 +237,13 @@ def ellipsoid(
 
 
 def truncated_cone(
-    bottom_radius, top_radius, height, detail_x, detail_y, bottom_cap, top_cap
+    bottom_radius: float,
+    top_radius: float,
+    height: float,
+    detail_x: int,
+    detail_y: int,
+    bottom_cap: bool,
+    top_cap: bool,
 ):
     geom = Geometry(detail_x, detail_y)
 
