@@ -64,7 +64,9 @@ def color_mode(
     p5.renderer.style.color_parse_mode = mode
 
 
-def parse_color(*args, color_mode="RGB", normed: bool = False, **kwargs) -> Tuple:
+def parse_color(
+    *args, color_mode: str = "RGB", normed: bool = False, **kwargs
+) -> Tuple[float, float, float, float]:
     """Parses a color from a range of different input formats.
 
     This assumes that the args and kwargs are in the following form:
@@ -97,7 +99,6 @@ def parse_color(*args, color_mode="RGB", normed: bool = False, **kwargs) -> Tupl
     :type kwargs: dict
 
     :returns: The color parsed as red, green, blue, alpha values.
-    :rtype: tuple
 
     """
 
@@ -221,7 +222,9 @@ class Color:
     Represents a color.
     """
 
-    def __init__(self, *args, color_mode=None, normed=False, **kwargs):
+    def __init__(
+        self, *args, color_mode: Optional[str] = None, normed: bool = False, **kwargs
+    ):
         if color_mode is None:
             color_mode = p5.renderer.style.color_parse_mode if p5.renderer else "RGB"
 
@@ -239,10 +242,10 @@ class Color:
             r, g, b, a = parse_color(
                 *args, color_mode=color_mode, normed=normed, **kwargs
             )
-        self._red = r
-        self._green = g
-        self._blue = b
-        self._alpha = a
+        self._red: float = r
+        self._green: float = g
+        self._blue: float = b
+        self._alpha: float = a
 
         self._recompute_hsb()
 
@@ -276,8 +279,7 @@ class Color:
         return Color(*lerped, color_mode="RGB")
 
     def __repr__(self):
-        fvalues = self._red, self._green, self._blue
-        return "Color( red={}, green={}, blue={} )".format(*fvalues)
+        return f"Color( red={self._red}, green={self._green}, blue={self._blue} )"
 
     __str__ = __repr__
 
@@ -331,7 +333,7 @@ class Color:
         return norm_gray * 255
 
     @gray.setter
-    def gray(self, value):
+    def gray(self, value: float):
         value = constrain(value / 255, 0, 1)
         self._red = value
         self._green = value
@@ -344,7 +346,7 @@ class Color:
         return self._alpha * p5.renderer.style.color_range[3]
 
     @alpha.setter
-    def alpha(self, value):
+    def alpha(self, value: float):
         self._alpha = constrain(value / p5.renderer.style.color_range[3], 0, 1)
 
     @property
@@ -369,7 +371,7 @@ class Color:
         return self._red * p5.renderer.style.color_range[0]
 
     @red.setter
-    def red(self, value):
+    def red(self, value: float):
         self._red = constrain(value / p5.renderer.style.color_range[0], 0, 1)
         self._recompute_hsb()
 
@@ -379,7 +381,7 @@ class Color:
         return self._green * p5.renderer.style.color_range[1]
 
     @green.setter
-    def green(self, value):
+    def green(self, value: float):
         self._green = constrain(value / p5.renderer.style.color_range[1], 0, 1)
         self._recompute_hsb()
 
@@ -389,7 +391,7 @@ class Color:
         return self._blue * p5.renderer.style.color_range[2]
 
     @blue.setter
-    def blue(self, value):
+    def blue(self, value: float):
         self._blue = constrain(value / p5.renderer.style.color_range[2], 0, 1)
         self._recompute_hsb()
 
@@ -415,7 +417,7 @@ class Color:
         return self._hue * p5.renderer.style.color_range[0]
 
     @hue.setter
-    def hue(self, value):
+    def hue(self, value: float):
         self._hue = constrain(value / p5.renderer.style.color_range[0], 0, 1)
         self._recompute_rgb()
 
@@ -425,7 +427,7 @@ class Color:
         return self._saturation * p5.renderer.style.color_range[1]
 
     @saturation.setter
-    def saturation(self, value):
+    def saturation(self, value: float):
         self._saturation = constrain(value / p5.renderer.style.color_range[1], 0, 1)
         self._recompute_rgb()
 
@@ -435,7 +437,7 @@ class Color:
         return self._brightness * p5.renderer.style.color_range[2]
 
     @brightness.setter
-    def brightness(self, value):
+    def brightness(self, value: float):
         self._brightness = constrain(value / p5.renderer.style.color_range[2], 0, 1)
         self._recompute_rgb()
 
@@ -460,7 +462,7 @@ class Color:
             raise ValueError(f"Unknown color mode {p5.renderer.style.color_parse_mode}")
 
     @b.setter
-    def b(self, value):
+    def b(self, value: float):
         if p5.renderer.style.color_parse_mode == "RGB":
             self.blue = value
         elif p5.renderer.style.color_parse_mode == "HSB":
