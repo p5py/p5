@@ -18,6 +18,8 @@
 
 import math
 import builtins
+from typing import Optional, Tuple, overload
+
 
 from ..pmath import Point
 from ..pmath import curves
@@ -28,6 +30,7 @@ from .constants import ROUND, SQUARE, PROJECT
 from . import p5
 
 from ..sketch.Skia2DRenderer.util import should_draw, mode_adjust
+
 
 __all__ = [
     "point",
@@ -47,17 +50,14 @@ __all__ = [
 ]
 
 
-def point(x, y, z=0):
+def point(x: float, y: float, z: float = 0):
     """Returns a point.
 
     :param x: x-coordinate of the shape.
-    :type x: int or float
 
     :param y: y-coordinate of the shape.
-    :type y: int or float
 
     :param z: z-coordinate of the shape (defaults to 0).
-    :type z: int or float
 
     :returns: A point PShape.
     :rtype: PShape
@@ -76,37 +76,64 @@ def point(x, y, z=0):
             p5.renderer.point(x, y)
 
 
-def line(*args):
+@overload
+def line(
+    p1: Tuple,
+    p2: Tuple,
+):
+    """Returns a line.
+    :param p1: Coordinates of the starting point of the line.
+
+    :param p2: Coordinates of the end point of the line.
+
+    :returns: A line PShape.
+    :rtype: PShape"""
+    ...
+
+
+@overload
+def line(x1: float, y1: float, x2: float, y2: float):
     """Returns a line.
 
     :param x1: x-coordinate of the first point
-    :type x1: float
 
     :param y1: y-coordinate of the first point
-    :type y1: float
-
-    :param z1: z-coordinate of the first point
-    :type z1: float
 
     :param x2: x-coordinate of the first point
-    :type x2: float
 
     :param y2: y-coordinate of the first point
-    :type y2: float
-
-    :param z2: z-coordinate of the first point
-    :type z2: float
-
-    :param p1: Coordinates of the starting point of the line.
-    :type p1: tuple
-
-    :param p2: Coordinates of the end point of the line.
-    :type p2: tuple
 
     :returns: A line PShape.
     :rtype: PShape
 
     """
+    ...
+
+
+@overload
+def line(x1: float, y1: float, z1: float, x2: float, y2: float, z2: float):
+    """Returns a line.
+
+    :param x1: x-coordinate of the first point
+
+    :param y1: y-coordinate of the first point
+
+    :param z1: z-coordinate of the first point
+
+    :param x2: x-coordinate of the first point
+
+    :param y2: y-coordinate of the first point
+
+    :param z2: z-coordinate of the first point
+
+    :returns: A line PShape.
+    :rtype: PShape
+
+    """
+    ...
+
+
+def line(*args):
     if len(args) == 2:
         p1, p2 = args[0], args[1]
     elif len(args) == 4:
@@ -120,63 +147,112 @@ def line(*args):
     p5.renderer.line(path)
 
 
-def bezier(*args):
+@overload
+def bezier(start: Tuple, control_point_1: Tuple, control_point_2: Tuple, stop: Tuple):
     """Return a bezier path defined by two control points.
 
-    :param x1: x-coordinate of the first anchor point
-    :type x1: float
-
-    :param y1: y-coordinate of the first anchor point
-    :type y1: float
-
-    :param z1: z-coordinate of the first anchor point
-    :type z1: float
-
-    :param x2: x-coordinate of the first control point
-    :type x2: float
-
-    :param y2: y-coordinate of the first control point
-    :type y2: float
-
-    :param z2: z-coordinate of the first control point
-    :type z2: float
-
-    :param x3: x-coordinate of the second control point
-    :type x3: float
-
-    :param y3: y-coordinate of the second control point
-    :type y3: float
-
-    :param z3: z-coordinate of the second control point
-    :type z3: float
-
-    :param x4: x-coordinate of the second anchor point
-    :type x4: float
-
-    :param y4: y-coordinate of the second anchor point
-    :type y4: float
-
-    :param z4: z-coordinate of the second anchor point
-    :type z4: float
-
     :param start: The starting point of the bezier curve.
-    :type start: tuple.
 
     :param control_point_1: The first control point of the bezier
         curve.
-    :type control_point_1: tuple.
 
     :param control_point_2: The second control point of the bezier
         curve.
-    :type control_point_2: tuple.
 
     :param stop: The end point of the bezier curve.
-    :type stop: tuple.
 
     :returns: A bezier path.
     :rtype: PShape.
 
     """
+    ...
+
+
+@overload
+def bezier(
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    x3: float,
+    y3: float,
+    x4: float,
+    y4: float,
+):
+    """Return a bezier path defined by two control points.
+
+    :param x1: x-coordinate of the first anchor point
+
+    :param y1: y-coordinate of the first anchor point
+
+    :param x2: x-coordinate of the first control point
+
+    :param y2: y-coordinate of the first control point
+
+    :param x3: x-coordinate of the second control point
+
+    :param y3: y-coordinate of the second control point
+
+    :param x4: x-coordinate of the second anchor point
+
+    :param y4: y-coordinate of the second anchor point
+
+    :returns: A bezier path.
+    :rtype: PShape.
+
+    """
+    ...
+
+
+@overload
+def bezier(
+    x1: float,
+    y1: float,
+    z1: float,
+    x2: float,
+    y2: float,
+    z2: float,
+    x3: float,
+    y3: float,
+    z3: float,
+    x4: float,
+    y4: float,
+    z4: float,
+):
+    """Return a bezier path defined by two control points.
+
+    :param x1: x-coordinate of the first anchor point
+
+    :param y1: y-coordinate of the first anchor point
+
+    :param z1: z-coordinate of the first anchor point
+
+    :param x2: x-coordinate of the first control point
+
+    :param y2: y-coordinate of the first control point
+
+    :param z2: z-coordinate of the first control point
+
+    :param x3: x-coordinate of the second control point
+
+    :param y3: y-coordinate of the second control point
+
+    :param z3: z-coordinate of the second control point
+
+    :param x4: x-coordinate of the second anchor point
+
+    :param y4: y-coordinate of the second anchor point
+
+    :param z4: z-coordinate of the second anchor point
+
+    :returns: A bezier path.
+    :rtype: PShape.
+
+    """
+    ...
+
+
+def bezier(*args):
     if len(args) == 4:
         start, control_point_1, control_point_2, stop = args
     elif len(args) == 8:
@@ -206,61 +282,110 @@ def bezier(*args):
     p5.renderer.bezier(vertices)
 
 
-def curve(*args):
+@overload
+def curve(point_1: Tuple, point_2: Tuple, point_3: Tuple, point_4: Tuple):
     """Return a Catmull-Rom curve defined by four points.
 
-    :param x1: x-coordinate of the beginning control point
-    :type x1: float
-
-    :param y1: y-coordinate of the beginning control point
-    :type y1: float
-
-    :param z1: z-coordinate of the beginning control point
-    :type z1: float
-
-    :param x2: x-coordinate of the first point
-    :type x2: float
-
-    :param y2: y-coordinate of the first point
-    :type y2: float
-
-    :param z2: z-coordinate of the first point
-    :type z2: float
-
-    :param x3: x-coordinate of the second point
-    :type x3: float
-
-    :param y3: y-coordinate of the second point
-    :type y3: float
-
-    :param z3: z-coordinate of the second point
-    :type z3: float
-
-    :param x4: x-coordinate of the ending control point
-    :type x4: float
-
-    :param y4: y-coordinate of the ending control point
-    :type y4: float
-
-    :param z4: z-coordinate of the ending control point
-    :type z4: float
-
     :param point_1: The first point of the curve.
-    :type point_1: tuple
 
     :param point_2: The first point of the curve.
-    :type point_2: tuple
 
     :param point_3: The first point of the curve.
-    :type point_3: tuple
 
     :param point_4: The first point of the curve.
-    :type point_4: tuple
 
     :returns: A curved path.
     :rtype: PShape
 
     """
+    ...
+
+
+@overload
+def curve(
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    x3: float,
+    y3: float,
+    x4: float,
+    y4: float,
+):
+    """Return a Catmull-Rom curve defined by four points.
+
+    :param x1: x-coordinate of the beginning control point
+
+    :param y1: y-coordinate of the beginning control point
+
+    :param x2: x-coordinate of the first point
+
+    :param y2: y-coordinate of the first point
+
+    :param x3: x-coordinate of the second point
+
+    :param y3: y-coordinate of the second point
+
+    :param x4: x-coordinate of the ending control point
+
+    :param y4: y-coordinate of the ending control point
+
+    :returns: A curved path.
+    :rtype: PShape
+
+    """
+    ...
+
+
+@overload
+def curve(
+    x1: float,
+    y1: float,
+    z1: float,
+    x2: float,
+    y2: float,
+    z2: float,
+    x3: float,
+    y3: float,
+    z3: float,
+    x4: float,
+    y4: float,
+    z4: float,
+):
+    """Return a Catmull-Rom curve defined by four points.
+
+    :param x1: x-coordinate of the beginning control point
+
+    :param y1: y-coordinate of the beginning control point
+
+    :param z1: z-coordinate of the beginning control point
+
+    :param x2: x-coordinate of the first point
+
+    :param y2: y-coordinate of the first point
+
+    :param z2: z-coordinate of the first point
+
+    :param x3: x-coordinate of the second point
+
+    :param y3: y-coordinate of the second point
+
+    :param z3: z-coordinate of the second point
+
+    :param x4: x-coordinate of the ending control point
+
+    :param y4: y-coordinate of the ending control point
+
+    :param z4: z-coordinate of the ending control point
+
+    :returns: A curved path.
+    :rtype: PShape
+
+    """
+    ...
+
+
+def curve(*args):
     if len(args) == 4:
         point_1, point_2, point_3, point_4 = args
     elif len(args) == 8:
@@ -280,26 +405,31 @@ def curve(*args):
     p5.renderer.curve(vertices)
 
 
-def triangle(*args):
+@overload
+def triangle(x1: float, y1: float, x2: float, y2: float, x3: float, y3: float):
     """Return a triangle.
 
     :param x1: x-coordinate of the first point
-    :type x1: float
 
     :param y1: y-coordinate of the first point
-    :type y1: float
 
     :param x2: x-coordinate of the second point
-    :type x2: float
 
     :param y2: y-coordinate of the second point
-    :type y2: float
 
     :param x3: x-coordinate of the third point
-    :type x3: float
 
     :param y3: y-coordinate of the third point
-    :type y3: float
+
+    :returns: A triangle.
+    :rtype: p5.PShape
+    """
+    ...
+
+
+@overload
+def triangle(p1, p2, p3):
+    """Return a triangle.
 
     :param p1: coordinates of the first point of the triangle
     :type p1: tuple | list | p5.Vector
@@ -313,6 +443,10 @@ def triangle(*args):
     :returns: A triangle.
     :rtype: p5.PShape
     """
+    ...
+
+
+def triangle(*args):
     if len(args) == 6:
         p1, p2, p3 = args[:2], args[2:4], args[4:]
     elif len(args) == 3:
@@ -327,32 +461,44 @@ def triangle(*args):
             p5.renderer.triangle(*p1, *p2, *p3)
 
 
-def quad(*args):
+@overload
+def quad(
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    x3: float,
+    y3: float,
+    x4: float,
+    y4: float,
+):
     """Return a quad.
 
     :param x1: x-coordinate of the first point
-    :type x1: float
 
     :param y1: y-coordinate of the first point
-    :type y1: float
 
     :param x2: x-coordinate of the second point
-    :type x2: float
 
     :param y2: y-coordinate of the second point
-    :type y2: float
 
     :param x3: x-coordinate of the third point
-    :type x3: float
 
     :param y3: y-coordinate of the third point
-    :type y3: float
 
     :param x4: x-coordinate of the forth point
-    :type x4: float
 
     :param y4: y-coordinate of the forth point
-    :type y4: float
+
+    :returns: A quad.
+    :rtype: PShape
+    """
+    ...
+
+
+@overload
+def quad(p1, p2, p3, p4):
+    """Return a quad.
 
     :param p1: coordinates of the first point of the quad
     :type p1: tuple | list | p5.Vector
@@ -369,6 +515,10 @@ def quad(*args):
     :returns: A quad.
     :rtype: PShape
     """
+    ...
+
+
+def quad(*args):
     if len(args) == 8:
         p1, p2, p3, p4 = args[:2], args[2:4], args[4:6], args[6:]
     elif len(args) == 4:
@@ -387,7 +537,7 @@ def quad(*args):
         p5.renderer.quad(x1, y1, x2, y2, x3, y3, x4, y4)
 
 
-def rect(*args, mode=None):
+def rect(*args, mode: Optional[str] = None):
     """Return a rectangle.
 
     :param x: x-coordinate of the rectangle by default
@@ -420,7 +570,6 @@ def rect(*args, mode=None):
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'} (defaults to the
         mode being used by the p5.renderer.)
 
-    :type mode: str
 
     :returns: A rectangle.
     :rtype: p5.PShape
@@ -540,20 +689,19 @@ def square(*args, mode=None):
             rect(x, y, side, side)
 
 
-def rect_mode(mode="CORNER"):
+def rect_mode(mode: str = "CORNER"):
     """Change the rect and square drawing mode for the p5.renderer.
 
     :param mode: The new mode for drawing rects. Should be one of
         {'CORNER', 'CORNERS', 'CENTER', 'RADIUS'}. This defaults to
         'CORNER' so calling rect_mode without parameters will reset
         the sketch's rect mode.
-    :type mode: str
 
     """
     p5.renderer.style.rect_mode = mode
 
 
-def arc(*args, mode=None, ellipse_mode=None):
+def arc(*args, mode: Optional[str] = None, ellipse_mode: Optional[str] = None):
     """Return a ellipse.
 
     :param x: x-coordinate of the arc's ellipse.
@@ -584,13 +732,9 @@ def arc(*args, mode=None, ellipse_mode=None):
 
     :param mode: The mode used to draw an arc can be any of {None, 'OPEN', 'CHORD', 'PIE'}.
 
-    :type mode: str
-
     :param ellipse_mode: The drawing mode used for the ellipse. Should be one of
         {'CORNER', 'CENTER', 'RADIUS'} (defaults to the
         mode being used by the p5.renderer.)
-
-    :type mode: str
 
     :returns: An arc.
     :rtype: Arc
