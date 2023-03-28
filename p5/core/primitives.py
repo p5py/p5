@@ -99,9 +99,9 @@ def line(x1: float, y1: float, x2: float, y2: float):
 
     :param y1: y-coordinate of the first point
 
-    :param x2: x-coordinate of the first point
+    :param x2: x-coordinate of the second point
 
-    :param y2: y-coordinate of the first point
+    :param y2: y-coordinate of the second point
 
     :returns: A line PShape.
     :rtype: PShape
@@ -120,11 +120,11 @@ def line(x1: float, y1: float, z1: float, x2: float, y2: float, z2: float):
 
     :param z1: z-coordinate of the first point
 
-    :param x2: x-coordinate of the first point
+    :param x2: x-coordinate of the second point
 
-    :param y2: y-coordinate of the first point
+    :param y2: y-coordinate of the second point
 
-    :param z2: z-coordinate of the first point
+    :param z2: z-coordinate of the second point
 
     :returns: A line PShape.
     :rtype: PShape
@@ -185,17 +185,17 @@ def bezier(
 
     :param y1: y-coordinate of the first anchor point
 
-    :param x2: x-coordinate of the first control point
+    :param x2: x-coordinate of the second control point
 
-    :param y2: y-coordinate of the first control point
+    :param y2: y-coordinate of the second control point
 
-    :param x3: x-coordinate of the second control point
+    :param x3: x-coordinate of the third control point
 
-    :param y3: y-coordinate of the second control point
+    :param y3: y-coordinate of the third control point
 
-    :param x4: x-coordinate of the second anchor point
+    :param x4: x-coordinate of the fourth anchor point
 
-    :param y4: y-coordinate of the second anchor point
+    :param y4: y-coordinate of the fourth anchor point
 
     :returns: A bezier path.
     :rtype: PShape.
@@ -227,23 +227,23 @@ def bezier(
 
     :param z1: z-coordinate of the first anchor point
 
-    :param x2: x-coordinate of the first control point
+    :param x2: x-coordinate of the second control point
 
-    :param y2: y-coordinate of the first control point
+    :param y2: y-coordinate of the second control point
 
-    :param z2: z-coordinate of the first control point
+    :param z2: z-coordinate of the second control point
 
-    :param x3: x-coordinate of the second control point
+    :param x3: x-coordinate of the third control point
 
-    :param y3: y-coordinate of the second control point
+    :param y3: y-coordinate of the third control point
 
-    :param z3: z-coordinate of the second control point
+    :param z3: z-coordinate of the third control point
 
-    :param x4: x-coordinate of the second anchor point
+    :param x4: x-coordinate of the fourth anchor point
 
-    :param y4: y-coordinate of the second anchor point
+    :param y4: y-coordinate of the fourth anchor point
 
-    :param z4: z-coordinate of the second anchor point
+    :param z4: z-coordinate of the fourth anchor point
 
     :returns: A bezier path.
     :rtype: PShape.
@@ -288,11 +288,11 @@ def curve(point_1: Tuple, point_2: Tuple, point_3: Tuple, point_4: Tuple):
 
     :param point_1: The first point of the curve.
 
-    :param point_2: The first point of the curve.
+    :param point_2: The second point of the curve.
 
-    :param point_3: The first point of the curve.
+    :param point_3: The third point of the curve.
 
-    :param point_4: The first point of the curve.
+    :param point_4: The fourth point of the curve.
 
     :returns: A curved path.
     :rtype: PShape
@@ -360,17 +360,17 @@ def curve(
 
     :param z1: z-coordinate of the beginning control point
 
-    :param x2: x-coordinate of the first point
+    :param x2: x-coordinate of the second point
 
-    :param y2: y-coordinate of the first point
+    :param y2: y-coordinate of the second point
 
-    :param z2: z-coordinate of the first point
+    :param z2: z-coordinate of the second point
 
-    :param x3: x-coordinate of the second point
+    :param x3: x-coordinate of the third point
 
-    :param y3: y-coordinate of the second point
+    :param y3: y-coordinate of the third point
 
-    :param z3: z-coordinate of the second point
+    :param z3: z-coordinate of the third point
 
     :param x4: x-coordinate of the ending control point
 
@@ -486,9 +486,9 @@ def quad(
 
     :param y3: y-coordinate of the third point
 
-    :param x4: x-coordinate of the forth point
+    :param x4: x-coordinate of the fourth point
 
-    :param y4: y-coordinate of the forth point
+    :param y4: y-coordinate of the fourth point
 
     :returns: A quad.
     :rtype: PShape
