@@ -12,7 +12,7 @@ def httpGet(url: str):
     :param url: url of the API
 
     """
-    return http_get
+    return http_get(url)
 
 
 def httpPost(url: str, postData: Dict):
