@@ -20,6 +20,7 @@
 import __main__
 
 import math
+from typing import Callable, Optional
 import numpy as np
 import builtins
 import sys
@@ -80,7 +81,7 @@ builtins.start_time = 0
 builtins.current_renderer = None
 
 
-def _fix_interface(func):
+def _fix_interface(func: Callable):
     """Make sure that `func` takes at least one argument as input.
 
     :returns: a new function that accepts arguments.
@@ -92,10 +93,7 @@ def _fix_interface(func):
         return_value = func()
         return return_value
 
-    if func.__code__.co_argcount == 0:
-        return fixed_func
-    else:
-        return func
+    return fixed_func if func.__code__.co_argcount == 0 else func
 
 
 def preload():
@@ -129,12 +127,12 @@ def setup():
 
 
 def run(
-    sketch_preload=None,
-    sketch_setup=None,
-    sketch_draw=None,
-    frame_rate=60,
-    mode="P2D",
-    renderer="vispy",
+    sketch_preload: Optional[Callable] = None,
+    sketch_setup: Optional[Callable] = None,
+    sketch_draw: Optional[Callable] = None,
+    frame_rate: int = 60,
+    mode: str = "P2D",
+    renderer: str = "vispy",
 ):
     """Run a sketch.
 
@@ -143,14 +141,12 @@ def run(
 
     :param sketch_setup: The setup function of the sketch (None by
          default.)
-    :type sketch_setup: function
 
     :param sketch_draw: The draw function of the sketch (None by
         default.)
-    :type sketch_draw: function
 
     :param frame_rate: The target frame rate for the sketch.
-    :type frame_rate: int :math:`\geq 1`
+    :math:`\geq 1`
 
     """
     # get the user-defined setup(), draw(), preload() and handler functions.
@@ -175,13 +171,26 @@ def run(
     else:
         draw_method = draw
 
-    handlers = dict()
-    for handler in handler_names:
-        if hasattr(__main__, handler):
-            hfunc = getattr(__main__, handler)
-            handlers[handler] = _fix_interface(hfunc)
+    handlers = {
+        handler: _fix_interface(getattr(__main__, handler))
+        for handler in handler_names
+        if hasattr(__main__, handler)
+    }
 
-    if renderer == "vispy":
+    if renderer == "skia":
+        from p5.sketch.Skia2DRenderer.base import SkiaSketch
+        from p5.sketch.Skia2DRenderer.renderer2d import SkiaRenderer
+
+        builtins.current_renderer = renderer
+        if mode == "P2D":
+            p5.mode = "P2D"
+            p5.renderer = SkiaRenderer()
+        elif mode == "P3D":
+            raise NotImplementedError("3D mode is not available in skia")
+        p5.sketch = SkiaSketch(setup_method, draw_method, handlers, frame_rate)
+        preload_method()
+        p5.sketch.start()
+    elif renderer == "vispy":
         import vispy
 
         vispy.use("glfw")
@@ -201,7 +210,7 @@ def run(
 
             p5.renderer = Renderer3D()
         else:
-            ValueError("Invalid Mode %s" % mode)
+            ValueError(f"Invalid Mode {mode}")
 
         p5.sketch = VispySketch(setup_method, draw_method, handlers, frame_rate)
         physical_width, physical_height = p5.sketch.physical_size
@@ -216,42 +225,26 @@ def run(
 
         app.run()
         exit()
-    elif renderer == "skia":
-        from p5.sketch.Skia2DRenderer.base import SkiaSketch
-        from p5.sketch.Skia2DRenderer.renderer2d import SkiaRenderer
-
-        builtins.current_renderer = renderer
-        if mode == "P2D":
-            p5.mode = "P2D"
-            p5.renderer = SkiaRenderer()
-        elif mode == "P3D":
-            raise NotImplementedError("3D mode is not available in skia")
-        p5.sketch = SkiaSketch(setup_method, draw_method, handlers, frame_rate)
-        preload_method()
-        p5.sketch.start()
     else:
-        raise NotImplementedError("Invalid Renderer %s" % renderer)
+        raise NotImplementedError(f"Invalid Renderer {renderer}")
 
 
-def title(new_title):
+def title(new_title: str):
     """Set the title of the p5 window.
 
     :param new_title: new title of the window.
-    :type new_title: str
 
     """
     builtins.title = new_title
     p5.sketch.title = new_title
 
 
-def size(width, height):
+def size(width: int, height: int):
     """Resize the sketch window.
 
     :param width: width of the sketch window.
-    :type width: int
 
     :param height: height of the sketch window.
-    :type height: int
 
     """
 
@@ -316,9 +309,8 @@ def exit():
     before exiting the sketch.
 
     """
-    if not (p5.sketch is None):
-        if builtins.current_renderer == "vispy":
-            p5.sketch.exit()
+    if p5.sketch is not None and builtins.current_renderer == "vispy":
+        p5.sketch.exit()
 
 
 def no_cursor():
@@ -327,13 +319,12 @@ def no_cursor():
     raise NotImplementedError
 
 
-def cursor(cursor_type="ARROW"):
+def cursor(cursor_type: str = "ARROW"):
     """Set the cursor to the specified type.
 
     :param cursor_type: The cursor type to be used (defaults to
         'ARROW'). Should be one of: {'ARROW','CROSS','HAND', 'MOVE',
         'TEXT', 'WAIT'}
-    :type cursor_type: str
 
     """
     # cursor_map = {
@@ -351,7 +342,7 @@ def cursor(cursor_type="ARROW"):
     raise NotImplementedError
 
 
-def save(filename="screen.png"):
+def save(filename: str = "screen.png"):
     """Save an image from the display window.
 
     Saves an image from the display window. Append a file extension to
@@ -366,7 +357,6 @@ def save(filename="screen.png"):
     :param filename: Filename of the image (defaults to
         ``screen.png``)
 
-    :type filename: str
 
     """
     # TODO: images saved using ``save()`` should *not* be numbered.
@@ -374,7 +364,7 @@ def save(filename="screen.png"):
     p5.renderer.save_canvas(filename)
 
 
-def save_frame(filename="screen.png"):
+def save_frame(filename: str = "screen.png"):
     """Save a numbered sequence of images whenever the function is run.
 
     Saves a numbered sequence of images, one image each time the
@@ -394,7 +384,6 @@ def save_frame(filename="screen.png"):
     :param filename: name (or name with path) of the image file.
         (defaults to ``screen.png``)
 
-    :type filename: str
 
     """
     # todo: allow setting the frame number in the file name of the
@@ -405,7 +394,7 @@ def save_frame(filename="screen.png"):
 
 # TODO: Add support to calculate the current frame_rate
 # TODO: Deprecate set_frame_rate and use frame_rate(), current frame_rate should return as per p5.js API
-def set_frame_rate(fps):
+def set_frame_rate(fps: int):
     """Sets the frame_rate for the current sketch
 
     Args:

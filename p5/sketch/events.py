@@ -15,10 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-
+from __future__ import annotations
 import builtins
 from collections import namedtuple
 from enum import IntEnum
+from typing import List, Tuple, Union, overload
 
 Position = namedtuple("Position", ["x", "y"])
 
@@ -46,11 +47,10 @@ class MouseButton:
     """An abstraction over a set of mouse buttons.
 
     :param buttons: list of mouse buttons pressed at the same time.
-    :type buttons: str list
 
     """
 
-    def __init__(self, buttons):
+    def __init__(self, buttons: List[str]):
         button_names = {
             MouseButtonEnum.LEFT: "LEFT",
             MouseButtonEnum.RIGHT: "RIGHT",
@@ -66,22 +66,22 @@ class MouseButton:
         return self._button_names
 
     def __eq__(self, other):
-        button_map = {
-            "CENTER": MouseButtonEnum.MIDDLE,
-            "MIDDLE": MouseButtonEnum.MIDDLE,
-            "LEFT": MouseButtonEnum.LEFT,
-            "RIGHT": MouseButtonEnum.RIGHT,
-        }
         if isinstance(other, str):
+            button_map = {
+                "CENTER": MouseButtonEnum.MIDDLE,
+                "MIDDLE": MouseButtonEnum.MIDDLE,
+                "LEFT": MouseButtonEnum.LEFT,
+                "RIGHT": MouseButtonEnum.RIGHT,
+            }
             return button_map.get(other.upper(), -1) in self._buttons
         return self._buttons == other._buttons
 
     def __neq__(self, other):
-        return not (self == other)
+        return self != other
 
     def __repr__(self):
         fstr = ", ".join(self.buttons)
-        return "MouseButton({})".format(fstr)
+        return f"MouseButton({fstr})"
 
     __str__ = __repr__
 
@@ -90,35 +90,30 @@ class Key:
     """A higher level abstraction over a single key.
 
     :param name: The name of the key; ENTER, BACKSPACE, etc.
-    :type name: str
 
     :param text: The text associated with the given key. This
         corresponds to the symbol that will be "typed" by the given
         key.
-    :type name: str
 
     """
 
-    def __init__(self, name, text=""):
+    def __init__(self, name: str, text: str = ""):
         self.name = name.upper()
         self.text = text
 
-    def __eq__(self, other):
+    def __eq__(self, other: Union[Key, str]):
         if isinstance(other, str):
-            return other == self.name or other == self.text
+            return other in [self.name, self.text]
         return self.name == other.name and self.text == other.text
 
     def __neq__(self, other):
-        return not (self == other)
+        return self != other
 
     def __str__(self):
-        if self.text.isalnum():
-            return self.text
-        else:
-            return self.name
+        return self.text if self.text.isalnum() else self.name
 
     def __repr__(self):
-        return "Key({})".format(self.name)
+        return f"Key({self.name})"
 
 
 class Event:
@@ -134,8 +129,8 @@ class Event:
 
     """
 
-    def __init__(self, raw_event, active=False):
-        self._modifiers = list(map(lambda k: k.name, raw_event.modifiers))
+    def __init__(self, raw_event, active: bool = False):
+        self._modifiers: List[str] = [k.name for k in raw_event.modifiers]
         self._active = active
 
         self._raw = raw_event
@@ -152,38 +147,34 @@ class Event:
     def pressed(self):
         return self._active
 
-    def is_shift_down(self):
+    def is_shift_down(self) -> bool:
         """Was shift held down during the event?
 
         :returns: True if the shift-key was held down.
-        :rtype: bool
 
         """
         return "Shift" in self._modifiers
 
-    def is_ctrl_down(self):
+    def is_ctrl_down(self) -> bool:
         """Was ctrl (command on Mac) held down during the event?
 
         :returns: True if the ctrl-key was held down.
-        :rtype: bool
 
         """
         return "Control" in self._modifiers
 
-    def is_alt_down(self):
+    def is_alt_down(self) -> bool:
         """Was alt held down during the event?
 
         :returns: True if the alt-key was held down.
-        :rtype: bool
 
         """
         return "Alt" in self._modifiers
 
-    def is_meta_down(self):
+    def is_meta_down(self) -> bool:
         """Was the meta key (windows/option key) held down?
 
         :returns: True if the meta-key was held down.
-        :rtype: bool
 
         """
         return "Meta" in self._modifiers
@@ -193,15 +184,16 @@ class Event:
 
 
 class KeyEvent(Event):
-    """Encapsulates information about a key event.
+    @overload
+    def __init__(self, key: Union[str, Key], pressed: bool):
+        """Encapsulates information about a key event.
 
-    :param key: The key associated with this event.
-    :type key: str | Key
+        :param key: The key associated with this event.
 
-    :param pressed: Specifies whether the key is held down or not.
-    :type pressed: bool
+        :param pressed: Specifies whether the key is held down or not.
 
-    """
+        """
+        ...
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -216,35 +208,40 @@ class KeyEvent(Event):
 
 
 class MouseEvent(Event):
-    """A class that encapsulates information about a mouse event.
+    @overload
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        position: Tuple[int, int],
+        change: Tuple[int, int],
+        scroll: Tuple[int, int],
+        count: int,
+        button: MouseButton,
+    ):
+        """A class that encapsulates information about a mouse event.
 
-    :param x: The x-position of the mouse in the window at the time of
-        the event.
-    :type x: int
+        :param x: The x-position of the mouse in the window at the time of
+            the event.
 
-    :param y: The y-position of the mouse in the window at the time of
-        the event.
-    :type y: int
+        :param y: The y-position of the mouse in the window at the time of
+            the event.
 
-    :param position: Position of the mouse in the window at the time
-        of the event.
-    :type position: (int, int)
+        :param position: Position of the mouse in the window at the time
+            of the event.
 
-    :param change: the change in the x and y directions (defaults to
-        (0, 0))
-    :type change: (int, int)
+        :param change: the change in the x and y directions (defaults to
+            (0, 0))
 
-    :param scroll: the scroll amount in the x and y directions
-         (defaults to (0, 0)).
-    :type scroll: (int, int)
+        :param scroll: the scroll amount in the x and y directions
+            (defaults to (0, 0)).
 
-    :param count: amount by which the mouse whell was dragged.
-    :type count: int
+        :param count: amount by which the mouse whell was dragged.
 
-    :param button: Button information at the time of the event.
-    :type button: MouseButton
+        :param button: Button information at the time of the event.
 
-    """
+        """
+        ...
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -279,6 +276,6 @@ class MouseEvent(Event):
 
     def __repr__(self):
         press = "pressed" if self.pressed else "not-pressed"
-        return "MouseEvent({} at {})".format(press, self.position)
+        return f"MouseEvent({press} at {self.position})"
 
     __str__ = __repr__
