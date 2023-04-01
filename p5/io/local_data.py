@@ -1,142 +1,120 @@
 # for loading tables in csv format
+from typing import List
+
+
 class Table:
     """Class to represent tabular data
 
     :param path: Path to the CSV file.
-    :type path: string
     """
 
-    def __init__(self, path, seperator):
+    def __init__(self, path: str, seperator: str):
         """
         Initializes Table object when given the path to a CSV file.
         """
-        file = open(path, "r")
-        lines = file.readlines()
+        with open(path, "r") as file:
+            lines = file.readlines()
         data = []
         for line in lines:
             fragment = line.split(seperator)
-            x = fragment[len(fragment) - 1]
+            x = fragment[-1]
             x = x[:-1]
-            fragment[len(fragment) - 1] = x
+            fragment[-1] = x
             data.append(fragment)
-        self.data = data
+        self.data: List[List] = data
 
-    def get_row_count(self):
+    def get_row_count(self) -> int:
         """
         :returns: Number of rows in the read CSV.
-        :rtype: int
         """
         return len(self.data)
 
-    def getRowCount(self):
+    def getRowCount(self) -> int:
         """
         :returns: Number of rows in the read CSV.
-        :rtype: int
         """
         return self.get_row_count()
 
-    def get_column_count(self):
+    def get_column_count(self) -> int:
         """
         :returns: Number of columns in the read CSV.
-        :rtype: int
         """
         return len(self.data[0])
 
-    def getColumnCount(self):
+    def getColumnCount(self) -> int:
         """
         :returns: Number of columns in the read CSV.
-        :rtype: int
         """
         return self.get_column_count()
 
-    def get_column(self, name):
+    def get_column(self, name: str) -> List:
         """
         :param name: Name of the required column
-        :type name: string
 
         :returns: An entire column based on the column index.
-        :rtype: list
         """
-        count = 0
-        for i in self.data[0]:
-            if i == name:
-                break
-            count = count + 1
-        column = []
-        for item in self.data:
-            column.append(item[count])
-        return column
+        count = self.data[0].index(name)
+        return [item[count] for item in self.data]
 
-    def getColumn(self, name):
+    def getColumn(self, name: str) -> List:
         """
         :param name: Name of the required column
-        :type name: string
 
         :returns: An entire column based on the column index.
-        :rtype: list
         """
         return self.get_column(name)
 
-    def get_row(self, index):
+    def get_row(self, index: str) -> List:
         """
         Returns an entire row when given the row index.
 
         :param index: Name of the row
-        :type index: string
 
         :returns: An entire row when given the row index.
-        :rtype: list
         """
         for fragment in self.data:
             if fragment[0] == index:
                 return fragment
 
-    def getRow(self, index):
+    def getRow(self, index: str) -> List:
         """
         Returns an entire row when given the row index.
 
         :param index: Name of the row
-        :type index: string
 
         :returns: An entire row when given the row index.
-        :rtype: list
         """
         return self.get_row(index)
 
     def get_array(self):
         """
         :returns: the entire csv data as an multidimensional array.
-        :rtype: list
         """
         return self.data
 
     def getArray(self):
         """
         :returns: the entire csv data as an multidimensional array.
-        :rtype: list
         """
         return self.get_array()
 
 
-def load_table(path, mode="csv"):
+def load_table(path: str, mode: str = "csv") -> Table:
     """
     Calls Table class and returns a Table class object
 
     :param path: Path to file
-    :type path: string
 
     :param mode: Type of File csv/ssv/tsv.
-    :type mode: string
 
     :returns: A table object
-    :rtype: object
 
     """
+    assert mode in {"csv", "tsv"}
     if mode == "csv":
         seperator = ","
-    if mode == "ssv":
+    elif mode == "ssv":
         seperator = ";"
-    if mode == "tsv":
+    elif mode == "tsv":
         seperator = "\t"
-    table = Table(path, seperator)
-    return table
+    return Table(path, seperator)

@@ -2,6 +2,7 @@
 Part of the io library. Includes functions that require **internet** connection.
 """
 
+from typing import Dict
 from urllib import request
 import json
 import requests
@@ -14,11 +15,10 @@ class http_get:
     Performs a synchronous GET request on the given url.
 
     :param url: url of the API
-    :type url: string
 
     """
 
-    def __init__(self, url):
+    def __init__(self, url: str):
         resp = request.urlopen(url)
 
         data = resp.read().decode("UTF-8")
@@ -34,14 +34,12 @@ class http_get:
 # Synchronous
 
 
-def http_post(url, post_data):
+def http_post(url: str, post_data: Dict):
     """
     Performs a synchronous POST request on the given url.
 
     :param url: url of the API
-    :type url: string
     :param post_data: Key-value pairs of the request payload.
-    :type post_data: dict
 
     """
     data = requests.post(url, post_data)
