@@ -16,8 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
-from collections import namedtuple
-from typing import Optional
+from typing import Optional, NamedTuple
 import numpy as np
 from numpy.typing import NDArray
 from numpy.random import random
@@ -28,8 +27,10 @@ __all__ = ["Vector", "Point"]
 EPSILON = 1e-8
 
 
-Point = namedtuple("Point", ["x", "y", "z"])
-Point.__new__.__defaults__ = (None, None, 0)
+class Point(NamedTuple):
+    x: float = None
+    y: float = None
+    z: float = 0
 
 
 class Vector(Point):
