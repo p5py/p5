@@ -21,7 +21,7 @@
 
 from collections.abc import Iterable
 from functools import wraps
-from typing import Callable
+from typing import Callable, List
 from ..pmath import Point
 from ..core import p5
 from ..p5types import FloatOrNTuple
@@ -110,13 +110,11 @@ def bezier_point(
 
     t = parameter
     t_ = 1 - parameter
-    P = [start, control_1, control_2, stop]
-    coeffs = [t_ * t_ * t_, 3 * t * t_ * t_, 3 * t * t * t_, t**2 * t]
+    P: List[List[float]] = [start, control_1, control_2, stop]
+    coeffs = [t_**3, 3 * t * t_**2, 3 * t**2 * t_, t**3]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
     # Unpack answer if input is not iterable
-    if not is_iterable:
-        ans = ans[0]
-    return ans
+    return ans if is_iterable else ans[0]
 
 
 def bezier_tangent(
@@ -159,16 +157,12 @@ def bezier_tangent(
 
     def tangent(a, b, c, d):
         return (
-            3 * t * t * (3 * b - 3 * c + d - a) + 6 * t * (a - 2 * b + c) + 3 * (b - a)
+            3 * t**2 * (3 * b - 3 * c + d - a) + 6 * t * (a - 2 * b + c) + 3 * (b - a)
         )
 
-    ans = tuple(
-        tangent(j, control_1[i], control_2[i], stop[i]) for i, j in enumerate(start)
-    )
+    ans = tuple(tangent(*i) for i in zip(start, control_1, control_2, stop))
     # Unpack answer if input is not iterable
-    if not is_iterable:
-        ans = ans[0]
-    return ans
+    return ans if is_iterable else ans[0]
 
 
 def _reinit_curve_matrices():
@@ -232,13 +226,11 @@ def curve_point(
 
     t = parameter
     basis = curve_basis_matrix
-    P = [point_1, point_2, point_3, point_4]
+    P: List[List[float]] = [point_1, point_2, point_3, point_4]
     coeffs = [sum(t ** (3 - i) * basis[i][j] for i in range(4)) for j in range(4)]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(point_1)))
     # Unpack answer if input is not iterable
-    if not is_iterable:
-        ans = ans[0]
-    return ans
+    return ans if is_iterable else ans[0]
 
 
 def curve_tangent(
@@ -278,15 +270,13 @@ def curve_tangent(
 
     t = parameter
     basis = curve_basis_matrix
-    P = [point_1, point_2, point_3, point_4]
+    P: List[List[float]] = [point_1, point_2, point_3, point_4]
     coeffs = [
         sum((3 - i) * (t ** (2 - i)) * basis[i][j] for i in range(3)) for j in range(4)
     ]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(point_1)))
     # Unpack answer if input is not iterable
-    if not is_iterable:
-        ans = ans[0]
-    return ans
+    return ans if is_iterable else ans[0]
 
 
 def quadratic_point(
@@ -315,13 +305,11 @@ def quadratic_point(
 
     t = parameter
     t_ = 1 - parameter
-    P = [start, control, stop]
-    coeffs = [t_ * t_, 2 * t * t_, t**2]
+    P: List[List[float]] = [start, control, stop]
+    coeffs = [t_**2, 2 * t * t_, t**2]
     ans = tuple(sum(pt[i] * c for pt, c in zip(P, coeffs)) for i in range(len(start)))
     # Unpack answer if input is not iterable
-    if not is_iterable:
-        ans = ans[0]
-    return ans
+    return ans if is_iterable else ans[0]
 
 
 # Set the default values.
