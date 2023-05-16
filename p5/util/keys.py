@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Vispy Development Team. All Rights Reserved.
 # Distributed under the (new) BSD License. See LICENSE.txt for more info.
 
@@ -14,8 +13,11 @@ intended as a compatibility measure.
 
 """
 
+from __future__ import annotations
+from typing import Optional, Union
 
-class Key(object):
+
+class Key:
     """Represent the identity of a certain key.
 
     This represents one or more names that the key in question is known by.
@@ -25,9 +27,9 @@ class Key(object):
     represent characters), and to another Key instance.
     """
 
-    def __init__(self, *names):
+    def __init__(self, *names: str):
         self._names = names
-        self._names_upper = tuple([v.upper() for v in names])
+        self._names_upper = tuple(v.upper() for v in names)
 
     @property
     def name(self):
@@ -35,18 +37,18 @@ class Key(object):
         return self._names[0]
 
     def __hash__(self):
-        return self._names[0].__hash__()
+        return hash(self._names[0])
 
     def __repr__(self):
-        return "<Key %s>" % ", ".join([repr(v) for v in self._names])
+        return f'<Key {", ".join(repr(v) for v in self._names)}>'
 
-    def __eq__(self, other):
+    def __eq__(self, other: Optional[Union[str, Key, int]]):
         if isinstance(other, str):
             return other.upper() in self._names_upper
         elif isinstance(other, Key):
             return self._names[0] == other
         elif isinstance(other, int):
-            return other in [ord(v) for v in self._names_upper if len(v) == 1]
+            return other in {ord(v) for v in self._names_upper if len(v) == 1}
         elif other is None:
             return False
         else:
