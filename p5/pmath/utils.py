@@ -24,6 +24,7 @@ from math import ceil, floor, exp, log, sqrt, modf
 from math import degrees, radians
 from math import sin, cos, tan
 from math import asin, acos, atan, atan2
+from typing import List, Tuple
 
 import numpy as np
 
@@ -85,15 +86,15 @@ PRE_COS = [cos(radians(d) * SINCOS_PRECISION) for d in range(SINCOS_LENGTH)]
 SINCOS = list(zip(PRE_SIN, PRE_COS))
 
 
-def _sanitize(point, target_dimension=3):
+def _sanitize(point: List[float], target_dimension: int = 3):
     return list(point) + [0] * (target_dimension - len(point))
 
 
-def _is_numeric(val):
-    return isinstance(val, int) or isinstance(val, float)
+def _is_numeric(val) -> bool:
+    return isinstance(val, (int, float))
 
 
-def constrain(amount, low, high):
+def constrain(amount: float, low: float, high: float):
     """Constrain the given value in the specified range.
 
     Examples ::
@@ -128,7 +129,7 @@ def constrain(amount, low, high):
         return amount
 
 
-def lerp(start, stop, amount):
+def lerp(start: float, stop: float, amount: float) -> float:
     """Linearly interpolate the start value to the stop value.
 
     Examples ::
@@ -157,7 +158,9 @@ def lerp(start, stop, amount):
     return start + amount * (stop - start)
 
 
-def remap(value, source_range, target_range):
+def remap(
+    value: float, source_range: Tuple[float, float], target_range: Tuple[float, float]
+) -> float:
     """Remap a value from the source range to the target range.
 
     Examples ::
@@ -177,10 +180,8 @@ def remap(value, source_range, target_range):
     :param value: The value to be remapped.
 
     :param source_range: The source range for :code:`value`
-    :type source_range: tuple
 
     :param target_range: The target range for :code:`value`
-    :type target_range: tuple
 
     """
     s0, s1 = source_range
@@ -190,7 +191,7 @@ def remap(value, source_range, target_range):
     return t0 + ((value - s0) / S) * T
 
 
-def normalize(value, low, high):
+def normalize(value: float, low: float, high: float) -> float:
     """Normalize the given value to the specified range.
 
     Examples ::
@@ -208,18 +209,15 @@ def normalize(value, low, high):
         0.0
 
     :param value:
-    :type value: float
 
     :param low: The lower bound for the range.
-    :type low: float
 
     :param high: The upper bound for the range.
-    :type high: float
     """
     return remap(value, (low, high), (0, 1))
 
 
-def magnitude(x, y, z=0):
+def magnitude(x: float, y: float, z: float = 0) -> float:
     """Return the magnitude of the given vector.
 
     Examples ::
@@ -234,22 +232,20 @@ def magnitude(x, y, z=0):
         0.0
 
     :param x: The x-component of the vector.
-    :type x: float
 
     :param y: The y-component of the vector.
-    :type y: float
 
     :param z: The z-component of the vector (defaults to 0).
-    :type z: float
 
     :returns: The magnitude of the vector.
-    :rtype: float
 
     """
-    return np.sqrt(np.sum(np.array([x, y, z]) ** 2))
+    return np.sqrt((np.array([x, y, z]) ** 2).sum())
 
 
-def distance(point_1, point_2):
+def distance(
+    point_1: Tuple[float, float, float], point_2: Tuple[float, float, float]
+) -> float:
     """Return the distance between two points.
 
     Examples ::
@@ -264,21 +260,18 @@ def distance(point_1, point_2):
         5.0
 
     :param point_1:
-    :type point_1: tuple
 
     :param point_2:
-    :type point_2: tuple
 
     :returns: The distance between two points
-    :rtype: float
 
     """
     p1 = np.array(_sanitize(point_1))
     p2 = np.array(_sanitize(point_2))
-    return np.sqrt(np.sum((p1 - p2) ** 2))
+    return np.sqrt(((p1 - p2) ** 2).sum())
 
 
-def sq(number):
+def sq(number: float) -> float:
     """Square a number.
 
     Examples ::
@@ -294,16 +287,14 @@ def sq(number):
 
 
     :param number: The number to be squared.
-    :type number: float
 
     :returns: The square of the number.
-    :rtype: float
 
     """
     return number**2
 
 
-def fract(number):
+def fract(number: float) -> float:
     """Calculates the fractional part of a number.
 
     Examples ::
@@ -315,10 +306,8 @@ def fract(number):
         1.4215e-15
 
     :param number: Number whose fractional part needs to be found out.
-    :type number: float
 
     :returns: Fractional part of the number.
-    :rtype: float
 
     """
     return modf(number)[0]

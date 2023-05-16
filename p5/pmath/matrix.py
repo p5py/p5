@@ -20,46 +20,38 @@ import math
 import numpy as np
 
 
-def _magnitude(arr):
+def _magnitude(arr: np.ndarray) -> float:
     """Return the magnitude of the given array.
 
     :param arr: Input array.
-    :type arr: np.ndarray
 
     :returns: The magnitude of the input array.
-    :rtype: float
     """
     return np.sqrt(arr.dot(arr))
 
 
-def _normalize(arry):
+def _normalize(arry: np.ndarray) -> np.ndarray:
     """Return the normalized version of the given array.
 
     :param arry: Input array to be normalized.
-    :type arry: np.ndarray
 
     :returns: Normalized version of the input array.
-    :rtype: np.ndarray
 
     """
     mag = _magnitude(arry)
     return arry / mag
 
 
-def scale_transform(x, y, z=1):
+def scale_transform(x: float, y: float, z: float = 1) -> np.ndarray:
     """Return a scale transformation matrix.
 
     :param x: Scale factor in the x direction.
-    :type x: numeric
 
     :param y: Scale factor in the y direction.
-    :type y: numeric
 
     :param z: Scale factor in the z direction.
-    :type z: numeric (defaults to 1)
 
     :returns: A scale transformation matrix.
-    :rtype: np.ndarray
 
     """
     scale_matrix = np.identity(4)
@@ -69,21 +61,17 @@ def scale_transform(x, y, z=1):
     return scale_matrix
 
 
-def translation_matrix(x, y, z=0):
+def translation_matrix(x: float, y: float, z: float = 0) -> np.ndarray:
     """Return a new translation matrix.
 
     :param x: translation in the x-direction.
-    :type x: numeric
 
     :param y: translation in the y-direction.
-    :type y: numeric
 
     :param z: translation in the z-direction.
-    :type z: numeric (defaults to 0)
 
     :returns: A transform matrix with the given translation applied to
         it
-    :rtype: np.ndarray
 
     """
     translate_matrix = np.identity(4)
@@ -93,17 +81,14 @@ def translation_matrix(x, y, z=0):
     return translate_matrix
 
 
-def rotation_matrix(axis, angle):
+def rotation_matrix(axis: np.ndarray, angle: float) -> np.ndarray:
     """Return a rotation matrix with the given angle and rotation.
 
     :param axis: The axis along which the matrix should be rotated.
-    :type axis: np.ndarray
 
     :param angle: Angle by which to rotate (in radians).
-    :type angle: float
 
     :returns: A rotation matrix along the given axis and angle.
-    :rtype: np.ndarray
 
     """
     x, y, z = _normalize(axis)
@@ -135,20 +120,18 @@ def euler_rotation_matrix(heading, attitude, bank):
     pass
 
 
-def triple_axis_rotation_matrix(x, y, z):
+def triple_axis_rotation_matrix(
+    x: np.ndarray, y: np.ndarray, z: np.ndarray
+) -> np.ndarray:
     """Return a rotation matrix based on three axes.
 
     :param x: x-axis for the rotation matrix.
-    :type x: np.ndarray
 
     :param y: y-axis for the rotation matrix.
-    :type y: np.ndarray
 
     :param z: z-axis for the rotation matrix.
-    :type z: np.ndarray
 
     :returns: A rotation matrix based on the given parameters.
-    :rtype: np.ndarray
     """
     rotation_matrix = np.identity(4)
     rotation_matrix[0, :3] = x
@@ -157,20 +140,16 @@ def triple_axis_rotation_matrix(x, y, z):
     return rotation_matrix
 
 
-def look_at(eye, at, up):
+def look_at(eye: np.ndarray, at: np.ndarray, up: np.ndarray) -> np.ndarray:
     """Return a new 'look-at' matrix.
 
     :param eye: Location of the 'eye'
-    :type eye: np.ndarray
 
     :param at: The point being looked at.
-    :type at: np.ndarray
 
     :param up: Vector specifying the up-direction.
-    :type up: np.ndarray
 
     :returns: A new look at matrix.
-    :rtype: np.ndarray
     """
     z = _normalize(eye - at)
     x = _normalize(np.cross(up, z))
@@ -186,23 +165,20 @@ def look_at(eye, at, up):
     return mat
 
 
-def perspective_matrix(field_of_view, aspect_ratio, near_plane, far_plane):
+def perspective_matrix(
+    field_of_view: float, aspect_ratio: float, near_plane: float, far_plane: float
+) -> np.ndarray:
     """Return a perspective matrix.
 
     :param field_of_view: The field_of_view to use.
-    :type field_of_view: float
 
     :param aspect_ratio: The aspect ratio of the projection.
-    :type aspect_ratio: float
 
     :param near_plane: Location of the near plane of the projection.
-    :type near_plane: float
 
     :param far_plane: Location of the far plane of the projection.
-    :type far_plane: float
 
     :returns: A new perspective matrix.
-    :rtype: np.ndarray
 
     :raises AssertionError: When the near plane is zero or the near
          plane is the same as the far plane.
