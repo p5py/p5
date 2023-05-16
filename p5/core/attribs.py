@@ -89,14 +89,13 @@ def stroke(*color_args, **color_kwargs):
     p5.renderer.style.stroke_color = stroke_color.normalized
 
 
-def stroke_weight(thickness):
+def stroke_weight(weight: int):
     """Sets the width of the stroke used for lines, points, and the border around shapes. All widths are set in units of pixels.
 
     :param weight: thickness of stroke in pixels
-    :type weight: int
 
     """
-    p5.renderer.style.stroke_weight = thickness
+    p5.renderer.style.stroke_weight = weight
 
 
 def no_stroke():
@@ -104,34 +103,32 @@ def no_stroke():
     p5.renderer.style.stroke_enabled = False
 
 
-def stroke_cap(c):
+def stroke_cap(c: str):
     """Sets the style of line endings. The ends are SQUARE,
     PROJECT, and ROUND. The default cap is ROUND.
 
     :param c: either 'SQUARE', 'PROJECT' or 'ROUND'
-    :type c: string
 
     """
     if c in [SQUARE, PROJECT, ROUND]:
         p5.renderer.style.set_stroke_cap(c)
     else:
-        raise ValueError("Invalid Stroke Cap %s" % c)
+        raise ValueError(f"Invalid Stroke Cap {c}")
 
 
-def stroke_join(j):
+def stroke_join(j: str):
     """Sets the style of the joints which connect line segments.
     These joints are either mitered, beveled, or rounded and
     specified with the corresponding parameters MITER, BEVEL,
     and ROUND. The default joint is MITER.
 
     :param weight: either 'MITER', 'BEVEL' or 'ROUND'
-    :type j: string
 
     """
     if j in [MITER, BEVEL, ROUND]:
         p5.renderer.style.set_stroke_join(j)
     else:
-        raise ValueError("Invalid Stroke Cap %s" % j)
+        raise ValueError(f"Invalid Stroke Cap {j}")
 
 
 def tint(*color_args, **color_kwargs):

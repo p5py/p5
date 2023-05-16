@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from typing import Optional
 from . import p5
 
 __all__ = [
@@ -33,12 +34,11 @@ __all__ = [
 ]
 
 
-def create_font(name, size=10):
+def create_font(name: str, size: int = 10):
     """Create the given font at the appropriate size.
 
     :param name: Filename of the font file (only pil, otf and ttf
         fonts are supported.)
-    :type name: str
 
     :param size: Font size (only required when `name` refers to a
         truetype font; defaults to None)
@@ -53,7 +53,7 @@ def load_font(font_name):
     return p5.renderer.load_font(font_name)
 
 
-def text(*args, wrap_at=None):
+def text(*args, wrap_at: Optional[int] = None):
     """Draw the given text on the screen and save the image.
 
     :param text_string: text to display
@@ -82,7 +82,7 @@ def text(*args, wrap_at=None):
     """
     if len(args) == 2:
         text_string, position = args
-    elif len(args) == 3 or len(args) == 4:
+    elif len(args) in {3, 4}:
         text_string, position = args[0], args[1:]
     else:
         raise ValueError("Unexpected number of arguments passed to text()")
@@ -104,14 +104,12 @@ def text_font(font, size=None):
     p5.renderer.text_font(font, size)
 
 
-def text_align(align_x, align_y=None):
+def text_align(align_x: str, align_y: Optional[str] = None):
     """Set the alignment of drawing text
 
     :param align_x: "RIGHT", "CENTER" or "LEFT".
-    :type align_x: string
 
     :param align_y: "TOP", "CENTER" or "BOTTOM".
-    :type align_y: string
 
     """
     p5.renderer.style.text_align_x = align_x
@@ -130,11 +128,10 @@ def text_leading(leading):
     p5.renderer.style.text_leading = leading
 
 
-def text_size(size):
+def text_size(size: int):
     """Sets the current font size
 
     :param leading: the size of the letters in units of pixels
-    :type align_x: int
 
     """
 
@@ -142,35 +139,31 @@ def text_size(size):
     p5.renderer.text_size(size)
 
 
-def text_width(text):
+def text_width(text: str) -> int:
     """Calculates and returns the width of any character or text string
 
     :param text_string: text
-    :type text_string: str
 
     :returns: width of any character or text string
-    :rtype: int
 
     """
 
     return p5.renderer.text_width(text)
 
 
-def text_ascent():
+def text_ascent() -> float:
     """Returns ascent of the current font at its current size
 
     :returns: ascent of the current font at its current size
-    :rtype: float
 
     """
     return p5.renderer.text_ascent()
 
 
-def text_descent():
+def text_descent() -> float:
     """Returns descent of the current font at its current size
 
     :returns:  descent of the current font at its current size
-    :rtype: float
 
     """
     return p5.renderer.text_descent()
@@ -190,7 +183,7 @@ def text_style(s):
     return p5.renderer.text_style(s)
 
 
-def text_wrap(wrap_style):
+def text_wrap(wrap_style: str):
     """
     Specifies how lines of text are wrapped within a text box. This requires a wrap_at set on the text area,
     specified in text() as parameter wrap_at. WORD wrap style only breaks lines at spaces. A single string without
@@ -199,6 +192,5 @@ def text_wrap(wrap_style):
     WORD is the default wrap style, and both styles will still break lines at any line breaks (\n) specified in the
     original text.
     :param wrap_style: One of the wrap style mode 'CHAR' or 'WORD'
-    :type wrap_style: str
     """
     p5.renderer.text_wrap(wrap_style)
