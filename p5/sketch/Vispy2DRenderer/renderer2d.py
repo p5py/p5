@@ -566,7 +566,7 @@ class VispyRenderer2D(OpenGLRenderer):
     # add function
     def create_image(self, width, height):
         return VispyPImage(width, height)
-    
+
     def load_image(self, filename):
         if re.match(r"\w+://", filename):
             with urllib.request.urlopen(filename) as url:
