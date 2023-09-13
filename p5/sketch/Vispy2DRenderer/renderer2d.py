@@ -563,7 +563,6 @@ class VispyRenderer2D(OpenGLRenderer):
 
         self.render_image(img, (lx, ly), (sx, sy))
 
-    # add function
     def create_image(self, width, height):
         return VispyPImage(width, height)
 
