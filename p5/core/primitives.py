@@ -602,8 +602,7 @@ def rect(*args, mode: Optional[str] = None):
             height = 2 * half_height
         elif mode == "CORNERS":
             corner = Point(*coordinate)
-            (corner_2,) = args
-            corner_2 = Point(*corner_2)
+            corner_2 = Point(*args)
             width = corner_2.x - corner.x
             height = corner_2.y - corner.y
         else:
