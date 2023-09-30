@@ -562,7 +562,7 @@ def rect(*args, mode: Optional[str] = None):
     :param args: For modes'CORNER' or 'CENTER' this has the form
         (width, height); for the 'RADIUS' this has the form
         (half_width, half_height); and for the 'CORNERS' mode, args
-        should be the corner opposite to `coordinate`.
+        should be two int values x, y - the coords of corner opposite to `coordinate`.
 
     :type: tuple
 
