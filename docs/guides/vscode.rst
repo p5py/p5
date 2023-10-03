@@ -15,11 +15,11 @@ Setup
 3. In the ``.vscode`` directory create a file called ``settings.json``
 4. In that file copy and paste all of these json settings:
 
-.. code:: 
+.. code::
 
     {
-        "python.linting.pylintArgs": [
-            "--disable", "E0102", 
+        "pylint.args": [
+            "--disable", "E0102",
             "--disable", "C0111",
             "--disable", "W0401",
             "--disable", "C0304",
