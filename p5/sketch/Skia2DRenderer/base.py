@@ -76,20 +76,14 @@ class SkiaSketch:
     def glfw_window(self):
         if not glfw.init():
             raise RuntimeError("glfw.init() failed")
+
         window = glfw.create_window(*self._size, "p5py", None, None)
         glfw.make_context_current(window)
         return window
 
-    def skia_surface(self, window=None, size=None):
+    def skia_surface(self):
         self.context = skia.GrDirectContext.MakeGL()
-        if size:
-            width, height = size
-        elif window:
-            width, height = glfw.get_framebuffer_size(window)
-        else:
-            raise ValueError(
-                "Both window and size can't be None, This is probably an error within p5 instead of the sketch"
-            )
+        width, height = glfw.get_framebuffer_size(self.window)
         backend_render_target = skia.GrBackendRenderTarget(
             width,
             height,
@@ -108,12 +102,10 @@ class SkiaSketch:
         return surface
 
     # create a new surface everytime
-    def create_surface(self, size=None):
-        if not size:
-            size = self._size
-        self._size = size
-        builtins.width, builtins.height = size
-        self.surface = self.skia_surface(self.window, size)
+    def create_surface(self):
+        self._size = glfw.get_framebuffer_size(self.window)
+        builtins.width, builtins.height = self._size
+        self.surface = self.skia_surface()
         self.canvas = self.surface.getCanvas()
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
 
@@ -133,8 +125,11 @@ class SkiaSketch:
                 builtins.frame_count += 1
                 with self.surface as self.canvas:
                     self.draw_method()
+
+                p5.renderer._store_surface_state()
                 self.surface.flushAndSubmit()
                 glfw.swap_buffers(self.window)
+                p5.renderer._restore_surface_state()
                 last_render_call_time = time()
 
                 # If redraw == True, we have rendered the frame once
@@ -157,12 +152,24 @@ class SkiaSketch:
         self.window = self.glfw_window()
         self.create_surface()
         self.assign_callbacks()
-
         p5.renderer.initialize_renderer(self.canvas, self.paint, self.path)
+
+        # We don't draw the buffer from scratch each time, instead store the current state of surface
+        # and restore it after swapping the buffer
         self.setup_method()
-        self.poll_events()
         p5.renderer.render()
+
+        # Get snapshot of surface
+        p5.renderer._store_surface_state()
+
+        # Write to secondary buffer
         self.surface.flushAndSubmit()
+        glfw.swap_buffers(self.window)
+
+        p5.renderer._restore_surface_state()
+        self.surface.flushAndSubmit()
+
+        # Buffers are swapped twice so that both buffers have the same initial surface state
         glfw.swap_buffers(self.window)
 
         self.main_loop()
@@ -221,7 +228,7 @@ class SkiaSketch:
         old_style = copy.deepcopy(p5.renderer.style)
 
         GL.glViewport(0, 0, width, height)
-        self.create_surface(size=(width, height))
+        self.create_surface()
         self.setup_method()
 
         # Redraws Image on the canvas/ new frame buffer
