@@ -51,7 +51,7 @@ jobs:
         run: |
           pytest -svv p5
 
-  sanity-tests:
+  sanity-tests-linux:
     needs : pytest
     strategy:
       matrix:
@@ -75,3 +75,23 @@ jobs:
         uses: GabrielBB/xvfb-action@v1
         with:
           run: python p5/visualTests/sanity_testing.py 
+
+  sanity-tests-macos:
+    strategy:
+      matrix:
+        os: [macos-latest]
+        python-version: [ '3.7', '3.8', '3.9', '3.10']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          brew install glfw
+          python -m pip install --upgrade pip
+          pip install wheel
+          pip install .
+          python p5/visualTests/sanity_testing.py
