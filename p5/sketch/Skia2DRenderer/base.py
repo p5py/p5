@@ -183,8 +183,6 @@ class SkiaSketch:
         # on a different thread
         glfw.set_window_size(self.window, *self.size)
 
-
-
     def poll_events(self):
         glfw.poll_events()
         if glfw.get_key(
