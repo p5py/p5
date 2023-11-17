@@ -3,7 +3,7 @@ glfw>=2.5.9
 numpy
 Pillow==9.0.1
 vispy==0.10.0
-PyOpenGL-accelerate==3.1.6
+PyOpenGL-accelerate==3.1.7
 PyOpenGL==3.1.6
 requests>=2.25.0
 dataclasses;python_version=="3.6"
