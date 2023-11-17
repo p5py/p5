@@ -19,7 +19,7 @@
 __title__ = "p5"
 __description__ = "Creative coding in Python"
 __url__ = "https://p5py.github.io"
-__version__ = "0.8.2"
+__version__ = "0.8.3"
 __author__ = "Abhik Pal"
 __author_email__ = "theabhikpal@gmail.com"
 __license__ = " GNU GPLv3"
