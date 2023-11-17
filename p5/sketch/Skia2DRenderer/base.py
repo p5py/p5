@@ -1,9 +1,7 @@
-import builtins
 from p5.core import p5
 
-import contextlib, glfw, skia
+import skia
 from OpenGL import GL
-from time import time
 
 import copy
 from ..events import handler_names
@@ -176,14 +174,16 @@ class SkiaSketch:
         self.clean_up()
 
     def resize(self):
+        # when glfw changes the framebuffer size, we will be resized completely
+        # until then hold the rendering calls
+        self.resized = False
+
         # call change the window size(), this will not be done instantly
         # but after some time and a frame_buffer_changed callback will occur on
         # on a different thread
         glfw.set_window_size(self.window, *self.size)
 
-        # when glfw changes the framebuffer size, we will be resized completely
-        # until then hold the rendering calls
-        self.resized = False
+
 
     def poll_events(self):
         glfw.poll_events()
@@ -223,20 +223,16 @@ class SkiaSketch:
         # Creates an Image of current surface and a copy of current style configurations
         # For the purpose of handling setup_method() re-call
         # Ref: Issue #419
-        old_image = self.surface.makeImageSnapshot()
-        old_image = old_image.resize(old_image.width(), old_image.height())
         old_style = copy.deepcopy(p5.renderer.style)
 
         GL.glViewport(0, 0, width, height)
         self.create_surface()
         self.setup_method()
+        p5.renderer._store_surface_state()
+        self.surface.flushAndSubmit()
+        glfw.swap_buffers(self.window)
 
-        # Redraws Image on the canvas/ new frame buffer
-        # Previously stored style configurations are restored for
-        # discarding setup_method() style changes
         p5.renderer.style = old_style
-        with self.surface as self.canvas:
-            self.canvas.drawImage(old_image, 0, 0)
 
         # Tell the program, we have resized the frame buffer
         # and do not rewind/clear the path
@@ -245,3 +241,7 @@ class SkiaSketch:
 
     def _enqueue_event(self, handler_name, event):
         self.handler_queue.append((self.handlers[handler_name], event))
+
+    def exit(self):
+        self.clean_up()
+        exit()
