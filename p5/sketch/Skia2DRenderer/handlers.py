@@ -225,7 +225,7 @@ def on_close(window):
 
 
 def _adjust_mouse_pos(window, pos):
-    if platform.system() != 'Darwin':
+    if platform.system() != "Darwin":
         return pos
     glfw.get_window_content_scale(window)
     pos_x, pos_y = pos
