@@ -151,7 +151,7 @@ def on_mouse_button(window, button, action, mod):
 
 
 def on_mouse_scroll(window, x_off, y_off):
-    pos = _adjust_mouse_pos(glfw.get_cursor_pos(window))
+    pos = _adjust_mouse_pos(window, glfw.get_cursor_pos(window))
     delta = (float(x_off), float(y_off))
     event = PseudoMouseEvent(pos=pos, delta=delta, modifiers=input_state.modifiers)
     mev = MouseEvent(event, active=builtins.mouse_is_pressed)
