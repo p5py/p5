@@ -2,13 +2,17 @@ p5
 ===
 
 
-|License| |Version| |Slack|  |build-tests|
+|Downloads| |License| |Version| |Slack| |build-tests|  |downloads-month|
 
 .. |License| image:: https://img.shields.io/pypi/l/p5?color=light-green
 .. |Version| image:: https://img.shields.io/pypi/v/p5?color=blue
 .. |Slack| image:: https://img.shields.io/badge/Slack-Join!-yellow  
            :target: https://join.slack.com/t/p5py/shared_invite/zt-g9uo4vph-dUVltiE1ixvmjFTCyRlzpQ
 .. |build-tests| image:: https://github.com/p5py/p5/actions/workflows/build-tests.yml/badge.svg
+.. |Downloads| image:: https://static.pepy.tech/badge/p5  
+           :target: https://pepy.tech/project/p5
+.. |downloads-month| image:: https://static.pepy.tech/badge/p5/month
+           :target: https://pepy.tech/project/p5
 
 p5 is a Python library that provides high level drawing functionality
 to help you quickly create simulations and interactive art using
