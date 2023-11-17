@@ -4,6 +4,7 @@ This file contains the handlers needed for glfw event handling
 
 
 import builtins
+import platform
 import glfw
 from p5.core import p5
 from p5.sketch.events import KeyEvent, MouseEvent
@@ -224,6 +225,8 @@ def on_close(window):
 
 
 def _adjust_mouse_pos(window, pos):
+    if platform.system() != 'Darwin':
+        return pos
     glfw.get_window_content_scale(window)
     pos_x, pos_y = pos
     mul_x, mul_y = glfw.get_window_content_scale(window)
