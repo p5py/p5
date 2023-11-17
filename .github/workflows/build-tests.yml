@@ -94,4 +94,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
           pip install .
-          python p5/visualTests/sanity_testing.py
+      - name: Run headless tests
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: python p5/visualTests/sanity_testing.py 
