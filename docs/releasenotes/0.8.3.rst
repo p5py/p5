@@ -1,0 +1,26 @@
+v0.8.3
+======
+
+- Check if the user has defined preload before use by `@davidlowryduda <https://github.com/davidlowryduda>`_ in `PR #414 <https://github.com/p5py/p5/pull/414>`__
+- Fix #362: Fixed order of GHAs by `@RyanWalker277 <https://github.com/RyanWalker277>`_ in `PR #412 <https://github.com/p5py/p5/pull/412>`__
+- Format Python code with psf/black push by `@github-actions <https://github.com/github-actions>`_ in `PR #405 <https://github.com/p5py/p5/pull/405>`__
+- Fix: add pyopengl-accelerate back as a dependency due to upstream fix by `@tushar5526 <https://github.com/tushar5526>`_ in `PR #416 <https://github.com/p5py/p5/pull/416>`__
+- Format Python code with psf/black push by `@github-actions <https://github.com/github-actions>`_ in `PR #415 <https://github.com/p5py/p5/pull/415>`__
+- Linter fix by `@tushar5526 <https://github.com/tushar5526>`_ in `PR #421 <https://github.com/p5py/p5/pull/421>`__
+- Fix for unordinary behavior of size() in setup() for skia by `@devAyushDubey <https://github.com/devAyushDubey>`_ in `PR #420 <https://github.com/p5py/p5/pull/420>`__
+- Format Python code with psf/black push by `@github-actions <https://github.com/github-actions>`_ in `PR #422 <https://github.com/p5py/p5/pull/422>`__
+- Add type to io by `@asukaminato0721 <https://github.com/asukaminato0721>`_ in `PR #430 <https://github.com/p5py/p5/pull/430>`__
+- Add type to util by `@asukaminato0721 <https://github.com/asukaminato0721>`_ in `PR #432 <https://github.com/p5py/p5/pull/432>`__
+- Add type to sketch by `@asukaminato0721 <https://github.com/asukaminato0721>`_ in `PR #431 <https://github.com/p5py/p5/pull/431>`__
+- Type pmath module by `@asukaminato0721 <https://github.com/asukaminato0721>`_ in `PR #428 <https://github.com/p5py/p5/pull/428>`__
+- Add initial type for core by `@asukaminato0721 <https://github.com/asukaminato0721>`_ in `PR #429 <https://github.com/p5py/p5/pull/429>`__
+- Update requirements.txt by `@tushar5526 <https://github.com/tushar5526>`_ in `PR #435 <https://github.com/p5py/p5/pull/435>`__
+- Fix args unpacking for corners mode by `@hvitis <https://github.com/hvitis>`_ in `PR #442 <https://github.com/p5py/p5/pull/442>`__
+- Fix jitter behavior of skia due to double buffers swapping by `@tushar5526 <https://github.com/tushar5526>`_ in `PR #446 <https://github.com/p5py/p5/pull/446>`__
+- Fix wrong mouse position bug in MacOS by `@tushar5526 <https://github.com/tushar5526>`_ in `PR #446 <https://github.com/p5py/p5/pull/446>`__
+- Fix window size being half in retina display bug in MacOS by `@tushar5526 <https://github.com/tushar5526>`_ in `PR #446 <https://github.com/p5py/p5/pull/446>`__
+
+Full Changelog
+--------------
+
+`Compare v0.8.1 to v0.8.3 <https://github.com/p5py/p5/compare/v0.8.1...v0.8.3>`_

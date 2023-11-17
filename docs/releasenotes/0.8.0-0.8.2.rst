@@ -1,9 +1,14 @@
-0.8.0
-=====
+
+0.8.0-0.8.2
+***********
 
 We are happy to announce another developmental release under the summer fellowship at `The Processing Foundation <https://processingfoundation.org/>`_.
 The project was supervised by `Mark Zhang <https://github.com/ziyaointl>`_. This release comes with an experimental 2D renderer using `Skia <https://skia.org/>`_.
 The skia 2D renderer shows significance improvements in both rendering and efficiency of the sketches.
+
+
+v0.8.0
+=======
 
 Bug Fixes
 --------------
