@@ -4,6 +4,7 @@ This file contains the handlers needed for glfw event handling
 
 
 import builtins
+import platform
 import glfw
 from p5.core import p5
 from p5.sketch.events import KeyEvent, MouseEvent
@@ -130,8 +131,7 @@ input_state = InputState([], 0, [], {})
 
 
 def on_mouse_button(window, button, action, mod):
-    pos = glfw.get_cursor_pos(window)
-
+    pos = _adjust_mouse_pos(window, glfw.get_cursor_pos(window))
     if button < 3:
         button = BUTTONMAP.get(button, 0)
 
@@ -152,7 +152,7 @@ def on_mouse_button(window, button, action, mod):
 
 
 def on_mouse_scroll(window, x_off, y_off):
-    pos = glfw.get_cursor_pos(window)
+    pos = _adjust_mouse_pos(window, glfw.get_cursor_pos(window))
     delta = (float(x_off), float(y_off))
     event = PseudoMouseEvent(pos=pos, delta=delta, modifiers=input_state.modifiers)
     mev = MouseEvent(event, active=builtins.mouse_is_pressed)
@@ -161,7 +161,9 @@ def on_mouse_scroll(window, x_off, y_off):
 
 
 def on_mouse_motion(window, x, y):
-    event = PseudoMouseEvent(pos=(x, y), modifiers=input_state.modifiers)
+    event = PseudoMouseEvent(
+        _adjust_mouse_pos(window, (x, y)), modifiers=input_state.modifiers
+    )
     mev = MouseEvent(event, active=builtins.mouse_is_pressed)
 
     # Queue a 'mouse_dragged` or `mouse_moved` event, not both similar to p5.js
@@ -220,3 +222,12 @@ def on_window_focus(window, focused):
 
 def on_close(window):
     pass
+
+
+def _adjust_mouse_pos(window, pos):
+    if platform.system() != "Darwin":
+        return pos
+    glfw.get_window_content_scale(window)
+    pos_x, pos_y = pos
+    mul_x, mul_y = glfw.get_window_content_scale(window)
+    return pos_x * mul_x, pos_y * mul_y

@@ -309,8 +309,7 @@ def exit():
     before exiting the sketch.
 
     """
-    if p5.sketch is not None and builtins.current_renderer == "vispy":
-        p5.sketch.exit()
+    p5.sketch.exit()
 
 
 def no_cursor():

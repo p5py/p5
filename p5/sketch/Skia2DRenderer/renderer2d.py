@@ -72,6 +72,15 @@ class SkiaRenderer:
         self.path = None
         self.curve_tightness = 0
         self.pimage = None
+        # used to store the surface state before swapping with secondary buffer
+        self._surface_image = None
+
+    # TODO: Optimise it using bitmap or pixmap
+    def _store_surface_state(self):
+        self._surface_image = self.canvas.getSurface().makeImageSnapshot()
+
+    def _restore_surface_state(self):
+        self.canvas.drawImage(self._surface_image, 0, 0)
 
     # Transforms functions
     def push_matrix(self):
