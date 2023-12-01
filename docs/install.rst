@@ -63,8 +63,8 @@ homebrew, run
    $ brew install glfw
 
 
-Similarly, on Debain (and it's derivatives like Ubuntu and Linux
-Mint)run
+Similarly, on Debian (and its derivatives like Ubuntu and Linux
+Mint) run
 
 .. code:: bash
 
