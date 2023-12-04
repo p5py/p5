@@ -270,7 +270,7 @@ class MouseEvent(Event):
         builtins.mouse_x = self.x
         builtins.mouse_y = self.y
         builtins.mouse_is_pressed = self._active
-        builtins.mouse_button = self.button if self.pressed else None
+        builtins.mouse_button = self.button
         builtins.moved_x = builtins.mouse_x - builtins.pmouse_x
         builtins.moved_y = builtins.mouse_y - builtins.pmouse_y
 
