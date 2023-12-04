@@ -1,0 +1,15 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.11.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+
+  # - repo: https://github.com/pytest-dev/pytest
+  #   rev: 7.4.1  
+  #   hooks:
+  #     - id: pytest
