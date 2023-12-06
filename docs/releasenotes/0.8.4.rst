@@ -1,0 +1,19 @@
+v0.8.4
+======
+
+- Update README.rst by @tushar5526 in `<https://github.com/p5py/p5/pull/453>`_
+- Fix minor typos in install.rst by @pszemsza in `<https://github.com/p5py/p5/pull/456>`_
+- fix mouse button always set to None in handlers by @tushar5526 in `<https://github.com/p5py/p5/pull/458>`_
+- fix: keyerror 'SQAURE' when using stroke_cap(SQUARE) by @abastola0 in `<https://github.com/p5py/p5/pull/459>`_
+- feat: migrate to 3.11 by @tushar5526 in `<https://github.com/p5py/p5/pull/461>`_
+
+New Contributors
+----------------
+
+* @pszemsza made their first contribution in `<https://github.com/p5py/p5/pull/456>`_
+* @abastola0 made their first contribution in `<https://github.com/p5py/p5/pull/459>`_
+
+Full Changelog
+--------------
+
+`Compare v0.8.1 to v0.8.3 <https://github.com/p5py/p5/compare/v0.8.3...v0.8.4>`_
