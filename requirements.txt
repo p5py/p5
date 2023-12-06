@@ -1,4 +1,3 @@
-freetype-py==2.1.0.post1
 glfw>=2.5.9
 numpy
 Pillow==9.0.1
