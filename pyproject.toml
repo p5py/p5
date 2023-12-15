@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "p5"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+freetype-py = "2.1.0.post1"
+glfw = ">=2.5.9"
+numpy = "^1.26.2"
+pillow = "9.0.1"
+vispy = "0.10.0"
+pyopengl-accelerate = "3.1.7"
+pyopengl = "3.1.6"
+requests = ">=2.25.0"
+dataclasses = {markers = "python_version == \"3.6\"", version = "^0.8"}
+skia-python = ">=85.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
