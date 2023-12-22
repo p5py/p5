@@ -57,9 +57,11 @@ Python code for the sketch looks like:
    def key_pressed(event):
        background(204)
        
-   # p5 supports different backend to render sketches, viz "vispy" for both 2D and 3D sketches and "skia" for 2D sketches
+   # p5 supports different backends to render sketches, 
+   # "vispy" for both 2D and 3D sketches & "skia" for 2D sketches
+   # use "skia" for better 2D experience 
    # Default renderer is set to "vispy"
-   run(renderer="vispy")
+   run(renderer="vispy") # "skia" is still in beta
 
 Documentation
 -------------
