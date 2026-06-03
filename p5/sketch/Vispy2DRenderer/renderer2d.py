@@ -417,17 +417,36 @@ class VispyRenderer2D(OpenGLRenderer):
         return self.create_font(font_name)
 
     def text(self, text_string, position, wrap_at):
+        def _singleline_size(text):
+            if hasattr(self.style.font_family, "getsize"):
+                return self.style.font_family.getsize(text)
+            bbox = self.style.font_family.getbbox(text)
+            return (bbox[2] - bbox[0], bbox[3] - bbox[1])
+
+        def _multiline_size(text):
+            if hasattr(self.style.font_family, "getsize_multiline"):
+                return self.style.font_family.getsize_multiline(text)
+            canvas = Image.new("RGBA", (1, 1), color=(0, 0, 0, 0))
+            canvas_draw = ImageDraw.Draw(canvas)
+            bbox = canvas_draw.multiline_textbbox(
+                (0, 0),
+                text,
+                font=self.style.font_family,
+                spacing=self.style.text_leading,
+            )
+            return (bbox[2] - bbox[0], bbox[3] - bbox[1])
+
         multiline = False
         if not (wrap_at is None):
             text_string = textwrap.fill(text_string, wrap_at)
-            size = self.style.font_family.getsize_multiline(text_string)
+            size = _multiline_size(text_string)
             multiline = True
         elif "\n" in text_string:
             multiline = True
-            size = list(self.style.font_family.getsize_multiline(text_string))
+            size = list(_multiline_size(text_string))
             size[1] += self.style.text_leading * text_string.count("\n")
         else:
-            size = self.style.font_family.getsize(text_string)
+            size = _singleline_size(text_string)
 
         is_stroke_valid = False  # True when stroke_weight != 0
         is_min_filter = False  # True when stroke_weight <0
@@ -520,7 +539,10 @@ class VispyRenderer2D(OpenGLRenderer):
             raise ValueError("text_size is not supported for Bitmap Fonts")
 
     def text_width(self, text):
-        return self.style.font_family.getsize(text)[0]
+        if hasattr(self.style.font_family, "getsize"):
+            return self.style.font_family.getsize(text)[0]
+        bbox = self.style.font_family.getbbox(text)
+        return bbox[2] - bbox[0]
 
     def text_ascent(self):
         ascent, descent = self.style.font_family.getmetrics()

@@ -178,6 +178,8 @@ def parse_color(
     else:
         raise ValueError("Failed to parse color.")
 
+    red, green, blue = 0.0, 0.0, 0.0
+
     if hsb is not None:
         h, s, b = hsb
         if not normed:

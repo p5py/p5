@@ -110,11 +110,10 @@ def load_table(path: str, mode: str = "csv") -> Table:
     :returns: A table object
 
     """
-    assert mode in {"csv", "tsv"}
-    if mode == "csv":
-        seperator = ","
-    elif mode == "ssv":
-        seperator = ";"
-    elif mode == "tsv":
-        seperator = "\t"
-    return Table(path, seperator)
+    assert mode in {"csv", "ssv", "tsv"}
+    separator_map = {
+        "csv": ",",
+        "ssv": ";",
+        "tsv": "\t",
+    }
+    return Table(path, separator_map[mode])
