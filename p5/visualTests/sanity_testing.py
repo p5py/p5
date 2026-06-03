@@ -61,6 +61,7 @@ def run_test(renderer, code_stub, test_names):
                 # Run each test for 2s then raise a timeout
                 process = run(
                     ["python", tmp_test_file_path],
+                    stdout=PIPE,
                     stderr=PIPE,
                     encoding="utf-8",
                     timeout=2,
@@ -68,12 +69,15 @@ def run_test(renderer, code_stub, test_names):
             except TimeoutExpired:
                 pass
             else:
-                # If any error was found raise an exception
-                if process.stderr:
+                # Some backends write benign warnings to stderr; only fail on
+                # non-zero exits or traceback output.
+                if process.returncode != 0:
+                    exception = process.stderr or process.stdout
+                elif process.stderr and "Traceback" in process.stderr:
                     exception = process.stderr
 
         if exception:
-            raise Exception(f"{process.stderr} in {test_file_path}")
+            raise Exception(f"{exception} in {test_file_path}")
 
 
 print("============================= Running 2D tests =============================")

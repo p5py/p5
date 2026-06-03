@@ -1,9 +1,10 @@
 glfw>=2.5.9
 numpy
-Pillow==9.0.1
+Pillow==10.4.0
 vispy==0.10.0
-PyOpenGL-accelerate==3.1.7
-PyOpenGL==3.1.6
+PyOpenGL-accelerate==3.1.10
+PyOpenGL==3.1.10
 requests>=2.25.0
 dataclasses;python_version=="3.6"
+setuptools>=68;python_version>="3.12"
 skia-python>=85.0
