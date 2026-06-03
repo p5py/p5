@@ -81,6 +81,33 @@ class SkiaSketch:
 
     def skia_surface(self):
         self.context = skia.GrDirectContext.MakeGL()
+        context_source = "MakeGL(auto)"
+
+        # Newer skia-python builds on Linux/Wayland may require an explicit
+        # native GL interface instead of auto-detection.
+        if self.context is None and hasattr(skia, "GrGLInterface"):
+            for interface_name in ("MakeEGL", "MakeGLX"):
+                interface_factory = getattr(skia.GrGLInterface, interface_name, None)
+                if interface_factory is None:
+                    continue
+
+                interface = interface_factory()
+                if interface is None:
+                    continue
+
+                self.context = skia.GrDirectContext.MakeGL(interface)
+                if self.context is not None:
+                    context_source = f"MakeGL({interface_name[4:]})"
+                    break
+
+        if self.context is None:
+            raise RuntimeError(
+                "Unable to create Skia GL context. "
+                "Try run(renderer='vispy') or ensure your Skia/OpenGL driver stack supports GPU contexts."
+            )
+
+        print(f"[p5/skia] GL context initialized via {context_source}")
+
         width, height = glfw.get_framebuffer_size(self.window)
         backend_render_target = skia.GrBackendRenderTarget(
             width,
@@ -96,7 +123,10 @@ class SkiaSketch:
             skia.kRGBA_8888_ColorType,
             skia.ColorSpace.MakeSRGB(),
         )
-        assert surface is not None
+        if surface is None:
+            raise RuntimeError(
+                "Skia backend render target initialization failed for the current OpenGL context."
+            )
         return surface
 
     # create a new surface everytime
