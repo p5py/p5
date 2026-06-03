@@ -1,6 +1,6 @@
 glfw>=2.5.9
 numpy
-Pillow==10.4.0
+Pillow==12.2.0
 vispy==0.10.0
 PyOpenGL-accelerate==3.1.10
 PyOpenGL==3.1.10
