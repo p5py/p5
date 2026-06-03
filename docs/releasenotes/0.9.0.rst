@@ -1,0 +1,12 @@
+v0.9.0
+======
+
+- chore: upgrade GHA action versions and update Python CI matrix by @Copilot in `<https://github.com/p5py/p5/pull/481>`_
+- fix(skia): fallback to EGL/GLX when MakeGL auto fails by @tushar5526 in `<https://github.com/p5py/p5/pull/482>`_
+- chores: also add support for 3.12+ by @tushar5526 in `<https://github.com/p5py/p5/pull/484>`_
+- chore: loosen pillow requirements by @tushar5526 in `<https://github.com/p5py/p5/pull/485>`_
+
+Full Changelog
+--------------
+
+`Compare v0.8.4 to v0.9.0 <https://github.com/p5py/p5/compare/v0.8.4...v0.9.0>`_
