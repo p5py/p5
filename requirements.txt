@@ -6,4 +6,5 @@ PyOpenGL-accelerate==3.1.10
 PyOpenGL==3.1.10
 requests>=2.25.0
 dataclasses;python_version=="3.6"
+setuptools>=68;python_version>="3.12"
 skia-python>=85.0
