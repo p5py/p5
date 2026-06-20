@@ -1,5 +1,5 @@
 ********
-Mouse 1D
+Mouse Functions
 ********
 
 .. raw:: html
