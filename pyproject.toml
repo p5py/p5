@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "p5"
+version = "0.8.4"
+description = "p5 is a Python library that provides high level drawing functionality to help you quickly create simulations and interactive art using Python"
+authors = ["Abhik Pal <theabhikpal@gmail.com>"]
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+freetype-py = "^2.1.0"
+glfw = "^2.5.9"
+pillow = "^9.0.1"
+vispy = "^0.10.0"
+pyopengl-accelerate = "^3.1.7"
+pyopengl = "^3.1.6"
+requests = "^2.25.0"
+numpy = [    
+    {version = "*", python = "^3.8"},
+    {version = "^1.21.6", python = "=3.7"},
+]
+dataclasses = [
+    {version = "^0.8", python = "3.6"}
+]
+skia-python = "^87.5"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = [    
+    {version = "*", python = "^3.8"},
+    {version = "^7.4", python = "3.7"},
+]
+pylint = [    
+    {version = "*", python = "^3.8"},
+    {version = "^2.10", python = "3.7"},
+]
+sphinx = [    
+    {version = "*", python = "^3.9"},
+    {version = "^6.2", python = "3.8"},
+    {version = "^5.3.0", python = "3.7"},
+]
+sphinx-rtd-theme = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

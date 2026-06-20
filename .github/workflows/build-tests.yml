@@ -23,11 +23,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pylint sphinx sphinx_rtd_theme
-          pip install -r requirements.txt
+          pip install poetry
+          poetry install
       - name: Run pylint
         run: |
-          pylint --disable=I --disable=W --disable=C --disable=R p5
+          poetry run pylint --disable=I --disable=W --disable=C --disable=R p5
 
   pytest:
     needs : pylint
@@ -44,12 +44,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
+          pip install poetry
+          poetry install
           sudo apt-get install python3-opengl libglfw3 -y
       - name: Run Tests
         run: |
-          pytest -svv p5
+          poetry run pytest -svv p5
 
   sanity-tests:
     needs : pytest
