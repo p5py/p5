@@ -17,6 +17,8 @@
 #
 
 from enum import Enum
+from p5.core.constants import TESS, TRIANGLES, POINTS, LINES, LINE_STRIP, TRIANGLE_FAN, TRIANGLE_STRIP, QUADS, QUAD_STRIP
+
 
 """Constants Variables for P5 sketches"""
 
@@ -202,16 +204,16 @@ colour_codes = {
 
 
 # Shape types / kinds
-class SType(Enum):
-    POINTS = "POINTS"
-    LINES = "LINES"
-    LINE_STRIP = "LINE_STRIP"
-    TRIANGLES = "TRIANGLES"
-    TRIANGLE_FAN = "TRIANGLE_FAN"
-    TRIANGLE_STRIP = "TRIANGLE_STRIP"
-    QUADS = "QUADS"
-    QUAD_STRIP = "QUAD_STRIP"
-    TESS = "TESS"
+POINTS = "POINTS"
+LINES = "LINES"
+LINE_STRIP = "LINE_STRIP"
+TRIANGLES = "TRIANGLES"
+TRIANGLE_FAN = "TRIANGLE_FAN"
+TRIANGLE_STRIP = "TRIANGLE_STRIP"
+QUADS = "QUADS"
+QUAD_STRIP = "QUAD_STRIP"
+TESS = "TESS"
+
 
 
 # Add all members of SType to global

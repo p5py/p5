@@ -30,6 +30,7 @@ from p5.pmath import matrix
 from p5.pmath.vector import Point
 from p5.pmath.utils import SINCOS
 from p5.core import p5
+from p5.core.constants import TESS, TRIANGLE_FAN
 
 __all__ = ["PShape"]
 
@@ -105,7 +106,7 @@ class PShape:
         children=None,
         contours=tuple(),
         vertices=tuple(),
-        shape_type=SType.TESS,
+        shape_type="TESS",
     ):
         # basic properties of the shape
         self._fill = None
@@ -475,7 +476,7 @@ class Arc(PShape):
         self._stop_angle = stop_angle
         self.arc_mode = mode
 
-        gl_type = SType.TESS if mode in ["OPEN", "CHORD"] else SType.TRIANGLE_FAN
+        gl_type = "TESS" if mode in ["OPEN", "CHORD"] else "TRIANGLE_FAN"
         super().__init__(
             fill_color=fill_color,
             stroke_color=stroke_color,
